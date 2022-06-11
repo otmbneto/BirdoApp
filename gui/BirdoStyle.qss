@@ -1,0 +1,44 @@
+/********************************************************************************************
+
+QT Stylesheet for all Birdo GUI created with Toon Boom Javascript... (decide if will use in python apps too)
+
+For more info about QT stylesheets, please see http://doc.qt.io/qt-4.8/stylesheet.html
+
+********************************************************************************************/
+
+QWidget{	
+	background-color: gray;
+}
+
+QLabel{
+	color: white;
+}
+
+QProgressBar {
+	color: white;
+	padding: 2 2px;
+	border: 2px solid white;
+	border-radius: 5px;
+}
+	
+QProgressBar::chunk {
+	background-color: #05B8CC;
+	width: 20px;
+}
+
+QPushButton{
+	border: 2px solid white;
+	border-radius: 6px;
+	background-color: ligthgray;
+	width: 110px;
+	height: 23px;
+}
+
+QPushButton:pressed {
+	color: black;
+	background-color: #05B8CC;
+}
+
+QPushButton:flat {
+	border: none;	
+}

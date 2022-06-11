@@ -1,0 +1,16 @@
+###BirdoAPP v.0.7.3####
+###created: LeoBazao - 07/06/2022
+
+>> includes 
+   -add funcao nova: BD2_GetMostUsedPaletteInNode
+
+>> atualizacao do script de recolor => agora ele importa as cores quando nao tem elas na cena
+   -add pasta com as palettes de recolor numa pasta palettes em templates
+   -mudanca do json de recolor (mudou o objeto)
+   -mudanca no script  .\BirdoPack\utils\project_recolor.js
+
+
+>> atualizacao do save tpl >> .\BirdoPack\scripts\Menu\4-Save_Asset_tpl.js
+   -add itens novos nos nomes de save ANIM
+	
+

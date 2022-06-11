@@ -1,0 +1,50 @@
+{
+	"projects" : [
+		{
+			"id" : 0,
+			"prefix" : "MNM",
+			"name" : "Maluquinho_S01",
+			"harmony" : {
+					"version" : "20.0.3",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_MNM.ico",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
+		},
+		{
+			"id" : 1,
+			"prefix" : "AST",
+			"name" : "ASTRONAUTA_T1",
+			"harmony" : {
+					"version" : "20.0.3",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_AST.ico",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
+		}
+	]
+}

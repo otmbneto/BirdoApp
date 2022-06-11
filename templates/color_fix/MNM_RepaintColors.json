@@ -1,0 +1,52 @@
+{
+	"CH0001_MM": {
+		"recolorInfo": {
+			"LINGUA": {
+				"original_color": "0aca565dbd0627ff"
+			},
+			"DENTES": {
+				"original_color": "0aae5a5aaaab85e0"
+			}
+		},
+		"palette": {
+			"path": "templates/palettes/MNM/CH0001_MM_recolor",
+			"name": "CH0001_MALUQUINHO"
+		}
+	},
+	"CH001_MM": {
+		"recolorInfo": {
+			"LINGUA": {
+				"original_color": "0aca565dbd0627ff"
+			},
+			"DENTES": {
+				"original_color": "0aae5a5aaaab85e0"
+			}
+		},
+		"palette": {
+			"path": "templates/palettes/MNM/CH0001_MM_recolor",
+			"name": "CH0001_MALUQUINHO"
+		}
+	},
+	"CH0014_SapoLazaro": {
+		"recolorInfo": {
+			"LINGUA": {
+				"original_color": "0acc59fae603b447"
+			}
+		},
+		"palette": {
+			"path": "templates/palettes/MNM/CH0014_Lazaro_recolor",
+			"name": "CH0014_SAPO_LAZARO"
+		}
+	},
+	"CH0005_Bocao": {
+		"recolorInfo": {
+			"LINGUA": {
+				"original_color": "0ac549d7c8a8aa61"
+			}
+		},	
+		"palette": {
+			"path": "templates/palettes/MNM/CH0005_Bocao_recolor",
+			"name": "CH0005_Bocao"
+		}
+	}
+}

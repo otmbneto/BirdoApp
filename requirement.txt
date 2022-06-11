@@ -1,0 +1,10 @@
+certifi==2021.5.30
+chardet==4.0.0
+idna==2.10
+pyocclient==0.6
+PySide==1.2.4
+requests==2.26.0
+shotgun-api3 @ git+https://github.com/shotgunsoftware/python-api.git@a4231a55f6c1e091f810755054c53235757ec262
+six==1.16.0
+urllib3==1.26.6
+requests==2.26.0

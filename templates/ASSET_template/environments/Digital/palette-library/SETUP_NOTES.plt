@@ -1,0 +1,1 @@
+ToonBoomAnimationInc PaletteFile 2

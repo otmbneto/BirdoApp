@@ -1,0 +1,97 @@
+{
+	"paths": {
+		"root": "//192.168.10.100/projects/153_Astronauta/",
+		"projRoot": "1_TEMPORADA/",
+		"assetLib": {
+				"bg": "01_BG/",
+				"character": "02_CHARACTER/",
+				"prop": "03_PROP/"
+				},
+		"episodes": "02_EPISODIOS/",
+		"step": {
+			"ANIM": {
+				"folder_name": "02_ANIM",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				},
+			"RENDER": [
+				"01_ANIMATIC",
+				"02_SETUP",
+				"03_ANIMATION",
+				"04_COMP"
+				],
+			"SETUP": {
+				"folder_name": "01_SETUP",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"BG",
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				}
+			},
+		"library": "01_BIBLIOTECA/",
+		"roteiros": "00_ROTEIROS/",
+		"tblib": "_tbLib/",
+		"fazendinha": "_tbLib/_Fazendinha/",
+		"render_comp": "//192.168.10.100/projects/153_Astronauta/1_TEMPORADA/02_EPISODIOS/{EP}/05_CENAS/_RENDER/04_COMP/",
+		"packUpdate": "_tbLib/_birdoApp/"
+		},
+	"server": {
+		"type": "vpn",
+		"url" : null,
+		"login": false
+	},
+	"pipeline": {
+		"type": "monday",
+		"login": "suporte@birdo.com.br",
+		"projectName": "Astronauta",
+		"projectId": 153,
+		"assetsTypes": [
+					"Character", 
+					"Prop", 
+					"BG", 
+					"FX",
+					"Misc",
+					"Ilustra"
+					],
+		"assets_digits": 3,
+		"boards": {
+				"filter": "AST",
+				"Character": {
+					"name": ":: AST | Inventário CHAR",
+					"subgroup": "CHARACTERS",
+					"prefix": "CH"
+				},
+				"Misc": {
+					"name": ":: AST | Inventário MI",
+					"subgroup": "CHARACTERS",
+					"prefix": "MI"
+				},
+				"Prop": {
+					"name": ":: AST | Inventário PROP",
+					"subgroup": "PROPS",
+					"prefix": "PR"
+				},
+				"FX": {
+					"name": ":: AST | Inventário FX",
+					"subgroup": "FX",
+					"prefix": "FX"
+				}
+		},
+		"scriptName": "pipelineScript",
+		"url": "https://api.monday.com/v2",
+		"apiKey": "0-^95{!)k-jkyfqMz{z1(awJ2e1Ys xU)6V(Z&-56,99YV~67\\!(>f{dzme,Htlh`@NyfFiplRqJJZx(P6F:Z%[-5.@2&@*!+{et=e||%i;a?;qHmybie~WW!j\"TBrW\"C6 8J<^/Z_&.i\\}..|gf?fn^.*@/br_b|_QIiLTM%?$HvEXn,K=FO\"\\}1Rv2_g|n{q@f$syDdZlKwL|gH%yf2"
+	}
+}

@@ -1,0 +1,33 @@
+{
+  "ASSET": {
+	"LEAD": [
+		"4-Save_Asset_tpl.js",
+		"5-Import_Assets.js"
+	  ],
+	"OTHER": [
+		"4-Save_Asset_tpl.js",
+		"5-Import_Assets.js"
+	]
+  }, 		
+  "SHOT": {
+	"LEAD": [
+		"0-Update_Animatic.js",
+		"1-Open_Scene.js",
+		"3-Publish.js",
+		"4-Save_Asset_tpl.js",
+		"5-Import_Assets.js",
+		"6-Render_Preview.js",
+		"7-Add_Notes.js",
+		"8-Send_Notes.js",
+		"9-Get_Notes.js"
+	], 
+	"OTHER": [
+		"0-Update_Animatic.js",
+		"1-Open_Scene.js",
+		"3-Publish.js",
+		"5-Import_Assets.js",
+		"6-Render_Preview.js",
+		"9-Get_Notes.js"
+	]
+  } 	
+}

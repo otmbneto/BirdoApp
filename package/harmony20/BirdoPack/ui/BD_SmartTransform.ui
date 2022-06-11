@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>355</width>
+    <height>374</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Smart Transform</string>
+  </property>
+  <property name="toolTip">
+   <string>Use this button to get the value in the Current frame for the Position Checked</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{	
+	background-color: gray;
+}
+
+QLabel{
+	color: white;
+}
+
+QGroupBox {
+	color: white;
+}
+
+QRadioButton {
+	color: white;
+    spacing: 5px;
+}
+
+QRadioButton::indicator::unchecked{ 
+	border: 2px solid white;
+	border-radius: 6px;
+	background-color: white;
+	width: 10px;
+	height: 10px;
+}
+
+QRadioButton::indicator::checked{
+	border: 2px solid lightgray;
+	border-radius: 6px;
+	background-color: rgb(68, 68, 68);
+	width: 12px;
+	height: 12px;
+}
+
+QSpinBox {
+	color: black;
+    border: 2px solid white;
+	border-radius: 6px;
+	background-color: lightgray;
+}
+
+QSpinBox::up-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-bottom: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QSpinBox::down-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-up: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QSpinBox:hover{
+    border: 2px solid #05B8CC;
+    color: white;
+}
+
+QSpinBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QCheckBox {
+	color: white;
+    spacing: 5px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid white;
+	border-radius: 2px;
+	background-color: lightgray;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 1px;
+	background-color: rgb(68, 68, 68);
+}
+
+QCheckBox:disabled{
+	color: rgb(250, 150, 120);
+}
+
+QCheckBox::indicator:checked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QDoubleSpinBox {
+	color: black;
+    border: 2px solid white;
+	border-radius: 6px;
+	background-color: lightgray;
+}
+
+QDoubleSpinBox::up-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-bottom: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QDoubleSpinBox::down-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-up: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QDoubleSpinBox:hover{
+    border: 2px solid #05B8CC;
+    color: white;
+}
+
+QDoubleSpinBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0">
+   <item row="0" column="0" colspan="3">
+    <widget class="QGroupBox" name="group1">
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+       <underline>false</underline>
+      </font>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Position</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkX">
+        <property name="text">
+         <string>Pos X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" rowspan="3">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="checkY">
+        <property name="text">
+         <string>Pos Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3" rowspan="3">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QCheckBox" name="checkZ">
+        <property name="text">
+         <string>Pos Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="spinBox_X">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="spinBox_Y">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="spinBox_Z">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.001000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="group2">
+     <property name="title">
+      <string>Scale</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkSx">
+        <property name="text">
+         <string>Scale X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" rowspan="3">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="checkSy">
+        <property name="text">
+         <string>Scale Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QDoubleSpinBox" name="spinBox_Sx">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QDoubleSpinBox" name="spinBox_Sy">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QCheckBox" name="checkALL">
+       <property name="toolTip">
+        <string>Check this to check all available attributes</string>
+       </property>
+       <property name="text">
+        <string>Check All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkAdd">
+       <property name="toolTip">
+        <string>Checj this to Add the given velue to the chosen Attribute </string>
+       </property>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="currVal">
+       <property name="toolTip">
+        <string>Push this to get the current  value to the checked attributtes</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+}
+
+QPushButton:pressed {
+	color: white;
+	border-color: white;
+    background-color: #05B8CC;
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}
+
+QPushButton::disabled {
+	border-color: darkgray;
+	color: gray;
+}</string>
+       </property>
+       <property name="text">
+        <string>Current Val</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QGroupBox" name="group3">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Selection</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>START</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBox_Start">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>END</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBox_End"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>@leobazao - Birdo 2021</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+}
+
+QPushButton:pressed {
+	color: white;
+	border-color: white;
+    background-color: #05B8CC;
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}
+
+QPushButton::disabled {
+	border-color: darkgray;
+	color: gray;
+}</string>
+       </property>
+       <property name="text">
+        <string>Ok</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+}
+
+QPushButton:pressed {
+	color: red;
+    background-color: rgb(255, 196, 197);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}</string>
+       </property>
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>241</width>
+       <height>25</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0">
+    <widget class="QRadioButton" name="radioB_AllTime">
+     <property name="toolTip">
+      <string>Check to affect keyframes in the intire scene</string>
+     </property>
+     <property name="text">
+      <string>All Timeline</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QRadioButton" name="radioB_Selection">
+     <property name="toolTip">
+      <string>Check to affect keyframes in the Timeline Selection</string>
+     </property>
+     <property name="text">
+      <string>Selection</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

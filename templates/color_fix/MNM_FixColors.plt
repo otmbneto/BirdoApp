@@ -1,0 +1,20 @@
+ToonBoomAnimationInc PaletteFile 2
+Solid    BOCAO_SHORTS/TENIS         0x0aa077a48a08a3a6  95 100 115 255
+Solid    LUCIO_PELE_01              0x0aa1b41b1c1d8bbd 112  57  47 255
+Solid    LUCIO_SHORTS/MEIA          0x0aa1b41b1c1d8b7f  92  61 107 255
+Solid    LUCIO_PELE_02              0x0aa1b41b1c1d8bfc 127  62  52 255
+Solid    ALFINHA_SAPATO             0x0aa7472a2260b1d1  97  91  91 255
+Solid    ALFINHA_CAQBELO_LINHAS     0x0aa7cd434490336c  79  79  79 255
+Solid    JULIETA_PELE               0x09c46cd31a8ddfb0 158  82  57 255
+Solid    JULIETA_BOCHECHA           0x09c46cd31a8de0dd 194 107  75 255
+Solid    JULIETA_CABELO             0x09c472608964ed8c  36  22  20 255
+Solid    JULIETA_SHORT_FUNDO        0x0aaf3dee7201e82f  76 114 145 255
+Solid    JULIETA_SHOT               0x09c46cd31a8deca6  92 144 197 255
+Solid    YOSHIDA_CALCA              0x0aa4fefc73085946 192 141  90 255
+Solid    YOSHIDA_TENIS              0x09df31a2ed1da57f 156  46  46 255
+Solid    YOSHIDA_CAMISA             0x0aa4f05297d598a7  73  73  92 255
+Solid    SAPATO                     0x0aaeb4915bf63185 122  82  67 255
+Solid    PROFSRA_CABELO             0x0aa7761ac3502402  95  90  94 255
+Solid    PROFSRA_CAM/BOTA/BRIN      0x0aa7761ac3502252  80  64  90 255
+Solid    PROFSRA_SAIA               0x0aa7761ac3502321 104  73  85 255
+Solid    PROFSRA_MEIA_CALCA         0x0aa7761ac350245c 109  83 100 255
