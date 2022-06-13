@@ -8,7 +8,7 @@ from app.utils.birdo_json import write_json_file
 from app.utils.check_updates import main_update
 from app.utils.system import SystemFolders, get_short_path_name
 from app.utils.create_shortcut import create_shortcut
-from PySide import QtCore, QtGui
+from PySide import QtCore, QtGui, QtUiTools
 from gui.dialog_main import Ui_MainWindow
 import os
 import sys
@@ -25,35 +25,133 @@ MessageBox = CreateMessageBox()
 encdec = PswEncDec()
 
 
-def make_short_cut_open_scene():
-    """Cria os atalhos na area de trabalho"""
-    system_folders = SystemFolders()
-    python_path = get_short_path_name(os.path.join(app_root, 'venv', 'Scripts', 'python.exe'))
-    open_scene_shortcut = os.path.join(system_folders.desktop, "open_scene.lnk")
-    args = 'open_scene.py 0 ""'
-    wdir = get_short_path_name(os.path.join(app_root, 'app', 'plugins', 'open_scene'))
+class ProjectButton(QtGui.QPushButton):
 
-    if not os.path.exists(open_scene_shortcut):
-        print "crating open_scene shortcut..."
-        create_shortcut(open_scene_shortcut, global_icons["folder"], python_path, arguments=args, working_dir=wdir)
-    else:
-        print 'not necessary to create OpenScene shortcut'
+
+    def __init__(self,project_info):
+
+        super(ProjectButton, self).__init__()
+        self.project_info = project_info
 
 
 class BirdoApp(QtGui.QMainWindow):
+
+
     """Main BirdoApp interface"""
+    
+    '''
     def __init__(self, initial_data, project_data):
+
         super(BirdoApp, self).__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        self.owncloud = None
+        ui_path = os.path.join(app_root,"gui/birdoApp.ui").replace("\\","/")
+        self.ui = self.loadPage(ui_path)
+        #self.ui = Ui_MainWindow()
+        #self.ui.setupUi(self)
+        
+        w = self.ui.frameGeometry().width()
+        h = self.ui.frameGeometry().height()
+        self.setCentralWidget(self.ui)
+        self.resize(w, h)
+
         self.initial_data = initial_data
         self.project_data = project_data
 
-        # SETS THE APP VERSION
-        self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
+        # SETS WINDOW ICON
+        self.setWindowIcon(QtGui.QIcon(global_icons["birdo_app"]))
+        self.setUI()
+    '''
+    def __init__(self,root):
+
+        super(BirdoApp, self).__init__()
+        self.owncloud = None
+        self.app_root = root
+        ui_path = os.path.join(self.app_root,"gui/birdoApp.ui").replace("\\","/")
+        self.ui = self.loadPage(ui_path)
+
+        w = self.ui.frameGeometry().width()
+        h = self.ui.frameGeometry().height()
+        self.setCentralWidget(self.ui)
+        self.resize(w, h)
+
+        self.initial_data = config_init(self.app_root)
+        if not self.initial_data:
+            MessageBox.critical("ERRO Ao pegar informacoes iniciais do App!")
+
+        self.projects = self.initial_data["birdo_local"]["projects"]
+
+        #self.project_data = config_project(self.app_root, 0)
+        #if not self.project_data:
+        #    MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
 
         # SETS WINDOW ICON
         self.setWindowIcon(QtGui.QIcon(global_icons["birdo_app"]))
+        #self.setUI()
+
+        return
+
+    def createBtn(self,project):
+
+        button = QtGui.QPushButton("")
+        button.setIcon(QtGui.QIcon(os.path.join(self.app_root,project["icon"])))
+        button.setIconSize(QtCore.QSize(100, 100))
+        BUTTON_SIZE = QtCore.QSize(150, 150);
+        button.setMinimumSize(BUTTON_SIZE);
+        button.setMaximumSize(BUTTON_SIZE);
+        button.clicked.connect(lambda: self.projectSelected(project))
+
+        return button
+
+    def projectSelected(self,project):
+
+        self.project_data = config_project(self.app_root, project["id"])
+        print self.project_data
+        if not self.project_data:
+            MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
+
+        self.setUI()      
+        self.splash_page()
+
+        return
+
+    def cleanLayout(self,layout):
+
+        for i in reversed(range(layout.count())): 
+            layout.itemAt(i).widget().setParent(None)
+
+    def initProjectPage(self):
+
+        self.ui.proj_logo_label.clear()
+        self.cleanLayout(self.ui.projects_layout)
+        self.ui.stackedWidget.setCurrentIndex(0)
+        self.ui.projects_layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
+        i = 0
+        columnNum = 3
+        for project in self.projects:
+            btn = self.createBtn(project)
+            self.ui.projects_layout.addWidget(btn,i/columnNum,i%columnNum)
+            i+=1
+
+        return
+
+    def showEvent(self, event):
+        # do stuff here 
+        self.initProjectPage()
+        #self.splash_page()
+        event.accept()
+
+    def loadPage(self,page):
+
+        ui_file = QtCore.QFile(page)
+        ui_file.open(QtCore.QFile.ReadOnly)
+        loader = QtUiTools.QUiLoader()
+
+        return loader.load(ui_file)
+
+    def setUI(self):
+
+        # SETS THE APP VERSION
+        self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
 
         # SETS HOME BUTTON ICON
         self.ui.home_button.setIcon(QtGui.QIcon(global_icons["birdo_app"]))
@@ -82,9 +180,10 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_button.setEnabled(harmony_installation)
 
         #BUTTONS ACTIONS
-        self.ui.harmony_folder_button.clicked.connect(self.get_harmony_folder)
-        self.ui.local_folder_button.clicked.connect(self.get_local_folder)
-        self.ui.home_button.clicked.connect(self.splash_page)
+        self.ui.harmony_folder_button.clicked.connect(lambda: self.getFolder(self.ui.harmony_folder_line))
+        self.ui.local_folder_button.clicked.connect(lambda: self.getFolder(self.ui.localFolder_line))
+
+        self.ui.home_button.clicked.connect(self.initProjectPage)
         self.ui.test_login_button.clicked.connect(self.test_server_login)
         self.ui.update_button.clicked.connect(self.update_button)
         self.ui.view_pw_button.clicked.connect(self.show_pw)
@@ -96,48 +195,44 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
 
+
+    def getFolder(self,editLine):
+        
+        folder = QtGui.QFileDialog.getExistingDirectory()
+        editLine.setText(folder)
+        return
+
+    #check if we have a established connection with owncloud.
+    def isConnected(self):
+
+        return self.owncloud is not None or self.owncloud.get_roots()
+
     def splash_page(self):
-        self.ui.login_widget.hide()
+
+        self.ui.stackedWidget.setCurrentIndex(1)
 
         # RESET LOADING LABEL TO DEFAULT COLOR
         self.ui.loading_label.setStyleSheet("color: lightgray;")
-
         # SETS THE CURRENT HEADER
         self.ui.header.setText("LOADING APP...")
-
-        #ADD LABEL WIDGET
-        self.anim_logo_label = QtGui.QLabel(self.ui.area_frame)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.anim_logo_label.sizePolicy().hasHeightForWidth())
-        self.anim_logo_label.setSizePolicy(sizePolicy)
-        self.anim_logo_label.setMinimumSize(QtCore.QSize(150, 150))
-        self.anim_logo_label.setText("")
-        self.anim_logo_label.setObjectName("anim_logo_label")
-        self.ui.gridLayout_5.addWidget(self.anim_logo_label, 0, 0, 1, 1)
-        self.anim_logo_label.setScaledContents(True)
-        self.anim_logo_label.show()
-
         #ADD LAYOUT LOGO
-        self.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
+        self.ui.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
 
         # CHECK IF CONFIG IS READY
         if not self.project_data["ready"]:
             # OPEN LOGIN PAGE
             self.login_page()
+        elif not main_update(self.project_data, self):
+            print "check update failed!"
         else:
-            # UPDATE PACKAGE
-            if not main_update(self.project_data, self):
-                print "check update failed!"
-            else:
-                MessageBox.information("BirdoApp foi Atualizado!")
-                ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
-                self.close()
+            MessageBox.information("BirdoApp foi Atualizado!")
+            ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
+            self.close()
 
+    #Mostra a pagina pra preencher os dados
     def login_page(self):
-        self.anim_logo_label.hide()
-        self.ui.login_widget.show()
+
+        self.ui.stackedWidget.setCurrentIndex(2)
         self.ui.progressBar.setValue(0)
         self.ui.loading_label.setText(None)
 
@@ -154,11 +249,14 @@ class BirdoApp(QtGui.QMainWindow):
 
     # LOGIN PAGE METHODS
     def get_harmony_folder(self):
+        
         folder = QtGui.QFileDialog.getExistingDirectory()
         self.ui.harmony_folder_line.setText(folder)
         print folder
 
+    #lambda: self.buttonClick(button)
     def get_local_folder(self):
+        
         folder = QtGui.QFileDialog.getExistingDirectory()
         self.ui.localFolder_line.setText(folder)
         print folder
@@ -167,10 +265,19 @@ class BirdoApp(QtGui.QMainWindow):
     def credits(self):
         MessageBox.information("BirdoApp-BETA\napp version: {0}\npackage version: {1}".format(self.initial_data["app"]["app_version"], self.initial_data["app"]["package_version"]))
 
+    def setLabelAttributes(self,label,txt,color):
+
+        label.setText(txt)
+        label.setStyleSheet(color)
+
+        return
+
+    #TODO: Sempre que um dado for alterado mudar o status da conexao pra false
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
     def update_login_page(self):
+
         login_status_geral = True
-        msg = "..."
+        msg = "Login test ok!"
         if self.ui.status_label.text() != "LOGIN OK":
             msg = "Server Connection Test Failed..."
             login_status_geral = False
@@ -184,24 +291,20 @@ class BirdoApp(QtGui.QMainWindow):
             msg = "Escolha sua funcao no projeto!"
             login_status_geral = False
 
-        if not login_status_geral:
-            self.ui.loading_label.setStyleSheet("color: rgb(255, 100, 74);")
-            self.ui.loading_label.setText(msg)
-        else:
-            self.ui.loading_label.setText("Login test ok!")
-            self.ui.loading_label.setStyleSheet("color: rgb(37, 255, 201);")
-
+        self.setLabelAttributes(self.ui.loading_label,msg,"color: rgb(255, 100, 74);" if not login_status_geral else "color: rgb(37, 255, 201);")
         self.ui.update_button.setEnabled(login_status_geral)
         print msg
 
     def test_server_login(self):
+        
         if self.ui.server_login_line.text() == "" or self.ui.server_pw_line.text() == "":
             MessageBox.information("Preencha os campos Login antes de testar!")
             return
         temp_server_data = self.project_data['server']
         # MUDA O STATUS PRA CHECANDO...
-        self.ui.status_label.setText("Connecting...")
-        self.ui.status_label.setStyleSheet("color: white;")
+
+        self.setLabelAttributes(self.ui.status_label,"Connecting...","color: white;")
+
         # CHECA CONEXAO COM O NEXTCLOUD
         if self.project_data["server"]["type"] == "nextcloud":
             temp_server_data["login"] = {}
@@ -209,11 +312,10 @@ class BirdoApp(QtGui.QMainWindow):
             temp_server_data["login"]["pw"] = encdec.enc(self.ui.server_pw_line.text())
             nc = NextcloudServer(temp_server_data, self.project_data["paths"])
             if not nc.get_roots():
-                self.ui.status_label.setText("LOGIN FAIL")
-                self.ui.status_label.setStyleSheet("color: rgb(255, 100, 74);")
+                self.setLabelAttributes(self.ui.status_label,"LOGIN FAIL","color: rgb(255, 100, 74);")                
             else:
-                self.ui.status_label.setText("LOGIN OK")
-                self.ui.status_label.setStyleSheet("color: rgb(37, 255, 201);")
+                self.setLabelAttributes(self.ui.status_label,"LOGIN OK","color: rgb(37, 255, 201);")
+
         self.update_login_page()
 
     # WHEN CHANGE THE SERVER LOGIN
@@ -227,21 +329,9 @@ class BirdoApp(QtGui.QMainWindow):
         elif self.ui.server_pw_line.echoMode() == QtGui.QLineEdit.EchoMode.Password:
             self.ui.server_pw_line.setEchoMode(QtGui.QLineEdit.EchoMode.Normal)
 
-    # FUNCAO QUE CRIA O JSON COM AS INFOS DO USUARIO
-    def update_button(self):
+    def createNewUser(self):
 
-        temp_user_json = self.project_data["user_json"]
         new_user = {}
-        if os.path.exists(temp_user_json):
-            user_data = read_json_file(temp_user_json)
-            first_login = False
-        else:
-            first_login = True
-            user_data = {}
-
-        # SETS THE CURRENT USER TO LOGIN
-        user_data["current_user"] = str(self.ui.username_line.text())
-
         new_user[self.project_data["prefix"]] = {
             "server_login": {
                 "user": str(self.ui.server_login_line.text()),
@@ -255,8 +345,22 @@ class BirdoApp(QtGui.QMainWindow):
         if not self.project_data["harmony"]["installation_default"]:
             new_user[self.project_data["prefix"]]["harmony_installation"] = str(self.ui.harmony_folder_line.text())
 
+        return new_user
+
+    # FUNCAO QUE CRIA O JSON COM AS INFOS DO USUARIO
+    def update_button(self):
+
+        temp_user_json = self.project_data["user_json"]
+        user_data = {}
+        first_login = True
+        if os.path.exists(temp_user_json):
+            user_data = read_json_file(temp_user_json)
+            first_login = False
+
+        # SETS THE CURRENT USER TO LOGIN
+        user_data["current_user"] = str(self.ui.username_line.text())
         # UPDATES USERDATA
-        user_data[str(self.ui.username_line.text())] = new_user
+        user_data[str(self.ui.username_line.text())] = self.createNewUser()
 
         # WRITES THE TEMP JSON USER DATA
         local_user_data_folder = os.path.dirname(temp_user_json)
@@ -264,26 +368,22 @@ class BirdoApp(QtGui.QMainWindow):
             os.makedirs(local_user_data_folder)
 
         if write_json_file(temp_user_json, user_data):
-            self.ui.loading_label.setStyleSheet("color: rgb(37, 255, 201);")
-            self.ui.loading_label.setText("Login done!")
+            self.setLabelAttributes(self.ui.loading_label,"Login done!","color: rgb(37, 255, 201);")
             print "login data saved!"
         else:
             MessageBox.warning("Fail to create user data!")
-            self.ui.loading_label.setStyleSheet("color: rgb(255, 100, 74);")
-            self.ui.loading_label.setText("Fail to create user login!!!")
+            self.setLabelAttributes(self.ui.loading_label,"Fail to create user login!!!","color: rgb(255, 100, 74);")
             print "failed to save login data!"
 
         self.splash_page()
-        # self.plugins_page()
-
 
 # main script
 if __name__ == "__main__":
 
-    make_short_cut_open_scene()
-
     app = QtGui.QApplication.instance()
 
+
+    '''
     initial_data = config_init(app_root)
     if not initial_data:
         MessageBox.critical("ERRO Ao pegar informacoes iniciais do App!")
@@ -291,9 +391,11 @@ if __name__ == "__main__":
     project_data = config_project(app_root, 0)
     if not project_data:
         MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
+    '''
+    
+    MainWindow = BirdoApp(app_root)
 
-    MainWindow = BirdoApp(initial_data, project_data)
+    #MainWindow = BirdoApp(initial_data, project_data)
     MainWindow.show()
-    MainWindow.splash_page()
     sys.exit(app.exec_())
 

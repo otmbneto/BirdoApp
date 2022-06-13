@@ -105,6 +105,42 @@ def install_harmony_package_config(proj_data):
 
 
 def main_update(proj_data, main_app=None):
+    
+    main_app.ui.progressBar.setRange(0, 4)
+    main_app.ui.progressBar.setValue(0)
+    print "main_update"
+    main_app.ui.progressBar.setValue(1)
+    result = os.system(os.path.join(main_app.app_root,"update.bat"))
+    main_app.ui.progressBar.setValue(2)
+    if result != 0:
+        print "something went wrong with update"
+        main_app.ui.progressBar.setValue(0)
+        return False
+
+    # UPDATE TOON BOOM PACKAGE
+    main_app.ui.progressBar.setValue(3)
+    main_app.ui.loading_label.setText("updating harmony package...")
+    install_harmony_package_config(proj_data)
+
+    main_app.ui.progressBar.setValue(4)
+    main_app.ui.loading_label.setText("update done!")
+
+    return True
+
+
+def update_app_version():
+
+    app_file = os.path.join(app_root,"app.json")
+    app_json = read_json_file(app_json)
+    version = app_json["app_version"].replace(".","")
+    version = str(int(version) + 1).zfill(3)
+
+    app_json["app_version"] = ".".join(list(version))
+    write_json_file(app_file,app_json)
+
+'''
+def main_update(proj_data, main_app=None):
+    
     """main function - returns False if fail to get new package and True if no need updates or successful update!"""
     paths = proj_data["paths"]
     server_data = proj_data["server"]
@@ -195,7 +231,7 @@ def main_update(proj_data, main_app=None):
     main_app.ui.progressBar.setValue(7)
     main_app.ui.loading_label.setText("update done!")
     return True
-
+'''
 
 if __name__ == "__main__":
     pdata = config_project(app_root, 0)
