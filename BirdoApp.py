@@ -150,6 +150,8 @@ class BirdoApp(QtGui.QMainWindow):
 
     def setUI(self):
 
+        self.isCloudProject =  self.project_data["server"]["type"] == "nextcloud"
+
         # SETS THE APP VERSION
         self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
 
@@ -185,12 +187,17 @@ class BirdoApp(QtGui.QMainWindow):
 
         self.ui.home_button.clicked.connect(self.initProjectPage)
         self.ui.test_login_button.clicked.connect(self.test_server_login)
+        self.ui.test_login_button.setEnabled(self.isCloudProject)
+
         self.ui.update_button.clicked.connect(self.update_button)
         self.ui.view_pw_button.clicked.connect(self.show_pw)
+        self.ui.view_pw_button.setEnabled(self.isCloudProject)
 
         # LINEEDIT CONNECTIONS
         self.ui.server_login_line.textChanged.connect(self.change_login)
+        self.ui.server_login_line.setEnabled(self.isCloudProject)
         self.ui.server_pw_line.textChanged.connect(self.change_login)
+        self.ui.server_pw_line.setEnabled(self.isCloudProject)
         self.ui.localFolder_line.textChanged.connect(self.update_login_page)
         self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
@@ -276,11 +283,13 @@ class BirdoApp(QtGui.QMainWindow):
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
     def update_login_page(self):
 
+
         login_status_geral = True
         msg = "Login test ok!"
-        if self.ui.status_label.text() != "LOGIN OK":
+        if self.isCloudProject and self.ui.status_label.text() != "LOGIN OK":
             msg = "Server Connection Test Failed..."
             login_status_geral = False
+
         if self.ui.username_line.text() == "":
             msg = "Inserte valid UserName!!!"
             login_status_geral = False
@@ -291,9 +300,11 @@ class BirdoApp(QtGui.QMainWindow):
             msg = "Escolha sua funcao no projeto!"
             login_status_geral = False
 
+
         self.setLabelAttributes(self.ui.loading_label,msg,"color: rgb(255, 100, 74);" if not login_status_geral else "color: rgb(37, 255, 201);")
         self.ui.update_button.setEnabled(login_status_geral)
         print msg
+
 
     def test_server_login(self):
         
@@ -333,13 +344,12 @@ class BirdoApp(QtGui.QMainWindow):
 
         new_user = {}
         new_user[self.project_data["prefix"]] = {
-            "server_login": {
-                "user": str(self.ui.server_login_line.text()),
-                "pw": encdec.enc(self.ui.server_pw_line.text())
-            },
+            "server_login": {"user": None,"pw": None},
             "local_folder": str(self.ui.localFolder_line.text()),
             "user_type": str(self.ui.combo_funcao.currentText())
         }
+        if self.isCloudProject:
+            new_user[self.project_data["prefix"]]["server_login"] = {"user": str(self.ui.server_login_line.text()),"pw": encdec.enc(self.ui.server_pw_line.text())}
 
         # ADDSS HARMONY ALTERNATIVE INSTALLATION PATH IF NECESSARY
         if not self.project_data["harmony"]["installation_default"]:
@@ -360,7 +370,11 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT USER TO LOGIN
         user_data["current_user"] = str(self.ui.username_line.text())
         # UPDATES USERDATA
-        user_data[str(self.ui.username_line.text())] = self.createNewUser()
+        if not user_data["current_user"] in user_data.keys():
+            user_data[user_data["current_user"]] = self.createNewUser()
+        else:
+            user_data[user_data["current_user"]][self.project_data["prefix"]] = self.createNewUser()[self.project_data["prefix"]]
+
 
         # WRITES THE TEMP JSON USER DATA
         local_user_data_folder = os.path.dirname(temp_user_json)

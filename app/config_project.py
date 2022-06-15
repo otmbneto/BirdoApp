@@ -94,7 +94,10 @@ def config_project(app_root, project_index):
             return False
 
         last_login = user_data["current_user"]
-        project_data["server"]["login"] = user_data[last_login][project_data["prefix"]]["server_login"]
+        if project_data["prefix"] in user_data[last_login].keys():
+            project_data["server"]["login"] = user_data[last_login][project_data["prefix"]]["server_login"]
+        else:
+            ready = False
 
     tb_version = project_data["harmony"]["version"].split(".")[0]
     harmony_paths = HarmonyPaths(system, tb_version)
