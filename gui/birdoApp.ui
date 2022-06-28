@@ -209,7 +209,7 @@ QScrollBar:arrow{
      <item row="0" column="0">
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="projects_page">
         <widget class="QWidget" name="gridLayoutWidget">
@@ -860,6 +860,25 @@ QScrollBar:arrow{
            </widget>
           </item>
          </layout>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="plugins_page">
+        <property name="styleSheet">
+         <string notr="true">QWidget{
+	background: rgb(0, 0, 0);
+}
+</string>
+        </property>
+        <widget class="QWidget" name="gridLayoutWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>421</width>
+           <height>531</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="plugin_layout"/>
         </widget>
        </widget>
       </widget>

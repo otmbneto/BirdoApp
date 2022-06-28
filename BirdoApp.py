@@ -12,6 +12,7 @@ from PySide import QtCore, QtGui, QtUiTools
 from gui.dialog_main import Ui_MainWindow
 import os
 import sys
+import subprocess
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,6 +33,16 @@ class ProjectButton(QtGui.QPushButton):
 
         super(ProjectButton, self).__init__()
         self.project_info = project_info
+
+
+class PluginButton(QtGui.QPushButton):
+
+
+    def __init__(self,plugin,project_code):
+
+        super(PluginButton, self).__init__()
+        self.plugin_path = plugin
+        self.project_code = project_code
 
 
 class BirdoApp(QtGui.QMainWindow):
@@ -90,12 +101,28 @@ class BirdoApp(QtGui.QMainWindow):
 
         return
 
+
+
+    def createPluginBtn(self,plugin,project_code):
+
+        button = QtGui.QToolButton()
+        button.setToolTip(os.path.basename(plugin).replace(".py",""))
+        button.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(plugin),"plugin.ico")))
+        button.setIconSize(QtCore.QSize(100, 100))
+        BUTTON_SIZE = QtCore.QSize(150, 150);
+        button.setMinimumSize(BUTTON_SIZE);
+        button.setMaximumSize(BUTTON_SIZE);
+        button.clicked.connect(lambda: self.pluginSelected(plugin,project_code))
+
+        return button
+
+
     def createBtn(self,project):
 
         button = QtGui.QPushButton("")
         button.setIcon(QtGui.QIcon(os.path.join(self.app_root,project["icon"])))
         button.setIconSize(QtCore.QSize(100, 100))
-        BUTTON_SIZE = QtCore.QSize(150, 150);
+        BUTTON_SIZE = QtCore.QSize(120, 120);
         button.setMinimumSize(BUTTON_SIZE);
         button.setMaximumSize(BUTTON_SIZE);
         button.clicked.connect(lambda: self.projectSelected(project))
@@ -114,6 +141,47 @@ class BirdoApp(QtGui.QMainWindow):
 
         return
 
+    def getPython(self):
+
+        #C:\Users\admin\AppData\Roaming\BirdoApp\venv\Scripts\python.exe
+        return os.path.join(self.app_root,"venv/Scripts/python.exe").replace("\\","/")
+
+    def pluginSelected(self,plugin,project_code):
+
+        python = self.getPython()
+        cmd = "{0} \"{1}\" {2} \"\"".format(python,plugin,project_code)
+        print cmd
+        subprocess.Popen([python, plugin,str(project_code),""], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        return
+
+    #TODO: Falar com o leo sobre refatorar a pasta de plugins.
+    def isValidPlugin(self,path):
+
+        permissions = []
+        if os.path.exists(os.path.join(os.path.dirname(path),"permissions.json")):
+            j = read_json_file(os.path.join(os.path.dirname(path),"permissions.json"))
+            if "user_types" in j.keys():
+                permissions = j["user_types"]
+
+        user_data = self.project_data["user_data"]
+        user_type = user_data[next(iter(user_data))][self.project_data["prefix"]]["user_type"]
+        print user_type
+
+        icon = os.path.join(os.path.dirname(path),"plugin.ico").replace("\\","/")
+        print os.path.exists(path) and os.path.exists(icon)
+        return os.path.exists(path) and os.path.exists(icon) and user_type in permissions
+
+    def getPlugins(self):
+
+        plugin_path = os.path.join(self.app_root,"app","plugins").replace("\\","/")
+        plugins = []
+        
+        if os.path.exists(plugin_path):
+            #print [os.path.join(plugin_path,f,f + ".py").replace("\\","/") for f in os.listdir(plugin_path)]
+            plugins = filter(self.isValidPlugin,[os.path.join(plugin_path,f,f + ".py").replace("\\","/") for f in os.listdir(plugin_path)])
+
+        return plugins
+
     def cleanLayout(self,layout):
 
         for i in reversed(range(layout.count())): 
@@ -127,9 +195,26 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.projects_layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
         i = 0
         columnNum = 3
+
         for project in self.projects:
             btn = self.createBtn(project)
             self.ui.projects_layout.addWidget(btn,i/columnNum,i%columnNum)
+            i+=1
+
+        return
+
+    def initPluginPage(self):
+
+        self.ui.stackedWidget.setCurrentIndex(3)
+        self.plugins = self.getPlugins()
+        self.cleanLayout(self.ui.plugin_layout)
+        self.ui.plugin_layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)    
+        columnNum = 3
+        i = 0
+        for plugin in self.plugins:
+            print plugin
+            btn = self.createPluginBtn(plugin,self.project_data["id"])
+            self.ui.plugin_layout.addWidget(btn,i/columnNum,i%columnNum)
             i+=1
 
         return
@@ -232,9 +317,10 @@ class BirdoApp(QtGui.QMainWindow):
         elif not main_update(self.project_data, self):
             print "check update failed!"
         else:
-            MessageBox.information("BirdoApp foi Atualizado!")
+            #MessageBox.information("BirdoApp foi Atualizado!")
             ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
-            self.close()
+            #self.close()
+            self.initPluginPage()
 
     #Mostra a pagina pra preencher os dados
     def login_page(self):
@@ -391,11 +477,24 @@ class BirdoApp(QtGui.QMainWindow):
 
         self.splash_page()
 
+def try_to_delete_shortcut(shortcut_name):
+
+    desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop',shortcut_name + ".lnk").replace("\\","/")
+    onedrive = os.path.join(os.path.join(os.environ['USERPROFILE']), "OneDrive",'Desktop',shortcut_name + ".lnk").replace("\\","/")
+    for shortcut in [desktop,onedrive]:
+        print "TRYING TO DELETE: " + shortcut
+        print os.path.exists(shortcut)
+        if os.path.exists(shortcut):
+            os.remove(shortcut)
+
+    return
+
 # main script
 if __name__ == "__main__":
 
     app = QtGui.QApplication.instance()
 
+    try_to_delete_shortcut("open_scene")
 
     '''
     initial_data = config_init(app_root)
