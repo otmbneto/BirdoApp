@@ -3,7 +3,7 @@ include("BD_2-ScriptLIB_Geral.js");
 function AddNotes(){
 	var projectDATA = BD2_ProjectInfo();
 
-	if(projectDATA.user_type != "ANIM_LEAD"){
+	if(projectDATA.user_type != "ANIM_LEAD" && projectDATA.user_type != "DT"){
 		MessageBox.information("Apenas para supervisores.");
 		return;
 	}
