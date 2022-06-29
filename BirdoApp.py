@@ -164,7 +164,12 @@ class BirdoApp(QtGui.QMainWindow):
                 permissions = j["user_types"]
 
         user_data = self.project_data["user_data"]
-        user_type = user_data[next(iter(user_data))][self.project_data["prefix"]]["user_type"]
+        if "current_user" in user_data.keys():
+            username = user_data["current_user"]
+        else:
+            username = next(iter(user_data))
+
+        user_type = user_data[username][self.project_data["prefix"]]["user_type"]
         print user_type
 
         icon = os.path.join(os.path.dirname(path),"plugin.ico").replace("\\","/")
