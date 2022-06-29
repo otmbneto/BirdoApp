@@ -164,6 +164,9 @@ class BirdoApp(QtGui.QMainWindow):
                 permissions = j["user_types"]
 
         user_data = self.project_data["user_data"]
+        print "\n"
+        print user_data
+        print "\n"
         if "current_user" in user_data.keys():
             username = user_data["current_user"]
         else:
