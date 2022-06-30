@@ -14,6 +14,12 @@ function GetNotes(){
 	}
 
 	var projectDATA = BD2_ProjectInfo();
+
+	if(projectDATA.server.type == "vpn"){
+		MessageBox.warning("Projeto ainda não suportado.", 1,0);
+		return;
+	}
+
 	var remotePath = "MNM_TBLIB/_Notes/" + projectDATA.entity.ep + "/" + projectDATA.entity.name + "/"; //FIXME
 
 	var venvPath = projectDATA.birdoApp + "venv/Lib/site-packages"; // for oc

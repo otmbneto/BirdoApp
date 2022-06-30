@@ -2,8 +2,8 @@ include("BD_2-ScriptLIB_Geral.js");
 
 function SendNotes(){
 	var projectDATA = BD2_ProjectInfo();
-	projectDATA.user_type = "ANIM_LEAD" // FIXME
-	if(projectDATA.user_type != "ANIM_LEAD"){
+
+	if(projectDATA.user_type != "ANIM_LEAD" && projectDATA.user_type != "DT"){
 		MessageBox.information("Apenas para supervisores.");
 		return;
 	}
@@ -90,35 +90,42 @@ function SendNotes(){
 	}
 
 	// Uploading!
-	//PATHS NEEDED:
-	var venvPath = projectDATA.birdoApp + "/venv/Lib/site-packages"; // for oc
-	var utilsPath = projectDATA.birdoApp + "/app/utils"; // for decode
-	var assurePathFile = projectDATA.birdoApp + "/app/utils/nc_ensure_path_upload.py"
-	var login = {}
-	login.url = projectDATA.server.url;
-	login.user = projectDATA.server.login.user;
-	login.passwd = projectDATA.server.login.pw;
+	if(projectDATA.server.type == "nextcloud"){
+		var venvPath = projectDATA.birdoApp + "/venv/Lib/site-packages"; // for oc
+		var utilsPath = projectDATA.birdoApp + "/app/utils"; // for decode
+		var assurePathFile = projectDATA.birdoApp + "/app/utils/nc_ensure_path_upload.py"
+		var login = {}
+		login.url = projectDATA.server.url;
+		login.user = projectDATA.server.login.user;
+		login.passwd = projectDATA.server.login.pw;
 
-	var remotePath = "MNM_TBLIB/_Notes/" + projectDATA.entity.ep + "/" + projectDATA.entity.name + "/";
-	PythonManager.addSysPath(venvPath);
-	PythonManager.addSysPath(utilsPath);
-	pyObj = PythonManager.createPyObject(assurePathFile);
+		var remotePath = "MNM_TBLIB/_Notes/" + projectDATA.entity.ep + "/" + projectDATA.entity.name + "/";
+		PythonManager.addSysPath(venvPath);
+		PythonManager.addSysPath(utilsPath);
+		pyObj = PythonManager.createPyObject(assurePathFile);
 
-	var myAddObj;
-	if(typeof(pyObj.addObjectToPython) == "function"){
-		myAddObj = pyObj.addObjectToPython;
+		var myAddObj;
+		if(typeof(pyObj.addObjectToPython) == "function"){
+			myAddObj = pyObj.addObjectToPython;
+		}else{
+			myAddObj = pyObj.addObject;
+		}
+
+		myAddObj("messageLog", MessageLog);
+		myAddObj("login", login);
+		
+		var rtrn = "" + pyObj.py.ensure_path_and_upload(remotePath, templateZip);
+		if (rtrn.indexOf("OK!") != -1){
+			MessageBox.information("Note enviado com sucesso!");
+		}else{
+			MessageBox.warning("ERRO ao subir o note", 1,0);
+			return;
+		}
+	}else if(projectDATA.server.type == "vpn"){
+		MessageBox.warning("Projeto ainda não suportado.", 1,0);
+		return;
 	}else{
-		myAddObj = pyObj.addObject;
-	}
-
-	// myAddObj("messageLog", MessageLog);
-	myAddObj("login", login);
-	
-	var rtrn = "" + pyObj.py.ensure_path_and_upload(remotePath, templateZip);
-	if (rtrn.indexOf("OK!") != -1){
-		MessageBox.information("Note enviado com sucesso!");
-	}else{
-		MessageBox.warning("ERRO ao subir o note", 1,0);
+		MessageBox.warning("O tipo de servidor desse projeto não é conhecido.", 1,0);
 		return;
 	}
 
