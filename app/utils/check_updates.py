@@ -123,7 +123,7 @@ def main_update(proj_data, main_app=None):
     install_harmony_package_config(proj_data)
 
     main_app.ui.progressBar.setValue(4)
-    main_app.ui.loading_label.setText("update done!")
+    main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
 
     return True
 
