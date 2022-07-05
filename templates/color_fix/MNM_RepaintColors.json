@@ -48,5 +48,16 @@
 			"path": "templates/palettes/MNM/CH0005_Bocao_recolor",
 			"name": "CH0005_Bocao"
 		}
+	},
+	"CH0004_Julieta": {
+		"recolorInfo": {
+			"CABELO": {
+				"original_color": "09c472608964ed8c"
+			}
+		},
+		"palette": {
+			"path": "templates/palettes/MNM/CH0004_Julieta_recolor",
+			"name": "CH0004_JULIETA"
+		}
 	}
 }
