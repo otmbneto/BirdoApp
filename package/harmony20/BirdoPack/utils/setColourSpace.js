@@ -94,7 +94,7 @@ function setColourSpace(colour_space){
 		for(var i=0; i<reads.length; i++){
 			var nodeName = node.getName(reads[i]);
 			var change = node.setTextAttr(reads[i], "COLOR_SPACE", 1, color_space_name);
-			Print("	--NODE: " + reads[i] + " : " + change); 
+			//Print("	--NODE: " + reads[i] + " : " + change); 
 			if(change){
 				counter++;
 			}
