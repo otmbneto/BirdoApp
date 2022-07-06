@@ -595,6 +595,6 @@ Copyright:  leobazao_@Birdo
 				return false;
 			}
 		}
-		return BD1_createDirectoryREDE(temp_folder);
+		return BD1_createDirectoryREDE(folderPath);
 	}	
 	
