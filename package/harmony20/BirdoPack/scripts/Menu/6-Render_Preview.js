@@ -213,6 +213,8 @@ function RenderPreview(){
 		
 		progressDlg.setValue(5);
 		progressDlg.hide();
+		
+		MessageBox.information("As midias exportadas foram copiadas para rede!");
 
 	}
 	
