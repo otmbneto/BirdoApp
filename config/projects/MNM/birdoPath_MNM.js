@@ -128,11 +128,12 @@ function BirdoProject(entity){
 		var name_arr = scene_name.split("_");
 		var ep = name_arr[0] + "_" + name_arr[1];
 		
+		/* nao impede de pegar o caminho se nao tiver conectado a rede!!!!
 		//test if render path for comp exists in this computer
 		if(!dirExist(this.paths.render_comp)){
 			MessageLog.trace("Fail to find renderComp path in this computer! Use the local path instead!");
 			return false;
-		}
+		}*/
 		
 		var render_path = this.paths.render_comp + ep + "/RENDER/COMP/" + ep + "_SEQ_EXR/" + scene_name + "/";
 		return render_path;
@@ -170,9 +171,6 @@ function BirdoProject(entity){
 				return false;
 			}				
 		}
-		
-		
-		
 		return step;
 	}
 	
