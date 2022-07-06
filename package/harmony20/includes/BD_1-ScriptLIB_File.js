@@ -585,4 +585,16 @@ Copyright:  leobazao_@Birdo
 		Print("sleep end!");
 	}
 	
+	/*
+		ensure the folder is clean and exists (delete and cretate it again to make sure is empty)
+	*/
+	function BD1_CleanFolder(folderPath){
+		if(BD1_DirExist(folderPath)){
+			if(!BD1_RemoveDirs(folderPath)){
+				Print("fail to clean folder: " + folderPath);
+				return false;
+			}
+		}
+		return BD1_createDirectoryREDE(temp_folder);
+	}	
 	
