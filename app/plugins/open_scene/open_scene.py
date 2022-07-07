@@ -95,7 +95,8 @@ class OpenShot(QtGui.QWidget):
         if not self.root_test:
             MessageBox.warning("Fail to connect to Nextcloud server!")
             self.close()
-        if self.root_test["has_root"]:
+        
+        if self.root_test or self.root_test["has_root"]:
             self.root = self.project_data['paths']["root"] + self.project_data['paths']["projRoot"]
         else:
             self.root = ""
