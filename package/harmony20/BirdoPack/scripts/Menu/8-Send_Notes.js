@@ -83,7 +83,8 @@ function SendNotes(){
 		return;
 	}
 
-	var zipFile = new File(templateZip);
+//	var zipFile = new File(templateZip);
+	var zipFile = new PermanentFile(templateZip);
 	if(!zipFile.exists){
 		MessageBox.warning("ERRO ao conferir o template!", 1,0);
 		return;
@@ -122,8 +123,15 @@ function SendNotes(){
 			return;
 		}
 	}else if(projectDATA.server.type == "vpn"){
-		MessageBox.warning("Projeto ainda não suportado.", 1,0);
-		return;
+		var destPath = projectDATA.paths.root + projectDATA.paths.tblib + "_notes/" + projectDATA.entity.ep + "/" + projectDATA.entity.name;
+		BD1_createDirectoryREDE(destPath);
+		if(BD1_CopyFile(zipFile.path(), destPath + "/" + templateName + ".zip")){
+			MessageBox.information("O note '" + templateName + "foi enviado para o servidor!.", 1, 0, 0, "Note Enviado");
+			return;
+		}else{
+			MessageBox.warning("Algo de errado aconteceu ao copiar o note para o servidor.", 1,0);
+			return;
+		}
 	}else{
 		MessageBox.warning("O tipo de servidor desse projeto não é conhecido.", 1,0);
 		return;
