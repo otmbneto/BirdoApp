@@ -110,6 +110,7 @@ function defineInterface(pathUI, initialData){
 
 	//SET INITIAL VALUES
 	this.ui.label_version.text = scrip_version;
+	this.ui.gb_options.comboScale.addItems(["Scale Dependent","Scale Independent","Scale Independent (Legacy)"]);
 
 	//change Radio Selection
 	if(!initialData["rig_group"] || !initialData["selected_nodes"]){//se nao tiver reconhecido um RIG na selecao de nodes
@@ -197,7 +198,13 @@ function defineInterface(pathUI, initialData){
 		
 
 	///FUNCOES EXTRAS DA INTERFACE
-		
+	function Print(msg){
+		if(typeof msg == "object"){
+			var msg = JSON.stringify(msg, null, 2);
+		}
+		MessageLog.trace(msg);
+	}
+	
 	function has_defformation(nodeToCheck){//checks if this node has a defformation affecting the drawings
 		var up_node = node.srcNode(nodeToCheck, 0);
 		return node.isGroup(up_node) && is_def_group(up_node);
@@ -231,16 +238,20 @@ function defineInterface(pathUI, initialData){
 			var changeDefformation = (has_defformation(rig_read_nodes[i]) && lineDefformation);
 			var smoothVal = changeDefformation ? self.ui.gb_options.spinSmooth.value : parseFloat(node.getTextAttr(rig_read_nodes[i], 1, "PENCIL_LINE_DEFORMATION_SMOOTH"));
 			var fixVal = changeDefformation ? self.ui.gb_options.doubleSpinFix.value : parseFloat(node.getTextAttr(rig_read_nodes[i], 1, "PENCIL_LINE_DEFORMATION_FIT_ERROR"));;
+			var scale_style = self.ui.gb_options.comboScale.currentText;
+
 			//SET Line control attributes
 			node.setTextAttr(rig_read_nodes[i], "ADJUST_PENCIL_THICKNESS", 1, useLineControl);//ativa controle de linha
-			node.setTextAttr(rig_read_nodes[i], "ZOOM_INDEPENDENT_LINE_ART_THICKNESS", 1, "Scale Dependent");//att obrigatorio (adapta a linha a scale e camera)
+			node.setTextAttr(rig_read_nodes[i], "ZOOM_INDEPENDENT_LINE_ART_THICKNESS", 1, scale_style);//att obrigatorio (adapta a linha a scale e camera)
 			node.setTextAttr(rig_read_nodes[i], "multLineArtThickness", 1, value);
+			node.setTextAttr(rig_read_nodes[i], "ADD_LINE_ART_THICKNESS", 1, 0);//fix contant value to 0 to make sense
+
 			//SET Line Deform attributes
 			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS", 1, changeDefformation);		
 			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_SMOOTH", 1, smoothVal);
 			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_FIT_ERROR", 1, fixVal);
 			
-			MessageLog.trace("Setting Lince Control Node: " + rig_read_nodes[i]);
+			Print("Setting Lince Control Node: " + rig_read_nodes[i]);
 		}
 		
 	}

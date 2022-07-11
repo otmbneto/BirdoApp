@@ -1155,8 +1155,17 @@ muda o espaco de cor do projeto para COMP ou PRE_COMP
 */
 function BD2_setProjectColourSpace(projectData, step){
 	var cs = projectData.getProjectCS(step);
+	if(cs == "ACES"){
+		var ocio = fileMapper.toScenePath(specialFolders.etc + "/colormanagement/config.ocio");
+		if(!BD1_FileExists(ocio)){
+			Print("Ocio not found in this computer!");
+			return false
+		}
+		Print("OCIO check ok!");
+	}
+	
 	var setCS_script_path = projectData.paths.birdoPackage + "utils/setColourSpace.js";
-
+	
 	Print("### Setting Color Space - " + cs + " ###");
 
 	var require_script = require(setCS_script_path).setColourSpace(cs);

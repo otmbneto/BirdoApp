@@ -1,6 +1,6 @@
 {
 	"paths": {
-		"root": "//192.168.10.100/projects/153_Astronauta/",
+		"root": "//192.168.10.100/153_Astronauta/",
 		"projRoot": "1_TEMPORADA/",
 		"assetLib": {
 				"bg": "01_BG/",
@@ -45,7 +45,7 @@
 		"roteiros": "00_ROTEIROS/",
 		"tblib": "_tbLib/",
 		"fazendinha": "_tbLib/_Fazendinha/",
-		"render_comp": "//192.168.10.100/projects/153_Astronauta/1_TEMPORADA/02_EPISODIOS/{EP}/05_CENAS/_RENDER/04_COMP/",
+		"render_comp": "//192.168.10.100/153_Astronauta/1_TEMPORADA/02_EPISODIOS/{EP}/05_CENAS/_RENDER/04_COMP/",
 		"packUpdate": "_tbLib/_birdoApp/"
 		},
 	"server": {

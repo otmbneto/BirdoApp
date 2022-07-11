@@ -18,34 +18,23 @@ Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
 
-
-
-function prepare_for_render(projData, step, use_extra_writenodes){
+function prepare_for_render(projData, render_step, use_extra_writenodes){
 	
+	var step = 	render_step == "COMP" ? "COMP" : "PRE_COMP";
+
 	//objeto com info do output esperado
-	var output_data = {"folder": null, "render_number": 0, "frames_number": frame.numberOf(), "file_list": []};
+	var output_data = {"render_comp": projData.getRenderComp(projData.entity.name), "folder": null, "render_number": 0, "frames_number": frame.numberOf(), "file_list": []};
 	
 	//sets the colour space for the step
 	var setCS = BD2_setProjectColourSpace(projData, step);
 	
 	if(!setCS){
-		Print("Fail to set projectColourSpace!");
+		Print("[ERROR]Fail to set projectColourSpace!");
 		return false;
 	}
 	
 	var renderPath = scene.currentProjectPath() + "/frames/";
 
-	if(step == "COMP"){//se for comp, muda o path do render pra rede
-		
-		renderPath = projData.getRenderComp(projData.entity.name);
-		
-		if(!renderPath){
-			Print("canceled.. cant find server comp render path");
-			return false;
-		}
-		
-	}
-	
 	if(BD1_DirExist(renderPath)){//limpa folder de destino...
 		Print("preparing output folder...");
 		if(!BD1_RemoveDirs(renderPath)){
@@ -105,15 +94,17 @@ function prepare_for_render(projData, step, use_extra_writenodes){
 				Print("WriteFINAL set: ");
 				Print(updateWriteFinal);
 				//if write node is NOT a matte treatment, add color fix
-					Print("####Add color fix: " + finalWrite);
-					Print("####>> " + BD2_add_proj_CO_correction(projData, finalWrite));
+				Print("####Add color fix: " + finalWrite);
+				Print("####>> " + BD2_add_proj_CO_correction(projData, finalWrite));
+				info_list.push(updateWriteFinal);
 			} else {
 				Print("Disabled WriteFINAL for COMP!");	
 				node.setEnable(finalWrite, false);
 			}
+		} else {
+			//atualiza as infos do writeFINAL na lista
+			info_list.push(updateWriteFinal);
 		}
-		
-		info_list.push(updateWriteFinal);
 		
 		for(var i=0; i<writes.length; i++){
 			

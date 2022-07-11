@@ -16,13 +16,12 @@ Created:	2020, (setembro 2021)
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
-
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
 function RenderPreview(){
-
+	
 	scene.beginUndoRedoAccum("Render Local");
 
 	var currPath = BD2_updateUserNameInPath(scene.currentProjectPath());
@@ -54,52 +53,80 @@ function RenderPreview(){
 	
 	var prepare_render_js = projectDATA.paths.birdoPackage + "utils/prepare_for_render.js";
 	
-	if(render_step == "COMP"){
-		//renderiza direto no server...
-		Print("step is COMP, preparing for render...");
-		
-		var output_data = require(prepare_render_js).prepare_for_render(projectDATA, "COMP", true);
-		
-		if(!output_data || output_data["render_number"] == 0){
-			MessageBox.warning("Error ao settar saidas do render para COMP!",0,0);
-			Print("fail to get output data for comp");
-			return;				
-		}
-		
-		Action.perform("onActionComposite()");
+	Print("...preparing for render...");
+	var output_data = require(prepare_render_js).prepare_for_render(projectDATA, render_step, render_step == "COMP");
+	
+	Print("Render output data:");
+	Print(output_data);
+	
+	if(!output_data || output_data["render_number"] == 0){
+		MessageBox.warning("Error ao settar saidas do render!",0,0);
+		Print("fail to get output render data ...");
+		return;				
+	}
+	
+	//check prepare render
+	var output_files = output_data["file_list"];
+	if(!output_files){
+		MessageBox.warning("Fail to set render nodes - 'script_prepare_for_render.js'",0,0);
+		return;
+	}
 
-		//chek saida se rolou os renders
-		var output_files = output_data["file_list"];
+	//render the scene
+	Action.perform("onActionComposite()");
+
+	//check if render was ok
+	var render_data = check_render_output(output_files);
 		
-		if(!output_files){
-			MessageBox.warning("Fail to set render nodes - 'script_prepare_for_render.js'",0,0);
+	if(render_data.render_files.length == 0 || render_data.render_erros != 0){
+		Print("the render had " + render_data.render_erros + " erros!");
+		MessageBox.warning("A cena NÃO foi renderizada com sucesso! Mais info no MessageLog", 0, 0);
+		return;
+	}
+	
+	if(render_step == "COMP"){
+		//checa se o servidor esta conectado nesta maquina
+		if(!BD1_DirExist(BD1_dirname(output_data["render_comp"]))){
+			MessageBox.warning("Cena foi renderizada no folder local, mas nao foi possivel enviar pro servidor pois este parece estar offline!",0,0);
 			return;
 		}
-
-		var render_counter = 0;
-		var render_erros = 0;
+		
+		if(!BD2_AskQuestion("A cena foi renderizada com sucesso!\nDeseja copiar as midias para o servidor?")){
+			Print("render local com sucesso! Midias nao foram enviadas para rede!");
+			return;
+		}
+		//copia midias para o servidor
+		copy_comp_media_to_server(output_data["folder"], output_data["render_comp"]);
+		
+	} else {
+		copy_temprender_to_renderlocal(render_data.render_files[0], render_step);
+	}
+	
+	Print("---render preview end!");	
+	scene.endUndoRedoAccum();
+	
+//////////////////////////////////////////FUNCOES EXTRAS/////////////////////////////////////////
+	function check_render_output(output_files){//verifica os arquivos de destino do render (retorna info dos arquivos de saida)
+		Print("--INIT Check output files: ");
+		var render_check = {"render_counter": 0, "render_erros": 0, "render_files": []};
+		
 		for(var i=0; i<output_files.length; i++){
 			var render = output_files[i];
-			
 			if(render["render_type"] == "movie"){//se for movie
 				var mov_file = output_data["folder"] + render["file_name"] + "." + render["format"];
 				if(BD1_FileExists(mov_file)){
 					Print("render output check: " + render["writeNode"] + " : OK!"); 
-					render_counter++;
+					render_check["render_counter"]++;
+					render_check["render_files"].push(mov_file);
 				}else{
 					Print("render output check: " + render["writeNode"] + " : ERROR!"); 
-					render_erros++;
+					render_check["render_erros"]++;
 				}
+				continue;
 			}
 			
 			if(render["render_type"] == "image"){//se for image seq
 				var image_list = BD1_ListFiles(output_data["folder"] , ("*."+ render["format"]));
-				
-				if(image_list.length == 0){
-					Print("Image sequence render failed!");
-					MessageBox.warning("A cena NÃO foi renderizada!",0,0);
-					return false;
-				}
 				
 				var image_patern_name = output_data["folder"] + render["file_name"];
 				//separa somente os renders de imagem deste writeNode
@@ -111,66 +138,90 @@ function RenderPreview(){
 					}
 				);
 				
+				//checks images exported
+				filtered_list.forEach(function(x){
+									var image_path = output_data["folder"] + x;
+									render_check["render_files"].push(image_path);
+				});
 				
-				if(filtered_list.length > 0){
-					Print("render image output check: " + render["writeNode"] + " : " + filtered_list.length + " imagens renderizadas!"); 
-					render_counter++;
+				if(filtered_list.length != output_data["frames_number"]){
+					var images_erros_num = output_data["frames_number"] - filtered_list.length;
+					Print("[ERROR]render image output check: " + render["writeNode"] + " with :" + images_erros_num + " images not rendered!"); 
+					render_check["render_erros"]++;
 				}else{
-					Print("render image output check: " + render["writeNode"] + " : ERROR!"); 
-					render_erros++;
+					Print("render image output check: " + render["writeNode"] + " : " + filtered_list.length + " imagens renderizadas!"); 
+					render_check["render_counter"]++;
 				}
 			}
 			
 		}
 		
-		MessageBox.information("Feito! render Log:\n -number of outputs: " + 
-			output_data["render_number"] + 
-			";\n -Renders OK: " + render_counter +
-			";\n -Renders ERROS: " + render_erros +
-			";\n\nMais Informacoes no MessageLog!"); 
-	} else{
-		//renderiza no local da pessoa
-		Print("step is PRE_COMP, will render in local folder...");
+		Print("Render check:");
+		Print(render_check);
 		
-		var output_data = require(prepare_render_js).prepare_for_render(projectDATA, "PRE_COMP", false);
-		
-		if(!output_data || output_data["render_number"] == 0){
-			MessageBox.warning("Erro ao settar saidas do render para PRE_COMP!",0,0);
-			Print("fail to get output data for PRE_COMP");
-			return;
-		}
-		
-		Action.perform("onActionComposite()");
-		
-		//chek saida se rolou o render
-		var output_files = output_data["file_list"];
-		var render = output_files[0];
-		
-		if(render["render_type"] != "movie"){//garante q o render saiu em movie
-			Print("Algo deu errado! Output de pre_comp diferente de movie! Nao foi possivel verificar saida do render!");
-			return;
-		}
-		
-		var mov_file = output_data["folder"] + render["file_name"] + "." + render["format"];
-		Print("mov file rendered path: " + mov_file);
-		if(!BD1_FileExists(mov_file)){
-			MessageBox.information("A cena NÃO foi renderizada!");
-			scene.cancelUndoRedoAccum();
-			return;
-		}
-		
-		copy_temprender_to_renderlocal(mov_file, render_step);
-		
+		MessageBox.information("Feito! render Log:\n -number of outputs: " + output_data["render_number"] + 
+			";\n -Files Rendered: " + render_check["render_counter"] +
+			";\n -Renders ERROS: " + render_check["render_erros"] +
+			";\n\nMais Informacoes no MessageLog!"); 	
+
+		return render_check;
 	}
 	
-	
-	scene.endUndoRedoAccum();
-//////////////////////////////////////////FUNCOES EXTRAS/////////////////////////////////////////
+	function copy_comp_media_to_server(local_folder_render, server_render_path){//copia as midias de comp pro server
+		
+		var progressDlg; 
+		progressDlg = new QProgressDialog();
+		progressDlg.modal = true;
+		progressDlg.open();
+		progressDlg.setRange(0, 5);
+		
+		progressDlg.setLabelText("cleaning temp folder...");
+		progressDlg.setValue(1);
+		var temp_folder = specialFolders.temp + "/BirdoApp/Render_preview/";
+		if(!BD1_CleanFolder(temp_folder)){
+			progressDlg.hide();
+			MessageBox.warning("Error cleaning temp folder to copy files",0,0);
+			Print("Error creating temp folder!");
+			return false;
+		}
+		
+		progressDlg.setLabelText("ziping temp files...");
+		progressDlg.setValue(2);
+		var temp_zip = BD2_ZipFilesInFolder(local_folder_render, "_tempCopyMedias.zip", temp_folder);
+		if(!temp_zip){
+			progressDlg.hide();
+			MessageBox.warning("Fail to compact temp files!",0,0);
+		}
+		
+		progressDlg.setLabelText("cleaning server destiny folder...");
+		progressDlg.setValue(3);
+		if(!BD1_CleanFolder(server_render_path)){
+			progressDlg.hide();
+			MessageBox.warning("Error cleaning server destiny folder",0,0);
+			Print("Error cleaning server destiny folder!");
+			return false;
+		}
+		
+		progressDlg.setLabelText("unpacking media in server...");
+		progressDlg.setValue(4);
+		if(!BD1_UnzipFile(temp_zip, server_render_path)){
+			progressDlg.hide();
+			MessageBox.warning("Error unpacking media files in server!",0,0);
+			Print("Error unpacking media files in server!");
+			return false;
+		}
+		
+		progressDlg.setValue(5);
+		progressDlg.hide();
+		
+		MessageBox.information("As midias exportadas foram copiadas para rede!");
 
+	}
+	
 	function copy_temprender_to_renderlocal(temp_mov, render_step){//copia o movie temp na pasta frames de saida para o folder local de render do birdoAPP
 		
 		var renderLocalEp = projectDATA.getRenderPath("local", render_step);
-	
+		
 		if(!renderLocalEp){
 			Print("Canceled..");
 			return;

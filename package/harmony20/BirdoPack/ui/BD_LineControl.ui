@@ -160,7 +160,104 @@ QDoubleSpinBox:disabled{
 	color: rgb(250, 90, 120);
 	background-color: rgb(250, 200, 200);
 	border-color: rgb(255, 230, 220);
-}</string>
+}
+
+QComboBox {
+	color: black;
+    border: 2px solid white;
+    border-radius: 6px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}
+
+QComboBox::down-arrow {
+      image: null;
+}
+
+QComboBox:editable{
+	background: rgb(212, 210, 229);
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: lightgray;
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left-width: 2px;
+    border-left-color: white;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox:hover{
+    border: 2px solid #05B8CC;
+    color: gray;
+}
+
+QComboBox QAbstractItemView{
+    border: 2px solid white;
+	border-radius: 10px;
+    color: gray;
+	background-color: lightgray;
+    selection-background-color: #05B8CC;
+	selection-color: white;
+	selection-item-border-radius: 2px;
+	padding: 3px 3px ;
+}
+
+QComboBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: gray;
+}
+
+QScrollArea{
+	border-radius: 5px;
+	border: none;
+}
+
+QScrollBar::handle {
+	border-radius: 10px;
+ 	border: none;
+	background-color: #05B8CC;
+	width: 5px;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-page {
+    background-color: transparent;
+	border: none;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: transparent;
+	color: none;
+	image: none;
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -485,19 +582,6 @@ QLabel::hover {
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
-        <item row="0" column="2">
-         <widget class="QRadioButton" name="radioChoose">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="toolTip">
-           <string>Escolher valor</string>
-          </property>
-          <property name="text">
-           <string>Choose</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QRadioButton" name="radioDefault">
           <property name="toolTip">
@@ -508,6 +592,19 @@ QLabel::hover {
           </property>
           <property name="checked">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QRadioButton" name="radioChoose">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Escolher valor</string>
+          </property>
+          <property name="text">
+           <string>Choose</string>
           </property>
          </widget>
         </item>
@@ -606,6 +703,16 @@ QSlider::handle:disabled{
           </property>
           <property name="tickPosition">
            <enum>QSlider::NoTicks</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <widget class="QComboBox" name="comboScale"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Scale Style:</string>
           </property>
          </widget>
         </item>

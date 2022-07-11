@@ -50,14 +50,14 @@
 					"PUBLISH",
 					"REVIEW",
 					"WORK"
-					]					
+					]
 				}
 			},
 		"library" : "MNM_LIBRARY/",
 		"roteiros" : "MNM_SCRIPT/",
 		"tblib" : "MNM_TBLIB/",
 		"fazendinha": "MNM_OMeninoMaluquinho/MNM_TBLIB/_Fazendinha/",
-		"render_comp": "//192.168.10.100/projects/152_Maluquinho/09_POS/",
+		"render_comp": "//192.168.10.101/projects/152_Maluquinho/09_POS/",
 		"packUpdate": "BirdoApp/"
 		},
 	"server": {
