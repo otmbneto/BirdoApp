@@ -414,7 +414,8 @@ class BirdoApp(QtGui.QMainWindow):
             self.setLabelAttributes(self.ui.loading_label, "Fail to create user login!!!", "color: rgb(255, 100, 74);")
             print "failed to save login data!"
 
-        self.splash_page()
+        #self.splash_page()
+        self.projectSelected(self.project_data)
 
 
 def try_to_delete_shortcut(shortcut_name):
