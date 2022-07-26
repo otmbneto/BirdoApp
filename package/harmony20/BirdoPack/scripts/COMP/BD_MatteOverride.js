@@ -93,9 +93,14 @@ function CreateInterface(projData, mattePalette, paletteList){
 	this.ui.setFixedSize(378, 304);
 	
 	//self variables
+	this.addedColors = 0;
 	this.currPalette = null;
 	this.matteColour = mattePalette.nColors == 0 ? new QColor(255,255,255,255) : createQColor(mattePalette.getColorByIndex(0));//inicialmente branco se nao houver cores escolhidas
 	this.ingoneColour = new QColor(0,0,0,255);//inicialmente preto
+	
+	//update clear button state
+	this.ui.groupPalettes.pushRemoveColors.enabled = mattePalette.nColors > 0;
+
 
 	//CALL BACKS
 	this.changeButtonColor = function(buttonWidget, newColor){//atualiza a cor do botao 
@@ -114,7 +119,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 	
 	this.enableButtons = function(enable){//habilita os botoes de palette
 		this.ui.groupPalettes.pushAddColors.enabled = enable;
-		this.ui.groupPalettes.pushRemoveColors.enabled = enable;
+		this.ui.groupPalettes.pushRemoveColors.enabled = mattePalette.nColors > 0;
 	}
 	
 	this.changeRadio = function(){
@@ -151,7 +156,8 @@ function CreateInterface(projData, mattePalette, paletteList){
 	
 	this.onAddColors = function(){
 		scene.beginUndoRedoAccum("Add colors to MatteOverride");
-		
+		//reset counter;
+		this.addedColors = 0;
 		var paletteCounter = 0;
 		if(this.ui.groupPalettes.radioChoosePal.checked){
 			Print("Mode Palette is Choose Single Palette!");
@@ -169,9 +175,10 @@ function CreateInterface(projData, mattePalette, paletteList){
 				paletteCounter++;
 			}
 		}
-		this.ui.progressBar.format = "paletas adicionadas: " + paletteCounter;
-		Print(paletteCounter + " palettes foram adicionadas ao MattePalette!");
-		this.ui.progressBar.value = 0;
+		this.onUpdateColors();
+		this.ui.progressBar.clear();
+		this.ui.progressBar.format = "Palettes: " + paletteCounter + " - colors: " + this.addedColors;
+		Print(paletteCounter + " palettes added and " + this.addedColors + " colors added");
 		
 		scene.endUndoRedoAccum();
 	}	
@@ -189,6 +196,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 			mattePalette.removeColor(cor.id);
 			delete_counter++;
 		}
+		this.enableButtons(this.ui.groupPalettes.radioAllColors.checked);
 		
 		Print("cores deletadas do mattePalette: " + delete_counter);
 		this.ui.progressBar.format = "MattePalette foi limpa! removidos: " + delete_counter;
@@ -228,18 +236,22 @@ function CreateInterface(projData, mattePalette, paletteList){
 			if(!cloneColor){
 				Print("Error cloning color: " + cor.name);
 				errorCounter++;
-				continue;
+			} else {
+				counter++;
 			}
-			//recolor
-			cloneColor.setColorData(convertColor(this.matteColour));
-			counter++;
 		}	
 		Print("add palette: " + palette.getName() + "\n-erros: " + errorCounter + "\n-cloned: " + counter + "\n-ignored: " + counterIgnored);
 		this.ui.progressBar.format = "palette added: " + palette.getName();
 		this.ui.progressBar.value = 0;
+		//update global counter 
+		this.addedColors += counter;
 	}
 	
 	this.isColorIgnored = function(color){//retorna TRUE se a cor deve ser ignorada
+		if(!this.ui.groupAdvenced.checkIgnore.checked){
+			Print("Not using ignore option...");
+			return false;
+		}
 		var isIgnore = false;
 		if(this.ui.groupAdvenced.radioCorName.checked){
 			isIgnore = this.ui.groupAdvenced.lineCorName.text == color.name;
@@ -307,7 +319,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 		var counter_removed = 0;
 		this.ui.progressBar.maximum = mattePalette.nColors - 1;
 
-		for(var i=0; i<mattePalette.nColors; i++){
+		for(var i=mattePalette.nColors-1; i>=0; i--){
 			this.updateProgressBar();
 			var cor = mattePalette.getColorByIndex(i);
 			var originalColor = paletteList.findPaletteOfColor(cor.id).getColorById(cor.id);//cor na palete original
