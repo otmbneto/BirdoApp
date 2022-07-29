@@ -27,6 +27,7 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 	
 	if(!frames_obj){
 		Print("-- frames object functioun failed! Canceling..");
+		scene.cancelUndoRedoAccum();
 		return false;
 	}
 	
@@ -35,6 +36,7 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 	if(art_list.length == 0){
 		MessageBox.warning("Nenhuma art layer selecionada!",0,0);
 		Print("Marque pelo menos uma art layer!");
+		scene.cancelUndoRedoAccum();
 		return false;
 	}
 	
@@ -44,6 +46,12 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 	for(item in frames_obj){
 		Print(" --- drawing: " + item);
 		self.ui.progressBar.format = "drawing - " + item;
+		
+		if(item == "backup"){
+			redoTempExp(nodeSel, frames_obj[item]);
+			continue;
+		}
+		
 		var config = {
 			drawing: {node: nodeSel, frame: frames_obj[item]["first_frame"]}
 		};
@@ -89,13 +97,30 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 		if(apply_to == "All Drawigs"){
 			var fr = frame.numberOf() + 1;
 			var drawingList = column.getDrawingTimings(coluna);	
+			var exposureBackup = {};
+			for(var i=0; i<drawingList.length; i++){
+				exposureBackup[fr] = column.getEntry(coluna, 1, fr);
+				fr++;
+			}
+			var fr = frame.numberOf() + 1;
 			for(var i=0; i<drawingList.length; i++){
 				column.setEntry(coluna, 1, fr, drawingList[i]);
 				exposure_data[drawingList[i]] = {"first_frame": fr};
 				fr++;
 			}
+			exposure_data["backup"] = exposureBackup;
 		}
 		return exposure_data;
+	}
+	
+	function redoTempExp(selNode, backupObj){//refaz as exposicoes temporarias depois do fim da cena
+		var redoCounter = 0;
+		var coluna = node.linkedColumn(selNode, "DRAWING.ELEMENT");
+		for(frame in backupObj){
+			column.setEntry(coluna, 1, frame, backupObj[frame]);
+			redoCounter++;
+		}
+		Print("Temp exp redo: " + redoCounter);
 	}
 	
 	function repaintDrawing(data, art_list, config){//do the action in one shape type

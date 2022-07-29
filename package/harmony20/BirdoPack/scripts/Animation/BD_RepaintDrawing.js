@@ -18,8 +18,6 @@ Copyright:   leobazao_@Birdo
 */
 
 function BD_RepaintDrawing(){
-	
-	scene.beginUndoRedoAccum("Repaint Drawings");
 
 	var nodeSel = selection.selectedNode(0);
 	
@@ -54,7 +52,6 @@ function BD_RepaintDrawing(){
 	var d = new CreateInterface(projectDATA, paletteList, repaint_script, nodeSel);
 	d.ui.show();
 	
-	scene.endUndoRedoAccum();
 	
 	//extra functions
 	function get_timeline_exposure_data(selNode){
@@ -186,7 +183,6 @@ function CreateInterface(projectDATA, paletteList, util_js, selectedNode){
 		Print("ui closed..");
 		this.ui.close();
 	}	
-	
 		
 	//CONNECTIONS
 	this.ui.checkLines.toggled.connect(this, this.onCheckLine);
