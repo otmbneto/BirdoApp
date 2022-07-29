@@ -6,7 +6,7 @@ Name:		repaintDrawings.js
 
 Description:	util do repaint drawings. Faz toda acao de repaint no node selecionado.
 
-Usage:		usar como util no script principal BD_RepaintDrawing.js (recebe os ids das cores para serem pintadas)
+Usage:		usar como util no script principal BD_RepaintDrawing.js
 
 Author:		Leonardo Bazilio Bentolila
 
@@ -53,13 +53,12 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 		counter++;
 	}
 	
+	scene.endUndoRedoAccum();
 	self.ui.progressBar.format = "Drawings repintados: " + counter;		
 
 	MessageBox.information("FEITO! " + counter + " drawings foram repintados!");
 	Print("Drawings repintados: " + counter);
 	return true;
-	
-	scene.endUndoRedoAccum();
 
 	//EXTRA//
 	function get_exposure_data(selNode, apply_to){//retorna lista com objetos com info das exposicoes
@@ -121,11 +120,11 @@ function repaintDrawings(nodeSel, lineColor, fillColor, self){
 							layer: i
 							};
 				if("contours" in x.layers[i]){
-					layerObj["contours"] = fillColor ? updateColorInList(x.layers[i]["contours"], fillColor, "fill") : x.layers[i]["contours"];
+					layerObj["contours"] = fillColor ? updateColorInList(x.layers[i]["contours"], fillColor.id, "fill") : x.layers[i]["contours"];
 				}
 				if("strokes" in x.layers[i]){
 					var strokes = Drawing.query.getStrokes({drawing: config.drawing, art: x.art}).layers[i].strokes;
-					layerObj["strokes"] = lineColor ? updateColorInList(strokes, lineColor, "line") : strokes;
+					layerObj["strokes"] = lineColor ? updateColorInList(strokes, lineColor.id, "line") : strokes;
 				}
 				configObj["layers"].push(layerObj);
 			}

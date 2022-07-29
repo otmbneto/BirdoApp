@@ -173,7 +173,7 @@ function CreateInterface(projectDATA, paletteList, util_js, selectedNode){
 	}
 	
 	this.onRepaint = function(){
-		var repaint = require(util_js).repaintDrawings(selectedNode, this.lineColor.id, this.shapeColor.id, this);
+		var repaint = require(util_js).repaintDrawings(selectedNode, this.lineColor, this.shapeColor, this);
 		if(!repaint){
 			Print("Fail to repaint drawings!");
 		} else {
