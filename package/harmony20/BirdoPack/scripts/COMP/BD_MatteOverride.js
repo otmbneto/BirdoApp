@@ -101,7 +101,6 @@ function CreateInterface(projData, mattePalette, paletteList){
 	//update clear button state
 	this.ui.groupPalettes.pushRemoveColors.enabled = mattePalette.nColors > 0;
 
-
 	//CALL BACKS
 	this.changeButtonColor = function(buttonWidget, newColor){//atualiza a cor do botao 
 		var rgbStr = "rgb(" + newColor.red() + "," + newColor.green() + "," + newColor.blue() + ")";
@@ -110,7 +109,6 @@ function CreateInterface(projData, mattePalette, paletteList){
 	}
 	//update matte color button
 	this.changeButtonColor(this.ui.groupAdvenced.pushMatteColor, this.matteColour);
-
 
 	this.updateProgressBar = function(){
 		var val = this.ui.progressBar.value;
@@ -155,8 +153,8 @@ function CreateInterface(projData, mattePalette, paletteList){
 	}
 	
 	this.onAddColors = function(){
-		scene.beginUndoRedoAccum("Add colors to MatteOverride");
 		//reset counter;
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - add colors");
 		this.addedColors = 0;
 		var paletteCounter = 0;
 		if(this.ui.groupPalettes.radioChoosePal.checked){
@@ -175,17 +173,17 @@ function CreateInterface(projData, mattePalette, paletteList){
 				paletteCounter++;
 			}
 		}
+		scene.endUndoRedoAccum();
+
 		this.onUpdateColors();
 		this.ui.progressBar.clear();
 		this.ui.progressBar.format = "Palettes: " + paletteCounter + " - colors: " + this.addedColors;
 		Print(paletteCounter + " palettes added and " + this.addedColors + " colors added");
-		
-		scene.endUndoRedoAccum();
 	}	
 	
 	this.onClearColors = function(){
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - clear colors");
 		var delete_counter = 0;
-		
 		this.ui.progressBar.maximum = mattePalette.nColors - 1;
 
 		for(var i=mattePalette.nColors-1; i>=0; i--){
@@ -201,6 +199,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 		Print("cores deletadas do mattePalette: " + delete_counter);
 		this.ui.progressBar.format = "MattePalette foi limpa! removidos: " + delete_counter;
 		this.ui.progressBar.value = 0;
+		scene.endUndoRedoAccum();
 	}
 	
 	this.addPalleteColorsToMatteOverride = function(palette){//adiciona as cores da pelette dada para o MatteOverridePalette
@@ -314,7 +313,9 @@ function CreateInterface(projData, mattePalette, paletteList){
 			Print("Nenhuma cor para modificar!");
 			return;
 		}
-		scene.beginUndoRedoAccum("Update colors in MatteOverride");
+		
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - update colors");
+
 		var counter_repaint = 0;
 		var counter_removed = 0;
 		this.ui.progressBar.maximum = mattePalette.nColors - 1;
@@ -350,7 +351,8 @@ function CreateInterface(projData, mattePalette, paletteList){
 			return;
 		}
 		
-		scene.beginUndoRedoAccum("Add MatteOverride node");
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - add node");
+
 		var co = addColourOverride(selNode, mattePalette);
 		if(co){
 			this.ui.progressBar.format = co + " created!";
@@ -359,11 +361,12 @@ function CreateInterface(projData, mattePalette, paletteList){
 		}
 		scene.endUndoRedoAccum();
 	}
-	
+		
 	this.onClose = function(){
 		Print("Ui closed..");
 		this.ui.close();
 	}
+	
 	
 	
 	//connections
@@ -386,7 +389,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 
 	this.ui.addMatteNodeButton.clicked.connect(this, this.onAddNode);
 	this.ui.closeButton.clicked.connect(this, this.onClose);
-	
+		
 	////Funcoes extras da interface/////
 	function Print(msg){
 		if(typeof msg == "object"){
