@@ -47,7 +47,8 @@ function TB_sceneOpenPreUI_Offline(){
 
 function isAssetTemplate(){//checa se o arquivo aberto e o ASSET template ou se ja e um arquivo de ASSET
 	var sceneName = scene.currentScene();
-	return sceneName == "ASSET_template";
+	var name_regex = /\w{3}_ASSET_template/;
+	return name_regex.test(sceneName);
 }
 
 

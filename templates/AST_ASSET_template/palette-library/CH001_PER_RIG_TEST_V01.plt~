@@ -1,0 +1,24 @@
+ToonBoomAnimationInc PaletteFile 2
+Solid    LINHA                      0x0ae0f96ab8601101   0   0   0 255
+Solid    TENIS                      0x0ae0f96ab864d2db 198 185 164 255
+Solid    TENIS_TOP                  0x0ae0f96ab864d7a1  75  78  69 255
+Solid    JUMPER_CALCA               0x0ae0f96ab864cfe9  59  57  65 255
+Solid    MASK                       0x0ae0c6de39b598bc   0 255   0 255
+Solid    JUMPER_PUNHO               0x0ae0fc2ea6330d9c  78  75  81 255
+Solid    BRACO                      0x0ae0fecb09622a93 205 133 105 255
+Solid    MAO                        0x0ae0fc2ea63f809b 205 133 105 255
+Solid    UNHA                       0x0ae0fc2ea63fbdbc 212 153 125 255
+Solid    JUMPER_BRACO               0x0ae0fecb0963599e  59  57  65 255
+Solid    "New 0"                    0x0b1251134c9cde40   0 255   0   0
+Solid    JUMPER_GOLA                0x0ae0f96ab8682785  59  57  65 255
+Solid    PELE                       0x0ae0f96ab8643dfd 206 132 105 255
+Solid    BLUSA                      0x0ae0f96ab8649d66 199 187 165 255
+Solid    JUMPER_TOP                 0x0ae0c6de39b4e81f  90 119 116 255
+Solid    JUMPER_TORSO               0x0ae0f96ab864ac6d  59  56  64 255
+Solid    JUMPER_FAIXA               0x0ae0f96ab864a10f 201 189 168 255
+Solid    JUMPER_ZIPER               0x0ae0f96ab864b2e0 201 189 168 255
+Solid    CINTO                      0x0ae0f96ab864c7ad  78  75  81 255
+Solid    CABELO                     0x0ae0f96ab8649684 139  97  54 255
+Solid    OLHO                       0x0ae0f96ab8647f4d 218 204 173 255
+Solid    PUPILA                     0x0ae0f96ab864875d   2   1   0 255
+Solid    SOBRANCELHA                0x0ae0f96ab8648a1f   0   0   0 255
