@@ -28,8 +28,7 @@ def main(proj_data):
 if __name__ == "__main__":
     args = sys.argv
 
-    # project_index = int(args[1])
-    project_index = 0
+    project_index = int(args[1])
 
     p_data = config_project(birdo_app_root, project_index)
 
