@@ -76,7 +76,12 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		MessageBox.warning("Error to find rig version in server!",0,0);
 		return false;
 	} else {
-		assetInfo["version"] = rig_version;
+		var msg = rig_version.exists ? "\nEsta versao ja existe." : "\nSera o primeiro rig desta versao.";
+		if(!BD2_AskQuestion("Rig identificado como versao: " + rig_version.version + msg + " Deseja continuar?")){
+			Print("canceled...");
+			return false;
+		}
+		assetInfo["version"] = rig_version.version;
 	}
 		
 	var asset_server_folder = main_assetfolder + assetInfo["version"] + "/" + assetInfo.assetName;
@@ -358,6 +363,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	function find_rig_version(main_folder, assetInfo){
 		
 		var versions = BD1_ListFolders(main_folder);
+		var output = {"version": null, "exists": false};
 		
 		if(assetInfo.prefixo.slice(0,2) != "CH" || assetInfo.isAnim || !assetInfo.fullNode){
 			Print("Rig is not entitle to lib version parameters! Will save as v00...");
@@ -365,7 +371,8 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		}
 		
 		var rig_nodes = BD2_ListNodesInGroup(assetInfo.fullNode, "", false);
-
+		rig_nodes.sort();
+		
 		if(versions.length == 0){
 			return "v01";
 		}
@@ -373,13 +380,16 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		for(var i=0; i<versions.length; i++){
 			if(check_version(versions[i], rig_nodes)){
 				Print("Rig version found: " + versions[i]);
-				return versions[i];
+				output["version"] = versions[i];
+				output["exists"] = true;
+				return output;
 			}
 		}
 		
 		var next_num = parseFloat(versions[versions.length-1].replace("v", "")) + 1;
 
-		return "v" + ("00" + next_num).slice(-2);
+		output["version"] = "v" + ("00" + next_num).slice(-2);
+		return output;
 
 		function check_version(version, rig_nodes){
 			var versionInfoJson = main_folder + version + "/_rigINFO." + version + ".json"; 	
@@ -388,7 +398,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 				Print("Fail to read version data!");
 				return false;
 			}
-			var version_nodes = version_data["nodes"];
+			var version_nodes = version_data["nodes"].sort();
 			return JSON.stringify(version_nodes) == JSON.stringify(rig_nodes);
 		}
 	}
