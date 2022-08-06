@@ -253,26 +253,56 @@ function BD2_ListAllNodesUp(initialNode, typeArray, exception){
 @node1 => node para copiar os atributos
 @node2 => node para colar os atributos
 */
-function BD2_copyAtributes(node1, node2){
+function BD2_copyAtributes(node1, node2, only_columns){
 	var a = frame.current();
+	var counter = 0;
+
 	if(node.type(node1) != node.type(node2)){
 		Print("[COPYATTRIBUTES] ERROR: different node types: " + node1 + " : " + node2);
 		return false;
 	}
+
 	if(node.type(node1) == "READ"){//se for drawing, copia exposicao
 		var col_1 = node.linkedColumn(node1,"DRAWING.ELEMENT");
 		var col_2 = node.linkedColumn(node2,"DRAWING.ELEMENT");
-		if(col_1 != " " && col_2 != " "){
+		if(col_1 != "" && col_2 != ""){
 			var exp1 = column.getEntry(col_1, 1, a);
 			column.setEntry(col_2, 1, a, exp1);
 		};
 	};
-	var myList = node.getAttrList(node1, a); 
-	for(var i=0;i<myList.length;i=i+1){
-		var attrName = myList[i].fullKeyword();
-		var attrVal = myList[i].textValue();
-		node.setTextAttr(node2, attrName, a, attrVal);
-	}
+
+	var myList = node.getAttrList(node1, a);
+
+	myList.forEach(function (x){
+
+		var col = null;
+		var fullAttName = null;
+
+		if(x.hasSubAttributes()){
+			var subAtt = x.getSubAttributes();
+			subAtt.forEach(function (y){
+				fullAttName =  y.fullKeyword();
+				col = node.linkedColumn(node1, fullAttName);
+				if(!col && only_columns){
+					return;
+				}
+				var attrVal = y.textValue();
+				node.setTextAttr(node2, fullAttName, a, attrVal);
+				counter++;	
+			});
+		} else {
+			fullAttName = x.fullKeyword();
+			col = node.linkedColumn(node1, fullAttName);
+			if(!col && only_columns){
+				return;
+			}
+			var attrVal = x.textValue();
+			node.setTextAttr(node2, fullAttName, a, attrVal);
+			counter++;
+		}
+	});
+	Print("[COPYATT]: " + node1 + " to " + node2);
+	Print(" -- att copied " + counter);
 }
 
 /*Adiciona um node embaixo ao node selecionado 

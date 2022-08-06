@@ -289,10 +289,10 @@ function createInrterface(uifile){
 	function createCompareObject(self, groupNodeA, groupNodeB){//cretates the node list into list widget
 		var obj = {groupA : {}, groupB: {}};
 		obj.groupA["node"] = groupNodeA;
-		obj.groupA["nodeList"] = listNodes(groupNodeA, "", false);
-			
+		obj.groupA["nodeList"] = listNodes(groupNodeA, "", false).sort();
+
 		obj.groupB["node"] = groupNodeB;
-		obj.groupB["nodeList"] = listNodes(groupNodeB, "", false);
+		obj.groupB["nodeList"] = listNodes(groupNodeB, "", false).sort();
 		
 		//updates progressBar value
 		self.ui.progressBar.setMaximum(obj.groupA["nodeList"].length * 4);
