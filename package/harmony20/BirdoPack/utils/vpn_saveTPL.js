@@ -367,14 +367,18 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		
 		if(assetInfo.prefixo.slice(0,2) != "CH" || assetInfo.isAnim || !assetInfo.fullNode){
 			Print("Rig is not entitle to lib version parameters! Will save as v00...");
-			return "v00";
+			output["version"] = "v00";
+			output["exists"] = BD1_DirExist(main_folder + output["version"]);
+			return output;
 		}
 		
 		var rig_nodes = BD2_ListNodesInGroup(assetInfo.fullNode, "", false);
 		rig_nodes.sort();
 		
 		if(versions.length == 0){
-			return "v01";
+			output["version"] = "v01";
+			output["exists"] = BD1_DirExist(main_folder + output["version"]);
+			return output;
 		}
 		
 		for(var i=0; i<versions.length; i++){
