@@ -45,7 +45,10 @@ def create_fazendinha_queue(proj_data, imput_obj, scene_name, version):
         "status": "waiting",
         "step": imput_obj["render_step"],
         "render_type": render_type,
-        "version": version
+        "version": version,
+        "extra": {
+            "weighted_deform": imput_obj["has_weightedDef"]
+        }
     }
 
     # JSON QUEUE FILE
@@ -262,11 +265,11 @@ if __name__ == "__main__":
     # pegar a lista dos arquivos para zipar no output.json dado como parametro
 
     args = sys.argv
-    if not len(args) == 8:
+    if not len(args) == 9:
         print("Numero de argumentos invalidos!")
         sys.exit("error: wrong number of arguments!")
 
-    output_json_file = args[7]
+    output_json_file = args[8]
     tb_files_data = read_json_file(output_json_file)
 
     if not tb_files_data:
@@ -281,7 +284,8 @@ if __name__ == "__main__":
         "step": args[5],
         "project_index": args[6],
         "files_data": tb_files_data["file_list"],
-        "user_name": tb_files_data["user_name"]
+        "user_name": tb_files_data["user_name"],
+        "has_weightedDef": args[7] != 0
     }
 
     # GET PROJECT DATA

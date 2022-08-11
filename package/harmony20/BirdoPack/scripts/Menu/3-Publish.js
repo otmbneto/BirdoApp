@@ -124,7 +124,12 @@ function Publish(){
 		var output_json = tempfolder + "publish_shot" + new Date().getTime() + ".json";
 		BD1_WriteJsonFile(versionData, output_json);
 		
-		var start = Process2(pythonPath, pyFile, publish_server_path, publish_local_path, render_path, render_step, step, projectId, output_json);
+		//numero pra dizer se a cena tem WeightedDeform que trava na fila 1 (pra forcar mandar pra fila 2 do MNM) (se for 0 vira False no Python, contrario vira True);
+		var hasWDef = node.getNodes(["WeightedDeform"]).length;
+		
+		Print("Has Weighted Deform: " + hasWDef);
+		
+		var start = Process2(pythonPath, pyFile, publish_server_path, publish_local_path, render_path, render_step, step, projectId, hasWDef, output_json);
 		
 		//PRINTA os comandos do script de python q vai rodar
 		var commands = pythonPath + " " + pyFile + " " + publish_server_path + " " + publish_local_path + " " + render_path + " " + render_step + " " + step + " " + projectId + " " + output_json;
