@@ -22,6 +22,7 @@ sys.path.append(birdo_app_root)
 from app.config_project import config_project
 from app.utils.birdo_harmony import HarmonyManager
 from app.utils.nextcloud_server import NextcloudServer
+from app.utils.vpn_server import VPNServer
 from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_iso_string
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.ffmpeg import compress_render
@@ -179,7 +180,7 @@ def zip_scene(filelist, zip_path, scene_version):
     return os.path.exists(zip_path)
 
 
-def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
+def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
     """MAIN script (uma rodda do loop) do Events de publish"""
     #PEGA AS INFOS DO JSON
     render_type = events_data["publish_events"]["render_type"]
@@ -210,7 +211,7 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
             os.makedirs(item_log_folder)
         print "---Target Folder log: {0}".format(item_log_folder)
 
-        file_list = filter(lambda x: x.get_name().endswith(".zip") or x.get_name().endswith(".rar"), nc.list_folder(folder_path))
+        file_list = filter(lambda x: x.get_name().endswith(".zip") or x.get_name().endswith(".rar"), server.list_folder(folder_path))
         if not file_list:
             print "---Error listing files in folder: {0}".format(folder_path)
             continue
@@ -302,14 +303,14 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
                 update_output("Fail")
                 continue
             # MAKES SURE SCENE FOLDER EXISTS
-            if not nc.ensure_folder_exists(os.path.dirname(file_output_data['scene_path'])):
+            if not server.ensure_folder_exists(os.path.dirname(file_output_data['scene_path'])):
                 event_log['1_Scene_Check'] = "[ERROR] Fail to create scene folder in server!"
                 print event_log['1_Scene_Check']
                 update_output("Fail")
                 continue
             # MAKES SURE PUBLISH FOLDER EXISTS
 
-            if not nc.ensure_folder_exists(file_output_data['scene_path']):
+            if not server.ensure_folder_exists(file_output_data['scene_path']):
                 event_log['1_Scene_Check'] = "[ERROR] Fail to create scene publish folder in server!"
                 print event_log['1_Scene_Check']
                 update_output("Fail")
@@ -317,12 +318,12 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
             event_log['1_Scene_Check'] = "[OK] Scene detected!"
 
             # CHECK FOR VERSION FILE INFO
-            if not nc.get_file_info(file_output_data['scene_path']):
+            if not server.get_file_info(file_output_data['scene_path']):
                 event_log['2_File_Check'] = "[ERROR] Something went wrong, the PUBLISH folder was not created!"
                 print event_log['2_File_Check']
                 update_output("Fail")
                 continue
-            scene_versions_files = nc.list_folder(file_output_data['scene_path'])
+            scene_versions_files = server.list_folder(file_output_data['scene_path'])
             files_info = get_versions_name(file_output_data['scene_name'], scene_versions_files)
             if not files_info:
                 event_log['2_File_Check'] = "[ERROR] Can't find version file for scene!"
@@ -355,7 +356,7 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
 
             #Download  do arquivo para o temp
             print " ---downloading file: {0}".format(file_to_run_event)
-            if not nc.download_file(file_to_run_event, temp_zip):
+            if not server.download_file(file_to_run_event, temp_zip):
                 event_log['3_File_Download'] = "[ERROR] Fail to download scene file!"
                 print event_log['3_File_Download']
                 update_output("Fail")
@@ -387,6 +388,7 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
 
             # Render scene
             print " ---Rendering scene..."
+            print " ------- cena: {0}".format(temp_xstage_file)
             prepare_for_render_js = os.path.join(harmony.get_package_folder(), 'utils', '{0}_render.js'.format(render_type))
             if not harmony.render_scene(temp_xstage_file, pre_render_script=prepare_for_render_js):
                 event_log['5_Render_Scene'] = "[ERROR] Scene Render failed!"
@@ -418,7 +420,7 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
                         render_step = 'ANIMATION' if step == 'ANIM' else step
                         render_server_path = server_root + fm.get_render_path(ep) + "/" + render_step + "/" + os.path.basename(compressed_mov)
                         print " ---Uploading compressed render: {0} to \n - {1}".format(compressed_mov, render_server_path)
-                        if not nc.upload_file(render_server_path, compressed_mov):
+                        if not server.upload_file(render_server_path, compressed_mov):
                             event_log['7_Upload_Render'] = "[ERROR] Failed to upload Render file: {0}".format(render_server_path)
                             print event_log['7_Upload_Render']
                             continue
@@ -459,7 +461,7 @@ def do_event_loop(project_data, server_root, nc, harmony, events_data, fm):
 
             # UPLOAD SCENE ZIP FILE
             publish_server_zip = file_output_data['scene_path'] + "/" + files_info['next_file'] + ".zip"
-            if not nc.upload_file(publish_server_zip, publish_temp_zip):
+            if not server.upload_file(publish_server_zip, publish_temp_zip):
                 event_log['9_Publish_Scene'] = "[ERROR] Fail to upload zip file"
                 print event_log['9_Publish_Scene']
                 update_output("Fail")
@@ -497,13 +499,26 @@ if __name__ == "__main__":
     sys.path.append(project_config_folder)
     from folder_schemme import FolderManager
 
-    # TEST NEXTCLOUD CONNECTION
-    nc = NextcloudServer(project_data["server"], project_data['paths'])
-    nc_test = nc.get_roots()
-    if not nc_test:
-        print "ERROR connecting to nextcloud!"
-        sys.exit("error connecting to NextCloud!")
-    if nc_test["has_root"]:
+    # define server connection type:
+    server = None
+    if project_data["server"]["type"] == "nextcloud":
+        server = NextcloudServer(project_data["server"], project_data['paths'])
+        print "-- server type: {0}".format("nextcloud")
+    elif project_data["server"]["type"] == "vpn":
+        server = VPNServer(project_data["server"], project_data['paths'])
+        print "-- server type: {0}".format("vpn")
+
+    # TEST SERVER CONNECTION
+    if not server:
+        print "Server type not found!"
+        sys.exit("Server type not found for this project")
+
+    root_test = server.get_roots()
+    if not root_test:
+        print "Fail to connect to " + project_data["server"]["type"].capitalize() + " server!"
+        sys.exit("Fail to connect server!!")
+
+    if root_test["has_root"]:
         root = project_data['paths']["root"] + project_data['paths']["projRoot"]
     else:
         root = ""
@@ -518,7 +533,7 @@ if __name__ == "__main__":
     date = datetime.datetime
     while True:
         print "****Start new loop****"
-        do_event_loop(project_data, root, nc, harmony, events_data, folder_m)
+        do_event_loop(project_data, root, server, harmony, events_data, folder_m)
         print "#"*15
         print "######## end of loop at {0}... waiting to loop again...#########".format(date.now())
         print "#"*15
@@ -528,7 +543,7 @@ if __name__ == "__main__":
             break
 
     # disconnect from nc server
-    nc.logout()
+    server.logout()
 
     print '{0}\nend of publish events at {1}\n{0}'.format(("#" * 87), date.now())
     sys.exit("Events loop interrupted!!")
