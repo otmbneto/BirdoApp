@@ -20,7 +20,6 @@ Copyright:   leobazao_@Birdo
 
 function BD_AddWriteNode(){
 	
-	scene.beginUndoRedoAccum("Add Write Node");
 
 	var sel = selection.selectedNode(0);
 	var selName = node.getName(sel);
@@ -49,6 +48,8 @@ function BD_AddWriteNode(){
 		return;
 	}
 
+	scene.beginUndoRedoAccum("Add Write Node");
+
 	////cria a pasta de render na rede caso ainda nao exista
 	if(!BD1_DirExist(renderPath)){
 		Print("Foi preciso criar a pasta da cena na rede");
@@ -58,23 +59,23 @@ function BD_AddWriteNode(){
 	renderPath += currScene;//render path Final write
 
 	//escolhe o nome do node e da saida
-	var writeName = Input.getText("Escolha o Nome do Write", selName, "Separar Para Export");
-
-	if(!writeName){
+	var input_name = Input.getText("Escolha o Nome do Write", selName, "Separar Para Export");
+	
+	if(!input_name){
 		Print("Add WriteNode Canceled...");
 		return;
 	}
+	
+	var writeName = normalizeName(input_name);
 
-	writeName = writeName.toUpperCase();
-
-	if(writeName.indexOf("WRITE") != -1){
-		writeName = writeName.replace("WRITE", "");
+	if(!writeName){
+		Print("invalid name... canceling!");
+		return;
 	}
 
-	writeName = writeName.replace( /^_/, "");//tira o '_'  no inicio		
 	renderPath = renderPath + "_" + writeName;
 
-	var writeNew = BD2_AddNodeUnder(sel, "Write_" + writeName,  "WRITE", true);
+	var writeNew = BD2_AddNodeUnder(sel, "Write_" + writeName, "WRITE", true);
 
 	var setAtt = BD2_changeWriteNodeAtt(projData, writeNew, renderPath, "COMP");
 
@@ -84,19 +85,30 @@ function BD_AddWriteNode(){
 	Print(setAtt);
 	scene.endUndoRedoAccum();
 	
-	
 	//////////EXTRA FUNCTIONS////////
-	
 	function checkUserType(projData){//checa se o usuario pode usar este script
-		
 		if(projData.user_type != "DT" && projData.user_type != "COMP"){
 			MessageBox.warning("Este script funciona somente para COMP!",0,0);
 			return false;
 		} else {
 			Print("UserType check ok!");
 			return true;
-		}	
+		}
+	}
 	
-	}	
-	
+	function normalizeName(name){//limpa o nome
+		var normalized = name.toUpperCase();
+		var writeRegex = /WRITE(_?)/;
+		var regex_space = /\s/;
+		var regex_invalid_char = /\W/;
+		normalized = normalized.replace(writeRegex, "");
+		while(regex_space.test(normalized)){
+			normalized = normalized.replace(regex_space, "_");				
+		}
+		if(regex_invalid_char.test(normalized)){
+			MessageBox.warning("Nome invalido! Contem caracter invalido no nome escolhido! Escolha um novo nome!",0,0);
+			return false;				
+		}
+		return normalized;
+	}
 }
