@@ -8,7 +8,7 @@
 import os
 import re
 import sys
-import datetime
+from datetime import datetime
 import time
 import shutil
 from zipfile import ZipFile
@@ -180,6 +180,42 @@ def zip_scene(filelist, zip_path, scene_version):
     return os.path.exists(zip_path)
 
 
+def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_path, scene_path, render_step):
+    """creates a json file local and return the json path"""
+    prefix = scene_name.split("_")[0]
+    ep = scene_name.split("_")[1].replace("EP", "")
+    scene_number = scene_name.split("_")[2].replace("SC", "")
+    date = datetime.strftime(datetime.today(), '%d/%m/%Y, %H:%M:%S')
+
+    render_data = {
+        "animator": "Mac_User",
+        "episode": ep,
+        "project": prefix,
+        "queued": date,
+        "render_path": render_path,
+        "scene": scene_number,
+        "scene_path": scene_path,
+        "status": "waiting",
+        "step": render_step,
+        "render_type": render_type,
+        "version": version,
+        "extra": {
+            "weighted_deform": False
+        }
+    }
+    # JSON QUEUE FILE
+    temp_folder = os.path.join(proj_data["system"]["temp"], "BirdoApp", "publish")
+    if not os.path.exists(temp_folder):
+        os.makedirs(temp_folder)
+    local_json_queue = os.path.join(temp_folder, (scene_name + "_" + version + ".json"))
+
+    if not write_json_file(local_json_queue, render_data):
+        print "Erro criando a fila do render antes de enivar pra rede! Avise a supervisao tecnica!"
+        return False
+    else:
+        return local_json_queue
+
+
 def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
     """MAIN script (uma rodda do loop) do Events de publish"""
     #PEGA AS INFOS DO JSON
@@ -188,6 +224,9 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
     folder_log = events_data["publish_events"]["log_folder"]
     temp_folder = events_data["publish_events"]["temp_folder"]
     folder_targets = events_data["publish_events"]["folder_targets"]
+
+    # define se renderiza na maquina ou manda pra fazendinha
+    render_local = events_data["render_scenes"] == "LOCAL"
 
     #CHECK IF EVENTS JSON IS CONFIGURED...
     if not bool(folder_log) or not bool(temp_folder):
@@ -386,50 +425,51 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                 continue
             event_log['4_Unzip_File'] = "[OK] File unpacked in temp folder"
 
-            # Render scene
-            print " ---Rendering scene..."
-            print " ------- cena: {0}".format(temp_xstage_file)
-            prepare_for_render_js = os.path.join(harmony.get_package_folder(), 'utils', '{0}_render.js'.format(render_type))
-            if not harmony.render_scene(temp_xstage_file, pre_render_script=prepare_for_render_js):
-                event_log['5_Render_Scene'] = "[ERROR] Scene Render failed!"
-                print event_log['5_Render_Scene']
-                update_output("Fail")
-                continue
-            event_log['5_Render_Scene'] = "[OK] Scene Render done!"
-            time.sleep(3)
+            # Render scene if local render is configured
+            if render_local:
+                print " ---Rendering scene..."
+                print " ------- cena: {0}".format(temp_xstage_file)
+                prepare_for_render_js = os.path.join(harmony.get_package_folder(), 'utils', '{0}_render.js'.format(render_type))
+                if not harmony.render_scene(temp_xstage_file, pre_render_script=prepare_for_render_js):
+                    event_log['5_Render_Scene'] = "[ERROR] Scene Render failed!"
+                    print event_log['5_Render_Scene']
+                    update_output("Fail")
+                    continue
+                event_log['5_Render_Scene'] = "[OK] Scene Render done!"
+                time.sleep(3)
 
-            # #CHECKS OUTPUT RENDER
-            render_output = check_output_render(temp_tb_file)
-            print render_output
+                # #CHECKS OUTPUT RENDER
+                render_output = check_output_render(temp_tb_file)
+                print render_output
 
-            # COMPRESS THE RENDER IN NEW PATH WITH FFMPEG
-            if len(render_output["output_movs"]) != 0:
-                for item in render_output['output_movs']:
-                    render_mov = item[0]
-                    compressed_mov = item[1]
-                    if not compress_render(render_mov, compressed_mov):
-                        event_log['6_Compress_Render'] = "[ERROR] Failed To Compress Render!"
-                        print event_log['6_Compress_Render']
-                        update_output("Fail")
-                        continue
-                    event_log['6_Compress_Render'] = "[OK] Compress render successfully"
-                    # SEND RENDER TO NC
-                    if os.path.exists(compressed_mov):
-                        print " ---sending compressed file to server..."
-                        ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
-                        render_step = 'ANIMATION' if step == 'ANIM' else step
-                        render_server_path = server_root + fm.get_render_path(ep) + "/" + render_step + "/" + os.path.basename(compressed_mov)
-                        print " ---Uploading compressed render: {0} to \n - {1}".format(compressed_mov, render_server_path)
-                        if not server.upload_file(render_server_path, compressed_mov):
-                            event_log['7_Upload_Render'] = "[ERROR] Failed to upload Render file: {0}".format(render_server_path)
-                            print event_log['7_Upload_Render']
+                # COMPRESS THE RENDER IN NEW PATH WITH FFMPEG
+                if len(render_output["output_movs"]) != 0:
+                    for item in render_output['output_movs']:
+                        render_mov = item[0]
+                        compressed_mov = item[1]
+                        if not compress_render(render_mov, compressed_mov):
+                            event_log['6_Compress_Render'] = "[ERROR] Failed To Compress Render!"
+                            print event_log['6_Compress_Render']
+                            update_output("Fail")
                             continue
-                        else:
-                            print "---Render uploaded to server at: {0}".format(render_server_path)
-                            event_log['7_Upload_Render'] = "[OK] Render uploaded to server!"
-            else:
-                print "---No mov renders to upload! going back to loop..."
-                event_log['7_Upload_Render'] = "[OK] No need to upload render, because it ouptut none!"
+                        event_log['6_Compress_Render'] = "[OK] Compress render successfully"
+                        # SEND RENDER TO NC
+                        if os.path.exists(compressed_mov):
+                            print " ---sending compressed file to server..."
+                            ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
+                            render_step = 'ANIMATION' if step == 'ANIM' else step
+                            render_server_path = server_root + fm.get_render_path(ep) + "/" + render_step + "/" + os.path.basename(compressed_mov)
+                            print " ---Uploading compressed render: {0} to \n - {1}".format(compressed_mov, render_server_path)
+                            if not server.upload_file(render_server_path, compressed_mov):
+                                event_log['7_Upload_Render'] = "[ERROR] Failed to upload Render file: {0}".format(render_server_path)
+                                print event_log['7_Upload_Render']
+                                continue
+                            else:
+                                print "---Render uploaded to server at: {0}".format(render_server_path)
+                                event_log['7_Upload_Render'] = "[OK] Render uploaded to server!"
+                else:
+                    print "---No mov renders to upload! going back to loop..."
+                    event_log['7_Upload_Render'] = "[OK] No need to upload render, because it ouptut none!"
 
             #Run tb compact script
             clean_scene_script = os.path.join(harmony.get_package_folder(), 'utils', 'compact_version_bat.js')
@@ -469,6 +509,10 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
             event_log['9_Publish_Scene'] = "[OK] Scene published: {0}".format(publish_server_zip)
             print event_log['9_Publish_Scene']
             update_output("Finished")
+
+            # if not render local
+            if not render_local:
+                json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], version, render_type, render_path, scene_path, render_step)
 
 
 # main script
@@ -530,12 +574,11 @@ if __name__ == "__main__":
     harmony = HarmonyManager(project_data)
 
     #RODA O LOOP
-    date = datetime.datetime
     while True:
         print "****Start new loop****"
         do_event_loop(project_data, root, server, harmony, events_data, folder_m)
         print "#"*15
-        print "######## end of loop at {0}... waiting to loop again...#########".format(date.now())
+        print "######## end of loop at {0}... waiting to loop again...#########".format(datetime.now())
         print "#"*15
 
         time.sleep(10)
@@ -545,5 +588,5 @@ if __name__ == "__main__":
     # disconnect from nc server
     server.logout()
 
-    print '{0}\nend of publish events at {1}\n{0}'.format(("#" * 87), date.now())
+    print '{0}\nend of publish events at {1}\n{0}'.format(("#" * 87), datetime.now())
     sys.exit("Events loop interrupted!!")
