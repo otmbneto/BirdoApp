@@ -98,8 +98,9 @@ def get_versions_name(scene_name, folder_list):
     last_file = zips[-1]
     last_version = re.findall(regex_version, last_file.get_name())[0]
     last_number = int(last_version.replace('v', ''))
-    next_number = '{:0>2d}'.format(last_number + 1)
-    files_data["next_file"] = '{0}_v{1}'.format(scene_name, next_number)
+    next_version = 'v{:0>2d}'.format(last_number + 1)
+    files_data["version"] = next_version
+    files_data["next_file"] = '{0}_{1}'.format(scene_name, next_version)
     files_data["last_file"] = last_file
     return files_data
 
@@ -425,6 +426,11 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                 continue
             event_log['4_Unzip_File'] = "[OK] File unpacked in temp folder"
 
+            # Variaveis de render
+            ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
+            render_step = 'ANIMATION' if step == 'ANIM' else step
+            render_path = fm.get_render_path(ep) + "/" + render_step + "/"
+
             # Render scene if local render is configured
             if render_local:
                 print " ---Rendering scene..."
@@ -455,10 +461,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                         event_log['6_Compress_Render'] = "[OK] Compress render successfully"
                         # SEND RENDER TO NC
                         if os.path.exists(compressed_mov):
-                            print " ---sending compressed file to server..."
-                            ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
-                            render_step = 'ANIMATION' if step == 'ANIM' else step
-                            render_server_path = server_root + fm.get_render_path(ep) + "/" + render_step + "/" + os.path.basename(compressed_mov)
+                            render_server_path = server_root + render_path + os.path.basename(compressed_mov)
                             print " ---Uploading compressed render: {0} to \n - {1}".format(compressed_mov, render_server_path)
                             if not server.upload_file(render_server_path, compressed_mov):
                                 event_log['7_Upload_Render'] = "[ERROR] Failed to upload Render file: {0}".format(render_server_path)
@@ -512,7 +515,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
 
             # if not render local
             if not render_local:
-                json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], version, render_type, render_path, scene_path, render_step)
+                json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_path, scene_path, render_step)
 
 
 # main script
