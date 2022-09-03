@@ -511,11 +511,30 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                 continue
             event_log['9_Publish_Scene'] = "[OK] Scene published: {0}".format(publish_server_zip)
             print event_log['9_Publish_Scene']
-            update_output("Finished")
 
             # if not render local
             if not render_local:
-                json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_path, scene_path, render_step)
+                render_mov_path = render_path + '/' + file_output_data["scene_name"] + "_" + files_info["version"] + ".mov"
+                scene_path = file_output_data['scene_path'].replace(server_root, "")
+                temp_json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_mov_path, scene_path, render_step)
+
+                if not server.get_file_info(temp_json_fila):
+                    print "-Error criating file json-"
+                    event_log['5_Render_Scene'] = "[ERROR] Scene Fazendinha queue Render was not created!"
+                    update_output("Fail")
+                    continue
+
+                # copia o arquivo de fila local do temp pra rede
+                fazendinha_server_path = server_root + project_data['paths']["fazendinha"] + os.path.basename(temp_json_fila)
+                if not server.upload_file(fazendinha_server_path, temp_json_fila):
+                    print "-Error uploading json fila file to fazendinha-"
+                    event_log['5_Render_Scene'] = "[ERROR] Scene Fazendinha queue Render failed upload!"
+                    update_output("Fail")
+                    continue
+
+                print "Render Queued in fazendinha!"
+                event_log['5_Render_Scene'] = "[OK] Scene added to Fazendinha Queue"
+                update_output("Finished")
 
 
 # main script
