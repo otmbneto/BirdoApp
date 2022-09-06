@@ -515,7 +515,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
 
             # if not render local
             if not render_local:
-                render_mov_path = "{0}{1}{2}_{3}.mov".format(server_root, render_path, file_output_data["scene_name"], files_info['version'])
+                render_mov_path = "{0}{1}{2}.mov".format(server_root, render_path, file_output_data["scene_name"])
                 scene_path = file_output_data['scene_path'].replace(server_root, "")
                 temp_json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_mov_path, scene_path, render_step)
 
