@@ -88,12 +88,13 @@ def get_versions_name(scene_name, folder_list):
         'folder_list' => list of files objects from scene folder in NC
         returns object with 'next_file' and 'last_file'
     """
-    files_data = {"next_file": None, "last_file": None}
+    files_data = {"next_file": None, "last_file": None, "version": None}
     regex_version = r"v\d{2}"
     zips = filter(lambda x: x.get_name().endswith(".zip") and bool(re.search(regex_version, x.get_name())), folder_list)
     zips.sort(key=lambda x: x.get_name())
     if len(zips) == 0:
         files_data["next_file"] = '{0}_v01'.format(scene_name)
+        files_data["version"] = 'v01'
         return files_data
     last_file = zips[-1]
     last_version = re.findall(regex_version, last_file.get_name())[0]
@@ -208,7 +209,7 @@ def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_
     temp_folder = os.path.join(proj_data["system"]["temp"], "BirdoApp", "publish")
     if not os.path.exists(temp_folder):
         os.makedirs(temp_folder)
-    local_json_queue = os.path.join(temp_folder, (scene_name + "_" + version + ".json"))
+    local_json_queue = os.path.join(temp_folder, "{0}_{1}.json".format(scene_name, version))
 
     if not write_json_file(local_json_queue, render_data):
         print "Erro criando a fila do render antes de enivar pra rede! Avise a supervisao tecnica!"
@@ -514,7 +515,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
 
             # if not render local
             if not render_local:
-                render_mov_path = render_path + '/' + file_output_data["scene_name"] + "_" + files_info["version"] + ".mov"
+                render_mov_path = "{0}{1}_{2}.mov".format(render_path, file_output_data["scene_name"], files_info['version'])
                 scene_path = file_output_data['scene_path'].replace(server_root, "")
                 temp_json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_mov_path, scene_path, render_step)
 
@@ -525,7 +526,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                     continue
 
                 # copia o arquivo de fila local do temp pra rede
-                fazendinha_server_path = server_root + project_data['paths']["fazendinha"] + os.path.basename(temp_json_fila)
+                fazendinha_server_path = "{0}{1}{2}".format(project_data['paths']["root"], project_data['paths']["fazendinha"], os.path.basename(temp_json_fila))
                 if not server.upload_file(fazendinha_server_path, temp_json_fila):
                     print "-Error uploading json fila file to fazendinha-"
                     event_log['5_Render_Scene'] = "[ERROR] Scene Fazendinha queue Render failed upload!"

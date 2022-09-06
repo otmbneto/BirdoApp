@@ -1,17 +1,14 @@
 {	
-	"project": "MNM",
-	"description": "eventos de publish e render do projeto Maluquinho. Pega cenas publicadas manualmente na lista de folders a seguir, e publica como se fosse a fazendinha",
+	"project": "{PROJECT_PREFIX}",
+	"description": "eventos de publish e render do projeto {PROJETO}. Pega cenas publicadas manualmente na lista de folders a seguir, e publica como se fosse a fazendinha",
+	"render_scenes": '"LOCAL" ou "FAZENDINHA"',
 	"publish_events": {
 		"log_folder": "",
 		"temp_folder": "",
-		"render_type": "pre_comp",
-		"step": "ANIM",
+		"render_type": '"pre_comp" ou "comp"',
+		"step": '"SETUP", "ANIM" ou "COMP"',
 		"folder_targets": {
-			"EP103": "MNM_EPISODES/MNM_EP103/MNM_EP103_SCENES/ANIM/_TB_TEMP",
-			"EP107": "MNM_EPISODES/MNM_EP107/MNM_EP107_SCENES/ANIM/_TEMP_TB",
-			"EP111": "MNM_EPISODES/MNM_EP111/MNM_EP111_SCENES/ANIM/_TB_TEMP",
-			"EP112": "MNM_EPISODES/MNM_EP112/MNM_EP112_SCENES/ANIM/_TB_TEMP"
+			"EPXXX": "FOLDER/PATH"
 		}
 	}
 }
-
