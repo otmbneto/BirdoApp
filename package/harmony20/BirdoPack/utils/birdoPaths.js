@@ -85,7 +85,7 @@ function getEntityData(){//get prefix, ep e type (asset ou shot)
 	var version_reg = /((_|-)(v|V)?\d+)$/;
 	var shot_prefix_reg = /(\w{3}_(EP)?\d{3}_(SC|sc)\d{4})$/;
 	var shot_no_prefix_reg = /^(EP\d{3}_(SC|sc)\d{4})/;
-	var asset_reg = /(^((CH|PR|FX|IL|CO)(\d{4}|\d{3})_\w+)|(^\w{3}_ASSET_template)|(MI_((\w+)?(\d{3})?(\w+)?_)+(Etc)?P\d{3}))/;
+	var asset_reg = /(^((CH|PR|FX|IL|CO)(\d{4}|\d{3})_\w+)|(^\w{3}_ASSET_template)|(MI_((\w+)?(\d{3})?(\w+)?_)+((Etc)?P\d{3}|\w+)))/;
 	var finalObj = {"prefix" : null, "type" : null, "ep" : []};
 
 	if(shot_prefix_reg.test(fileName)){
