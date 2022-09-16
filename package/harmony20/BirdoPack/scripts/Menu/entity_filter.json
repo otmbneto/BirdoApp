@@ -1,10 +1,12 @@
 {
   "ASSET": {
 	"LEAD": [
+		"1-Export_Asset.js",
 		"4-Save_Asset_tpl.js",
 		"5-Import_Assets.js"
 	  ],
 	"OTHER": [
+		"1-Export_Asset.js",
 		"4-Save_Asset_tpl.js",
 		"5-Import_Assets.js"
 	]
