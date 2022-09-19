@@ -376,7 +376,7 @@ QScrollBar:arrow{
         </property>
         <property name="minimumSize">
          <size>
-          <width>90</width>
+          <width>97</width>
           <height>0</height>
          </size>
         </property>
@@ -562,6 +562,11 @@ QPushButton::disabled {
             <height>25</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>7</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true">QLineEdit {
 	color: lightgray;
@@ -574,6 +579,9 @@ QLineEdit::hover {
 	color: white;
 	border: 2px solid white;
 }</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -593,6 +601,11 @@ QLineEdit::hover {
           <height>25</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>7</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">QLineEdit {
 	color: lightgray;
@@ -605,6 +618,9 @@ QLineEdit::hover {
 	color: white;
 	border: 2px solid white;
 }</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>

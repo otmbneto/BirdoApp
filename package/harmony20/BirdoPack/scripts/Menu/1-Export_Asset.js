@@ -147,17 +147,17 @@ function createInterface(projData, config_data, config_json){
 	if(config_data.layers.filters.lineup){
 		this.ui.groupLayers.checkLineup.checked = config_data.layers.filters.lineup.checked;
 	} else {
-		config_data.layers.filters.lineup.enabled = false;
+		this.ui.groupLayers.checkLineup.enabled = false;
 	}
 	if(config_data.layers.filters.colourcard){
 		this.ui.groupLayers.checkColorCard.checked = config_data.layers.filters.colourcard.checked;
 	} else {
-		config_data.layers.filters.colourcard.enabled = false;
+		this.ui.groupLayers.checkColorCard.enabled = false;
 	}
-	if(config_data.layers.filters){
+	if(config_data.layers.filters.ref){
 		this.ui.groupLayers.checkRef.checked = config_data.layers.filters.ref.checked;
 	} else {
-		config_data.layers.filters.enabled = false;
+		this.ui.groupLayers.checkRef.enabled = false;
 	}
 	
 	//update widgets - output folder and button
@@ -245,7 +245,7 @@ function createInterface(projData, config_data, config_json){
 
 		var util_export = require(projData.paths.birdoPackage + "utils/exportASSET.js");
 		Print(config_data);
-		util_export.exportASSET(this, config_data, config_json);
+		util_export.exportASSET(this, projData, config_data, config_json);
 		this.ui.close();
 	}
 	
@@ -271,6 +271,7 @@ function createInterface(projData, config_data, config_json){
 	this.obj_radios[config_data.output].checked = true;
 	this.ui.groupOutput.comboFormat.addItems(config_data.formats.list);
 	this.ui.groupOutput.spinFPS.value = config_data.fps;
+	
 	
 	//EXTRA FUNCTIONS
 	function Print(msg){

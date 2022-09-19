@@ -1,7 +1,7 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-function exportASSET(self, export_config, config_json){
+function exportASSET(self, projData, export_config, config_json){
 	
 	Print("Exporting asset..");
 	
@@ -11,6 +11,9 @@ function exportASSET(self, export_config, config_json){
 	//file name
 	var file_name_path = export_config.folder + "/" + export_config.file_name;
 
+	//temp folder 
+	var temp_folder = [projData.systemTempFolder, "BirdoApp", "_renderTemp"].join("/");
+	
 	scene.beginUndoRedoAccum("Export Asset");
 	//update layers filters
 	for(item in export_config.layers.filters){
@@ -22,6 +25,7 @@ function exportASSET(self, export_config, config_json){
 	}
 
 	self.ui.hide();
+	
 
 	if(export_config.output == "images"){
 		var rendered_images = exportImages(self, export_config);
@@ -31,6 +35,7 @@ function exportASSET(self, export_config, config_json){
 		}
 		Print("Images rendered: ");
 		Print(rendered_images);
+		MessageBox.information("Rendered images: " + rendered_images.length);
 	} else {
 		scene.setFrameRate(export_config.fps);
 		if(export_config.output == "gif"){
@@ -42,12 +47,12 @@ function exportASSET(self, export_config, config_json){
 			Print("GIF rendered: " + rendered_gif);
 		}
 		if(export_config.output == "movie"){
-			var rendered_movie = exportMov(export_config);
+			var rendered_movie = exportMov(self, export_config);
 			if(!rendered_movie){
 				Print("error rendering movie");
 				return false;
 			}
-			Print("Movie rendered: " + rendered_movie);
+			MessageBox.information("Movie rendered: " + rendered_movie);
 		}
 	}
 	scene.endUndoRedoAccum();
@@ -62,6 +67,8 @@ function exportASSET(self, export_config, config_json){
 			Print("--Error opening output folder!");
 		}	
 	}
+	
+	Print("Export ASSET end!");
 	return true;
 
 	//EXTRA FUNCTIONS
@@ -94,34 +101,78 @@ function exportASSET(self, export_config, config_json){
 		return gif_path;
 	}
 	
-	function exportMov(export_data){
+	function exportMov(self, export_data){
 		
 		var mov_path = file_name_path + ".mov";
 		Print("exporting mov: " + mov_path);
 		
-		try{
-			var res = exporter.exportToQuicktime(
-									export_data.display.last,
-									export_data.start_frame, 
-									export_data.end_frame,
-									false,
-									scene.currentResolutionX(),
-									scene.currentResolutionY(),
-									mov_path,
-									display_selected,
-									false,
-									1);
-			if(res){
-				MessageBox.information("MOV export has succeeded");
-			} else {
-				MessageBox.information("MOV export has failed");
-				Print("Error exporting MOV");
-				return false;
-			}
-		} catch (err){
-			MessageBox.critical(err.message);
+		
+		if(!BD1_CleanFolder(temp_folder)){
+			Print("fail to clean temp folder!");
 			return false;
 		}
+		
+		var counter = 0;
+		var canceled = false;
+		
+		//image name path 
+		var image_name = temp_folder + "/_temp_{framenumber}.png";
+		var image_pattern = temp_folder + "/_temp_%04d.png";
+		
+		var progressDlg = new QProgressDialog(self);
+		progressDlg.modal = true;
+		progressDlg.setRange(0, (export_data.end_frame - export_data.start_frame) + 1);
+
+		var renderFinished = function (){
+			Print("Render Finished with " + counter + " temp images!");
+			progressDlg.setLabelText("Converting images to movie...");
+		}
+
+		var frameReady = function(frame, celImage){
+			if(progressDlg.wasCanceled){
+				render.cancelRender();
+				progressDlg.close();
+				Print("canceled at frame " + frame);
+				MessageBox.information("Export Canceled!");
+				canceled = true;
+			}
+			Print("Script render frame: " + frame);
+			progressDlg.setLabelText("Rendering frame: " + frame);
+			// Save the image here.
+			var frameformatnumber = ("0000" + frame).slice(-4);
+			var image_full_path = image_name.replace("{framenumber}", frameformatnumber);
+			celImage.imageFile(image_full_path);
+			progressDlg.setValue(counter);
+			Print("Image rendered: " + image_full_path);
+			counter++;
+		}
+		
+		render.renderFinished.connect(renderFinished);
+		render.frameReady.connect(frameReady);
+		render.setRenderDisplay(display_selected);
+		render.setWriteEnabled(false);
+		
+		progressDlg.open();
+		progressDlg.setLabelText("Starting render...");
+		render.renderScene(export_data.start_frame, export_data.end_frame);
+
+		render.renderFinished.disconnect(renderFinished);
+		render.frameReady.disconnect(frameReady);
+		
+		if(!canceled){
+			Print("converting images into movie... ");
+			if(!BD1_MakeMovieFromImageSeq(projData.birdoApp, export_data.start_frame, image_pattern, (export_data.end_frame - export_data.start_frame), export_data.fps, mov_path)){
+				MessageBox.warning("Error compressing images into movie!", 0,0);
+				progressDlg.close();	
+				return false;
+			}	
+		}
+		
+		progressDlg.close();
+		
+		//clean temp folder
+		BD1_RemoveDirs(temp_folder);
+		
 		Print("MOV Export end");
 		return mov_path;
 	}
@@ -170,6 +221,7 @@ function exportASSET(self, export_config, config_json){
 		render.setWriteEnabled(false);
 		
 		progressDlg.open();
+		progressDlg.setLabelText("Starting render...");
 		render.renderScene(export_data.start_frame, export_data.end_frame);
 
 		render.renderFinished.disconnect(renderFinished);

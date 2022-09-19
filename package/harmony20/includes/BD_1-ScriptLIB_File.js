@@ -527,6 +527,31 @@ Copyright:  leobazao_@Birdo
 	}
 	
 	/*
+	comprime uma seq de imagens em um mov
+	@birdoAppRoot - root do birdoApp
+	@startFrame - frame de inicio
+	@imagePatern - padrao de imagem para achar (usar modo: fullpath/Name_%04d.png como padrao)
+	@duration - duracao em frames do mov
+	@fps - frame rate do mov
+	@input_file - arquivo para ser convertido
+	@output_file - saida do arquivo
+	*/
+	function BD1_MakeMovieFromImageSeq(birdoAppRoot, startFrame, imagePatern, duration, fps, output_file){
+		var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
+		var vcodec = "-c:v libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf  3";
+			var start = Process2(ffmpeg, "-y", "-start_number", startFrame, "-i", imagePatern, "-vframes", duration, "-r", fps, vcodec, BD2_FormatPathOS(output_file));
+		var ret = start.launch();
+			
+		if(ret == 0){
+			Print("Movie converted with ffmepg: " + output_file);
+			return true;
+		} else {
+			Print("[FFMPEG COMPRESS ERROR] Errror compressing movie file: " + output_file);
+			return false;
+		}
+	}
+	
+	/*
 	extract audio from movie file
 	@birdoAppRoot - root do birdoApp
 	@movie - arquivo de video de origem
