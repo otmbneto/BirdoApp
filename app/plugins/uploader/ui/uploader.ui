@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>588</width>
+    <height>687</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Birdo Uploader v0.01</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	background: rgb(91, 91, 91);
+}
+
+QMenu {
+	background-color: #666666;
+}
+
+QMenu::item:hover {
+	color: lightgray;
+	background-color: blue;
+}
+
+QMenuBar {
+	color: rgb(182, 182, 182);
+	background-color: transparent;
+}
+
+QMenuBar::item {
+	background-color: transparent;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background-color: #666666;
+}
+
+QMenuBar::item:hover {
+    background: #777777;
+}
+
+QLabel {
+	color: lightgray;
+}
+
+QLabel:!enabled {
+	color: gray;
+}
+
+QLineEdit:!enabled {
+	color: gray;
+	background-color: #555555;
+	border-color: gray;
+}
+
+QLineEdit {
+	color: black;
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 0 8px;
+    background: lightgray;
+    selection-background-color: darkgray;
+}
+
+QLineEdit:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}
+
+QComboBox {
+	color: black;
+    border: 2px solid white;
+    border-radius: 6px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: lightgray;
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    width: 20px;
+	background-color: rgb(194, 194, 194);
+    border-left-width: 2px;
+    border-left-color: white;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox:hover{
+    border: 2px solid #05B8CC;
+    color: gray;
+}
+
+QComboBox QAbstractItemView{
+    border: 2px solid white;
+	border-radius: 10px;
+    color: gray;
+	background-color: lightgray;
+    selection-background-color: #05B8CC;
+	selection-color: white;
+	padding: 3px 3px ;
+}
+
+QScrollBar {
+	background: none;
+	border: none;
+}
+
+QScrollBar::handle {
+	border-radius: 5px;
+ 	border: 2px solid #777777;
+	background-color: gray;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background: none;
+}
+
+QScrollBar::sub-page {
+    background: none;
+	border: none;
+	max-width: 5px;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background: none;
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background: none;
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: none;
+	color: none;
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: red;
+}
+
+QPushButton {
+	color: black;
+	background: rgb(91, 91, 91);
+    border: 2px solid rgb(180,180,180);
+	border-radius: 5px;
+}
+
+QPushButton:disabled {
+	color: black;
+	background-color: gray;
+    border: 2px solid rgb(100,100,100);
+	border-radius: 0px;
+}
+
+QPushButton::menu-indicator {
+	image: null;
+}</string>
+  </property>
+  <widget class="QScrollArea" name="scrollArea">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>570</width>
+     <height>450</height>
+    </rect>
+   </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOn</enum>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <widget class="QWidget" name="scrollAreaWidgetContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>547</width>
+      <height>448</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="executeBtn">
+   <property name="geometry">
+    <rect>
+     <x>95</x>
+     <y>570</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>execute</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelBtn">
+   <property name="geometry">
+    <rect>
+     <x>365</x>
+     <y>570</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>close</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cleanBtn">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>570</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>clean</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="progressBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>640</y>
+     <width>401</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>55</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Episode:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="globalEpisodes">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>50</y>
+     <width>97</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
