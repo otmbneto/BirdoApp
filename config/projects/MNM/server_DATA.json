@@ -59,7 +59,7 @@
 		"fazendinha": "MNM_OMeninoMaluquinho/MNM_TBLIB/_Fazendinha/",
 		"render_comp": "//192.168.10.101/projects/152_Maluquinho/09_POS/",
 		"packUpdate": "BirdoApp/"
-		},
+	},
 	"server": {
 		"type": "nextcloud",
 		"url" : "https://cloud.chatrone.com",

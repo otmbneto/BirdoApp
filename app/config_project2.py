@@ -1,16 +1,34 @@
 from utils.birdo_json import read_json_file
 from utils.MessageBox import CreateMessageBox
-from config_harmony import HarmonyPaths
 from utils.system import SystemFolders
+from nextcloud_server2 import NextcloudServer
+from vpn_server2 import VPNServer
+from config_harmony import HarmonyPaths
+import sys
 import os
 
+# define widget message box class
 MessageBox = CreateMessageBox()
 
+# define birdoApp root
+app_root = os.path.dirname(os.path.dirname(__file__))
+if app_root == "":
+    app_root = os.path.dirname(os.getcwd())
 
-def config_init(app_root):
-    """Retorna objeto com informacoes iniciais do APP (usuario , versao, e projetc list)"""
+
+def config_init():
+    """Return object with initial projects and BirdoApp information
+        ...
+    """
     final_obj = {}
     app_json = os.path.join(app_root, "app.json")
+
+    # checks if app json exists
+    if not os.path.exists(app_json):
+        print "file {0} not found".format(app_json)
+        MessageBox.warning("app.json not found! Something went wrong!")
+        return False
+
     app_data = read_json_file(app_json)
 
     if not app_data:
@@ -31,8 +49,35 @@ def config_init(app_root):
     return final_obj
 
 
-def config_project(app_root, project_index):
-    """Retorna objeto com info do Projeto escolhido"""
+class CreateClass(object):
+    """Creates Class object using the given dictionary
+        ...
+
+    Parameters
+    ----------
+    my_dict : dict
+        Dictionary to convert into class
+    """
+    def __init__(self, my_dict):
+        for key in my_dict:
+            if type(my_dict[key]) is dict:
+                setattr(self, key, CreateClass(my_dict[key]))
+            else:
+                setattr(self, key, my_dict[key])
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+
+def config_project(project_index):
+    """Creates Object with all information and methods for the project
+        ...
+
+    Parameters
+    ----------
+    project_index : int
+        project index (number of the project listed in projects list in object created by config_init() function)
+    """
     system = SystemFolders()
 
     # CHECA SE O SYSTEMA OS E SUPORTADO
@@ -45,6 +90,13 @@ def config_project(app_root, project_index):
         return False
 
     birdo_local_json = os.path.join(app_root, "birdoLocal.json")
+
+    # checks if app json exists
+    if not os.path.exists(birdo_local_json):
+        print "file {0} not found".format(birdo_local_json)
+        MessageBox.warning("'birdoLocal.json' not found! Something went wrong!")
+        return False
+
     birdo_local = read_json_file(birdo_local_json)
 
     ready = True # diz se o objeto esta pronto para continuar sem necessidade da janela de imput inofs
@@ -65,39 +117,47 @@ def config_project(app_root, project_index):
     # ADD SYSTEM FOLDERS TO THE PROJECT DATA
     project_data["system"] = {"temp": system.temp, "appdata": system.appdata, "programs": system.programs}
 
+    # PROJECT CONFIG FOLDER
+    project_config_folder = os.path.join(app_root, 'config', 'projects', project_data['prefix'])
+
     # GETS SERVER INFORMATION FROM THE PROJECT
-    server_json = os.path.join(app_root, "config", "projects", project_data["prefix"], "server_DATA.json")
+    server_json = os.path.join(project_config_folder, "server_DATA.json")
     server_data = read_json_file(server_json)
 
     if not server_data:
         MessageBox.warning('erro ao baixar dados do servidor do projeto!')
         return False
-    else:
-        project_data["paths"] = server_data["paths"]
-        project_data["server"] = server_data["server"]
-        project_data["pipeline"] = server_data["pipeline"]
+
+    # PIPELINE INFORMATION
+    project_data["pipeline"] = server_data["pipeline"]
 
     # GET USER INFORMATION IN TEMP
     local_user_json = os.path.join(project_data["system"]["temp"], 'BirdoApp', 'users', "users.json")
-
     project_data["user_json"] = local_user_json
-
+    project_data['user_data'] = {}
     if not os.path.exists(local_user_json):
-        user_data = {}
         print 'user data json nao encontrado... abrindo login page'
         ready = False
     else:
         user_data = read_json_file(local_user_json)
-
         if not user_data:
             MessageBox.warning("Error reading user json file!")
             return False
-
         last_login = user_data["current_user"]
-        if project_data["prefix"] in user_data[last_login].keys():
-            project_data["server"]["login"] = user_data[last_login][project_data["prefix"]]["server_login"]
+        if project_data["prefix"] in user_data[last_login]:
+            server_data["server"]["login"] = user_data[last_login][project_data["prefix"]]["server_login"]
         else:
+            print "--no login found for project {0}".format(project_data["prefix"])
             ready = False
+
+        # updates user_data information in project_data dict
+        project_data['user_data']["name"] = last_login
+        project_data['user_data']["type"] = user_data[last_login][project_data["prefix"]]["user_type"]
+        project_data['user_data']["local_folder"] = user_data[last_login][project_data["prefix"]]["local_folder"]
+        if "harmony_installation" in user_data[last_login][project_data["prefix"]]:
+            project_data['user_data']['harmony_installation'] = user_data[last_login][project_data["prefix"]]["harmony_installation"]
+        else:
+            project_data['user_data']['harmony_installation'] = ""
 
     tb_version = project_data["harmony"]["version"].split(".")[0]
     harmony_paths = HarmonyPaths(system, tb_version)
@@ -111,9 +171,10 @@ def config_project(app_root, project_index):
             'program': harmony_paths.harmony_path.replace('\\', '/'),
             'harmony_config_xml': harmony_paths.harmony_config_xml.replace('\\', '/')
         }
-        print installation_check
+        print "--installation check : {0}".format(installation_check)
     elif installation_check == 'HARMONY_NOT_INSTALLED':
         MessageBox.warning('Nao foi encontrado nenhuma versao do Harmony instalado neste computador!')
+        print "no harmony installed in computer!"
         return False
     elif installation_check == 'INSTALLATION_NOT_DEFAULT':
         if not ready:
@@ -125,7 +186,7 @@ def config_project(app_root, project_index):
                 'harmony_config_xml': None
             }
         else:
-            installation_path = user_data[last_login][project_data["prefix"]]["harmony_installation"]
+            installation_path = project_data["user_data"]["harmony_installation"]
             harmony_default_path = harmony_paths.default_installation
             project_data['harmony']['installation_default'] = False
             project_data['harmony']['paths'] = {
@@ -134,6 +195,28 @@ def config_project(app_root, project_index):
                 'harmony_config_xml': harmony_paths.harmony_config_xml.replace(harmony_default_path, installation_path)
             }
 
-    project_data['user_data'] = user_data
+    #  define server object
+    if server_data["server"]["type"] == "nextcloud":
+        project_data["server"] = NextcloudServer(server_data["server"], server_data["paths"])
+    elif server_data["server"]["type"] == "vpn":
+        project_data["server"] = VPNServer(server_data["server"], server_data["paths"])
+    else:
+        MessageBox.warning('Server Type nao suportado pelo BirdoApp!')
+        return False
+
+    # PATHS OBJECT (WITH FOLDER MANAGER CLASS)
+    sys.path.append(project_config_folder)
+    from folder_schemme2 import FolderManager
+    project_data["paths"] = FolderManager(server_data["paths"], project_data["prefix"], project_data["user_data"], MessageBox)
+
     project_data['ready'] = ready
-    return project_data
+    final_class = CreateClass(project_data)
+    final_class.__doc__ = """
+    Main class for project data with data and methods.Get information and manipulate folders and connections with this class.
+    ...
+    Parameters
+    ----------
+    project_index : int
+        index of the project
+    """
+    return final_class

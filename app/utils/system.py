@@ -23,7 +23,10 @@ def get_short_path_name(long_name):
 
 
 class SystemFolders:
-    """retorna os caminhos do System usados no app"""
+    """
+    Class containing the operational system paths and test methods
+    ...
+    """
     def __init__(self):
         self.system_os = platform.system()
 
@@ -43,7 +46,11 @@ class SystemFolders:
 
     # checa se o sistema operacional e suportado
     def check_os(self):
-        """checks if the Operatinal System is suported by the BirdoAPP"""
+        """
+        Checks if the Operational System is supported by the BirdoAPP
+        ...
+        RETURN: bool
+        """
         if self.system_os != 'Windows' and self.system_os != 'Darwin':
             return False
         else:
@@ -52,7 +59,11 @@ class SystemFolders:
 
     # CHECA SE OS CAMINHOS EXISTEM
     def check_paths(self):
-        """checa se os caminhos do sistema existem"""
+        """
+        Checks if the Operational System exists (to double check if the env paths retrieved are valid)
+        ...
+        RETURN: bool
+        """
         check = True
         if not os.path.exists(self.appdata):
             print "ERRO finding appdata path in the system: {0}".format(self.appdata)
@@ -67,6 +78,11 @@ class SystemFolders:
 
     # RETORNA MAC OR WINDOWS
     def mac_or_windows(self):
+        """
+        Returns 'windows' or 'mac'
+        ...
+        RETURN: string
+        """
         if self.system_os == 'Windows':
             return "windows"
         elif self.system_os == 'Darwin':
