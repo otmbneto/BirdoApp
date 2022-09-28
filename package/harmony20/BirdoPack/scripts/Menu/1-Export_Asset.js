@@ -37,8 +37,14 @@ function ExportAsset(){
 	//config information
 	var images_format = ["png", "jpeg", "tiff"];//lista de formatos de imagem
 	var displays_nodes = node.getNodes(["DISPLAY"]);
+	//sort display by node name to get ASSET_VIEW first
+	displays_nodes.sort(function(a, b) {
+		var textA = node.getName(a);
+		var textB = node.getName(b);
+		return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+	});
 	var display_names = [];
-	displays_nodes.forEach(function(x){ display_names.push(node.getName(x))});
+	displays_nodes.forEach(function(x){ Print(x); display_names.push(node.getName(x))});
 	var config_json = scene.currentProjectPath() + "/_exportAsset.json";
 	var export_config = {
 		"layers": getLayersNodesFilters(),
@@ -161,9 +167,9 @@ function createInterface(projData, config_data, config_json){
 	}
 	
 	//update widgets - output folder and button
-	this.ui.groupOutput.spinStart.maximum = frame.numberOf() - 1;
+	this.ui.groupOutput.spinStart.maximum = frame.numberOf();
 	this.ui.groupOutput.spinEnd.maximum = frame.numberOf();
-	this.ui.groupOutput.spinEnd.minimum = this.ui.groupOutput.spinStart.value + 1;
+	this.ui.groupOutput.spinEnd.minimum = this.ui.groupOutput.spinStart.value;
 	this.ui.groupOutput.spinStart.value = config_data.start_frame;
 	this.ui.groupOutput.spinEnd.value = config_data.end_frame;
 	

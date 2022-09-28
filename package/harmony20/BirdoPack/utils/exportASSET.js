@@ -187,7 +187,7 @@ function exportASSET(self, projData, export_config, config_json){
 
 		var progressDlg = new QProgressDialog(self);
 		progressDlg.modal = true;
-		progressDlg.setRange(0, export_data.end_frame - export_data.start_frame);
+		progressDlg.setRange(0, (export_data.end_frame - export_data.start_frame) + 1);
 
 		var renderFinished = function (){
 			var msg = "Render Finished with " + counter + " images!";
