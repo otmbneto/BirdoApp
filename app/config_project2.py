@@ -3,9 +3,12 @@ from utils.MessageBox import CreateMessageBox
 from utils.system import SystemFolders
 from nextcloud_server2 import NextcloudServer
 from vpn_server2 import VPNServer
-from config_harmony import HarmonyPaths
+from config_harmony2 import HarmonyManager
 import sys
 import os
+
+##  EM CASO DE ADICIONAR OS NOVO, MODIFICAR MODULOS: system.py e config_harmony2.py ##
+## EM CASO DE SERVER NOVO, CRIAR MODULO NOVO NESTE FOLDER E MODIFICAR AQUI PARA ACEITAR! ##
 
 # define widget message box class
 MessageBox = CreateMessageBox()
@@ -159,41 +162,25 @@ def config_project(project_index):
         else:
             project_data['user_data']['harmony_installation'] = ""
 
-    tb_version = project_data["harmony"]["version"].split(".")[0]
-    harmony_paths = HarmonyPaths(system, tb_version)
-
-    installation_check = harmony_paths.checkPaths()
-
-    if installation_check == 'HARMONY_PATHS_OK':
-        project_data['harmony']['installation_default'] = True
-        project_data['harmony']['paths'] = {
-            'scripts': harmony_paths.harmony_scripts.replace('\\', '/'),
-            'program': harmony_paths.harmony_path.replace('\\', '/'),
-            'harmony_config_xml': harmony_paths.harmony_config_xml.replace('\\', '/')
-        }
-        print "--installation check : {0}".format(installation_check)
-    elif installation_check == 'HARMONY_NOT_INSTALLED':
+    # Set HARMONY manager class and test installation
+    harmony = HarmonyManager(system, project_data["harmony"], project_data["user_data"]["harmony_installation"])
+    if harmony.installation_status == 'HARMONY_NOT_INSTALLED':
         MessageBox.warning('Nao foi encontrado nenhuma versao do Harmony instalado neste computador!')
-        print "no harmony installed in computer!"
+        print "Harmony installation check: {0}".format(harmony.installation_status)
         return False
-    elif installation_check == 'INSTALLATION_NOT_DEFAULT':
+    elif harmony.installation_status == 'INSTALLATION_NOT_DEFAULT':
         if not ready:
-            MessageBox.warning('Aparentemente o Harmony foi instalado fora do folder padrao neste computador! Informe no campo "Harmony Instalation Path" o caminho de instalacao alternativo!')
-            project_data['harmony']['installation_default'] = False
-            project_data['harmony']['paths'] = {
-                'scripts': harmony_paths.harmony_scripts.replace('\\', '/'),
-                'program': None,
-                'harmony_config_xml': None
-            }
+            MessageBox.warning('Aparentemente o Harmony foi instalado fora do folder padrao neste computador! '
+                               'Informe no campo "Harmony Instalation Path" o caminho de instalacao alternativo!')
         else:
-            installation_path = project_data["user_data"]["harmony_installation"]
-            harmony_default_path = harmony_paths.default_installation
-            project_data['harmony']['installation_default'] = False
-            project_data['harmony']['paths'] = {
-                'scripts': harmony_paths.harmony_scripts.replace('\\', '/'),
-                'program': harmony_paths.harmony_path.replace(harmony_default_path, installation_path),
-                'harmony_config_xml': harmony_paths.harmony_config_xml.replace(harmony_default_path, installation_path)
-            }
+            if not os.path.exists(project_data["user_data"]["harmony_installation"]):
+                MessageBox.warning("Nao foi encontrado um path de instalacao valido para o Harmony!")
+                print "Harmony installation check: {0}".format(harmony.installation_status)
+                return False
+
+    print "Harmony installation check: {0}".format(harmony.installation_status)
+
+    project_data["harmony"] = harmony
 
     #  define server object
     if server_data["server"]["type"] == "nextcloud":
