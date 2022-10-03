@@ -83,6 +83,9 @@ def update_doc(current_obj, doc_obj):
             # add new item
             if item not in doc:
                 print "item added: {0}".format(item)
+                update_object_item = current[item]
+            else:
+                update_object_item = doc[item]
 
             # updates description item
             if not output_obj[item]["description"]:
@@ -93,8 +96,8 @@ def update_doc(current_obj, doc_obj):
 
             # if item is class
             if output_obj[item]["type"] == "class":
-                print "updating sub-class {0}".format(doc[item]["name"])
-                output_obj[item] = update_doc(current[item], doc[item])
+                print "updating sub-class {0}".format(output_obj[item]["name"])
+                output_obj[item] = update_doc(current[item], update_object_item)
                 continue
 
         # delete old item list
