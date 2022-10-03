@@ -127,4 +127,4 @@ class HarmonyManager(object):
         ...
         RETURN : object
         """
-        return subprocess.Popen([self.harmony_path.replace, os.path.normpath(xstage_file)])
+        return subprocess.Popen([self.harmony_path, os.path.normpath(xstage_file)])
