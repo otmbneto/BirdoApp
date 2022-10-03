@@ -22,7 +22,7 @@ def get_short_path_name(long_name):
             output_buf_size = needed
 
 
-class SystemFolders:
+class SystemFolders(object):
     """
     Class containing the operational system paths and test methods
     ...

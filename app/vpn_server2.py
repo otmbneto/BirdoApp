@@ -7,7 +7,7 @@ from datetime import datetime
 # OBS: criar objetos de arquivos iguais ao que existe no modulo do owncloud
 
 
-class FileObject:
+class FileObject(object):
     """Classe que simula objeto de arquivo do modulo do owncloud usando o os"""
     def __init__(self, file_path):
         self.path = file_path
@@ -43,20 +43,18 @@ class VPNServer(object):
         for key in server_data:
             setattr(self, key, server_data[key])
 
-        self.server_root = server_paths['root']
-        self.server_paths = server_paths
+        # Define server root values
+        self.root = server_paths["root"] + server_paths["projRoot"]
+        self.has_root = True
+        self.roots_extras = []
 
-        for item in server_data:
-            self[item] = server_data[item]
-
-    def get_roots(self):
-        """mantive essa funcao pra simular o esquema de root do nextcloud, mas nesse caso sempre tera root"""
-        root_object = {"has_root": True, "roots": [self.server_root]}
-
-        if not os.path.exists(self.server_root):
-            print "vpn is not connecterd to the server!"
-            return False
-        return root_object
+        # Define Connection status
+        if os.path.exists(self.root):
+            self.status = "Online"
+            print "server is online!"
+        else:
+            print "server is offline!"
+            self.status = "Offline"
 
     def list_folder(self, folder):
         """lista os itens no folder"""
