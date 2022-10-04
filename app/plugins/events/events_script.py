@@ -19,7 +19,7 @@ birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
 events_json = os.path.join(curr_dir, '_events.json')
 
 sys.path.append(birdo_app_root)
-from app.config_project import config_project
+from app.config_project2 import config_project
 from app.utils.birdo_harmony import HarmonyManager
 from app.utils.nextcloud_server import NextcloudServer
 from app.utils.vpn_server import VPNServer
@@ -206,7 +206,7 @@ def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_
         }
     }
     # JSON QUEUE FILE
-    temp_folder = os.path.join(proj_data["system"]["temp"], "BirdoApp", "publish")
+    temp_folder = os.path.join(proj_data.system.temp, "BirdoApp", "publish")
     if not os.path.exists(temp_folder):
         os.makedirs(temp_folder)
     local_json_queue = os.path.join(temp_folder, "{0}_{1}.json".format(scene_name, version))
@@ -218,8 +218,25 @@ def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_
         return local_json_queue
 
 
-def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
+def do_event_loop(project_data,events_data):
     """MAIN script (uma rodda do loop) do Events de publish"""
+    
+    server = project_data.server
+    if not server.status:
+        print "Fail to connect to " + project_data.server.type.capitalize() + " server!"
+        sys.exit("Fail to connect server!!")
+
+    if server.has_root:
+        server_root = project_data.paths.root + project_data.paths.projRoot
+    else:
+        server_root = ""
+
+    #FOLDER MANAGER COM METODOS PARA GERAR PATHS DO PROJETO
+    fm = project_data.paths
+
+    #GET HARMONY CLASS
+    harmony = project_data.harmony
+
     #PEGA AS INFOS DO JSON
     render_type = events_data["publish_events"]["render_type"]
     step = events_data["publish_events"]["step"]
@@ -228,7 +245,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
     folder_targets = events_data["publish_events"]["folder_targets"]
 
     # define se renderiza na maquina ou manda pra fazendinha
-    render_local = events_data["render_scenes"] == "LOCAL"
+    render_local = events_data["render_scenes"] == "LOCAL" if "render_scenes" in events_data.keys() else False
 
     #CHECK IF EVENTS JSON IS CONFIGURED...
     if not bool(folder_log) or not bool(temp_folder):
@@ -280,7 +297,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                 "entry_time": get_current_datetime_iso_string(),
                 "file_etag": file.get_etag().replace("\"", ""),
                 "last_modified": file.get_last_modified().isoformat(),
-                "user": project_data["user_data"]["current_user"],
+                "user": project_data.user_data.name,
                 "status": "waiting",
                 "_event_log": None
             }
@@ -307,7 +324,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                 print " ---Creating new entry for file..."
                 first_entry = False
             else:
-                scene_name = get_scene_name(project_data['prefix'], file.get_name())
+                scene_name = get_scene_name(project_data.prefix, file.get_name())
                 server_sc_path = fm.get_scene_path(scene_name, step)
                 path_with_root = None
                 if bool(server_sc_path):
@@ -429,7 +446,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
 
             # Variaveis de render
             ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
-            render_step = 'ANIMATION' if step == 'ANIM' else step
+            render_step = 'ANIM' if step == 'ANIM' else step
             render_path = fm.get_render_path(ep) + "/" + render_step + "/"
 
             # Render scene if local render is configured
@@ -526,7 +543,7 @@ def do_event_loop(project_data, server_root, server, harmony, events_data, fm):
                     continue
 
                 # copia o arquivo de fila local do temp pra rede
-                fazendinha_server_path = "{0}{1}{2}".format(project_data['paths']["root"], project_data['paths']["fazendinha"], os.path.basename(temp_json_fila))
+                fazendinha_server_path = "{0}{1}{2}".format(project_data.paths.root, project_data.paths.fazendinha, os.path.basename(temp_json_fila))
                 if not server.upload_file(fazendinha_server_path, temp_json_fila):
                     print "-Error uploading json fila file to fazendinha-"
                     event_log['5_Render_Scene'] = "[ERROR] Scene Fazendinha queue Render failed upload!"
@@ -556,60 +573,32 @@ if __name__ == "__main__":
         events_data = read_json_file(events_json)
 
     #PEGA DADOS DO PROJETO
-    project_data = config_project(birdo_app_root, project_index)
+    project_data = config_project(project_index)
     if not project_data:
         print("ERRO Ao pegar informacoes do projeto!")
         sys.exit("error loading project info")
 
     #Loads the project folder to get the FolderManager Script
-    project_config_folder = os.path.join(birdo_app_root, 'config', 'projects', project_data['prefix'])
-    sys.path.append(project_config_folder)
-    from folder_schemme import FolderManager
-
-    # define server connection type:
-    server = None
-    if project_data["server"]["type"] == "nextcloud":
-        server = NextcloudServer(project_data["server"], project_data['paths'])
-        print "-- server type: {0}".format("nextcloud")
-    elif project_data["server"]["type"] == "vpn":
-        server = VPNServer(project_data["server"], project_data['paths'])
-        print "-- server type: {0}".format("vpn")
+    #project_config_folder = os.path.join(birdo_app_root, 'config', 'projects', project_data['prefix'])
+    #sys.path.append(project_config_folder)
 
     # TEST SERVER CONNECTION
-    if not server:
+    if not project_data.server:
         print "Server type not found!"
         sys.exit("Server type not found for this project")
-
-    root_test = server.get_roots()
-    if not root_test:
-        print "Fail to connect to " + project_data["server"]["type"].capitalize() + " server!"
-        sys.exit("Fail to connect server!!")
-
-    if root_test["has_root"]:
-        root = project_data['paths']["root"] + project_data['paths']["projRoot"]
-    else:
-        root = ""
-
-    #FOLDER MANAGER COM METODOS PARA GERAR PATHS DO PROJETO
-    folder_m = FolderManager(project_data)
-
-    #GET HARMONY CLASS
-    harmony = HarmonyManager(project_data)
 
     #RODA O LOOP
     while True:
         print "****Start new loop****"
-        do_event_loop(project_data, root, server, harmony, events_data, folder_m)
+        do_event_loop(project_data,events_data)
         print "#"*15
         print "######## end of loop at {0}... waiting to loop again...#########".format(datetime.now())
         print "#"*15
 
         time.sleep(10)
         if not is_loop:
+            project_data.server.logout()
             break
-
-    # disconnect from nc server
-    server.logout()
 
     print '{0}\nend of publish events at {1}\n{0}'.format(("#" * 87), datetime.now())
     sys.exit("Events loop interrupted!!")
