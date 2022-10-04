@@ -24,18 +24,21 @@ class HarmonyManager(object):
         raw_default_install = None
         raw_executable = None
         raw_scripts = None
+        raw_xml = None
         extenssion = None
 
         # defines OS path (only mac and windows)
         if system_data.system_os == 'Darwin':
-            raw_default_install = '{0}/Toon Boom Harmony {1} Premium/Harmony Premium.app/'
+            raw_default_install = '{0}/Toon Boom Harmony {1} Premium/Harmony {1} Premium.app/'
             raw_executable = '{0}Contents/tba/macosx/bin/HarmonyPremium{1}'
             raw_scripts = '{0}/Library/Preferences/Toon Boom Animation/Toon Boom Harmony Premium/{1}00-scripts/'
+            raw_xml = '{0}/Contents/tba/resources/menus.xml'
             extenssion = ''
         elif system_data.system_os == 'Windows':
             raw_default_install = '{0}/Toon Boom Animation/Toon Boom Harmony {1} Premium/'
             raw_executable = '{0}win64/bin/HarmonyPremium{1}'
             raw_scripts = '{0}/Toon Boom Animation/Toon Boom Harmony Premium/{1}00-scripts/'
+            raw_xml = '{0}/resources/menus.xml'
             extenssion = '.exe'
 
         default_installation_path = raw_default_install.format(system_data.programs, self.version).replace('\\', '/')
@@ -54,7 +57,7 @@ class HarmonyManager(object):
             self.installation_path = alternative_installation_path.replace('\\', '/')
 
         self.harmony_path = raw_executable.format(self.installation_path, extenssion)
-        self.harmony_config_xml = '{0}/resources/menus.xml'.format(self.installation_path).replace('\\', '/')
+        self.harmony_config_xml = raw_xml.format(self.installation_path).replace('\\', '/')
 
     def get_xstage_last_version(self, harmony_file_folder):
         """
