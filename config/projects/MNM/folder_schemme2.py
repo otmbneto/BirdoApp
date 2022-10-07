@@ -191,3 +191,21 @@ class FolderManager(object):
                 self.mb.warning("ERRO ao criar o folder: {0}".format(sub_folder))
                 return False
         return render_folder
+
+    def get_server_tblib(self):
+        """
+        Return tblib folder path in server(no root)
+        ...
+        ----------
+        RETURN: string
+        """
+        return self.projRoot + self.tblib
+
+    def get_local_tblib(self):
+        """
+        Return tblib LOCAL folder path(no root)
+        ...
+        ----------
+        RETURN: string
+        """
+        return self.get_local_root() + self.tblib
