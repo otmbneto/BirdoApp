@@ -32,6 +32,12 @@ function BD_UpdateMC(){
 		return false;
 	}
 	
+	var scripts_folder = scene.currentProjectPath() + "/scripts/";
+	var old_script_files = BD1_ListFiles(scripts_folder, "*.tbState").filter(function(x){ return /TESTE_\w/.test(x)});	
+	
+	//changed mc nodes
+	var mc_update_fail = false;
+	
 	//lista todos MC da cena
 	var mc_list = node.getNodes(["MasterController"]);
 	
@@ -45,6 +51,9 @@ function BD_UpdateMC(){
 		//update mc nodes (sem ser o master)
 		if(node.getName(mc_list[i]) != "mc_Function"){
 			node.setTextAttr(mc_list[i], "label_font", 1, "Vertigo Upright 2 BRK");
+			if(!fix_mc(projectDATA, mc_list[i])){
+				mc_update_fail = true;
+			}
 			continue;
 		}
 		
@@ -71,6 +80,12 @@ function BD_UpdateMC(){
 		}
 	}
 	
+	if(!mc_update_fail){
+		for(var i=0; i<old_script_files.length; i++){
+			BD1_RemoveFile(old_script_files[i]);
+		}	
+	}
+	
 	scene.endUndoRedoAccum();
 
 	//extra
@@ -86,7 +101,7 @@ function BD_UpdateMC(){
 		return phnode;
 	}
 	
-	//update place holder (desenha o lipsync no over layer
+	//update place holder (desenha o lipsync no over layer)
 	function updatePH(projectDATA, phnode){
 		node.setEnable(phnode, true);
 		var frameCur = frame.current();
@@ -149,5 +164,66 @@ function BD_UpdateMC(){
 			}
 			return false;
 		}
+	}
+	
+	function fix_mc(projectDATA, node_path){//checa se o mc do rig tem fix, e se tiver muda os atts e copia o arquivo pro scripts da cena
+		Print(" --- fix mc : " + node_path);
+		var regex_version = /_\d+$/; 
+		var asset_regex = /CH\d{3}_\w+/;
+		var rig_regex = /\w{3}\.\w+-v\d{2}/;
+		var mc_data = {};
+		
+		//var folder_fix = projectDATA.getTBLIB("server") + "MC_data/SCRIPTS/";
+		var folder_fix = "C:/_BirdoRemoto/PROJETOS/ASTRONAUTA/ASSETS/FIX_RIGS_MC/SCRIPTS/";
+
+		if(!asset_regex.test(node_path)){
+			Print("ERROR! This node is not part of a rig!");
+			Print(">> " + node_path);
+			return false;
+		}
+		
+		//node name test
+		if(!/BOCA_\w/.test(node.getName(node_path))){
+			Print("-- este mc node nao e um node de BOCA!");
+			return false;
+		}
+		
+		//define script file name 
+		mc_data["mc_node"] = node_path;
+		mc_data["rig_name"] = asset_regex.exec(node_path)[0].replace(regex_version, "");
+		mc_data["rig_version"] = rig_regex.exec(node_path)[0].split("-")[1];
+		mc_data["mc_name"] = node.getName(node_path);
+		mc_data["original_script_name"] = mc_data["mc_name"].replace("BOCA", "TESTE") + ".tbState";
+		
+		//define fix file info
+		var char_fix_folder = folder_fix + mc_data["rig_name"].split("_")[0] + "/";
+		var fix_rig_name = mc_data["rig_name"].split("_")[0] + "-" + mc_data["rig_version"];
+		var rig_fix_folder = char_fix_folder + fix_rig_name;
+		var fix_file = rig_fix_folder + "/" + fix_rig_name + "_" + mc_data["mc_name"] + ".tbState";
+		if(!BD1_FileExists(fix_file)){
+			Print("No fix file found for rig : " + fix_rig_name);
+			return false;
+		}
+		mc_data["new_script_name"] = BD1_fileBasename(fix_file);
+		mc_data["new_script_local_path"] = scripts_folder + mc_data["new_script_name"];
+		mc_data["new_script_fix_path"] = fix_file;
+		
+		//copia arquivo:
+		Print("start copying files...");
+		if(BD1_CopyFile(mc_data["new_script_fix_path"], mc_data["new_script_local_path"])){
+			Print(" -- script file copyed: " + mc_data["new_script_local_path"]);	
+		}
+		
+		//fix mc node
+		//att ui_data
+		var ui_att_raw = node.getTextAttr(mc_data["mc_node"], 1, "UI_DATA");
+		var new_ui_att = ui_att_raw.replace(mc_data["original_script_name"], mc_data["new_script_name"]);
+		node.setTextAttr(mc_data["mc_node"], "UI_DATA", 1, new_ui_att);
+		//att files
+		var col = node.linkedColumn(mc_data["mc_node"], "FILES");
+		var new_files_att = column.getEntry(col, 1, 1).replace(mc_data["original_script_name"], mc_data["new_script_name"]);
+		column.setEntry(col, 1, 1, new_files_att);
+
+		return true;
 	}
 }
