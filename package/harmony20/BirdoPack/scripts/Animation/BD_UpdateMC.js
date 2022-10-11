@@ -32,10 +32,20 @@ function BD_UpdateMC(){
 		return false;
 	}
 	
+	//mc script file 
+	//var mc_script = projectDATA.birdoApp + "config/projects/" + projectDATA.prefix + "/mc_script.js";
+	var mc_script = "C:/Users/Leonardo/AppData/Roaming/BirdoApp_SANDBOX/config/projects/AST/mc_script.js";
+	
+	if(!BD1_FileExists(mc_script)){
+		var ui_script = BD1_ReadFile(mc_script);
+	} else {
+		var ui_script = null;	
+	}
+	
 	var scripts_folder = scene.currentProjectPath() + "/scripts/";
 	var old_script_files = BD1_ListFiles(scripts_folder, "*.tbState").filter(function(x){ return /TESTE_\w/.test(x)});	
 	
-	//changed mc nodes
+	//if changed mc nodes
 	var mc_update_fail = false;
 	
 	//lista todos MC da cena
@@ -60,7 +70,9 @@ function BD_UpdateMC(){
 		//update mc new visual
 		node.setTextAttr(mc_list[i], "label_screen_space", 1, false);
 		node.setTextAttr(mc_list[i], "label", 1, "");
-		
+		if(ui_script){
+			node.setTextAttr(mc_list[i], "uiScript.editor", 1, ui_script);
+		}
 		var control_mode = node.getTextAttr(mc_list[i], 1, "SHOW_CONTROLS_MODE");
 		var new_mode = control_mode == "Always" ? "Normal" : "Always";
 		node.setTextAttr(mc_list[i], "SHOW_CONTROLS_MODE", 1, new_mode);
@@ -114,7 +126,10 @@ function BD_UpdateMC(){
 			Print("drawing OL in : " +  timings[i]);
 			Print(create_lipsyncDRAWING_OL(projectDATA, phnode, frameCur));
 		}
-
+		
+		//turn can animate on
+		node.setTextAttr(phnode, "CAN_ANIMATE", 1, true);
+		
 		column.setEntry(coluna, 1, frameCur, exp1);
 		
 		//desenha o lipsinc na overlayer do node
