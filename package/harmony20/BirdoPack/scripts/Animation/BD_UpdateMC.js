@@ -33,8 +33,7 @@ function BD_UpdateMC(){
 	}
 	
 	//mc script file 
-	//var mc_script = projectDATA.birdoApp + "config/projects/" + projectDATA.prefix + "/mc_script.js";
-	var mc_script = "C:/Users/Leonardo/AppData/Roaming/BirdoApp_SANDBOX/config/projects/AST/mc_script.js";
+	var mc_script = projectDATA.birdoApp + "config/projects/" + projectDATA.prefix + "/mc_script.js";
 	
 	if(!BD1_FileExists(mc_script)){
 		var ui_script = BD1_ReadFile(mc_script);
@@ -134,8 +133,7 @@ function BD_UpdateMC(){
 		
 		//desenha o lipsinc na overlayer do node
 		function create_lipsyncDRAWING_OL(projectDATA, phnode, fr){
-			//var lipsync_templatejson = projectDATA.birdoApp + "templates/drawings_data/" + projectDATA.prefix + "/_LipsyncPH_OL.json";
-			var lipsync_templatejson = "C:/Users/Leonardo/AppData/Roaming/BirdoApp_SANDBOX/templates/drawings_data/AST/_LipsyncPH_OL.json";
+			var lipsync_templatejson = projectDATA.birdoApp + "templates/drawings_data/" + projectDATA.prefix + "/_LipsyncPH_OL.json";
 			var ls_data = BD1_ReadJSONFile(lipsync_templatejson);
 			var config = {
 				drawing: {node: phnode, frame: fr}
@@ -188,8 +186,7 @@ function BD_UpdateMC(){
 		var rig_regex = /\w{3}\.\w+-v\d{2}/;
 		var mc_data = {};
 		
-		//var folder_fix = projectDATA.getTBLIB("server") + "MC_data/SCRIPTS/";
-		var folder_fix = "C:/_BirdoRemoto/PROJETOS/ASTRONAUTA/ASSETS/FIX_RIGS_MC/SCRIPTS/";
+		var folder_fix = projectDATA.getTBLIB("server") + "MC_data/SCRIPTS/";
 
 		if(!asset_regex.test(node_path)){
 			Print("ERROR! This node is not part of a rig!");
