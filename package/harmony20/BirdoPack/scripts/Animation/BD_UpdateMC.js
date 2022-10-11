@@ -34,13 +34,15 @@ function BD_UpdateMC(){
 	
 	//mc script file 
 	var mc_script = projectDATA.birdoApp + "config/projects/" + projectDATA.prefix + "/mc_script.js";
-	
-	if(!BD1_FileExists(mc_script)){
+Print("TESTE mc_script: " + mc_script);
+
+	if(BD1_FileExists(mc_script)){
 		var ui_script = BD1_ReadFile(mc_script);
 	} else {
 		var ui_script = null;	
 	}
-	
+Print("TESTE UI SCRIPT: " + ui_script);
+
 	var scripts_folder = scene.currentProjectPath() + "/scripts/";
 	var old_script_files = BD1_ListFiles(scripts_folder, "*.tbState").filter(function(x){ return /TESTE_\w/.test(x)});	
 	
@@ -139,7 +141,7 @@ function BD_UpdateMC(){
 			var curr_column = node.linkedColumn(phNode, "SCALE.X");
 			var currValue = node.getTextAttr(phNode, 1, "SCALE.X");
 			if(!curr_column){
-				var scale_col = node.getName(phNode) + ": Scale_x";
+				var scale_col = column.generateAnonymousName();
 				column.add(scale_col, "BEZIER");
 				node.linkAttr(phNode, "SCALE.X", scale_col);
 				return column.setEntry(scale_col, 1, 1, currValue);
