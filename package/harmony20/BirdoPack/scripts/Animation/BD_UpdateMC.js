@@ -129,7 +129,24 @@ function BD_UpdateMC(){
 		//turn can animate on
 		node.setTextAttr(phnode, "CAN_ANIMATE", 1, true);
 		
+		//cria key no 1 frame
+		createKeysForPlaceHolder(phnode);
+		
 		column.setEntry(coluna, 1, frameCur, exp1);
+		
+		//cria keyframe no primeiro frame pro placeholder
+		function createKeysForPlaceHolder(phNode){
+			var curr_column = node.linkedColumn(phNode, "SCALE.X");
+			var currValue = node.getTextAttr(phNode, 1, "SCALE.X");
+			if(!curr_column){
+				var scale_col = node.getName(phNode) + ": Scale_x";
+				column.add(scale_col, "BEZIER");
+				node.linkAttr(phNode, "SCALE.X", scale_col);
+				return column.setEntry(scale_col, 1, 1, currValue);
+			}
+			Print("No need to create colum for scale : " + phNode);
+			return false;
+		}		
 		
 		//desenha o lipsinc na overlayer do node
 		function create_lipsyncDRAWING_OL(projectDATA, phnode, fr){
