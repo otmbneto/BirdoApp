@@ -126,7 +126,7 @@ class FolderManager(object):
         ...
         RETURN: string
         """
-        return self.step["step"]["RENDER"][1]
+        return self.step["RENDER"][1]
 
     def get_anim_render_folder(self):
         """
@@ -134,7 +134,7 @@ class FolderManager(object):
         ...
         RETURN: string
         """
-        return self.step["step"]["RENDER"][2]
+        return self.step["RENDER"][2]
 
     def get_comp_render_folder(self):
         """
@@ -142,7 +142,7 @@ class FolderManager(object):
         ...
         RETURN: string
         """
-        return self.step["step"]["RENDER"][3]
+        return self.step["RENDER"][3]
 
     def get_animatic_folder_path(self, ep):
         """
