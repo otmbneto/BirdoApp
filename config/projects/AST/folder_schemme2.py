@@ -120,6 +120,30 @@ class FolderManager(object):
         """
         return self.step["RENDER"][0]
 
+    def get_setup_render_folder(self):
+        """
+        Return directory name for setup render folder
+        ...
+        RETURN: string
+        """
+        return self.step["step"]["RENDER"][1]
+
+    def get_anim_render_folder(self):
+        """
+        Return directory name for anim render folder
+        ...
+        RETURN: string
+        """
+        return self.step["step"]["RENDER"][2]
+
+    def get_comp_render_folder(self):
+        """
+        Return directory name for comp render folder
+        ...
+        RETURN: string
+        """
+        return self.step["step"]["RENDER"][3]
+
     def get_animatic_folder_path(self, ep):
         """
         Return directory path for render animatic.

@@ -76,6 +76,18 @@ class FolderManager:
         """retorna o path do folder do animatic"""
         return os.path.join(self.get_render_path(ep), self.paths["step"]["RENDER"][0])
 
+    def get_setup_render_folder(self):
+        """retorna o nome do folder de render anim"""
+        return self.paths["step"]["RENDER"][1]
+
+    def get_anim_render_folder(self):
+        """retorna o nome do folder de render anim"""
+        return self.paths["step"]["RENDER"][2]
+
+    def get_comp_render_folder(self):
+        """retorna o nome do folder de render anim"""
+        return self.paths["step"]["RENDER"][3]
+
     def create_local_scene_scheme(self, scene_name, step):
         """cria o esquema de pastas da cena local"""
         root = self.get_local_root()

@@ -10,7 +10,6 @@ import re
 import sys
 from datetime import datetime
 import time
-import shutil
 from zipfile import ZipFile
 from zipfile import ZIP_DEFLATED
 
@@ -20,11 +19,8 @@ events_json = os.path.join(curr_dir, '_events.json')
 
 sys.path.append(birdo_app_root)
 from app.config_project2 import config_project
-from app.utils.birdo_harmony import HarmonyManager
-from app.utils.nextcloud_server import NextcloudServer
-from app.utils.vpn_server import VPNServer
-from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_iso_string
-from app.utils.birdo_zip import extract_zipfile, compact_folder
+from app.utils.birdo_datetime import get_current_datetime_iso_string
+from app.utils.birdo_zip import extract_zipfile
 from app.utils.ffmpeg import compress_render
 from app.utils.system import get_short_path_name
 from app.utils.birdo_json import read_json_file, write_json_file
@@ -218,7 +214,7 @@ def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_
         return local_json_queue
 
 
-def do_event_loop(project_data,events_data):
+def do_event_loop(project_data, events_data):
     """MAIN script (uma rodda do loop) do Events de publish"""
     
     server = project_data.server
@@ -446,7 +442,16 @@ def do_event_loop(project_data,events_data):
 
             # Variaveis de render
             ep = re.findall(r'^\w{3}_EP\d{3}', file_output_data['scene_name'])[0]
-            render_step = 'ANIM' if step == 'ANIM' else step
+            if step == 'ANIM':
+                render_step = fm.get_anim_render_folder()
+            elif step == 'SETUP':
+                render_step = fm.get_setup_render_folder()
+            elif step == 'COMP':
+                render_step = fm.get_comp_render_folder()
+            else:
+                print "INVALID STEP: {0}".format(step)
+                return False
+
             render_path = fm.get_render_path(ep) + "/" + render_step + "/"
 
             # Render scene if local render is configured
@@ -534,7 +539,7 @@ def do_event_loop(project_data,events_data):
             if not render_local:
                 render_mov_path = "{0}{1}{2}.mov".format(server_root, render_path, file_output_data["scene_name"])
                 scene_path = file_output_data['scene_path'].replace(server_root, "")
-                temp_json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_mov_path, scene_path, render_step)
+                temp_json_fila = create_fazendinha_queue(project_data, file_output_data["scene_name"], files_info["version"], render_type, render_mov_path, scene_path, step)
 
                 if not server.get_file_info(temp_json_fila):
                     print "-Error criating file json-"
