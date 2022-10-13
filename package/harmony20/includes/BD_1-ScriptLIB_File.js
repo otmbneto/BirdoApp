@@ -622,4 +622,23 @@ Copyright:  leobazao_@Birdo
 		}
 		return BD1_createDirectoryREDE(folderPath);
 	}	
+
+/*
+	forca a criacao do folder (caso ja exista um folder com o mesmo nome, cria um nome novo com um sufixo de numero _1)
+*/
+function BD1_ForceMakeDir(dirPath){
+	var folder = dirPath;
+	var index = 1;
+	while (index < 100){
+		if(BD1_DirExist(folder)){
+			folder = dirPath + "_" + ("00" + index).slice(-2);
+			index++;
+			continue;
+		} else {
+			BD1_createDirectoryREDE(folder);
+			return folder;
+		}		
+	}
+	return false;
+}
 	

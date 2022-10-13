@@ -25,6 +25,10 @@ function BirdoProject(entity){
 	this.pipeline = null;
 	this.birdoApp = null;
 	this.paths = null;
+	this.pattern =  {
+		"asset": new RegExp("\\w{2}\\d{3}_\\w+"),
+		"shot": new RegExp("\\w{3}_EP\\d{3}_SC\\d{4}")
+	};
 	
 	//limpa o prefix da entity para nao ficar com redundancia
 	delete this.entity.prefix;
