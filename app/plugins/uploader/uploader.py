@@ -44,7 +44,7 @@ class VideoItemWidget(QtGui.QGroupBox):
         self.filename = file_path.split("/")[-1]
         self.filepath = "/".join(file_path.split("/")[:-1]) + "/"
 
-        if file_path.endswith(".mov"):
+        if file_path.endswith((".mov",".mp4")):
         	self.createVideoWidget(file_path,episodes)
         	self.isMov = True
 
@@ -195,6 +195,7 @@ class Uploader(QtGui.QMainWindow):
 		super(Uploader, self).__init__()
 
 		self.project_data = project_data
+		print self.project_data["prefix"]
 		self.listOfWidgets = []
 		self.app_root = os.path.dirname(os.path.realpath(__file__))
 		ui_path = os.path.join(self.app_root, "ui/uploader.ui").replace("\\", "/")
@@ -309,7 +310,7 @@ class Uploader(QtGui.QMainWindow):
 				movie.setStatus("No Episode","red")
 				continue
 			movie.incrementProgress(10)
-			scene_name = self.getScene(movie.getFilename())
+			scene_name = self.getScene(movie.getFilename().upper(),movie.getEpisode())
 			movie.incrementProgress(10)
 			animatic_path = self.getAnimaticPath(episode_code)
 			movie.incrementProgress(10)
@@ -323,6 +324,7 @@ class Uploader(QtGui.QMainWindow):
 			result = self.compressScene(movie.getFullpath(),compressed) == 0
 			movie.incrementProgress(25)
 			if result:
+				print dst
 				shutil.copyfile(compressed,dst)
 				pass
 			movie.incrementProgress(25)
@@ -356,13 +358,14 @@ class Uploader(QtGui.QMainWindow):
 
 	def getShot(self,filename):
 
-		m = re.search('.*(SC\d{4}).*', filename)
+		m = re.search('.*SC_(\d{4}).*', filename)
 		return m.group(1) if m is not None else m
 
-	def getScene(self,filename):
+	def getScene(self,filename,episode):
 
-		m = re.search('(\w{3}_EP\d{3}_SC\d{4}).*', filename)
-		return m.group(1) if m is not None else m
+		#m = re.search('(\w{3}_EP\d{3}_SC\d{4}).*', filename)
+		m = self.getShot(filename)
+		return "_".join([self.project_data["prefix"],episode,"SC" + m]) if m is not None else m
 
 	def getAnimaticPath(self,episode_code):
 
@@ -406,7 +409,7 @@ class Uploader(QtGui.QMainWindow):
 				QtGui.qApp.processEvents()
 				u = str(url.toLocalFile())
 				movWidget = VideoItemWidget(u,self.episodes)
-				episode = self.getEpisode(movWidget.getFilename())
+				episode = self.getEpisode(movWidget.getFullpath())
 				if episode is not None:
 					movWidget.setEpisode(self.findIndexOf(episode))
 				if movWidget.isMovie():
