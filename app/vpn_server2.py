@@ -63,10 +63,7 @@ class VPNServer(object):
 
         RETURN: True or False
         """
-        if not self.oc.file_info(self.root):
-            return False
-        else:
-            return True
+        return os.path.exists(self.root)
 
     def list_folder(self, folder):
         """lista os itens no folder"""
