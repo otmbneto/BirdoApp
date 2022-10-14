@@ -21,7 +21,7 @@ class NextcloudServer(object):
         encdec = PswEncDec()
 
         # lista com itens para nao entrarem no doc!
-        self.doc_exclude = ['doc_exclude', 'oc']
+        self.doc_exclude = ['doc_exclude', 'oc', 'define_roots']
 
         # Try to connect to NC server
         try:
@@ -70,6 +70,18 @@ class NextcloudServer(object):
                         extra_roots.append(root_path)
                 self.__setitem__("roots_extras", extra_roots)
         print "Nextcloud Server roots defined!"
+
+    def check_connection(self):
+        """
+        Check if server is still online
+        ...
+
+        RETURN: True or False
+        """
+        if not self.oc.file_info(self.root):
+            return False
+        else:
+            return True
 
     def list_folder(self, folder):
         """

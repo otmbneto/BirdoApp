@@ -56,6 +56,18 @@ class VPNServer(object):
             print "server is offline!"
             self.status = "Offline"
 
+    def check_connection(self):
+        """
+        Check if server is still online
+        ...
+
+        RETURN: True or False
+        """
+        if not self.oc.file_info(self.root):
+            return False
+        else:
+            return True
+
     def list_folder(self, folder):
         """lista os itens no folder"""
         final_list = []

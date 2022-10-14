@@ -216,9 +216,11 @@ def create_fazendinha_queue(proj_data, scene_name, version, render_type, render_
 
 def do_event_loop(project_data, events_data):
     """MAIN script (uma rodda do loop) do Events de publish"""
-    
+
     server = project_data.server
-    if not server.status:
+
+    # check if folder is still online
+    if not server.check_connection():
         print "Fail to connect to " + project_data.server.type.capitalize() + " server!"
         sys.exit("Fail to connect server!!")
 
@@ -264,6 +266,10 @@ def do_event_loop(project_data, events_data):
         if not os.path.exists(item_log_folder):
             os.makedirs(item_log_folder)
         print "---Target Folder log: {0}".format(item_log_folder)
+
+        if not server.get_file_info(folder_path):
+            print "[ERROR] Folder not found!"
+            return False
 
         file_list = filter(lambda x: x.get_name().endswith(".zip") or x.get_name().endswith(".rar"), server.list_folder(folder_path))
         if not file_list:
@@ -595,7 +601,7 @@ if __name__ == "__main__":
     #RODA O LOOP
     while True:
         print "****Start new loop****"
-        do_event_loop(project_data,events_data)
+        do_event_loop(project_data, events_data)
         print "#"*15
         print "######## end of loop at {0}... waiting to loop again...#########".format(datetime.now())
         print "#"*15
