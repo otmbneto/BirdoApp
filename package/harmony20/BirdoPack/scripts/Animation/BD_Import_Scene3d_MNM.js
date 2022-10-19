@@ -39,7 +39,7 @@ function BD_Import_Scene3d_MNM(){
 	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 15000, "donwloading_3D_sequences...");
 	
 	var sequence = donwload_assets(projectDATA);
-	
+	Print(sequence);
 	if(!sequence){
 		loadingScreen.terminate();
 		Print("Error downloading files!");
@@ -49,7 +49,6 @@ function BD_Import_Scene3d_MNM(){
 	
 	loadingScreen.terminate();
 
-	Print(sequence);
 	var d = new createInterface(projectDATA, sequence);
 	d.ui.show();
 	
@@ -60,7 +59,7 @@ function BD_Import_Scene3d_MNM(){
 		var libsPath = birdoAppPath + "venv/Lib/site-packages";
 		var pyFilePath = birdoAppPath + "app/utils/import3dMNM.py";
 		PythonManager.addSysPath(fileMapper.toNativePath(libsPath));
-		//PythonManager.addSysPath(fileMapper.toNativePath(birdoAppPath));
+		PythonManager.addSysPath(fileMapper.toNativePath(birdoAppPath));
 
 		var myPythonObject = PythonManager.createPyObject(fileMapper.toNativePath(pyFilePath));
 		myPythonObject.addObject("messageLog", MessageLog);
