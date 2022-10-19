@@ -23,6 +23,9 @@ def config_init():
     """Return object with initial projects and BirdoApp information
         ...
     """
+    if app_root == "":
+        print "[INIT][ERROR] app_root path is not valid!"
+        return False
     final_obj = {}
     app_json = os.path.join(app_root, "app.json")
 
@@ -81,6 +84,12 @@ def config_project(project_index):
     project_index : int
         project index (number of the project listed in projects list in object created by config_init() function)
     """
+    # if birdoApp root cant be found, return false!
+    if app_root == "":
+        print "[CONFIGPROJECT][ERROR] app_root path is not valid!"
+        MessageBox.warning("[ERROR] Cant find birdoApp root!")
+        return False
+
     system = SystemFolders()
 
     # CHECA SE O SYSTEMA OS E SUPORTADO
@@ -97,7 +106,7 @@ def config_project(project_index):
     # checks if app json exists
     if not os.path.exists(birdo_local_json):
         print "file {0} not found".format(birdo_local_json)
-        MessageBox.warning("'birdoLocal.json' not found! Something went wrong!")
+        MessageBox.warning("'birdoLocal.json' not found! Something went wrong!\n{0}".format(birdo_local_json))
         return False
 
     birdo_local = read_json_file(birdo_local_json)
