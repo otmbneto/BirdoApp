@@ -55,7 +55,7 @@ function BD_Import_Scene3d_MNM(){
 	//EXTRA FUNCTIONS
 	function donwload_assets(projectDATA){//runs python script to download from server
 	
-		var birdoAppPath = projectDATA.birdoApp.replace(/\/$/, "_SANDBOX/"); //FIXME!!!######################
+		var birdoAppPath = projectDATA.birdoApp; //FIXME!!!######################
 		var libsPath = birdoAppPath + "venv/Lib/site-packages";
 		var pyFilePath = birdoAppPath + "app/utils/import3dMNM.py";
 		PythonManager.addSysPath(fileMapper.toNativePath(libsPath));
