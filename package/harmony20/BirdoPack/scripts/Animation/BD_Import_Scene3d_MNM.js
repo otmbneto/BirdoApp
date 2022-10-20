@@ -47,6 +47,13 @@ function BD_Import_Scene3d_MNM(){
 		return;
 	}
 	
+	if(sequence.assets3D.length == 0){
+		loadingScreen.terminate();
+		Print("Scene has no 3D sequence!");
+		MessageBox.information("Esta cena nao contem assets 3D para importar!!");
+		return;
+	}
+	
 	loadingScreen.terminate();
 
 	var d = new createInterface(projectDATA, sequence);
