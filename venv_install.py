@@ -18,7 +18,7 @@ def venv_exists(venv_name):
 
 # atualiza o env com os requirements
 def update_virtualenv(venv_name):
-    cmd = "cd {0}/{1}/Scripts& activate & pip install -r {0}/requirement.txt".format(
+    cmd = "cd {0}/{1}/Scripts& activate & pip install -r \"{0}/requirement.txt\"".format(
         os.path.dirname(os.path.abspath(__file__)), venv_name).replace("\\", "/")
     return os.system(cmd) == 0
 
