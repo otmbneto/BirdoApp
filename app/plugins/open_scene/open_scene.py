@@ -4,7 +4,8 @@ import sys
 import time
 import subprocess
 from distutils.dir_util import copy_tree
-from PySide import QtGui
+from PySide import QtGui,QtCore
+from threading import Thread
 import shutil
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -38,6 +39,14 @@ shot_regex = r'\w{3}_EP\d{3}_SC\d{4}'
 mov_reg = r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
 version_reg = r'_v\d{2}.mov'
 
+#sinais usados para indicar a thread principal que a janela precisa ser atualizada.
+class CustomSignal(QtCore.QObject):
+
+    episode_received = QtCore.Signal(object)
+    progress_reseted = QtCore.Signal(object)
+    progress_made = QtCore.Signal(object)
+    progress_format = QtCore.Signal(object)
+    progress_range_set = QtCore.Signal(object)
 
 def copy_scene_template(prefix, scene_name, work_dir):
     """Creates a clean scene setup by copying the shot_SETUP template in birdoAPP template folder to the working scene folder"""
@@ -55,7 +64,7 @@ def copy_scene_template(prefix, scene_name, work_dir):
         os.rename(template_file, final_file_name)
     return True
 
-
+#TODO:Trazer o loading episodes pra uma thread separada usando signals.
 class OpenShot(QtGui.QWidget):
     """Main OpenShot interface"""
     def __init__(self, project_data, initial_shot):
@@ -63,6 +72,7 @@ class OpenShot(QtGui.QWidget):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.project_data = project_data
+        self.episodes_data = {}
         self.harmony_manager = HarmonyManager(project_data)
 
         # SETS WINDOW ICON
@@ -72,15 +82,7 @@ class OpenShot(QtGui.QWidget):
         # SET PROJECT LOGO
         self.ui.logoProj.setPixmap(QtGui.QPixmap(global_icons["proj_logo"].format(self.project_data["prefix"])))
 
-        # WIDGET CONNECTIONS
-        self.ui.cancel_button.clicked.connect(self.on_close)
-        self.ui.open_button.clicked.connect(self.on_open_scene)
-        self.ui.listEpisodes.itemClicked.connect(self.on_select_ep)
-        self.ui.listScenes.itemClicked.connect(self.on_select_scene)
-        self.ui.listVersions.itemClicked.connect(self.on_select_version)
-        self.ui.checkBox_all_versions.stateChanged.connect(self.on_check_all_versions)
-        self.ui.checkBox_open_local.stateChanged.connect(self.on_check_open_local)
-        self.ui.comboStep.currentIndexChanged.connect(self.on_change_step)
+        self.setupConnections()
 
         # define server connection type:
         if self.project_data["server"]["type"] == "nextcloud":
@@ -134,6 +136,28 @@ class OpenShot(QtGui.QWidget):
             shutil.rmtree(self.temp_open_scene, ignore_errors=True)
         os.makedirs(self.temp_open_scene)
 
+    def setupConnections(self):
+
+        # WIDGET CONNECTIONS
+        self.ui.cancel_button.clicked.connect(self.on_close)
+        self.ui.open_button.clicked.connect(self.on_open_scene)
+        self.ui.listEpisodes.itemClicked.connect(self.on_select_ep)
+        self.ui.listScenes.itemClicked.connect(self.on_select_scene)
+        self.ui.listVersions.itemClicked.connect(self.on_select_version)
+        self.ui.checkBox_all_versions.stateChanged.connect(self.on_check_all_versions)
+        self.ui.checkBox_open_local.stateChanged.connect(self.on_check_open_local)
+        self.ui.comboStep.currentIndexChanged.connect(self.on_change_step)
+        
+        # SIGNAL CONNECTIONS
+        self.signals = CustomSignal()
+        self.signals.episode_received.connect(self.insert_episode)
+        self.signals.progress_made.connect(self.increment_progress)
+        self.signals.progress_format.connect(self.format_progress)
+        self.signals.progress_reseted.connect(self.reset_progress)
+        self.signals.progress_range_set.connect(self.set_progress_range)
+
+        return
+
     def define_step_by_user(self):
         """Defines default step by user type. Sets the step combo to this step"""
         last_login = self.project_data["user_data"]["current_user"]
@@ -176,33 +200,46 @@ class OpenShot(QtGui.QWidget):
                 scenes_data[scene_name] = animatic_mov.get_path() + "/" + animatic_mov.get_name()
         return scenes_data
 
+    def getProgress(self):
+        
+        return self.ui.progress_bar.value()
+
+    def incrementProgress(self):
+
+        value = self.getProgress()
+        self.ui.progress_bar.setValue(value + 1)
+
+    def get_episode_data(self,episode):
+
+        episode_data = None
+        episode_name = episode.get_name()
+        self.signals.progress_format.emit(["loading {0}...".format(episode_name)])
+        if bool(re.search(self.project_folders.ep_regex, episode_name)):
+            scenes_data = self.get_scenes_list(episode_name)
+            if scenes_data and len(scenes_data) > 0:
+                episode_data = scenes_data
+
+        self.signals.progress_made.emit([])
+        return episode_data
+
     def get_episodes_data(self):
+
         """Generates all episodes and shots data object"""
         ep_data = {}
         episode_list = self.server.list_folder(self.episodes_path)
         episode_list.sort(key=lambda x: x.get_name())
 
-        if not episode_list or len(episode_list) == 0:
-            print "Fail to get episodes list from server!"
-            return False
+        if episode_list and len(episode_list) > 0:
+            self.signals.progress_range_set.emit([0,len(episode_list)])
+            for episode in episode_list:
+                result = self.get_episode_data(episode)
+                if result is not None:
+                    self.signals.episode_received.emit([{episode.get_name(): result}])
+            self.signals.progress_reseted.emit([])
+        else:
+            print "Fail to get episodes list from server!"            
 
-        self.ui.progress_bar.setRange(0, len(episode_list))
-        index = 0
-        for ep in episode_list:
-            ep_name = ep.get_name()
-            self.ui.progress_bar.setFormat("loading {0}...".format(ep_name))
-            self.ui.progress_bar.setValue(index)
-            if bool(re.search(self.project_folders.ep_regex, ep_name)):
-                ep_scenes_data = self.get_scenes_list(ep_name)
-                if not ep_scenes_data or len(ep_scenes_data) == 0:
-                    index += 1
-                    continue
-                ep_data[ep_name] = ep_scenes_data
-                index += 1
-
-        self.ui.progress_bar.setFormat("")
-        self.ui.progress_bar.setValue(0)
-        return ep_data
+        return
 
     def get_local_scene(self, scene_path, scene_name):
         """returns object with local scene information"""
@@ -282,15 +319,44 @@ class OpenShot(QtGui.QWidget):
         self.ui.progress_bar.setValue(0)
         return versions_data
 
+    #Abaixo estao os callbacks de cada custom signal.
+    @QtCore.Slot(object)
+    def insert_episode(self,args):
+        
+        episode = args[0]
+        row = self.ui.listEpisodes.count()
+        self.ui.listEpisodes.insertItem(row,episode.keys()[0])
+        self.episodes_data.update(episode)
+
+    @QtCore.Slot(object)
+    def increment_progress(self,args):
+
+        self.incrementProgress()
+
+    @QtCore.Slot(object)
+    def format_progress(self,args):
+
+        self.ui.progress_bar.setFormat(args[0])
+
+    @QtCore.Slot(object)
+    def reset_progress(self,args):
+
+        self.ui.progress_bar.setFormat("")
+        self.ui.progress_bar.setValue(0)        
+
+        return
+
+    @QtCore.Slot(object)
+    def set_progress_range(self,args):
+
+        self.ui.progress_bar.setRange(args[0],args[-1])
+
+        return
+
     def list_episodes(self):
         """add episodes to ep listWidget"""
-        self.episodes_data = self.get_episodes_data()
-        ep_list = self.episodes_data.keys()
-        ep_list.sort()
-        row = 0
-        for item in ep_list:
-            self.ui.listEpisodes.insertItem(row, item)
-            row += 1
+        thread = Thread(target=self.get_episodes_data)
+        thread.start()
 
         # ACTIVATE LIST WIDGETS
         self.ui.listEpisodes.setEnabled(True)
