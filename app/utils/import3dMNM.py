@@ -15,7 +15,7 @@ def clean_folder(folder_path):
 
 def format_name(raw_name):
     """formata o nome do asset/layer"""
-    reg_lixo = r'(^\w{2}_|\d+_|_SC\d{4}|\w{2}\d{4}_|Final)'
+    reg_lixo = r'(^\w{2}_|\d+_|_SC\d{4}|\w{2}\d{4}_|v\d{2}|Final|(\.\w{3}$))'
     return re.sub(reg_lixo, "", raw_name)
 
 
@@ -29,7 +29,7 @@ def get_layers(asset_folder):
         if len(files) == 0:
             messageLog.trace("[PYTHON]--No layers found for asset: {0}".format(os.path.dirname(asset_folder)))
             return False
-        layer_dict["name"] = None
+        layer_dict["name"] = format_name(files[0])
         layer_dict["path"] = asset_folder
         layer_dict["files"] = files
         layers_list.append(layer_dict)
@@ -40,6 +40,10 @@ def get_layers(asset_folder):
         layer_dict["name"] = format_name(item)
         layer_dict["path"] = os.path.join(asset_folder, item)
         layer_dict["files"] = filter(lambda x: x.endswith('.tif'), os.listdir(layer_dict["path"]))
+        # if layer has no files
+        if len(layer_dict["files"]) == 0:
+            messageLog.trace("[PYTHON]--No layers found for asset {0} layer: {1}".format(os.path.dirname(asset_folder), layer_dict["name"]))
+            continue
         layers_list.append(layer_dict)
     return layers_list
 

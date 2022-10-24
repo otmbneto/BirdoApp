@@ -7,18 +7,23 @@ include("BD_2-ScriptLIB_Geral.js");
 function import3DSeqMNM(self, assets_data){
 	
 	scene.beginUndoRedoAccum("Import Assets 3D");	
-	var nodes_created = [];
+	//global waning frame message
+	var frames_msg = null;
+	var allnodes = [];
 	var progressDlg = new QProgressDialog(self);
 	//progressDlg.setStyleSheet(progressDlg_style);
 	progressDlg.modal = true;
 	progressDlg.open();
 	progressDlg.setRange(0, 2);
 	progressDlg.activateWindow();
-
+	var index = 0;
 	for(asset in assets_data){
+		var nodes_created = [];
 		progressDlg.setLabelText("..Creating Group");
-		var asset_group = createAssetGroup(asset);
-
+		Print("asset: " + asset);
+		var asset_group = createAssetGroup(asset, index);
+		Print("Group created: ");
+		Print(asset_group);
 		if(!asset_group){
 			MessageBox.warning("ERROR creating node group!",0,0);
 			return false;
@@ -30,37 +35,43 @@ function import3DSeqMNM(self, assets_data){
 		assets_data[asset].forEach(function(item, index){
 			progressDlg.setLabelText("importing Layer: " + item.imput_name);
 			progressDlg.setValue(index);
-			
+			Print("assets item loop:");
+			Print(item.imput_name);
 			if(!item.valid){
 				Print("Ignoring layer: " + item.imput_name);
 				return;
 			}
+			Print("Creating node..");
 			var tif_node = addImageSeqIntoNode(item.imput_name, asset_group.node_path, item.file_list);
+			Print(tif_node);
+
 			if(!tif_node){
 				Print("ERROR creating layer");
 				continue;
 			}
 			nodes_created.push(tif_node);
+			allnodes.push(tif_node);
 		});
 		Print("Nodes created:");
 		Print(nodes_created);
 
 		//organize nodes created
 		connectNodes(nodes_created, asset_group.comp, asset_group.imput_module);
-
+		Print("Nodes connected!");
 		//add peg to main group
 		BD2_AddNodeUp(asset_group.node_path, node.getName(asset_group.node_path) + "-P", "PEG", false);
+		Print("Peg added!!");
+		index++;
 	}
-	
 	
 	scene.endUndoRedoAccum();
 	progressDlg.close();
 	
-	MessageBox.information("DONE! " + nodes_created.length + " nodes created!");
+	MessageBox.information("DONE! " + allnodes.length + " nodes created!");
 	return true;
 	
 	//extra functions
-	function createAssetGroup(group_name){//cria o grupo com composite
+	function createAssetGroup(group_name, index){//cria o grupo com composite
 		var parentGroup = node.root();
 		var charcomp = "Top/CHAR";
 
@@ -69,7 +80,8 @@ function import3DSeqMNM(self, assets_data){
 			charcomp = node.srcNode("Top/SETUP", 2);
 		}
 		//add main group
-		var group = node.add(parentGroup, group_name, "GROUP", 1026, -500, 0);
+		var coordx = index * 100;
+		var group = node.add(parentGroup, group_name, "GROUP", 1026 + coordx, -500, 0);
 		if(!group){
 			Print("ERROR creating group!");
 			return false;
@@ -135,22 +147,37 @@ function import3DSeqMNM(self, assets_data){
 		node.linkAttr(read, "DRAWING.ELEMENT", uniqueColumnName);
 		
 		//import images
+		var frame_exp = getImageFrame(images[0], node_name);//start frame
+Print("START FRAME: " + frame_exp);
 		images.forEach(function(element){
-			var timing = getImageFrame(element);
-			Drawing.create(elemId, timing, true, false); // create a drawing drawing, 'true' indicate that the file exists, the last false indicates the drawing is in temp.
-			var drawingFilePath = Drawing.filename(elemId, timing);   // get the actual path, in tmp folder.
+			Drawing.create(elemId, frame_exp, true, false); // create a drawing drawing, 'true' indicate that the file exists, the last false indicates the drawing is in temp.
+			var drawingFilePath = Drawing.filename(elemId, frame_exp);   // get the actual path, in tmp folder.
 			BD1_CopyFile(element, drawingFilePath);
-			column.setEntry(uniqueColumnName, 1, parseFloat(timing), timing);
+			column.setEntry(uniqueColumnName, 1, parseFloat(frame_exp), frame_exp);
+			frame_exp++;
 		});
+		//extend exposure
+		if(frame_exp < frame.numberOf()){
+			Print("Extendendo exposicao da camada: " + node_name);
+			column.fillEmptyCels(uniqueColumnName, frame_exp, (frame.numberOf() + 1));
+		}	
 		return read;
 	}
 	
 	//retorna o numero do frame baseado no nome do arquivo de imagem
-	function getImageFrame(imageName){
+	function getImageFrame(imageName, layerName){
 		var regex = /\.\d{4}\.\w{3}$/;
-		return parseInt(imageName.match(regex)[0].slice(1,5), 10);
+		if(!regex.test(imageName)){
+			MessageBox.warning("A camada " + layerName + " nao esta com informacao de frames no nome do arquivo.\nSera importada no Frame 1!",0,0);
+			return 1;
+		}
+		var framenum = parseInt(imageName.match(regex)[0].slice(1,5), 10);
+		if(framenum > frame.numberOf()){
+			MessageBox.warning("A camada " + layerName + " nao esta com informacao de frames no nome do arquivo.\nSera importada no Frame 1!",0,0);
+			framenum = 1;
+		}
+		return framenum;
 	}
-	
 }
 
 exports.import3DSeqMNM = import3DSeqMNM;

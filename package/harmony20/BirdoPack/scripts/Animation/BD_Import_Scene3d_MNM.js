@@ -62,7 +62,7 @@ function BD_Import_Scene3d_MNM(){
 	//EXTRA FUNCTIONS
 	function donwload_assets(projectDATA){//runs python script to download from server
 	
-		var birdoAppPath = projectDATA.birdoApp; //FIXME!!!######################
+		var birdoAppPath = projectDATA.birdoApp.replace(/\/$/, "_SANDBOX/"); //FIXME!!!######################
 		var libsPath = birdoAppPath + "venv/Lib/site-packages";
 		var pyFilePath = birdoAppPath + "app/utils/import3dMNM.py";
 		PythonManager.addSysPath(fileMapper.toNativePath(libsPath));
@@ -82,67 +82,70 @@ function createInterface(projectDATA, layers_data){
 	this.require_script = require(projectDATA.paths.birdoPackage + "utils/import3DSeqMNM.js");
 	this.ui = UiLoader.load(uifile);
 	this.ui.activateWindow();
-	
 	//fix windows size
 	//this.ui.setFixedSize(390, 520);
 	
 	//attributes
 	this.final_data = {};
-	this.current_page = 0;
-
-	//update widgets
-	if(layers_data.assets3D.length > 1){
-		this.ui.pushImport.text = "Continue...";
-	}
-		
-	//add imput widgets
-	var asset_name = layers_data["assets3D"][this.current_page].full_name;
-	this.ui.groupBox.title = asset_name;
-	var lay = this.ui.groupBox.layout();
-	var i = 0;
-	this.final_data[asset_name] = layers_data["assets3D"][this.current_page]["layers"].map(function(item){
-		var obj = {
-			"name": item.name,
-			"file_list": item["files"].map(function(x){return item["path"] + "\\" + x;}),
-			"checkbox": new QCheckBox("Layer " + (i + 1), this),
-			"lineEdit": new QLineEdit(item.name, this)
-		};
-		obj.checkbox.checked = true;
-		obj.checkbox.toggled.connect(this, function(){
-			obj.lineEdit.enabled = obj.checkbox.checked;
+	var bfont = new QFont();
+	bfont.setBold(true);
+	
+	//add widgets items	
+	var row = 0;
+	for(var i=0; i<layers_data.assets3D.length; i++){
+		var asset_name = layers_data["assets3D"][i].full_name;
+		var lay = this.ui.groupBox.layout();
+		var label1 = new QLabel("Asset:");
+		var label2 = new QLabel(asset_name);
+		label1.font = bfont;
+		label2.font = bfont;
+		lay.addWidget(label1, row, 0, Qt.AlignTop);
+		lay.addWidget(label2, row, 1, Qt.AlignTop);
+		row++;
+		this.final_data[asset_name] = layers_data["assets3D"][i]["layers"].map(function(item, index){
+			var obj = {
+				"name": item.name,
+				"file_list": item["files"].map(function(x){return item["path"] + "\\" + x;}),
+				"checkbox": new QCheckBox("Layer " + (index + 1), this),
+				"lineEdit": new QLineEdit(item.name, this)
+			};
+			obj.checkbox.checked = true;
+			obj.checkbox.toggled.connect(this, function(){
+				obj.lineEdit.enabled = obj.checkbox.checked;
+			});
+			lay.addWidget(obj.checkbox, row, 0, Qt.AlignCenter);
+			lay.addWidget(obj.lineEdit, row, 1, Qt.AlignTop);
+			row++;
+			return obj;
 		});
-		lay.addWidget(obj.checkbox, i, 0, Qt.AlignCenter);
-		lay.addWidget(obj.lineEdit, i, 1, Qt.AlignTop);
-		i++;
-		return obj;
-	});
-		
+	}
 	//CALLBACKs
 	this.updateMainData = function(){//clean widgets and remove unchecked items from final list 
-		var layout = this.ui.groupBox.layout();
-		var asset_name = layers_data["assets3D"][this.current_page].full_name;
-		this.final_data[asset_name].forEach(function(item, i){
-			//updates names values
-			var itemname = "3D_" + item.lineEdit.text;
-			if(!validate_name(itemname)){
-				Print("Invalid name for item : " + itemname);
-				this.ui.close();
-				return;
-			}
-			item["imput_name"] = itemname;
-			item["valid"] = item.checkbox.checked;
-		});
-		this.current_page++;
-		Print("Page updated!");
+		for(asset in this.final_data){
+			Print(asset);
+			Print(this.final_data[asset].length);
+			var listupdate = [];
+			this.final_data[asset].forEach(function(item){
+				//updates names values
+				var itemname = "3D_" + item.lineEdit.text;
+				if(!validate_name(itemname)){
+					Print("Invalid name for item : " + itemname);
+					this.ui.close();
+					return;
+				}
+				item["imput_name"] = itemname;
+				item["valid"] = item.checkbox.checked;
+			});
+		}
 	}
 	
 	this.onImport = function(){
-		var is_last_page = layers_data.assets3D.length == this.current_page;
-		Print("is last page : " + is_last_page);
+		Print("on import...");
 		this.updateMainData();
+		Print("Updated final data:");
 		Print(this.final_data);
 		this.require_script.import3DSeqMNM(this, this.final_data);
-		this.ui.close();
+		this.ui.close();				
 	}
 	
 	this.onClose = function(){
