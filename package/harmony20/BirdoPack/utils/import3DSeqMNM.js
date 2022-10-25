@@ -148,7 +148,7 @@ function import3DSeqMNM(self, assets_data){
 		
 		//import images
 		var frame_exp = getImageFrame(images[0], node_name);//start frame
-Print("START FRAME: " + frame_exp);
+		Print("START FRAME: " + frame_exp);
 		images.forEach(function(element){
 			Drawing.create(elemId, frame_exp, true, false); // create a drawing drawing, 'true' indicate that the file exists, the last false indicates the drawing is in temp.
 			var drawingFilePath = Drawing.filename(elemId, frame_exp);   // get the actual path, in tmp folder.
@@ -160,7 +160,11 @@ Print("START FRAME: " + frame_exp);
 		if(frame_exp < frame.numberOf()){
 			Print("Extendendo exposicao da camada: " + node_name);
 			column.fillEmptyCels(uniqueColumnName, frame_exp, (frame.numberOf() + 1));
-		}	
+		}
+		if(frame_exp > frame.numberOf()){
+			Print("Camada exedeu o tamanho da cena: " + node_name);
+			MessageBox.warning("A camada " + node_name + " utrapassou o limite da cena!\nConfira a duracao da cena correta e ajuste se necessario!",0,0);
+		}
 		return read;
 	}
 	
