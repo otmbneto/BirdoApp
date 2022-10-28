@@ -59,5 +59,16 @@
 			"path": "templates/palettes/MNM/CH0004_Julieta_recolor",
 			"name": "CH0004_JULIETA"
 		}
+	},
+	"CH0004_Julieta_RoupaBanho": {
+		"recolorInfo": {
+			"PELE": {
+				"original_color": "09c46cd31a8ddfb0"
+			}
+		},
+		"palette": {
+			"path": "templates/palettes/MNM/CH0004_Julieta_recolor",
+			"name": "CH0004_JULIETA"
+		}
 	}
 }

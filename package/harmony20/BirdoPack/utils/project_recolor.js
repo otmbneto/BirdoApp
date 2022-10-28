@@ -56,20 +56,32 @@ function project_recolor(projectDATA, use_pg){
 	}
 	
 	//loop nos drawings da cena
-	reads.forEach(function(x){
+	reads.forEach(function(element, index){
 			if(use_pg){
-				progressDlg.setLabelText("Chcking Nodes: [" + i + "/" + reads.length + "]");
-				progressDlg.setValue(i);
+				progressDlg.setLabelText("Chcking Nodes: [" + index + "/" + reads.length + "]");
+				progressDlg.setValue(index);
 			}
-			i++;
 			
-			var node_obj = get_repaint_object(repaint_obj, x);
+			var node_obj = get_repaint_object(repaint_obj, element);
 			if(!node_obj){
 				return;
 			} else {
 				recolor_counter++;
 				Print(node_obj);
 				repaint_node(node_obj);
+				//change colour selectors connected
+				//find cloned nodes
+				var clonedNodes = reads.filter(function(x){ return node.getElementId(element) == node.getElementId(x)});
+				clonedNodes.forEach(function(x){
+					var cs_list = find_color_selectors(x);
+					for(var i=0; i<cs_list.length; i++){
+						for(var y=0; y<node_obj.color_maps.length; y++){
+							var oldColor = node_obj.color_maps[y].from;
+							var newColor = node_obj.color_maps[y].to;
+							updateColorSelector(cs_list[i], oldColor, newColor);
+						}		
+					}
+				});
 			}
 		});	
 	
@@ -226,7 +238,77 @@ function project_recolor(projectDATA, use_pg){
 			DrawingTools.recolorDrawing(drawingKey, colorMaps);
 		});
 	}
-	
+		
+	function find_color_selectors(nodeP){//retorna uma lista de colour selectors conectados abaixo do node
+
+		var cslist = [];
+		var nType = "TbdColorSelector";
+		findNodeTypeDonw(nodeP, 0);
+
+		return cslist;
+
+		function findNodeTypeDonw(rootNode, p){
+			if(rootNode == ""){
+				return false;			
+			}
+			var prev_node = null;
+			for(var i=0; i<node.numberOfOutputLinks(rootNode, p); i++){
+				var prev_info = node.dstNodeInfo(rootNode, p, i);
+				if (node.type(prev_info.node) == nType){
+					cslist.push(prev_info.node);
+				} else if (node.type(prev_info.node) == "GROUP"){ 
+					var portIn = prev_info.node + "/Multi-Port-In"; 
+					prev_node = findNodeTypeDonw(portIn, prev_info.port);
+				} else if (node.type(prev_info.node) == "MULTIPORT_OUT"){
+					var parentN = node.parentNode(prev_info.node); 
+					prev_node = findNodeTypeDonw(parentN, prev_info.port);
+				} 
+				if(prev_node){
+					return prev_node;
+				} else {
+					prev_node = findNodeTypeDonw(prev_info.node, 0);			
+				}
+			}
+			return prev_node;
+		}
+	}
+		
+	function updateColorSelector(csNode, rmColorId, addColorId){//modifica a lista de cores do colour selector (remove e add as cores dadas)
+		var wAttr = node.getAttr(csNode, 1, "selectedcolors");
+		var colorList = JSON.parse(wAttr.textValue());
+		var updatedList = colorList.filter(function(element){
+			return element.colorId != rmColorId;
+		});
+		if(colorList.length == updatedList.length){
+			Print("Nao e necessario mudar o Colour-Selector : " + csNode);
+			return;
+		}
+		var colorObj = getColorData(addColorId);
+		if(!colorObj){
+			Print("ERROR geting orignal color to update cselector: " + addColorId);
+			return;
+		}
+		updatedList.push(colorObj);
+		wAttr.setValue(JSON.stringify(updatedList));
+		Print("Updated Colour-Selector: " + csNode);
+
+		function getColorData(colorID){
+			var paletteList = PaletteObjectManager.getScenePaletteList();
+			var pal = paletteList.findPaletteOfColor(colorID);
+			var cData = pal.getColorById(colorID);
+			if(!cData.isValid){
+				return false;
+			}
+			return { 
+				"a" : cData.colorData.a,
+				"r" : cData.colorData.r,
+				"g" : cData.colorData.g,
+				"b" : cData.colorData.b,
+				"colorId" : cData.id,
+				"name" : cData.name
+			};	
+		}
+	}
 }
 
 exports.project_recolor = project_recolor;
