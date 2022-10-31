@@ -93,6 +93,10 @@ function createInterface(projectDATA, layers_data){
 	//add widgets items	
 	var row = 0;
 	for(var i=0; i<layers_data.assets3D.length; i++){
+		if(!layers_data["assets3D"][i]["layers"]){
+			Print("ignoring item: " + layers_data["assets3D"][i].full_name);
+			continue;
+		}	
 		var asset_name = layers_data["assets3D"][i].full_name;
 		var lay = this.ui.groupBox.layout();
 		var label1 = new QLabel("Asset:");
@@ -102,6 +106,7 @@ function createInterface(projectDATA, layers_data){
 		lay.addWidget(label1, row, 0, Qt.AlignTop);
 		lay.addWidget(label2, row, 1, Qt.AlignTop);
 		row++;
+		
 		this.final_data[asset_name] = layers_data["assets3D"][i]["layers"].map(function(item, index){
 			var obj = {
 				"name": item.name,
