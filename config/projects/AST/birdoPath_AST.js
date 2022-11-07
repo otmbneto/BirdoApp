@@ -29,7 +29,14 @@ function BirdoProject(entity){
 		"asset": new RegExp("(\\w{2}\\d{3}|\\w{2})_\\w+"),
 		"shot": new RegExp("\\w{3}_EP\\d{3}_SC\\d{4}")
 	};
-	
+	this.colour_spaces = {
+		"PRE_COMP": "NO_COLOUR_SPACE", 
+		"COMP": "NO_COLOUR_SPACE"
+	};
+	this.resolution_name = {
+		"PRE_COMP": "HDTV_1080p24", 
+		"COMP": "4K_UHD"
+	};
 	//limpa o prefix da entity para nao ficar com redundancia
 	delete this.entity.prefix;
 	
@@ -114,15 +121,56 @@ function BirdoProject(entity){
 		return step;
 	}
 	
-	this.getProjectCS = function(step){//retorna qual espaco de cor para o projeto no step pedido
-		var colour_spaces = {"PRE_COMP": "NO_COLOUR_SPACE", "COMP": "NO_COLOUR_SPACE"};
-		if(!(step in colour_spaces)){
-			MessageLog.trace("[GETPROJECTCS] ERROR! PARAMETRO DE STEP INVALIDO!");
+	this.setProjectCS = function(step){//seta o espaco de cor para o projeto
+		if(!(step in this.colour_spaces)){
+			MessageLog.trace("[SETPROJECTCS] ERROR! PARAMETRO DE STEP INVALIDO!");
 			return false;
 		}
-		return colour_spaces[step];		
-	}
+		var proj_cs = this.colour_spaces[step];
+		
+		if(proj_cs == "ACES"){
+			var ocio = fileMapper.toScenePath(specialFolders.etc + "/colormanagement/config.ocio");
+			if(!fileExists(ocio)){
+				MessageLog.trace("Ocio not found in this computer!");
+				return false
+			}
+			MessageLog.trace("[SETPROJECTCS] OCIO check ok!");
+		}
+		
+		var setCS_script_path = this.paths.birdoPackage + "utils/setColourSpace.js";
+		
+		MessageLog.trace("### Setting Color Space - " + proj_cs + " ###");
 
+		var require_script = require(setCS_script_path).setColourSpace(proj_cs);
+		
+		if(!require_script){
+			MessageBox.warning("ERROR CHANGING COLOUR SPACE: " + proj_cs + "\nCheck MessageLog for details!",0,0);
+			return false;
+		} else {
+			MessageLog.trace(require_script);
+			return true;
+		}
+	}
+	
+	this.setProjectResolution = function(step){//seta os settings de resolucao e fps do projeto
+		if(!(step in this.resolution_name)){
+			MessageLog.trace("[SETPROJECTRESOLUTION] ERROR! PARAMETRO DE STEP INVALIDO!");
+			return false;
+		}
+		var res = this.resolution_name[step];
+		return scene.setDefaultResolutionName(res);
+	}
+	
+	this.modifyScenePreRender = function(step){
+		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
+		if(step == "COMP"){
+			//exporta info dos psd
+			require(get_psd_data_script).get_psd_anim_data(true);
+		} else {
+			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
+		}
+	}	
+	
 	this.getRenderComp = function(scene_name){//caminho do render da comp (direto na rede da birdo)
 		var name_arr = scene_name.split("_");
 		var ep = name_arr[1];

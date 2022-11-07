@@ -219,7 +219,7 @@ function BD2_ListNodesInSelection(selNodes, typelist){
 @typeArray => array com tipos de nodes a ser listados ("" vazio para nao filtrar e retornar TODOS nodes)
 @exception => string com excecoes nos nomes de nodes q NAO devem ser listados
 */
-function BD2_ListAllNodesUp(initialNode, typeArray, exception){
+function BD2_ListNodesUp(initialNode, typeArray, exception){
 	var nodeList = [];
 
 	if(node.getName(initialNode) == ""){
@@ -248,6 +248,54 @@ function BD2_ListAllNodesUp(initialNode, typeArray, exception){
 	return nodeList;
 }
 
+/*Lista todos os nodes dos tipos listados, conectados ABAIXO do node inicial
+@initialNode => node inicial para procurar os nodes conectados abaixo
+@typeArray => array com tipos de nodes a ser listados ("" vazio para nao filtrar e retornar TODOS nodes)
+@exception => string com excecoes nos nomes de nodes q NAO devem ser listados
+*/
+function BD2_ListNodesDown(initialNode, typeArray, exception){
+	var nodeList = [];
+	if(node.getName(initialNode) == ""){
+		MessageLog.trace("[LISTNODESDOWN] Invalid node!");
+		return false;
+	}
+	listConnectedNodes(initialNode);
+
+	function listConnectedNodes(rootNode){
+		var outPorts = node.numberOfOutputPorts(rootNode);
+		if(outPorts >0){
+			for(var i=0; i<outPorts; i++){
+				if(!node.isLinked(rootNode, i)){
+					continue;
+				}
+				list_links(rootNode, i);
+			}
+		}
+	}
+	function list_links(nodePath, port){
+		var links = node.numberOfOutputLinks(nodePath, port);
+		for(var y=0; y<links; y++){
+			var nodeConnectedInfo = node.dstNodeInfo(nodePath, port, y);
+			if(typeArray.indexOf(node.type(nodeConnectedInfo.node)) != -1){
+				if(!exception){
+					nodeList.push(nodeConnectedInfo.node);
+				} else if (node.getName(nodeConnectedInfo.node).indexOf(exception) == -1){
+					nodeList.push(nodeConnectedInfo.node);
+				}
+			}
+			if(node.type(nodeConnectedInfo.node) == "MULTIPORT_OUT"){
+				var parentGroup = node.parentNode(nodeConnectedInfo.node);
+				list_links(parentGroup, nodeConnectedInfo.port);
+			} else if (node.isGroup(nodeConnectedInfo.node)){
+				var portIn = [nodeConnectedInfo.node, "Multi-Port-In"].join("/");
+				list_links(portIn, nodeConnectedInfo.port);
+			} else {
+				listConnectedNodes(nodeConnectedInfo.node);
+			}
+		}
+	}
+	return nodeList;
+}
 
 /*Funcao q copia os att de um node para o outro no frame atual//
 @node1 => node para copiar os atributos
@@ -862,11 +910,11 @@ function BD2_FixBgVisibility(olg, render){
 	var bgComp = "Top/BG";
 	
 	if(node.getName(bgComp) == ""){
-		MessageLog.trace("Bg comp nao encontrada!");	
+		MessageLog.trace("Bg comp nao encontrada!");
 		return false;		
 	}
 
-	var grupos = BD2_ListAllNodesUp(bgComp, ["GROUP"]);
+	var grupos = BD2_ListNodesUp(bgComp, ["GROUP"]);
 	var visibList = [];
 	
 	for(var i=0; i<grupos.length; i++){
@@ -1182,7 +1230,6 @@ function BD2_changeWriteNodeAtt(projectData, writeNode, output_name, step){
 muda o espaco de cor do projeto para COMP ou PRE_COMP
 @projectData => objeto com info do projeto
 @step => step para definir espaco de cor 'COMP' ou 'PRE_COMP'!
-*/
 function BD2_setProjectColourSpace(projectData, step){
 	var cs = projectData.getProjectCS(step);
 	if(cs == "ACES"){
@@ -1209,6 +1256,7 @@ function BD2_setProjectColourSpace(projectData, step){
 	}
 	
 }
+*/
 
 /*
 adicionar um palletOverride no node selecionado com a correcao de cor do projeto caso exista

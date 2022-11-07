@@ -1,7 +1,6 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
-/* OBS: se for COMP, renderiza na rede com o caminho renderComp, se for PRE_COMP, renderiza na pasta frames da cena!
-   OBS2: somente adiciona o color fix do projeto se for COMP
+/*   OBS2: somente adiciona o color fix do projeto se for COMP
 -------------------------------------------------------------------------------
 Name:		prepare_for_render.js
 
@@ -23,16 +22,30 @@ function prepare_for_render(projData, render_step, use_extra_writenodes){
 	var step = 	render_step == "COMP" ? "COMP" : "PRE_COMP";
 
 	//objeto com info do output esperado
-	var output_data = {"render_comp": projData.getRenderComp(projData.entity.name), "folder": null, "render_number": 0, "frames_number": frame.numberOf(), "file_list": []};
+	var output_data = {
+		"render_comp": projData.getRenderComp(projData.entity.name),
+		"folder": null, 
+		"render_number": 0, 
+		"frames_number": frame.numberOf(),
+		"file_list": []
+	};
 	
 	//sets the colour space for the step
-	var setCS = BD2_setProjectColourSpace(projData, step);
-	
+	var setCS = projData.setProjectCS(step);
 	if(!setCS){
 		Print("[ERROR]Fail to set projectColourSpace!");
 		return false;
 	}
 	
+	//sets scene project resolution and fps
+	if(projData.setProjectResolution(step)){
+		Print("Project resolution set!");
+	} else {
+		Print("Fail to set secene project Resolution!");	
+	}
+	
+	//modify scene before render
+	projData.modifyScenePreRender(step);
 	var renderPath = scene.currentProjectPath() + "/frames/";
 
 	if(BD1_DirExist(renderPath)){//limpa folder de destino...
@@ -51,7 +64,7 @@ function prepare_for_render(projData, render_step, use_extra_writenodes){
 	checkForIrregularNodesForRender();
 	
 	output_data["folder"] = renderPath;
-		
+
 	//acerta os writeNodes
 	output_data["file_list"] = setWriteNodes(projData, step, renderPath);
 	output_data["render_number"] = output_data["file_list"].length;

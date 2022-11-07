@@ -105,6 +105,10 @@ function RenderPreview(){
 	Print("---render preview end!");	
 	scene.endUndoRedoAccum();
 	
+	//undo the modifications
+	Print("undoing modifications...");
+	scene.undo(1);
+	
 //////////////////////////////////////////FUNCOES EXTRAS/////////////////////////////////////////
 	function check_render_output(output_files){//verifica os arquivos de destino do render (retorna info dos arquivos de saida)
 		Print("--INIT Check output files: ");
