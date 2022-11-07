@@ -3,6 +3,7 @@ include("BD_2-ScriptLIB_Geral.js");
 
 
 function get_psd_anim_data(disable_psd_nodes){
+
 	var output_folder = scene.currentProjectPath() + "/frames/EXPORT_DATA/";
 	//make sure folder is clean and exists
 	BD1_CleanFolder(output_folder);

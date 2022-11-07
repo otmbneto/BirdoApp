@@ -44,22 +44,16 @@ function prepare_for_render(projData, render_step, use_extra_writenodes){
 		Print("Fail to set secene project Resolution!");	
 	}
 	
-	//modify scene before render
-	projData.modifyScenePreRender(step);
+	//clean frames folder
 	var renderPath = scene.currentProjectPath() + "/frames/";
 
-	if(BD1_DirExist(renderPath)){//limpa folder de destino...
-		Print("preparing output folder...");
-		if(!BD1_RemoveDirs(renderPath)){
-			Print("Fail to delete render folder!");
-			return false;
-		}
-	}
-
-	if(!BD1_createDirectoryREDE(renderPath)){
-		Print("Fail to create output render folder!");
+	if(!BD1_CleanFolder(renderPath)){
+		Print("[ERROR]Fail cleaning render destination folder!");
 		return false;
 	}
+	
+	//project modify scene before render
+	projData.modifyScenePreRender(step);
 	
 	checkForIrregularNodesForRender();
 	

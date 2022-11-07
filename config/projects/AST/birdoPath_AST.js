@@ -158,7 +158,13 @@ function BirdoProject(entity){
 			return false;
 		}
 		var res = this.resolution_name[step];
-		return scene.setDefaultResolutionName(res);
+		if(scene.setDefaultResolutionName(res)){
+			MessageLog.trace("Scene resolution updated to: " + res);
+			return true;
+		} else {
+			MessageLog.trace("FAIL to update scene resolution to: " + res);
+			return false;
+		}
 	}
 	
 	this.modifyScenePreRender = function(step){
