@@ -181,14 +181,8 @@ function BirdoProject(entity){
 		var name_arr = scene_name.split("_");
 		var ep = name_arr[1];
 		
-		//test if render path for comp exists in this computer
-		if(!dirExist(this.paths.render_comp)){
-			MessageLog.trace("Fail to find renderComp path in this computer! Use the local path instead!");
-			return false;
-		}
-		
 		var render_path = this.paths.render_comp.replace("{EP}", ep);
-		return render_path;
+		return render_path.replace("{SCENE}", scene_name);
 	}
 
 	this.getShotPublishFolder = function(step){//retorna o caminho de folder para publish do arquivo aberto para o projeto - OK
