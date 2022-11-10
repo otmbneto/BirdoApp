@@ -23,6 +23,9 @@ def main(proj_data):
     process = subprocess.Popen([harmony_path, xstage_file], executable=harmony_path)
 
     print "--template asset harmony opened for project: {0}, with pid: {1}".format(proj_data["prefix"], process.pid)
+    print "harmony: {0}".format(harmony_path)
+    print "xstage path: {0}".format(xstage_file)
+    os.system("pause")
 
 
 if __name__ == "__main__":
