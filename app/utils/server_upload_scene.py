@@ -29,7 +29,7 @@ def create_fazendinha_queue(proj_data, imput_obj, scene_name, version):
     date = datetime.strftime(datetime.today(), '%d/%m/%Y, %H:%M:%S')
 
     # DEFINE RENDER TYPE (OU RENDER DE COMP OU PRECOMP)
-    if imput_obj["render_step"] == "COMP":
+    if "COMP" in imput_obj["render_step"]:
         render_type = "COMP"
     else:
         render_type = "PRE_COMP"

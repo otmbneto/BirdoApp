@@ -199,7 +199,7 @@ function BirdoProject(entity){
 	}
 	
 	this.getRenderStep = function(){//retorna o step do render (se for anim ou setup o user_type, seleciona sozinho... se nao pergunta)
-		var steps = this.paths.step.RENDER;
+		var steps = this.paths.step.RENDER.map(function(x) { return x.replace(/\d{2}_/, "")});
 		steps.shift();
 		var step = null;
 		if(this.user_type == "SETUP"){
