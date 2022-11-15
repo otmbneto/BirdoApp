@@ -38,7 +38,7 @@ function BD_FindDrawingWithColour(){
 		MessageBox.warning("No color selected!");
 		return;
 	}
-	
+
 	var colorObj = {
 				"name": curr_color_name,
 				"colorId": curr_color_id,
@@ -127,7 +127,7 @@ function loadInterface(nodeMatch_list, colorData, pathUI){
 	this.ui = UiLoader.load(pathUI);
 	this.node_list = nodeMatch_list;
 	this.ui.activateWindow();
-	this.ui.setWindowFlags(Qt.WindowStaysOnTopHint);
+	//this.ui.setWindowFlags(Qt.WindowStaysOnTopHint);
 	
 	//update number of nodes label
 	this.ui.groupNode.labelNumber.setText(format_index(this.node_list.length));
@@ -255,23 +255,6 @@ function loadInterface(nodeMatch_list, colorData, pathUI){
 		Print("closing ui..");
 		this.ui.close();
 	}
-	
-	this.mpos = 0;
-	
-	//make drag window
-	this.ui.mousePressEvent = function(event){
-		MessageLog.trace("teste pres");
-		this.mpos = event.pos();
-	}
-	
-	this.ui.mouseMoveEvent = function(event){
-		Print("teste move");
-		var diff = new QPoint(event.pos() - this.mpos);
-		var newpos = new QPoint(this.ui.pos() + diff);
-		this.ui.move(newpos);
-	}
-
-	Print("pos setar mouser");
 	
 	//hide progress bar
 	this.ui.progressBar.hide();

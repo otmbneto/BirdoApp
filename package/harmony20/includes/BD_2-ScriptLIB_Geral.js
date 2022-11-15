@@ -147,7 +147,7 @@ function BD2_getTimingsOfSelected(selected){
 function BD2_ListNodesInGroup(firstGroup, typeList, fullpath){
 	var useTypeFilter = true;
 
-	if(typeList == ""){
+	if(!typeList){
 		useTypeFilter = false;
 	}
 
