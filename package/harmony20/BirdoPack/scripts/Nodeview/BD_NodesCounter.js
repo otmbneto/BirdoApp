@@ -8,77 +8,88 @@ Usage:		Selecione o grupo do RIG e veja  o BOXINFO com os detalhes;
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	Dezembro, 2018. (update seetmbro,2019 = lista por todos os tipos);
+Created:	Dezembro, 2018. (update novembro,2022 = nova interface mostrando lista por tipo);
             
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
+include("BD_1-ScriptLIB_File.js");
+include("BD_2-ScriptLIB_Geral.js");
+
 function BD_NodesCounter(){
 
-if(node.isGroup(selection.selectedNode(0))==false){
-    MessageBox.information("Não é um Grupo Selecionado! Seleciona certo aê, consagrado!!"); return;
-  }
-
-
-var n = selection.selectedNode(0);
-
-var listaTotal = total(n);
-
-var label = listaTipos(listaTotal);
-
-MessageBox.information(label);
-return;
-
-
-
-function total(Group){
+	var groupNode = selection.selectedNode(0);
+	if(!node.isGroup(groupNode) || !groupNode){
+		MessageBox.information("Não é um Grupo Selecionado! Seleciona certo aê, consagrado!!"); 
+		return;
+	}
 	
-	var listToFill = [];
+	var projectDATA = BD2_ProjectInfo();
+	if(!projectDATA){
+		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		return false;
+	}
 	
-	listaRecursivamente(node.subNodes(Group));
+	var nodeList = BD2_ListNodesInGroup(groupNode, "", true);
+	var mainObj = {
+		"group_node": groupNode,
+		"total": 0,
+		"types": {}
+	};
 	
-	function listaRecursivamente(a){
-		for(var i = 0;i<a.length;i=i+1){
-		listToFill.push(a[i]);
-			if(node.type(a[i]) == "GROUP"){
-			listaRecursivamente(node.subNodes(a[i]));
-			}
+	nodeList.forEach(function(item, index){
+		var nodeType = node.type(item);
+		if(nodeType in mainObj.types){
+			mainObj["types"][nodeType].push(item.replace(groupNode + "/", ""));
+		} else {
+			mainObj["types"][nodeType] = [item.replace(groupNode + "/", "")];
+		}
+		mainObj["total"]++;
+	});
+	Print(mainObj);
+	
+	var uiPath = projectDATA.paths.birdoPackage + "ui/BD_NodesCounter.ui";
+	var d = new InitiateUI(uiPath, mainObj);
+	d.ui.show();
+}
+
+function InitiateUI(uiPath, nodes_data){
+	this.ui = UiLoader.load(uiPath);
+	this.ui.activateWindow();
+	//this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
+	this.ui.setFixedSize(387, 211);
+
+	//set widgets
+	this.ui.labelGroupNode.text = nodes_data.group_node;
+	this.ui.labelTotal.text = nodes_data.total;
+	this.ui.groupBox.treeWidget.hide();
+	
+	//update listTree
+	for(item in nodes_data.types){
+		var tree = new QTreeWidgetItem(this.ui.groupBox.treeWidget, [item, nodes_data.types[item].length]);
+		nodes_data.types[item].forEach(function(x){
+			var leaf = new QTreeWidgetItem(tree, [x]);
+		});
+	};
+	
+	//callbacks
+	this.onCheckGB = function(){
+		this.ui.groupBox.treeWidget.setHidden(this.ui.groupBox.checked);
+		MessageLog.trace("Toogled groupBox check...");
+		if(!this.ui.groupBox.checked){
+			this.ui.setFixedSize(387, 211);
+			this.ui.groupBox.treeWidget.hide();
+		} else {
+			this.ui.setFixedSize(387, 386);
+			this.ui.groupBox.treeWidget.show();
 		}
 	}
 
-	return listToFill;
-}
-
-
-function listaTipos(lista){
-var text = "TOTAL: " + lista.length + "\n";
-var listaTipos = [];
-var arrayTodos = [];
-	for(var i=0; i< lista.length; i++){
-	var tipo = node.type(lista[i]);
-		if(listaTipos.indexOf(tipo) == -1){
-		listaTipos.push(tipo);
-		}
-	arrayTodos.push(tipo);
+	this.onClose = function(){
+		MessageLog.trace("Closed!");
+		this.ui.close();
 	}
-
-var finalText = changeText(listaTipos, arrayTodos, text);
-
-function changeText(lista1, lista2, texto){
-
-	for(var i = 0; i<lista1.length;i++){
-	var item = lista1[i];
-	var count = 0;
-		for(var y=0; y<lista2.length; y++){
-			if(lista2[y] == item){
-			count++;
-			}
-		}
-	texto += "\n" + item + ": " + count;
-		}
-return texto;
-}
-
-return finalText;
-}
+	//connections
+	this.ui.buttonClose.clicked.connect(this, this.onClose);
+	this.ui.groupBox.clicked.connect(this, this.onCheckGB);
 }
