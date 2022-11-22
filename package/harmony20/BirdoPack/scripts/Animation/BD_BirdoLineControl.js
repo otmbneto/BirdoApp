@@ -10,7 +10,7 @@ Usage:		Selecione um node de um RIG ou um node DRAWING isolado para controlar as
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	janeiro, 2022
+Created:	janeiro, 2022 (update novembro 2022)
             
 Copyright:   leobazao_@Birdo
  
@@ -19,7 +19,7 @@ Copyright:   leobazao_@Birdo
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-var scrip_version = "v.1.2";
+var scrip_version = "v.1.3";
 function BD_BirdoLineControl(){
 	
 	var projectDATA = BD2_ProjectInfo();
@@ -40,8 +40,11 @@ function BD_BirdoLineControl(){
 	initialData["default_linethick"] = getDefaultValueForScene();
 	
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_LineControl.ui";
-
-	var d = new defineInterface(pathUI, initialData);
+	
+	//require util script
+	var util_apply = require(projectDATA.paths.birdoPackage + "utils/applyLineControl.js");
+	
+	var d = new defineInterface(pathUI, initialData, util_apply);
 	d.ui.show();
 	
 	//EXTRA FUNTION MAIN FUNCTION
@@ -94,23 +97,21 @@ function BD_BirdoLineControl(){
 	
 }
 
-function defineInterface(pathUI, initialData){
+function defineInterface(pathUI, initialData, util_apply){
 
 	this.ui = UiLoader.load(pathUI);
 	
 	//FIX WINDOW SIZE
 	this.ui.setMaximumSize(368, 561);//fix windows size
 	this.ui.activateWindow();
-
+	
 	//STYLE FOR LABELS NODES
 	var styleLabelUnchecked = "QLabel {\n	color: rgb(80, 80, 80);\n	background-color: lightgray;\n	padding-left: 5px;\n	border-radius: 3px;\n	border: null;\n}\n\nQLabel::hover {\n	border: 2px solid #05B8CC;\n    color: white;\n}";	
 	var styleLabelChecked = "QLabel {\n	color: rgb(139, 184, 255);\n	background-color: rgb(0, 255, 255);\n	padding-left: 5px;\n	border-radius: 3px;\n	border: null;\n}\n\nQLabel::hover {\n	border: 2px solid #05B8CC;\n    color: rgb(58, 134, 255);\n}";
-	
-	this.undoLevels = 0;
 
 	//SET INITIAL VALUES
 	this.ui.label_version.text = scrip_version;
-	this.ui.gb_options.comboScale.addItems(["Scale Dependent","Scale Independent","Scale Independent (Legacy)"]);
+	this.ui.gb_options.comboScale.addItems(["Scale Dependent", "Scale Independent", "Scale Independent (Legacy)"]);
 
 	//change Radio Selection
 	if(!initialData["rig_group"] || !initialData["selected_nodes"]){//se nao tiver reconhecido um RIG na selecao de nodes
@@ -119,7 +120,6 @@ function defineInterface(pathUI, initialData){
 		this.ui.gb_node.labelRigGroup.text = ("[" + initialData["read_nodes"].length + "] Read Nodes Listed");
 		this.ui.gb_node.label_2.text = "Drawings:";
 		this.ui.gb_node.labelRigGroup.setStyle(styleLabelChecked);
-		
 	} else {
 		this.ui.gb_node.labelRigGroup.styleSheet = styleLabelChecked;
 		this.ui.gb_node.labelSelection.text = ("[" + initialData["selected_nodes"].length + "] Nodes Selected");
@@ -157,17 +157,36 @@ function defineInterface(pathUI, initialData){
 		this.ui.gb_options.slidesLineValue.enabled = !this.ui.gb_options.radioDefault.checked;
 	}	
 	
+	this.updateLineType = function(){
+		var curr_line_index = this.ui.gb_options.comboScale.currentIndex; 
+		this.ui.gb_options.checkBAnimLine.enabled = curr_line_index != 0;
+		
+	}
+	
 	this.onUpdateSlider = function(){
 		var slider_value = this.ui.gb_options.slidesLineValue.value * 0.1;
 		this.ui.gb_options.label_Value.text = slider_value.toFixed(2);
 		this.ui.previewLine.lineWidth = slider_value.toFixed(1);
 	}
 	
+	this.clearProgressBar = function(){
+		this.ui.progressBar.format = "";
+		this.ui.progressBar.value = 0;
+	}
+	
+	this.updateProgressBar = function(pb_text){
+		this.ui.progressBar.format = pb_text;
+		this.ui.progressBar.value = this.ui.progressBar.value + 1;
+	}
+	
 	this.onApply = function(){
 		scene.beginUndoRedoAccum("Birdo Line Control");
-
-		applyChangesToNodes(this);		
-		
+		try{
+			util_apply.applyLineControl(this, initialData);
+		} catch(e){
+			Print(e);
+			scene.cancelUndoRedoAccum();
+		}
 		scene.endUndoRedoAccum();
 			
 		if(this.ui.checkPreview.checked){
@@ -182,20 +201,16 @@ function defineInterface(pathUI, initialData){
 	
 	//CONNECTIONS
 	this.ui.gb_options.slidesLineValue.valueChanged.connect(this, this.onUpdateSlider);
-
 	this.ui.checEnable.toggled.connect(this,this.onCheckEnableLineEdit);
-
 	this.ui.gb_node.radioRig.toggled.connect(this,this.onCheckRadioNodes);
 	this.ui.gb_node.radioSelection.toggled.connect(this,this.onCheckRadioNodes);
-	
 	this.ui.gb_options.checkDefLine.toggled.connect(this,this.onCheckDefformation);
-
 	this.ui.gb_options.radioDefault.toggled.connect(this,this.onRadioLineValue);
 	this.ui.gb_options.radioChoose.toggled.connect(this,this.onRadioLineValue);
-
 	this.ui.cancelButton.clicked.connect(this,this.onCancel);
 	this.ui.applyButton.clicked.connect(this,this.onApply);
 		
+	this.ui.gb_options.comboScale["currentIndexChanged(QString)"].connect(this, this.updateLineType);
 
 	///FUNCOES EXTRAS DA INTERFACE
 	function Print(msg){
@@ -203,56 +218,5 @@ function defineInterface(pathUI, initialData){
 			var msg = JSON.stringify(msg, null, 2);
 		}
 		MessageLog.trace(msg);
-	}
-	
-	function has_defformation(nodeToCheck){//checks if this node has a defformation affecting the drawings
-		var up_node = node.srcNode(nodeToCheck, 0);
-		return node.isGroup(up_node) && is_def_group(up_node);
-		function is_def_group(groupNode){
-			var is_def = false;
-			var subs = node.subNodes(groupNode);
-			subs.forEach(function (element){
-							if(node.type(element) == "TransformationSwitch" || node.type(element) == "CurveModule"){
-								 is_def = true;
-							}
-						});
-			return is_def;
-		}
-	}
-	
-	function applyChangesToNodes(self){//aplica as mudancas nos nodes selecionados baseado nas selecoes da ui
-
-		var useLineControl = self.ui.checEnable.checked;
-		var lineValueLabel = parseFloat(self.ui.gb_options.label_Value.text);
-		var rig_read_nodes = self.ui.gb_node.radioRig.checked ? initialData["read_nodes"] : initialData["selected_nodes"];			
-		var lineDefformation = self.ui.gb_options.checkDefLine.checked;
-
-		for(var i=0; i<rig_read_nodes.length; i++){
-			
-			//deslink de qualuqer funcao q esteja linkada no att multLineArtThickness
-			node.unlinkAttr(rig_read_nodes[i], "multLineArtThickness");
-			
-			//define se aplica o valor da linha somente se useLineControl for verdade!
-			var value = useLineControl ? lineValueLabel : node.getTextAttr(rig_read_nodes[i], 1, "multLineArtThickness");
-			//define se vai precisar acionar opcoes de defformation
-			var changeDefformation = (has_defformation(rig_read_nodes[i]) && lineDefformation);
-			var smoothVal = changeDefformation ? self.ui.gb_options.spinSmooth.value : parseFloat(node.getTextAttr(rig_read_nodes[i], 1, "PENCIL_LINE_DEFORMATION_SMOOTH"));
-			var fixVal = changeDefformation ? self.ui.gb_options.doubleSpinFix.value : parseFloat(node.getTextAttr(rig_read_nodes[i], 1, "PENCIL_LINE_DEFORMATION_FIT_ERROR"));;
-			var scale_style = self.ui.gb_options.comboScale.currentText;
-
-			//SET Line control attributes
-			node.setTextAttr(rig_read_nodes[i], "ADJUST_PENCIL_THICKNESS", 1, useLineControl);//ativa controle de linha
-			node.setTextAttr(rig_read_nodes[i], "ZOOM_INDEPENDENT_LINE_ART_THICKNESS", 1, scale_style);//att obrigatorio (adapta a linha a scale e camera)
-			node.setTextAttr(rig_read_nodes[i], "multLineArtThickness", 1, value);
-			node.setTextAttr(rig_read_nodes[i], "ADD_LINE_ART_THICKNESS", 1, 0);//fix contant value to 0 to make sense
-
-			//SET Line Deform attributes
-			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS", 1, changeDefformation);		
-			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_SMOOTH", 1, smoothVal);
-			node.setTextAttr(rig_read_nodes[i], "PENCIL_LINE_DEFORMATION_FIT_ERROR", 1, fixVal);
-			
-			Print("Setting Lince Control Node: " + rig_read_nodes[i]);
-		}
-		
 	}
 }

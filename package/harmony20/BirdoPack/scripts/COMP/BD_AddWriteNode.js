@@ -79,6 +79,12 @@ function BD_AddWriteNode(){
 
 	var setAtt = BD2_changeWriteNodeAtt(projData, writeNew, renderPath, "COMP");
 
+	//verificacao de projeto
+	if(projData.prefix == "AST"){
+		if(writeName.indexOf("BG") != -1){
+			MessageBox.warning("Este projeto nao exporta as camadas de BG no render de COMP. Confira se o output q acabou de criar nao contem saida de BG, se for o caso, ele saira sem nada!",0,0);
+		}	
+	}
 	
 	Print("Write Node : " +  writeNew + " adicionado com sucesso ao node : " + sel + "\nSet att: ");
 	Print("render path: " + renderPath);

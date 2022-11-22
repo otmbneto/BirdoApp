@@ -196,15 +196,15 @@ function BD2_ListNodesInGroup(firstGroup, typeList, fullpath){
 function BD2_ListNodesInSelection(selNodes, typelist){
 	
 	var finalList = [];
-	var useFilter = typelist.length > 0;
 
 	for(var i=0; i<selNodes.length; i++){
 		var type = node.type(selNodes[i]);
 
-		if(useFilter && typelist.indexOf(type) != -1){
-			finalList.push(selNodes[i]);
+		if(typelist && typelist.indexOf(type) == -1){
+			continue;
 		}
 
+		finalList.push(selNodes[i]);
 		if(node.isGroup(selNodes[i])){
 			var newList = finalList.concat(BD2_ListNodesInGroup(selNodes[i], typelist, true));
 			finalList = newList;
@@ -482,7 +482,7 @@ function BD2_getMedianScaleForNodes(drawingsNodesList, atFrame){
 	var sumNodeMatrixScale = 0;
 	for(var i=0; i<numOfNodes; i++){
 		var nodeScaleMat = node.getMatrix(drawingsNodesList[i], atFrame).extractScale();
-		var nodeScaleXY = (Math.abs(nodeScaleMat.y) + Math.abs(nodeScaleMat.x))/2;//media entre a scala X e Y
+		var nodeScaleXY = (nodeScaleMat.y + nodeScaleMat.x)/2;//media entre a scala X e Y
 		//MessageLog.trace("node: " + drawingsNodesList[i] + " : " +  nodeScaleXY);
 		if(!isNaN(nodeScaleXY)){
 			sumNodeMatrixScale += nodeScaleXY;
@@ -493,7 +493,7 @@ function BD2_getMedianScaleForNodes(drawingsNodesList, atFrame){
 		return false;
 	}
 	var mediaNodes = (sumNodeMatrixScale/numOfNodes).toFixed(1);
-	return mediaNodes;
+	return parseFloat(mediaNodes);
 }
 	
 /*Retorna o fator de enquadramento da camera (matrixZ/matrixScala) 
@@ -501,10 +501,11 @@ function BD2_getMedianScaleForNodes(drawingsNodesList, atFrame){
 @atFrame => frame para calcular
 */
 function BD2_getCameraFrameValue(atFrame){
-	var cameraZfactor = 2.6666666666666665/scene.getCameraMatrix(atFrame).origin().z;
-	var camScaleMat = scene.getCameraMatrix(atFrame).extractScale();
-	var camScaleXY = (Math.abs(camScaleMat.y) + Math.abs(camScaleMat.x))/2;
-	return camScaleXY/cameraZfactor;
+	var cm = scene.getCameraMatrix(atFrame);
+	var cameraZfactor = scene.numberOfUnitsZ()/scene.fromOGLZ(cm.origin().z);
+	var camScaleMat = cm.extractScale();
+	var camScaleXY = (camScaleMat.y + camScaleMat.x)/2;
+	return parseFloat((camScaleXY * cameraZfactor).toFixed(2));
 }
 
 

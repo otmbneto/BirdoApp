@@ -289,7 +289,7 @@ QScrollBar:arrow{
      <item>
       <widget class="QLabel" name="label_version">
        <property name="text">
-        <string>v.1.0</string>
+        <string>v.0.0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -595,6 +595,58 @@ QLabel::hover {
           </property>
          </widget>
         </item>
+        <item row="1" column="1" colspan="3">
+         <widget class="QSlider" name="slidesLineValue">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Value slider para escolher valor da linha</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: rgb(220, 220, 220);
+}
+
+QSlider::handle:horizontal {
+    background: rgb(150, 160, 160);
+    border: 1px solid #5c5c5c;
+    width: 18px;
+    margin: -4px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 3px;
+}
+
+QSlider::groove:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QSlider::handle:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}</string>
+          </property>
+          <property name="maximum">
+           <number>99</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="pageStep">
+           <number>10</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::NoTicks</enum>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="2">
          <widget class="QRadioButton" name="radioChoose">
           <property name="enabled">
@@ -654,58 +706,6 @@ QLabel:disabled {
           </property>
          </widget>
         </item>
-        <item row="1" column="1" colspan="3">
-         <widget class="QSlider" name="slidesLineValue">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Value slider para escolher valor da linha</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QSlider::groove:horizontal {
-    border: 1px solid #999999;
-    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-    background: rgb(220, 220, 220);
-}
-
-QSlider::handle:horizontal {
-    background: rgb(150, 160, 160);
-    border: 1px solid #5c5c5c;
-    width: 18px;
-    margin: -4px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 3px;
-}
-
-QSlider::groove:disabled{
-	color: rgb(250, 90, 120);
-	background-color: rgb(250, 200, 200);
-	border-color: rgb(255, 230, 220);
-}
-
-QSlider::handle:disabled{
-	color: rgb(250, 90, 120);
-	background-color: rgb(250, 200, 200);
-	border-color: rgb(255, 230, 220);
-}</string>
-          </property>
-          <property name="maximum">
-           <number>99</number>
-          </property>
-          <property name="singleStep">
-           <number>1</number>
-          </property>
-          <property name="pageStep">
-           <number>10</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::NoTicks</enum>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="1" colspan="3">
          <widget class="QComboBox" name="comboScale"/>
         </item>
@@ -713,6 +713,19 @@ QSlider::handle:disabled{
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Scale Style:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="3">
+         <widget class="QCheckBox" name="checkBAnimLine">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;this option create keyframes over the timeline, adapting the line value based on the camera and rig scale values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Change Line Over Time</string>
           </property>
          </widget>
         </item>
@@ -751,17 +764,47 @@ QSlider::handle:disabled{
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="sizeHint" stdset="0">
+       <property name="minimumSize">
         <size>
-         <width>158</width>
-         <height>20</height>
+         <width>0</width>
+         <height>25</height>
         </size>
        </property>
-      </spacer>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar {
+	color: white;
+	padding: 2 2px;
+	border: null;
+}
+
+QProgressBar::chunk {
+	background-color: #05B8CC;
+	border-radius: 3px;
+}</string>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="format">
+        <string/>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
