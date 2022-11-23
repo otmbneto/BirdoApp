@@ -1,6 +1,6 @@
 /*
 -------------------------------------------------------------------------------
-Name:		EnableDisableFXNodes.js
+Name:		BD_ShowHideFXNodes.js
 
 Description:	Este script e usado para habilitar e desabilitar os nodes de fx internos do rig 
 
@@ -17,7 +17,7 @@ Copyright:   leobazao_@Birdo
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-function BD_EnableDisableFXNodes(){
+function BD_ShowHideFXNodes(){
 	
 	var rig_group = selection.selectedNode(0);
 	if(!rig_group || !node.isGroup(rig_group)){

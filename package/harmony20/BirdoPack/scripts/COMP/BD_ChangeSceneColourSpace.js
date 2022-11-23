@@ -17,13 +17,15 @@ Copyright:   leobazao_@Birdo
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-
-function BD_Set_CS_ACES(){
+function BD_ChangeSceneColourSpace(){
 	
-	var cs = "ACES"; //MUDAR ESPACO DE COR AQUI PRO TIPO PRETENDIDO PARA ESTE SCRIPT!!!!
+	var cs = get_cs();
+	if(!cs){
+		Print("caneled...");
+		return;
+	}
 	
 	var projData = BD2_ProjectInfo();
-	
 	if(!projData){
 		MessageBox.warning("Erro ao logar infos do BirdoApp! Avise a DT!",0,0);
 		return;
@@ -36,5 +38,11 @@ function BD_Set_CS_ACES(){
 		MessageBox.warning("ERROR CHANGING COLOUR SPACE: " + cs + "\nCheck MessageLog for details!",0,0);
 	} else {
 		MessageBox.information(require_script);
+	}
+	
+	//extra function
+	function get_cs(){
+		var cs_list = ["NO_COLOUR_SPACE", "ACES", "sRGB"];
+		return Input.getItem("Choose colour-space:", cs_list, "NO_COLOUR_SPACE", false, "Set Colour-Space", 0);
 	}
 }
