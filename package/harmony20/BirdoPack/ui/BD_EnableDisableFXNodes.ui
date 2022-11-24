@@ -148,6 +148,24 @@ QPushButton:pressed {
    </item>
    <item row="1" column="0" colspan="2">
     <widget class="QLabel" name="label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>115</width>
+       <height>18</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>115</width>
+       <height>20</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <weight>75</weight>
@@ -162,7 +180,7 @@ QPushButton:pressed {
 }</string>
      </property>
      <property name="text">
-      <string>Rig_Name</string>
+      <string>Rig_Name...dio8</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

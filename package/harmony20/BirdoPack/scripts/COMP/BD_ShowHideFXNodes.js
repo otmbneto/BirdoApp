@@ -158,7 +158,7 @@ function Interface(nodes_list, node_name, pathUI, curr_state, uis_data){
 	uis_data.update_ui_preference_list();
 
 	//update label name
-	this.ui.label.text = node_name;
+	this.ui.label.text = formatName(node_name);
 	
 	//style sheet options
 	this.sliderOffStyle = "QSlider::groove:horizontal {\n    border: 2px solid rgb(255, 93, 93);\n	border-radius: 18px;\n    height: 34; \n    background: rgb(255, 181, 156);\n}\n\nQSlider::handle:horizontal {\n    background: rgb(255, 138, 138);\n    border: 2px solid rgb(255, 98, 93);\n    border-radius: 12px;\n    width: 24px;\n	height: 24px;\n    margin: 4px 8px;\n}";
@@ -203,5 +203,12 @@ function Interface(nodes_list, node_name, pathUI, curr_state, uis_data){
 		MessageLog.trace(msg);
 		
 		scene.endUndoRedoAccum();
+	}
+	function formatName(name_str){//formata o nome para botar na widget
+		if(name_str.length > 15){
+			return "..." + name_str.slice(name_str.length - 12, name_str.length -1);
+		} else {
+			return name_str;
+		}
 	}
 }
