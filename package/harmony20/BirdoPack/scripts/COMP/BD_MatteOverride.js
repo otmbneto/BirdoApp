@@ -8,23 +8,19 @@ Usage:		Selecione a pallet q deseja criar, e aperte.
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	julho, 2022.
+Created:	julho, 2022 (update novembro 2022).
             
 Copyright:   leobazao_@Birdo
- 
 -------------------------------------------------------------------------------
-TODO : 
-
-	verificar pq o addnode parou de funcionar - verificar novo bug...
-	descobrir pq nao funciona o add all colors
-	Melhorar o enable dos botoes da parte de palette manager
-	testar melhor todas opcoes
-	
-
+	TODO: 
+		[ ] - fazer tratamento dos presets no UpdateColors
+		[ ] - criar o metodo de add colourOverride NAO renderizando as cores do preset (add checkbox?)
+		[ ] - melhorar forma como add os nodes (procurar link pra add... se nao tiver um dst disponivel, nao conectar o CO e deixar ele do lado 
 */
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
+var version = "v.1.2";
 
 function BD_MatteOverride(){
 	
@@ -37,79 +33,192 @@ function BD_MatteOverride(){
 	
 	var paletteList = PaletteObjectManager.getScenePaletteList();
 
-	var mattePalettePath = scene.currentProjectPath() + "/palette-library/_matte";
-	var mattePalette = null;
+	var mattePaletteData = new MattePalletData(paletteList);
 	
-	//creates pallet
-	if(!BD1_FileExists(mattePalettePath + ".plt")){
-		
-		if(!BD2_AskQuestion("A palette '_matte' ainda nao foi criada nesta cena. Sera necessario salvar esta acao apos a criacao desta palette.\nDeseja continuar?")){
-			Print("Canceled...");
-			return;
-		}
-		
-		mattePalette = paletteList.createPalette(mattePalettePath);
-		//clean defalt color created with palette
-		var defaltColor = mattePalette.getColorByIndex(0);
-		mattePalette.removeColor(defaltColor.id);
-		MessageBox.information("Palette '_matte' foi criada! Agora as cores clonadas serao adicionadas nessa paleta e usada como Palette-Override para os nodes criados!");
-		scene.saveAll();
-	} else {
-		mattePalette = findPallet(mattePalettePath);
-	}
+	var uiPath = projData.paths.birdoPackage + "ui/BD_MatteOverride.ui";
 	
-	if(!mattePalette){
-		MessageBox.warning("Algo deu errado! Palette nao foi criada corretamente!",0,0);
-		return;
-	}
-		
-	var d = new CreateInterface(projData, mattePalette, paletteList);
+	var presetsData = getPresets(projData, paletteList);
+	
+	var d = new CreateInterface(uiPath, mattePaletteData, presetsData);
 	d.ui.show();
 	
 	///EXTRA FUNCS
-	function findPallet(palettePath){//retorna o objeto da pallet (se nao tiver na paletteList add a palette nova);
-		var paletteName = BD1_fileBasename(palettePath);
-		for(var i=0; i<paletteList.numPalettes; i++){
-			var palett = paletteList.getPaletteByIndex(i);
-			if(palett.getName() == paletteName){
-				Print("Palette found at index " + i);
-				return palett;
+	function MattePalletData(paletteList){//cria objeto com infos das matte pallets da cena e com metodos para pegar as palettes
+		this.folder = scene.currentProjectPath() + "/palette-library/";
+		var palets_list = BD1_ListFiles(this.folder, "*.plt").filter(function(x){ 
+			return x.indexOf("_matte") != -1
+		});
+		this.mattes_list = palets_list.map(function(item){ return item.split(".")[0]});
+		this.mattes_list.sort();
+		this.has_mattes = this.mattes_list.length > 0;
+		this.mattes_list.unshift("");//cria item vazio pra ser o index 0 no combo
+		this.pl = paletteList;
+
+		//callback methods
+		this.get_matte_palette = function(index){
+			if(this.mattes_list[index] == "" || index == 0){
+				MessageLog.trace("Pallet path nao existe para o index selecionado!");
+				return false;
+			}
+			var pal_path = this.folder + this.mattes_list[index];
+			return this.pl.addPalette(pal_path);
+		}
+
+		this.get_next_pallet_name = function(){
+			var last_item = this.mattes_list[this.mattes_list.length -1];
+			var regex = /\d{2}/;//numero no nome '01'
+			if(!last_item){
+				return "_matte01";
+			}
+			var last_num = regex.test(last_item) ? regex.exec(last_item)[0] : 0;
+			return ("_matte" + ("00" + (last_num+1)).slice(-2));
+		}
+
+		this.create_next_pallet = function(){//cria a proxima palette
+			var next_mattePal_path = this.folder + this.get_next_pallet_name();
+			var newMattePalette = this.pl.createPalette(next_mattePal_path);
+			//clean defalt color created with palette
+			var defaltColor = newMattePalette.getColorByIndex(0);
+			newMattePalette.removeColor(defaltColor.id);
+			MessageBox.information("Palette " + newMattePalette.getName() + " foi criada! Agora as cores clonadas serao adicionadas nessa paleta e usada como Palette-Override para os nodes criados!\nUse a interface para adicinoar ou remover cores desta matte!");
+			MessageLog.trace("new matte pallete created: " + newMattePalette.getName());
+			scene.saveAll();
+			this.mattes_list.push(newMattePalette.getName());
+			//update has_mattes flag
+			this.has_mattes = true;
+			return newMattePalette;
+		}
+	}
+		
+	function getPresets(projData, paletteList){//retorna objeto com infos sobre os presets validos achados
+		var presets_data = {
+			"is_valid": false,
+			"presets": {}
+		};
+		var presets_folder = projData.getTBLIB("server") + "mattes_presets/";
+		if(!BD1_DirExist(presets_folder)){
+			Print("No presets for this project!");
+			return presets_data;
+		}
+		var preset_json_list = BD1_ListFiles(presets_folder, "*.json");
+		if(preset_json_list.length == 0){
+			Print("No presets for this project!");
+			return presets_data;
+		}
+		
+		for(var i=0; i<preset_json_list.length; i++){
+			var jsonfile = presets_folder + preset_json_list[i];
+			var data = BD1_ReadJSONFile(jsonfile);
+			if(!data){
+				continue;
+			}
+			var presetName = preset_json_list[i].split(".")[0];
+			var obj = {};
+			Print("Preset analizing: " + presetName);
+			for(colorId in data){
+				if(paletteList.findPaletteOfColor(colorId)){	
+					obj[colorId] = data[colorId];
+					Print(" -- Valid preset colour found: " + data[colorId]);
+					presets_data["is_valid"] = true;
+				}
+			}
+			if(Object.keys(obj).length > 0){
+				Print("Preset added: " + presetName);
+				presets_data["presets"][presetName] = obj;
 			}
 		}
-		Print("Pallet: " + paletteName + " is not in palette list. Adding palette...");
-		return paletteList.addPalette(palettePath);
+		return presets_data;
 	}
 }
 
-
-function CreateInterface(projData, mattePalette, paletteList){
-		
-	var uiPath = projData.paths.birdoPackage + "ui/BD_MatteOverride.ui";
+function CreateInterface(uiPath, matteData, presetsData){
+	
 	this.ui = UiLoader.load(uiPath);
 	this.ui.activateWindow();
-	this.ui.groupAdvenced.hide();
 	
 	//fix windows size
-	this.ui.setFixedSize(378, 304);
+	this.ui.setGeometry(this.ui.x, this.ui.y, 390, 575);
 	
 	//self variables
+	this.matteColour = new QColor(255,255,255,255);//inicialmente branco
+	this.ingoneColour = new QColor(0,0,0,255);//inicialmente preto
 	this.addedColors = 0;
 	this.currPalette = null;
-	this.matteColour = mattePalette.nColors == 0 ? new QColor(255,255,255,255) : createQColor(mattePalette.getColorByIndex(0));//inicialmente branco se nao houver cores escolhidas
-	this.ingoneColour = new QColor(0,0,0,255);//inicialmente preto
-	
-	//update clear button state
-	this.ui.groupPalettes.pushRemoveColors.enabled = mattePalette.nColors > 0;
+	this.sourcePalette = null;
+	this.matteData = matteData;
+	this.presetsData = presetsData;
 
+	//updates version
+	this.ui.labelVersion.text = version;
+	//update palettes combo
+	this.ui.comboMatteList.addItems(this.matteData.mattes_list);
+	//enable combo palettes
+	this.ui.comboMatteList.enabled = this.matteData.has_mattes;
+	//update presets widgets
+	this.ui.groupAdvenced.radioCorPreset.enabled = this.presetsData.is_valid;
+	this.ui.groupAdvenced.comboCorPreset.enabled = this.presetsData.is_valid;
+	this.ui.groupAdvenced.comboCorPreset.addItems(Object.keys(this.presetsData.presets));
+	
 	//CALL BACKS
+	this.updateColorsNamesCombo = function(){//atualiza a lista de cores no combo nome
+		this.ui.groupAdvenced.comboCorName.clear();
+		var curr_color_list = getColorsList(this.currPalette);
+		curr_color_list.unshift("");
+		this.ui.groupAdvenced.comboCorName.addItems(curr_color_list);
+	}
+	
+	this.selectMattePalette = function(){//callback do combo de palettes quando muda
+		this.currPalette = this.matteData.get_matte_palette(this.ui.comboMatteList.currentIndex);
+		
+		this.ui.groupPalettes.enabled = Boolean(this.currPalette);
+		this.ui.groupAdvenced.enabled = Boolean(this.currPalette);
+		this.ui.addMatteNodeButton.enabled = Boolean(this.currPalette);
+		
+		if(!this.currPalette){
+			Print("No palette selected!");
+			return;
+		}
+		
+		//update clear button state
+		var plt_is_valid = this.currPalette.nColors > 0;
+		this.ui.groupPalettes.pushRemoveColors.enabled = plt_is_valid;
+		this.ui.groupAdvenced.enabled = plt_is_valid;
+		
+		this.matteColour = plt_is_valid ? createQColor(this.currPalette.getColorByIndex(0)) : new QColor(255,255,255,255);//inicialmente branco se nao houver cores escolhidas
+		
+		//update matte color button
+		this.changeButtonColor(this.ui.groupAdvenced.pushMatteColor, this.matteColour);
+		
+		//update combo names
+		this.updateColorsNamesCombo();
+		//update radios in advanced groupAdvenced
+		this.changeRadio();
+	}
+	
+	this.createNewMattePallette = function(){//callback do pushButton de criar nova 
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - create new Matte");
+		//cria palette nova
+		this.currPalette = this.matteData.create_next_pallet();
+		
+		if(!this.currPalette){
+			MessageBox.warning("Erro ao criar nova palette!", 0, 0);
+			return;
+		}
+		
+		//atualiza combo de matte paletes
+		this.ui.comboMatteList.addItem(this.currPalette.getName());
+		this.ui.comboMatteList.setCurrentIndex(this.ui.comboMatteList.count -1);
+		this.ui.comboMatteList.enabled = this.matteData.has_mattes;
+
+		scene.endUndoRedoAccum();
+	}
+	
 	this.changeButtonColor = function(buttonWidget, newColor){//atualiza a cor do botao 
 		var rgbStr = "rgb(" + newColor.red() + "," + newColor.green() + "," + newColor.blue() + ")";
 		var currStyle = buttonWidget.styleSheet;
 		buttonWidget.styleSheet = currStyle.replace(/rgb\(\d+,\d+,\d+\)/, rgbStr);	
 	}
-	//update matte color button
-	this.changeButtonColor(this.ui.groupAdvenced.pushMatteColor, this.matteColour);
-
+	
 	this.updateProgressBar = function(){
 		var val = this.ui.progressBar.value;
 		this.ui.progressBar.value = val + 1;	
@@ -117,12 +226,13 @@ function CreateInterface(projData, mattePalette, paletteList){
 	
 	this.enableButtons = function(enable){//habilita os botoes de palette
 		this.ui.groupPalettes.pushAddColors.enabled = enable;
-		this.ui.groupPalettes.pushRemoveColors.enabled = mattePalette.nColors > 0;
+		this.ui.groupPalettes.pushRemoveColors.enabled = this.currPalette.nColors > 0;
 	}
 	
 	this.changeRadio = function(){
-		this.ui.groupAdvenced.lineCorName.enabled = this.ui.groupAdvenced.radioCorName.checked;
+		this.ui.groupAdvenced.comboCorName.enabled = this.ui.groupAdvenced.radioCorName.checked;
 		this.ui.groupAdvenced.pushIgnoreColor.enabled = this.ui.groupAdvenced.radioCorVal.checked;
+		this.ui.groupAdvenced.comboCorPreset.enabled = this.ui.groupAdvenced.radioCorPreset.checked;
 	}	
 	
 	this.onCheckPalletOptions = function(){
@@ -131,41 +241,41 @@ function CreateInterface(projData, mattePalette, paletteList){
 		this.ui.groupPalettes.pushSelPal.enabled = !this.ui.groupPalettes.radioAllColors.checked;
 		this.ui.groupPalettes.labelPalette.enabled = !this.ui.groupPalettes.radioAllColors.checked;
 		Print("Changed add colors mode...");
-	}	
+	}
 	
-	this.onSelectPalette = function(){
-		var currPal = paletteList.getPaletteById(PaletteManager.getCurrentPaletteId());
+	this.onSelectPalette = function(){//callback do botao de escolher palette para add as cores na matte
+		var sel_pallet = this.matteData.pl.getPaletteById(PaletteManager.getCurrentPaletteId());
 		var validPalette = true;
-		if(currPal.getName() == mattePalette.getName() || !currPal.isValid()){
+		if(sel_pallet.getName().indexOf("-matte") != -1 || !sel_pallet.isValid()){
 			MessageBox.warning("Palette selecionado e INVALIDA! Selecione uma palette valida na janela de cores!",0,0);
-			this.currPalette = null;
 			this.ui.groupPalettes.labelPalette.text = "";
+			this.sourcePalette = null;
 			Print("Invalid palette selection!");
 			validPalette = false;
 			this.ui.progressBar.format = "Selecione uma palette valida!";
 		} else {
-			this.currPalette = currPal;
-			this.ui.groupPalettes.labelPalette.text = this.currPalette.getName();
-			Print("Palette selected: " + this.currPalette.getName());
-			this.ui.progressBar.format = "Palette selected: " + this.currPalette.getName();
+			this.sourcePalette = sel_pallet;
+			this.ui.groupPalettes.labelPalette.text = this.sourcePalette.getName();
+			Print("Palette selected: " + this.sourcePalette.getName());
+			this.ui.progressBar.format = "Palette selected: " + this.sourcePalette.getName();
 		}
 		this.enableButtons(validPalette);
 	}
 	
 	this.onAddColors = function(){
-		//reset counter;
 		scene.beginUndoRedoAccum("MATTEOVERRIDE - add colors");
+		//reset counters;
 		this.addedColors = 0;
 		var paletteCounter = 0;
 		if(this.ui.groupPalettes.radioChoosePal.checked){
 			Print("Mode Palette is Choose Single Palette!");
-			this.addPalleteColorsToMatteOverride(this.currPalette);
+			this.addPalleteColorsToMatteOverride(this.sourcePalette);
 			paletteCounter++;
 		} else {
 			Print("Mode Palette is ALL colors Palette!");
-			for(var i=0; i<paletteList.numPalettes; i++){
-				var paleta = paletteList.getPaletteByIndex(i);
-				if(paleta.getName() == mattePalette.getName() || !paleta.isValid() || !paleta.isLoaded()){
+			for(var i=0; i<this.matteData.pl.numPalettes; i++){
+				var paleta = this.matteData.pl.getPaletteByIndex(i);
+				if(paleta.getName().indexOf("_matte") != -1 || !paleta.isValid() || !paleta.isLoaded()){
 					Print("ignoring palette: " + paleta.getName());
 					continue;
 				}
@@ -174,7 +284,10 @@ function CreateInterface(projData, mattePalette, paletteList){
 			}
 		}
 		scene.endUndoRedoAccum();
-
+		
+		//enable advanced options
+		this.ui.groupAdvenced.enabled = true;
+		
 		this.onUpdateColors();
 		this.ui.progressBar.clear();
 		this.ui.progressBar.format = "Palettes: " + paletteCounter + " - colors: " + this.addedColors;
@@ -184,14 +297,14 @@ function CreateInterface(projData, mattePalette, paletteList){
 	this.onClearColors = function(){
 		scene.beginUndoRedoAccum("MATTEOVERRIDE - clear colors");
 		var delete_counter = 0;
-		this.ui.progressBar.maximum = mattePalette.nColors - 1;
+		this.ui.progressBar.maximum = this.currPalette.nColors - 1;
 
-		for(var i=mattePalette.nColors-1; i>=0; i--){
+		for(var i=this.currPalette.nColors-1; i>=0; i--){
 			this.updateProgressBar();
-			var cor = mattePalette.getColorByIndex(i);
+			var cor = this.currPalette.getColorByIndex(i);
 			this.ui.progressBar.format = "deleting... " + cor.name;
 			Print("...deleting color: " + cor.name);
-			mattePalette.removeColor(cor.id);
+			this.currPalette.removeColor(cor.id);
 			delete_counter++;
 		}
 		this.enableButtons(this.ui.groupPalettes.radioAllColors.checked);
@@ -209,7 +322,6 @@ function CreateInterface(projData, mattePalette, paletteList){
 		var counterIgnored = 0;
 		
 		this.ui.progressBar.maximum = palette.nColors - 1;
-
 		for(var i=0; i<palette.nColors; i++){
 			this.updateProgressBar();
 			var cor = palette.getColorByIndex(i);
@@ -222,7 +334,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 				continue;		
 			}
 			
-			if(isColorInMattePallete(mattePalette, cor)){
+			if(isColorInMattePallete(this.currPalette, cor)){
 				Print("Color is already in the mattePalette: " + cor.name);
 				continue;
 			}
@@ -231,7 +343,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 				counterIgnored++;
 				continue;
 			}
-			var cloneColor = mattePalette.cloneColor(cor);
+			var cloneColor = this.currPalette.cloneColor(cor);
 			if(!cloneColor){
 				Print("Error cloning color: " + cor.name);
 				errorCounter++;
@@ -253,7 +365,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 		}
 		var isIgnore = false;
 		if(this.ui.groupAdvenced.radioCorName.checked){
-			isIgnore = this.ui.groupAdvenced.lineCorName.text == color.name;
+			isIgnore = this.ui.groupAdvenced.comboCorName.currentText == color.name;
 		} else if(this.ui.groupAdvenced.radioCorVal.checked){
 			isIgnore = compareColors(color, this.ingoneColour);
 		}
@@ -289,51 +401,39 @@ function CreateInterface(projData, mattePalette, paletteList){
 		this.ui.groupAdvenced.radioCorName.enabled = showIgnore;
 		this.ui.groupAdvenced.radioCorVal.enabled = showIgnore;
 
-		this.ui.groupAdvenced.lineCorName.enabled = showIgnore && this.ui.groupAdvenced.radioCorName.checked;
+		this.ui.groupAdvenced.comboCorName.enabled = showIgnore && this.ui.groupAdvenced.radioCorName.checked;
 		this.ui.groupAdvenced.pushIgnoreColor.enabled = showIgnore && this.ui.groupAdvenced.radioCorVal.checked;
 		Print("Use ignore colors: " + showIgnore);
-	}
-	
-	this.onShowAdvanced = function(){
-		if(this.ui.checkAdvanced.checked){
-			this.ui.groupAdvenced.show();
-			Print("Showing advanced options...");
-			this.ui.setFixedSize(378, 480);
-		} else {
-			this.ui.groupAdvenced.hide();
-			Print("Hiding advanced options...");
-			this.ui.setFixedSize(378, 304);
-		}
+		//update combo names
+		this.updateColorsNamesCombo();
 	}
 	
 	this.onUpdateColors = function(){//callback do botao de atualizar as cores
 		//check if matteOverride palette has no color yet
-		if(mattePalette.nColors == 0){
+		if(this.currPalette.nColors == 0){
 			this.ui.progressBar.format = "No color in the MatteOverride Palette!";
 			Print("Nenhuma cor para modificar!");
 			return;
 		}
 		
 		scene.beginUndoRedoAccum("MATTEOVERRIDE - update colors");
-
 		var counter_repaint = 0;
 		var counter_removed = 0;
-		this.ui.progressBar.maximum = mattePalette.nColors - 1;
+		this.ui.progressBar.maximum = this.currPalette.nColors - 1;
 
-		for(var i=mattePalette.nColors-1; i>=0; i--){
+		for(var i=this.currPalette.nColors-1; i>=0; i--){
 			this.updateProgressBar();
-			var cor = mattePalette.getColorByIndex(i);
-			var originalColor = paletteList.findPaletteOfColor(cor.id).getColorById(cor.id);//cor na palete original
+			var cor = this.currPalette.getColorByIndex(i);
+			var originalColor = matteData.pl.findPaletteOfColor(cor.id).getColorById(cor.id);//cor na palete original
 			this.ui.progressBar.format = "analizing... " + cor.name;
 			Print("...updating color: " + cor.name);
 			
 			if(this.isColorIgnored(originalColor)){
 				Print("color to ignore: " + originalColor.name);
-				mattePalette.removeColor(cor.id);
+				this.currPalette.removeColor(cor.id);
 				counter_removed++;
 				continue;
 			}
-			
 			//recolor
 			cor.setColorData(convertColor(this.matteColour));
 			counter_repaint++;
@@ -342,6 +442,8 @@ function CreateInterface(projData, mattePalette, paletteList){
 		this.ui.progressBar.format = "UpdateColors: - removed: " + counter_removed + " -repaint: " + counter_repaint;
 		this.ui.progressBar.value = 0;
 		scene.endUndoRedoAccum();
+		//update combo names
+		this.updateColorsNamesCombo();
 	}
 	
 	this.onAddNode = function(){
@@ -352,8 +454,8 @@ function CreateInterface(projData, mattePalette, paletteList){
 		}
 		
 		scene.beginUndoRedoAccum("MATTEOVERRIDE - add node");
-
-		var co = addColourOverride(selNode, mattePalette);
+		
+		var co = addColourOverride(selNode, this.currPalette);
 		if(co){
 			this.ui.progressBar.format = co + " created!";
 		} else {
@@ -367,10 +469,9 @@ function CreateInterface(projData, mattePalette, paletteList){
 		this.ui.close();
 	}
 	
-	
-	
 	//connections
-	this.ui.checkAdvanced.toggled.connect(this, this.onShowAdvanced);
+	this.ui.comboMatteList["currentIndexChanged(QString)"].connect(this, this.selectMattePalette);
+	this.ui.pushCreateMatte.clicked.connect(this, this.createNewMattePallette);
 	
 	this.ui.groupPalettes.radioAllColors.toggled.connect(this, this.onCheckPalletOptions);
 
@@ -397,6 +498,18 @@ function CreateInterface(projData, mattePalette, paletteList){
 		}
 		MessageLog.trace(msg);
 		System.println(msg);
+	}
+	
+	function getColorsList(palete){//retorna lista com os nomes das cores da palette
+		var colors = [];
+		for(var i=0; i<palete.nColors; i++){
+			var cor = palete.getColorByIndex(i);
+			if(colors.indexOf(cor.name) == -1){
+				colors.push(cor.name);
+			}
+		}
+		colors.sort();
+		return colors;
 	}
 	
 	function pickColor(currColor){//dialog para escolher cor
@@ -427,7 +540,7 @@ function CreateInterface(projData, mattePalette, paletteList){
 	
 	function addColourOverride(selNode, palette){
 		var palettePath = palette.getPath() + "/" + palette.getName() + ".plt";
-		var co = addNodeUnder(selNode, "MATTE_OVERRIDE", "COLOR_OVERRIDE_TVG");
+		var co = addNodeUnder(selNode, palette.getName() + "_OVERRIDE", "COLOR_OVERRIDE_TVG");
 		if(!co){
 			Print("Fail to add color override node!");
 			return false;
@@ -447,7 +560,6 @@ function CreateInterface(projData, mattePalette, paletteList){
 	
 		var nodePort = node.numberOfOutputPorts(nodeSel) -1;
 		var nextNode = node.dstNode(nodeSel, nodePort, 0);
-		
 		var end_connection = nextNode == "";
 
 		if(node.type(nextNode) == "COLOR_OVERRIDE_TVG" && node.getName(nextNode).indexOf("MATTE")!= -1){ 
@@ -460,7 +572,6 @@ function CreateInterface(projData, mattePalette, paletteList){
 		} else {
 			newX = x;
 		}
-		
 		var newNode = node.add(parentGroup, nodeName, type, newX, newY, 0);
 
 		if(!end_connection){

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
-    <height>480</height>
+    <width>390</width>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,12 +18,23 @@
 	color: lightgray;
 }
 
+QLabel:disabled {
+	color: rgb(200, 150, 120);
+}
+
 QWidget{
 	background-color: gray;
 }
 
 QGroupBox {
 	color: lightgray;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+}
+
+QGroupBox:disabled {
+	color: rgb(200, 150, 120);
+	border: 1px solid rgb(200, 150, 120);
 }
 
 QComboBox {
@@ -70,7 +81,8 @@ QComboBox QAbstractItemView{
 }
 
 QComboBox::disabled {
-	border-color: darkgray;
+	border-color: rgb(200, 150, 120);
+	background: rgb(220, 200, 190);
 	color: gray;
 }
 
@@ -91,11 +103,11 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
 }
 
 QRadioButton::checked::disabled {
-	color: lightgray;
+	color: rgb(180, 170, 150);
 }
 
 QRadioButton::unchecked::disabled {
-	color: lightgray;
+	color: rgb(200, 150, 120);
 }
 
 QRadioButton::checked {
@@ -123,10 +135,12 @@ QRadioButton::indicator::checked{
 }
 
 QRadioButton::indicator::checked::disabled {
-	background-color: gray;
+	color: rgb(150, 125, 120);
+	background-color: rgb(150, 140, 120);
 }
 
 QRadioButton::indicator::unchecked::disabled {
+	color: rgb(200, 150, 120);
 	background-color: lightgray;
 }
 
@@ -151,7 +165,7 @@ QPushButton:hover{
 
 QPushButton:disabled {
 	color: gray;
-    border: 2px solid lightgray;
+    border: 2px solid rgb(200, 150, 120);
 	background-color: darkgray;
 }
 
@@ -173,7 +187,7 @@ QCheckBox::indicator:checked {
 }
 
 QCheckBox:disabled{
-	color: rgb(250, 150, 120);
+	color: rgb(200, 150, 120);
 }
 
 QCheckBox::indicator:checked:disabled {
@@ -182,13 +196,258 @@ QCheckBox::indicator:checked:disabled {
 	border-color: rgb(255, 230, 220);
 }</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_4">
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupPalettes">
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="5" column="0">
+    <widget class="QGroupBox" name="groupAdvenced">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Edita as cores do Matte</string>
+     </property>
      <property name="title">
-      <string>Palette Manager</string>
+      <string>Edit Selected Matte Colors</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="topMargin">
+       <number>20</number>
+      </property>
+      <property name="spacing">
+       <number>11</number>
+      </property>
+      <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Matte Colour</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushMatteColor">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>84</width>
+            <height>80</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>80</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Change Matte colors override</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+	border: 2px solid lightgray;
+	border-radius: 15px;
+	background: rgb(255,255,255);		
+}
+
+QPushButton::hover {
+	border: 2px solid white;
+}
+
+QPushButton::disabled {
+	background: lightgray;	
+}</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="1">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0" columnminimumwidth="0,0,0">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <item row="1" column="2">
+         <widget class="QComboBox" name="comboCorName">
+          <property name="toolTip">
+           <string>Select color name to ignore</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QRadioButton" name="radioCorVal">
+          <property name="toolTip">
+           <string>Use color Value to Ignore</string>
+          </property>
+          <property name="text">
+           <string>By Value</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="radioCorName">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Ignore colors with name:</string>
+          </property>
+          <property name="text">
+           <string>By Name</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QPushButton" name="pushIgnoreColor">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>84</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>106</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Valor das cores para serem ignoradas no Matte&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+	border: 2px solid lightgray;
+	border-radius: 15px;
+	background: rgb(0,0,0);		
+}
+
+QPushButton::hover {
+	border: 2px solid white;
+}
+
+QPushButton::disabled {
+	background: lightgray;	
+}</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QComboBox" name="comboCorPreset">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Select colors preset to ignore</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QRadioButton" name="radioCorPreset">
+          <property name="toolTip">
+           <string>Use preset color list to ignore</string>
+          </property>
+          <property name="text">
+           <string>By Preset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QCheckBox" name="checkIgnore">
+          <property name="toolTip">
+           <string>Use ignore colors options</string>
+          </property>
+          <property name="text">
+           <string>Ignore Colors</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" rowspan="3">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QPushButton" name="pushUpdateColors">
+        <property name="toolTip">
+         <string>Update Colors in Matte palette</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Update Matte Colours</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QGroupBox" name="groupPalettes">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Add palettes colors options</string>
+     </property>
+     <property name="title">
+      <string>Add Collors To Selected Matte</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <property name="topMargin">
+       <number>20</number>
+      </property>
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,2">
         <item>
@@ -235,6 +494,9 @@ QCheckBox::indicator:checked:disabled {
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string>Add selected palettes options to matte</string>
+          </property>
           <property name="text">
            <string>Add Colours</string>
           </property>
@@ -254,6 +516,9 @@ QCheckBox::indicator:checked:disabled {
       </item>
       <item row="0" column="0">
        <widget class="QRadioButton" name="radioChoosePal">
+        <property name="toolTip">
+         <string>Add only selected Palette in colors view</string>
+        </property>
         <property name="text">
          <string>Choose Palette to Clone colors</string>
         </property>
@@ -264,6 +529,9 @@ QCheckBox::indicator:checked:disabled {
       </item>
       <item row="2" column="0">
        <widget class="QRadioButton" name="radioAllColors">
+        <property name="toolTip">
+         <string>Add ALL colors in the scene to the matte</string>
+        </property>
         <property name="text">
          <string>Add All Colors In Scene</string>
         </property>
@@ -272,7 +540,63 @@ QCheckBox::indicator:checked:disabled {
      </layout>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="1" column="0">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Select Matte Palette:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboMatteList">
+       <property name="toolTip">
+        <string>Choose matte palette to edit or apply</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QPushButton" name="pushCreateMatte">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Creates new matte palette in the scene</string>
+       </property>
+       <property name="text">
+        <string>Create New Matte</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Preferred</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="7" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="sizeConstraint">
       <enum>QLayout::SetFixedSize</enum>
@@ -280,12 +604,15 @@ QCheckBox::indicator:checked:disabled {
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Birdo 2022 @leobazao</string>
+        <string>2022 @leobazao</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="addMatteNodeButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -303,6 +630,12 @@ QCheckBox::indicator:checked:disabled {
          <width>16777215</width>
          <height>25</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
        </property>
        <property name="toolTip">
         <string>Adiciona um Matte Override na node view! (selecione um node para addicionar e conectar embaixo dele</string>
@@ -374,255 +707,7 @@ QPushButton:hover{
      </item>
     </layout>
    </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="groupAdvenced">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="toolTip">
-      <string>Edita as cores do Matte</string>
-     </property>
-     <property name="title">
-      <string>Matte Options</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="spacing">
-       <number>11</number>
-      </property>
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Matte Colour</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushMatteColor">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>84</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>80</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-	border: 2px solid lightgray;
-	border-radius: 15px;
-	background: rgb(255,255,255);		
-}
-
-QPushButton::hover {
-	border: 2px solid white;
-}
-
-QPushButton::disabled {
-	background: lightgray;	
-}</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="1">
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <layout class="QGridLayout" name="gridLayout">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <item row="1" column="0">
-         <widget class="QRadioButton" name="radioCorName">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Use Color Name to ignore</string>
-          </property>
-          <property name="text">
-           <string>By Name</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QRadioButton" name="radioCorVal">
-          <property name="toolTip">
-           <string>Use color Value to Ignore</string>
-          </property>
-          <property name="text">
-           <string>By Value</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="pushIgnoreColor">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>84</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>106</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Valor das cores para serem ignoradas no Matte&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
-	border: 2px solid lightgray;
-	border-radius: 15px;
-	background: rgb(0,0,0);		
-}
-
-QPushButton::hover {
-	border: 2px solid white;
-}
-
-QPushButton::disabled {
-	background: lightgray;	
-}</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="lineCorName">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Nome da cor para ser Ignorado</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QLineEdit {
-	color: rgb(100, 100, 100);
-	border-radius: 5px;
-	background-color: rgb(240, 240, 240);
-}
-
-QLineEdit::disabled {
-	color: gray;
-	background-color: rgb(245, 205, 195);
-}
-
-QLineEdit::hover {
-	border: 2px solid lightgray;
-}</string>
-          </property>
-          <property name="text">
-           <string>LINHA</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="checkIgnore">
-          <property name="text">
-           <string>Ignore Colors</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="QPushButton" name="pushUpdateColors">
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>Update Matte Colours</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>MATTE OVERRIDE</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>v.01</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0">
+   <item row="6" column="0">
     <widget class="QProgressBar" name="progressBar">
      <property name="maximumSize">
       <size>
@@ -666,18 +751,56 @@ QProgressBar::chunk {
      </property>
     </widget>
    </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>MATTE OVERRIDE</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelVersion">
+       <property name="toolTip">
+        <string>script version</string>
+       </property>
+       <property name="text">
+        <string>v.00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="2" column="0">
-    <widget class="QCheckBox" name="checkAdvanced">
-     <property name="toolTip">
-      <string>Show advanced options</string>
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="styleSheet">
-      <string notr="true"/>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>10</height>
+      </size>
      </property>
-     <property name="text">
-      <string>Advanced Matte Options...</string>
-     </property>
-    </widget>
+    </spacer>
    </item>
   </layout>
  </widget>

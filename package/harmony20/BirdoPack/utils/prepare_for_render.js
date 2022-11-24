@@ -151,7 +151,7 @@ function prepare_for_render(projData, render_step, use_extra_writenodes){
 				continue;
 			}
 
-			if(render_step == "COMP" && node.getName(writes[i]).indexOf("MATTE") == -1){//adiciona CO de fix de cor do projeto
+			if(render_step == "COMP" && node.getName(writes[i]).toUpperCase().indexOf("MATTE") == -1){//adiciona CO de fix de cor do projeto
 				Print("####Add color fix: " + writes[i]);
 				Print("####>> " + BD2_add_proj_CO_correction(projData, writes[i]));
 			}
