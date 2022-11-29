@@ -71,7 +71,7 @@ function BD_MatteOverride(){
 				return "_matte01";
 			}
 			var last_num = regex.test(last_item) ? regex.exec(last_item)[0] : 0;
-			return ("_matte" + ("00" + (last_num+1)).slice(-2));
+			return ("_matte" + ("00" + (parseFloat(last_num) + 1)).slice(-2));
 		}
 
 		this.create_next_pallet = function(){//cria a proxima palette
@@ -89,11 +89,12 @@ function BD_MatteOverride(){
 			return newMattePalette;
 		}
 	}
-		
+
 	function getPresets(projData, paletteList){//retorna objeto com infos sobre os presets validos achados
 		var presets_data = {
 			"is_valid": false,
-			"presets": {}
+			"presets": {},
+			"templates": {}	 
 		};
 		var presets_folder = projData.getTBLIB("server") + "mattes_presets/";
 		if(!BD1_DirExist(presets_folder)){
@@ -127,6 +128,11 @@ function BD_MatteOverride(){
 				presets_data["presets"][presetName] = obj;
 			}
 		}
+		var tpls_folders = presets_folder + "templates/";
+		var co_tpls = BD1_ListFolders(tpls_folders).filter(function(x){return x.indexOf(".tpl") != -1});
+		co_tpls.forEach(function(item, index){
+			presets_data["templates"][item.replace(".tpl", "")] = tpls_folders + item;
+		});
 		return presets_data;
 	}
 }
@@ -158,6 +164,10 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.groupAdvenced.radioCorPreset.enabled = this.presetsData.is_valid;
 	this.ui.groupAdvenced.comboCorPreset.enabled = this.presetsData.is_valid;
 	this.ui.groupAdvenced.comboCorPreset.addItems(Object.keys(this.presetsData.presets));
+	//update templates widgets
+	var tpl_list = Object.keys(this.presetsData.templates);
+	this.ui.groupTeplate.enabled = tpl_list.length > 0;
+	this.ui.groupTeplate.comboTemplates.addItems(tpl_list);
 	
 	//CALL BACKS
 	this.updateColorsNamesCombo = function(){//atualiza a lista de cores no combo nome
@@ -366,6 +376,8 @@ function CreateInterface(uiPath, matteData, presetsData){
 		var isIgnore = false;
 		if(this.ui.groupAdvenced.radioCorName.checked){
 			isIgnore = this.ui.groupAdvenced.comboCorName.currentText == color.name;
+		} else if(this.ui.groupAdvenced.radioCorPreset.checked){
+			isIgnore = color.id in this.presetsData.presets[this.ui.groupAdvenced.comboCorPreset.currentText];
 		} else if(this.ui.groupAdvenced.radioCorVal.checked){
 			isIgnore = compareColors(color, this.ingoneColour);
 		}
@@ -424,7 +436,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 		for(var i=this.currPalette.nColors-1; i>=0; i--){
 			this.updateProgressBar();
 			var cor = this.currPalette.getColorByIndex(i);
-			var originalColor = matteData.pl.findPaletteOfColor(cor.id).getColorById(cor.id);//cor na palete original
+			var originalColor = this.matteData.pl.findPaletteOfColor(cor.id).getColorById(cor.id);//cor na palete original
 			this.ui.progressBar.format = "analizing... " + cor.name;
 			Print("...updating color: " + cor.name);
 			
@@ -444,6 +456,21 @@ function CreateInterface(uiPath, matteData, presetsData){
 		scene.endUndoRedoAccum();
 		//update combo names
 		this.updateColorsNamesCombo();
+	}
+	
+	this.onAddTpl = function(){
+		var selNode = selection.selectedNode(0);
+		if(!selNode){
+			MessageBox.warning("Selecione um node para aplicar o matte!",0,0);
+			return;
+		}
+		
+		scene.beginUndoRedoAccum("MATTEOVERRIDE - add tpl");
+
+		var selected_tpl = this.presetsData.templates[this.ui.groupTeplate.comboTemplates.currentText];
+		var importedNode = importTPL(selected_tpl)[0];
+		connectNodeUnder(selNode, importedNode);
+		scene.endUndoRedoAccum();			
 	}
 	
 	this.onAddNode = function(){
@@ -488,6 +515,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.groupAdvenced.pushIgnoreColor.clicked.connect(this, this.onSelectIgnoreColor);
 	this.ui.groupAdvenced.pushUpdateColors.clicked.connect(this, this.onUpdateColors);
 
+	this.ui.groupTeplate.pushAddSpecialTpl.clicked.connect(this, this.onAddTpl);
 	this.ui.addMatteNodeButton.clicked.connect(this, this.onAddNode);
 	this.ui.closeButton.clicked.connect(this, this.onClose);
 		
@@ -550,30 +578,30 @@ function CreateInterface(uiPath, matteData, presetsData){
 		coObj.addPalette(palettePath);
 		return co;
 	}
-
-	function addNodeUnder(nodeSel, nodeName, type){//add node e conecta embaixo do nodeSel (retirado dos utils)
-		var parentGroup = node.parentNode(nodeSel);
-		var x = node.coordX(nodeSel);
-		var y = node.coordY(nodeSel);
-		var newY = y + 80;
-		var newX;
 	
+	function connectNodeUnder(nodeSel, nodeToMove){//conecta o node embaixo do node selecionado e se ja existir um node igual, conecta do lado
+		var parentSel = node.parentNode(nodeSel);
+		var parentDst = node.parentNode(nodeToMove);
+		var newNode = nodeToMove;
+		
+		if(parentSel != parentDst){
+			newNode = node.moveToGroup(nodeToMove, parentSel);
+		}
+
+		var nodeCoordSel = new QRect(node.coordX(nodeSel), node.coordY(nodeSel), node.width(nodeSel), node.height(nodeSel));
+		var nodeCoordDst = new QRect(node.coordX(newNode), node.coordY(newNode), node.width(newNode), node.height(newNode));
+		
+
 		var nodePort = node.numberOfOutputPorts(nodeSel) -1;
 		var nextNode = node.dstNode(nodeSel, nodePort, 0);
-		var end_connection = nextNode == "";
-
-		if(node.type(nextNode) == "COLOR_OVERRIDE_TVG" && node.getName(nextNode).indexOf("MATTE")!= -1){ 
-			MessageBox.warning("Aparentemente ja tem um MatteOverride conectado neste node!",0,0);
-			return false;				
-		}
+		var end_connection = nextNode == "" || node.type(nextNode) == node.type(nodeToMove);
 		
 		if(end_connection){
-			newX = x + 50;
+			nodeCoordSel.translate(nodeCoordDst.width(), 80);
 		} else {
-			newX = x;
+			nodeCoordSel.moveTo(nodeCoordSel.center().x() - nodeCoordDst.width()/2, nodeCoordSel.y() + 80);
 		}
-		var newNode = node.add(parentGroup, nodeName, type, newX, newY, 0);
-
+		
 		if(!end_connection){
 			var compPort = node.dstNodeInfo(nodeSel, nodePort, 0).port;						
 			node.unlink(nextNode, compPort);
@@ -581,6 +609,27 @@ function CreateInterface(uiPath, matteData, presetsData){
 		}
 
 		node.link(nodeSel, nodePort, newNode, 0);
+		node.setCoord(newNode, nodeCoordSel.x(), nodeCoordSel.y());
+		Print("Node connected under!");
+	}
+	
+	function addNodeUnder(nodeSel, nodeName, type){//add node e conecta embaixo do nodeSel (retirado dos utils)
+		var newNode = node.add(node.root(), nodeName, type, 0, 0, 0);
+		connectNodeUnder(nodeSel, newNode);
 		return newNode;
+	}
+	
+	function importTPL(tplPath){//import tpl into scene and return node list of imported nodes in root top view
+		var before = node.subNodes(node.root());
+		copyPaste.setPasteSpecialCreateNewColumn(true);
+		copyPaste.usePasteSpecial(true);
+		copyPaste.setExtendScene(false);
+		copyPaste.setPasteSpecialColorPaletteOption("DO_NOTHING");
+		if(!copyPaste.pasteTemplateIntoScene(tplPath, "", 1)){
+			Print("Error importing tpl : " + tplPath + " into scene!");
+			return false;
+		}
+		var after = node.subNodes(node.root());
+		return after.filter(function(x) { return before.indexOf(x) == -1});
 	}
 }
