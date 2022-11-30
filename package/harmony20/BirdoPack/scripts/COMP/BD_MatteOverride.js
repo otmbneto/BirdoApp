@@ -203,6 +203,8 @@ function CreateInterface(uiPath, matteData, presetsData){
 		this.updateColorsNamesCombo();
 		//update radios in advanced groupAdvenced
 		this.changeRadio();
+		//update palette buttons
+		this.updatePaletteButtons();		
 	}
 	
 	this.createNewMattePallette = function(){//callback do pushButton de criar nova 
@@ -234,8 +236,10 @@ function CreateInterface(uiPath, matteData, presetsData){
 		this.ui.progressBar.value = val + 1;	
 	}
 	
-	this.enableButtons = function(enable){//habilita os botoes de palette
-		this.ui.groupPalettes.pushAddColors.enabled = enable;
+	this.updatePaletteButtons = function(){//habilita os botoes de palette
+		this.ui.groupPalettes.pushAddColors.enabled = this.ui.groupPalettes.labelPalette.text != "" || !this.ui.groupPalettes.radioChoosePal.checked;
+		this.ui.groupPalettes.pushSelPal.enabled = this.ui.groupPalettes.radioChoosePal.checked;
+		this.ui.groupPalettes.labelPalette.enabled = this.ui.groupPalettes.radioChoosePal.checked;
 		this.ui.groupPalettes.pushRemoveColors.enabled = this.currPalette.nColors > 0;
 	}
 	
@@ -246,10 +250,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 	}	
 	
 	this.onCheckPalletOptions = function(){
-		var showButtons = Boolean(this.currPalette) || this.ui.groupPalettes.radioAllColors.checked;	
-		this.enableButtons(showButtons);
-		this.ui.groupPalettes.pushSelPal.enabled = !this.ui.groupPalettes.radioAllColors.checked;
-		this.ui.groupPalettes.labelPalette.enabled = !this.ui.groupPalettes.radioAllColors.checked;
+		this.updatePaletteButtons();
 		Print("Changed add colors mode...");
 	}
 	
@@ -269,7 +270,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 			Print("Palette selected: " + this.sourcePalette.getName());
 			this.ui.progressBar.format = "Palette selected: " + this.sourcePalette.getName();
 		}
-		this.enableButtons(validPalette);
+		this.updatePaletteButtons();
 	}
 	
 	this.onAddColors = function(){
@@ -317,7 +318,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 			this.currPalette.removeColor(cor.id);
 			delete_counter++;
 		}
-		this.enableButtons(this.ui.groupPalettes.radioAllColors.checked);
+		this.updatePaletteButtons();
 		
 		Print("cores deletadas do mattePalette: " + delete_counter);
 		this.ui.progressBar.format = "MattePalette foi limpa! removidos: " + delete_counter;
@@ -501,6 +502,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.pushCreateMatte.clicked.connect(this, this.createNewMattePallette);
 	
 	this.ui.groupPalettes.radioAllColors.toggled.connect(this, this.onCheckPalletOptions);
+	this.ui.groupPalettes.radioChoosePal.toggled.connect(this, this.onCheckPalletOptions);
 
 	this.ui.groupAdvenced.radioCorName.toggled.connect(this, this.changeRadio);
 	this.ui.groupAdvenced.radioCorVal.toggled.connect(this, this.changeRadio);
