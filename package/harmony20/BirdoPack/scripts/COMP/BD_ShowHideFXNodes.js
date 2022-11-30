@@ -38,7 +38,7 @@ function BD_ShowHideFXNodes(){
 	if(nodes_list.length == 0){
 		MessageBox.information("No FX nodes found for this group!");
 		Print("No FX nodes found for this group!");
-		return;			
+		return;
 	}
 	
 	//get current nodes enabled state
@@ -47,6 +47,12 @@ function BD_ShowHideFXNodes(){
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_EnableDisableFXNodes.ui";
 
 	var nvp = get_nodeview_position();
+	
+	if(!nvp){
+		Print("Error getting node view position!");
+		return;	
+	}
+	
 	var uis_data = new UIListData(nvp);
 	
 	if(!uis_data.is_valid){
@@ -80,6 +86,9 @@ function BD_ShowHideFXNodes(){
 		var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});
 		if(nodeview.length == 0){
 			Print("nodwview not found!");
+			return false;
+		} else if(nodeview.length > 1){
+			MessageBox.warning("ERROR! Mais de uma janela de node view detectada! Feche uma das janelas para funcionar!",0,0);
 			return false;
 		}
 		var nv_pos = view.viewPosition(nodeview[0]);
