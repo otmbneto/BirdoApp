@@ -257,9 +257,12 @@ QHeaderView::section:checked{
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
-         <bold>false</bold>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
        </property>
        <property name="frameShape">
         <enum>QFrame::Box</enum>
@@ -269,6 +272,9 @@ QHeaderView::section:checked{
        </property>
        <property name="text">
         <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>

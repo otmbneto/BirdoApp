@@ -64,6 +64,10 @@ function InitiateUI(uiPath, nodes_data){
 	this.ui.labelTotal.text = nodes_data.total;
 	this.ui.groupBox.treeWidget.hide();
 	
+	//update total value color styleSheets
+	var style = convertNumeberToColor(nodes_data.total);
+	this.ui.labelTotal.styleSheet = style;
+	
 	//update listTree
 	for(item in nodes_data.types){
 		var tree = new QTreeWidgetItem(this.ui.groupBox.treeWidget, [item, nodes_data.types[item].length]);
@@ -92,4 +96,13 @@ function InitiateUI(uiPath, nodes_data){
 	//connections
 	this.ui.buttonClose.clicked.connect(this, this.onClose);
 	this.ui.groupBox.clicked.connect(this, this.onCheckGB);
+	
+	//helper functions
+	function convertNumeberToColor(number){//gera valor de cor basead no numero de nodes (maximo 1000 fica mais vermelho, e menor fica mais verde)
+		var max_nodes = 1000;
+		var value = (number/max_nodes) * 255;
+		var red = value > 255 ? 255 : value;
+		var green = 255 - red;
+		return "color: rgb(" + Math.floor(red) + ", " + Math.floor(green) + ", 0);\nbackground-color: rgb(150, 150, 150);";
+	}
 }
