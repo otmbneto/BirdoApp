@@ -22,6 +22,8 @@
   <property name="styleSheet">
    <string notr="true">QLabel {
 	color: lightgray;
+	border: 1px solid darkgray;
+	border-radius: 5px;
 }
 
 QLabel::disabled {
@@ -159,6 +161,9 @@ QHeaderView::section:checked{
          <bold>true</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">border: null;</string>
+       </property>
        <property name="text">
         <string>Nodes Counter</string>
        </property>
@@ -166,6 +171,9 @@ QHeaderView::section:checked{
      </item>
      <item>
       <widget class="QLabel" name="labelVersion">
+       <property name="styleSheet">
+        <string notr="true">border: null;</string>
+       </property>
        <property name="text">
         <string>v2.0</string>
        </property>
@@ -268,7 +276,7 @@ QHeaderView::section:checked{
         <enum>QFrame::Box</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
+        <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
         <string/>
@@ -323,6 +331,9 @@ QHeaderView::section:checked{
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_7">
+     <property name="styleSheet">
+      <string notr="true">border: null;</string>
+     </property>
      <property name="text">
       <string>@leobazao 2022</string>
      </property>

@@ -102,7 +102,10 @@ function InitiateUI(uiPath, nodes_data){
 		var max_nodes = 1000;
 		var value = (number/max_nodes) * 255;
 		var red = value > 255 ? 255 : value;
-		var green = 255 - red;
-		return "color: rgb(" + Math.floor(red) + ", " + Math.floor(green) + ", 0);\nbackground-color: rgb(150, 150, 150);";
+		var green = (255 - red) < 50 ? 50 : 255 - red;
+		if(red < 50){
+			red = 50;
+		}
+		return "color: rgb(" + Math.floor(red) + ", " + Math.floor(green) + ", 40);\nbackground-color: rgb(40, 40, 40);";
 	}
 }
