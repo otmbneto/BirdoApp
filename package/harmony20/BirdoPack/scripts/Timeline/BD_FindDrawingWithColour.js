@@ -26,8 +26,6 @@ function BD_FindDrawingWithColour(){
 		return false;
 	}
 	
-	scene.beginUndoRedoAccum("Find Drawing By Colour")
-
 	var duplicate_check_list = [];
 	var readList = node.getNodes(["READ"]); 
 	var nodCores = [];
@@ -54,15 +52,15 @@ function BD_FindDrawingWithColour(){
 	progressDlg.setRange(0, readList.length-1);
 		
 	readList.forEach(function(item, index){ 
-					progressDlg.setValue(index);
-					progressDlg.setLabelText("Checking node: " + node.getName(item));
-					var itemNode = getNodeInfo(item, curr_color_id);	
-					if(itemNode){
-						Print("--node match with color: " + itemNode.node);
-						nodCores.push(itemNode);
-					}
-			});
-			
+			progressDlg.setValue(index);
+			progressDlg.setLabelText("Checking node: " + node.getName(item));
+			var itemNode = getNodeInfo(item, curr_color_id);	
+			if(itemNode){
+				Print("--node match with color: " + itemNode.node);
+				nodCores.push(itemNode);
+			}
+	});
+
 	progressDlg.hide();
 	
 	if(nodCores.length == 0){
@@ -74,8 +72,6 @@ function BD_FindDrawingWithColour(){
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_FindDrawingWithColour.ui";
 	var d = new loadInterface(nodCores, colorObj, ui_path);
 	d.ui.show();
-
-	scene.endUndoRedoAccum();
 
 	//EXTRA FUNCTIONS
 	function getNodeInfo(nodePath, colorId){//funcao que descobre se o node contem a cor e retorna objeto com informacoes de drawings
@@ -200,6 +196,7 @@ function loadInterface(nodeMatch_list, colorData, pathUI){
 		if(!ask){
 			Print("Edit Cancelado!");
 		}
+		scene.beginUndoRedoAccum("FIND DRAWING WITH COLOR - Edit Drawing");
 		var curr_index = parseInt(this.ui.groupNode.labelIndex.text);
 		var node_object = this.node_list[curr_index];
 		var drawing_data = node_object["drawings"][this.ui.groupDrawing.sliderDrawing.value];
@@ -217,6 +214,7 @@ function loadInterface(nodeMatch_list, colorData, pathUI){
 		//change to select tool;
 		Action.perform("onActionChooseSelectTool()", "cameraView");
 		Print("--editing drawing: " + drawing_data["name"] + " from node: " + node_object["node"]);
+		scene.endUndoRedoAccum();
 	}
 	
 	this.createThumbnails = function(){//create thumbnails for current selected Node

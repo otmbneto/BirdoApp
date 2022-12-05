@@ -544,6 +544,8 @@ function CreateInterface(uiPath, matteData, presetsData){
 	
 	function pickColor(currColor){//dialog para escolher cor
 		var d = new QColorDialog;
+		Print("TESSSTE");
+		Print(d.setOption(QColorDialog.ShowAlphaChannel, true));
 		d.currentColor = currColor
 		if(!d.exec()){
 			return false;
