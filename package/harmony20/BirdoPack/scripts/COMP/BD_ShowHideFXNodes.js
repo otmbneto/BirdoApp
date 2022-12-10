@@ -1,4 +1,4 @@
-/*
+/*v2.0
 -------------------------------------------------------------------------------
 Name:		BD_ShowHideFXNodes.js
 
@@ -8,163 +8,158 @@ Usage:		Seleciona o group do rig na node view para habilitar ou desabilitar os f
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	novembro, 2022.
+Created:	novembro, 2022 (update Dezembro 2022).
             
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
+	TO DO: fazer o script gerar uma ui pra cada grupo com fx encontrado
+	 [x] - fazer funcao para achar os rigs com fx no nivel da nodeview aberto;
+	 [x] - listar as widgets abertas na variavel do sistema pelo titulo (se tiver id melhor) -- CAIU
+	 [] - fazer funcao para pegar geometry da nodeview
+	 [] - gerar uma ui para cada rig encontrado
 */
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
+var curr_nv_group = null;//global var q define qual o grupo atual na node view
+
 function BD_ShowHideFXNodes(){
-	
-	var rig_group = selection.selectedNode(0);
-	if(!rig_group || !node.isGroup(rig_group)){
-		MessageBox.warning("Select a group node in the node view!",0,0);
-		return;
-	}
-	var node_name = node.getName(rig_group);
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return false;
 	}
-	
-	//get comp nodes
-	var comp_types = ["BLEND_MODE_MODULE", "FADE", "GLOW"];
-	var nodes_list = BD2_ListNodesInGroup(rig_group, comp_types, true);
-	if(nodes_list.length == 0){
-		MessageBox.information("No FX nodes found for this group!");
-		Print("No FX nodes found for this group!");
-		return;
-	}
-	
-	//get current nodes enabled state
-	var curr_state = getCurrentState(nodes_list);
-			
+	//ui file path
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_EnableDisableFXNodes.ui";
 
-	var nvp = get_nodeview_position();
-	
-	if(!nvp){
+	//gets node view geometry in the monitor
+	var nv_geometry = get_nodeview_geometry();
+	if(!nv_geometry){
 		Print("Error getting node view position!");
 		return;	
 	}
 	
-	var uis_data = new UIListData(nvp);
-	
-	if(!uis_data.is_valid){
-		var msg = "Voce atingiu o limite de " + uis_data.count_limit + " UIs criadas para este script!\Delete algumas antes de continuar!";
-		Print(msg);
-		MessageBox.warning(msg,0,0);
+	//gets rig nodes info
+	var rigs_list = get_rig_nodes_list_data();
+	if(!rigs_list){
+		MessageBox.information("No FX nodes found in the current Node View Group!");
 		return;
 	}
 	
-	try {
-		var d = new Interface(nodes_list, node_name, pathUI, curr_state, uis_data);
-		d.ui.show();
-	} catch(e){
-		Print(e);	
-	}
+	var ui_generator = new UiGeometry(nv_geometry);
+	
+	rigs_list.forEach(function(item, index){
+		var ui_geometry = ui_generator.get_geometry(index);
+		if(!ui_geometry){
+			Print("Ui limit! Wont create ui index " + index, 0, 0);
+			return;
+		}
+		try {
+			var d = new Interface(item.nodes_list, item.rig_name, pathUI, item.enable_state, ui_geometry);
+			d.ui.show();
+		} catch(e){
+			Print(e);	
+		}
+	});
 	
 	//EXTRA FUNCTIONS
-	function getCurrentState(fx_nodes){//define se os nodes estao mais OFF ou mais ON
-		var counter = {"on": 0, "off": 0};
-		fx_nodes.forEach(function(item){	
-			if(node.getEnable(item)){
-				counter["on"]++;
-			} else {
-				counter["off"]++;	
-			}
-		});
-		return counter.on > counter.off;
-	}
-	
-	function get_nodeview_position(){//retorna o ponto do canto esq da Node View
+	function get_nodeview_geometry(){//retorna um rect com coordenadas da janela node view
 		var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});
 		if(nodeview.length == 0){
-			Print("nodwview not found!");
+			MessageBox.warning("Node View not found!", 0, 0);
 			return false;
 		} else if(nodeview.length > 1){
 			MessageBox.warning("ERROR! Mais de uma janela de node view detectada! Feche uma das janelas para funcionar!",0,0);
 			return false;
 		}
+		curr_nv_group = view.group(nodeview[0]);
 		var nv_pos = view.viewPosition(nodeview[0]);
-		//fix padding for nodeview position
-		return new QPoint(nv_pos.x() + 5, nv_pos.y() -20);
+		var top_corner = new QPoint(nv_pos.x() + 5, nv_pos.y() -20);
+		
+		//finds te node view rect
+		var wlist = QApplication.allWidgets();
+		var g = null;
+		wlist.forEach(function(item){ 
+			if(item.visible && item.windowTitle == "Node View"){
+				g = new QRect(top_corner.x(), top_corner.y(), item.width, item.height);
+			}
+			//closes the opened uis for this script
+			if(item.windowTitle == "ShowHideFXScript"){
+				item.close();	
+			}
+		});
+		return g
 	}
 	
-	function UIListData(offSetPoint){//constroi objeto com geometry das UIs do script criadas
+	function get_rig_nodes_list_data(){//retorna lista de objetos contendo info dos grupos de rigs encontrados
+		var comp_types = ["BLEND_MODE_MODULE", "FADE", "GLOW"];//nodes de efeitos a procurar
+		var all_groups = node.subNodes(curr_nv_group).filter(function(item){ return node.isGroup(item) && node.getName(item) != "SETUP"});
+		var rig_data_list = [];
+		
+		//cria lista baseada na lista de grupos de rigs encontrados no current group da node view
+		all_groups.forEach(function(item){
+			var obj = {
+				"rig_name": node.getName(item),
+				"nodes_list": BD2_ListNodesInGroup(item, comp_types, true),
+			}
+			obj["enable_state"] = getCurrentState(obj.nodes_list);//get current nodes enabled state for this rig
+			if(obj.nodes_list.length > 0){
+				rig_data_list.push(obj);
+			}
+		});
+		
+		if(rig_data_list.length == 0){
+			Print("No FX nodes found in the current Node View Group!");
+			return false;
+		}
+		return rig_data_list;
+		
+		function getCurrentState(fx_nodes){//define se os nodes estao mais OFF ou mais ON
+			var counter = {"on": 0, "off": 0};
+			fx_nodes.forEach(function(item){	
+				if(node.getEnable(item)){
+					counter["on"]++;
+				} else {
+					counter["off"]++;	
+				}
+			});
+			return counter.on > counter.off;
+		}
+	}
+	
+	function UiGeometry(nvg){//constroi objeto que gera gerometrys de uis a serem criadas
 		//define tamanho e espacamento das uis
 		this.w = 140;
 		this.h = 90;
 		this.spacing = 5;//espacamento entre as uis
-		this.count_limit = 4;//define tamanho da lsita de uis (comecar com 4);
-		this.columns = 2;//numero de coluas no grid de uis
-		this.offset = offSetPoint;
-	
-		//define a lista de uis ativas usando a string salva em preferences
-		var ui_list_str = preferences.getString("comp_fx_ui_list", "");
-		var ui_list = ui_list_str.length == 0 ? [] : ui_list_str.split(",").map(function(x){ return parseFloat(x)});
-
-		//descobre qual o index do ui a ser criado e atualiza a lista de uis deste objeto
-		for(var i=0 ; i<=ui_list.length; i++){
-			if(ui_list.indexOf(i) == -1){
-				this.ui_index = i;
-				ui_list.push(i);
-				break;
-			}
-		}
-		this.ui_list = ui_list.sort();
+		this.columns = Math.floor(nvg.width()/this.w);//numero de coluas no grid de uis
+		this.lines = Math.floor((nvg.height()/this.h)/2);//numero de linhas do grid
+		this.nodeview = nvg;
 		
-		//define se o objeto passou do limite de uis
-		this.is_valid = this.ui_list.length < this.count_limit;
-
 		//callbacks metodos da classe objeto
-		this.get_current_ui_geometry = function(){
+		this.get_geometry = function(ui_index){
 			//retorna o rect do ui a ser criado
-			var coluna = this.ui_index%this.columns;
-			var linha = Math.floor(this.ui_index/this.columns);
-			var pos_x = this.offset.x() + (coluna * (this.w + this.spacing));
-			var pos_y = this.offset.y() + (linha * (this.h + this.spacing));
-			return new QRect(pos_x, pos_y, this.w, this.h);
-		}
-		
-		this.update_ui_preference_list = function(){//atualiza o preference UI list com o ui criado
-			preferences.setString("comp_fx_ui_list", this.ui_list.toString());
-			MessageLog.trace("Preferences UI list updated with index: " + this.ui_index);	
-		}
-
-		this.remove_ui_from_list_pref = function(){//remove o index do ui da ui list nas preferences
-			//checa se a lista mudou
-			var curr_list = preferences.getString("comp_fx_ui_list", "");
-			if(curr_list !=	this.ui_list.toString()){
-				MessageLog.trace("lista atualizou no meio tempo...");
-				if(curr_list.indexOf(this.ui_index) == -1){
-					MessageLog.trace("lista ja nao contem indice : " + this.ui_index);
-					return;
-				}
-				this.ui_list = curr_list.split(",").map(function(x){ return parseFloat(x)});
+			var coluna = ui_index%this.columns;
+			var linha = Math.floor(ui_index/this.columns);
+			if(linha > this.lines){
+				MessageBox.warning("Limit UIs for this NodeView! Make the Node View Bigger to fit all uis!", 0, 0);
+				return false;		
 			}
-			this.ui_list.splice(this.ui_list.indexOf(this.ui_index), 1);
-			preferences.setString("comp_fx_ui_list", this.ui_list.toString());
-			MessageLog.trace("Ui index removed from Preferences ui list: " + this.ui_index);
+			var pos_x = this.nodeview.topLeft().x() + (coluna * (this.w + this.spacing));
+			var pos_y = this.nodeview.topLeft().y() + (linha * (this.h + this.spacing));
+			return new QRect(pos_x, pos_y, this.w, this.h);
 		}
 	}
 }
 
-function Interface(nodes_list, node_name, pathUI, curr_state, uis_data){
-
+function Interface(nodes_list, node_name, pathUI, curr_state, ui_rect){
 	this.ui = UiLoader.load(pathUI);
 	this.ui.activateWindow();
 	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
-	var ui_rect = uis_data.get_current_ui_geometry();
 	this.ui.setGeometry(ui_rect.x(), ui_rect.y(), ui_rect.width(), ui_rect.height());
-	
-	//update preferences
-	uis_data.update_ui_preference_list();
+	this.ui.setWindowTitle("ShowHideFXScript");
 
 	//update label name
 	this.ui.label.text = formatName(node_name);
@@ -190,7 +185,6 @@ function Interface(nodes_list, node_name, pathUI, curr_state, uis_data){
 	
 	this.onClose = function(){
 		MessageLog.trace(node_name + " comp FX On Off CLOSED!");
-		uis_data.remove_ui_from_list_pref();
 		this.ui.close();
 	}
 	
