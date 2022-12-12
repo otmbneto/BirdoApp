@@ -13,11 +13,6 @@ Created:	novembro, 2022 (update Dezembro 2022).
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
-	TO DO: fazer o script gerar uma ui pra cada grupo com fx encontrado
-	 [x] - fazer funcao para achar os rigs com fx no nivel da nodeview aberto;
-	 [x] - listar as widgets abertas na variavel do sistema pelo titulo (se tiver id melhor) -- CAIU
-	 [] - fazer funcao para pegar geometry da nodeview
-	 [] - gerar uma ui para cada rig encontrado
 */
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
@@ -25,6 +20,9 @@ include("BD_2-ScriptLIB_Geral.js");
 var curr_nv_group = null;//global var q define qual o grupo atual na node view
 
 function BD_ShowHideFXNodes(){
+	
+	//fecha possiveis uis abertas
+	close_uis();
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -66,6 +64,16 @@ function BD_ShowHideFXNodes(){
 	});
 	
 	//EXTRA FUNCTIONS
+	function close_uis(){
+		var counter = 0;
+		var wlist = QApplication.allWidgets();
+		wlist.forEach(function(item){
+			if(item.windowTitle == "ShowHideFXScript"){
+				item.close();
+			}
+		});	
+		Print(counter + " uis widgets foram fechadas!");
+	}
 	function get_nodeview_geometry(){
 		var views = view.viewList()
 		var screen = QApplication.desktop().geometry;//screen geometry
