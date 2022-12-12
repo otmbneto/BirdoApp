@@ -40,7 +40,8 @@ function BD_ShowHideFXNodes(){
 		Print("Error getting node view position!");
 		return;	
 	}
-	
+
+
 	//gets rig nodes info
 	var rigs_list = get_rig_nodes_list_data();
 	if(!rigs_list){
@@ -65,32 +66,36 @@ function BD_ShowHideFXNodes(){
 	});
 	
 	//EXTRA FUNCTIONS
-	function get_nodeview_geometry(){//retorna um rect com coordenadas da janela node view
-		var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});
-		if(nodeview.length == 0){
-			MessageBox.warning("Node View not found!", 0, 0);
-			return false;
-		} else if(nodeview.length > 1){
-			MessageBox.warning("ERROR! Mais de uma janela de node view detectada! Feche uma das janelas para funcionar!",0,0);
-			return false;
-		}
-		curr_nv_group = view.group(nodeview[0]);
-		var nv_pos = view.viewPosition(nodeview[0]);
-		var top_corner = new QPoint(nv_pos.x() + 5, nv_pos.y() -20);
-		
-		//finds te node view rect
-		var wlist = QApplication.allWidgets();
-		var g = null;
-		wlist.forEach(function(item){ 
-			if(item.visible && item.windowTitle == "Node View"){
-				g = new QRect(top_corner.x(), top_corner.y(), item.width, item.height);
+	function get_nodeview_geometry(){
+		var views = view.viewList()
+		var screen = QApplication.desktop().geometry;//screen geometry
+		var top_corner = null;//canto superior esq da widget
+		var h_list = [screen.height()];
+		var w_list = [screen.width()];
+		var counter = 0;
+		views.forEach(function(item, index){
+			var pos = view.viewPosition(item);
+			if(view.type(item) == "Node View"){
+				curr_nv_group = view.group(item);
+				top_corner = pos;
+				counter++;
 			}
-			//closes the opened uis for this script
-			if(item.windowTitle == "ShowHideFXScript"){
-				item.close();	
+			if(h_list.indexOf(pos.y()) == -1){
+				h_list.push(pos.y());
+			}
+			if(w_list.indexOf(pos.x()) == -1){
+				w_list.push(pos.x());
 			}
 		});
-		return g
+		w_list.sort(function(a,b){ return b-a});
+		h_list.sort(function(a,b){ return b-a});
+		if(counter != 1){
+			Print("Mais de uma Node View ativa! Feche uma para funcionar este script!!");
+			return false;
+		}
+		var w = w_list[w_list.indexOf(top_corner.x()) - 1] - w_list[w_list.indexOf(top_corner.x())]; 
+		var h = h_list[h_list.indexOf(top_corner.y()) - 1] - h_list[h_list.indexOf(top_corner.y())];
+		return new QRect(top_corner.x() + 5, top_corner.y() -20, w, h);
 	}
 	
 	function get_rig_nodes_list_data(){//retorna lista de objetos contendo info dos grupos de rigs encontrados
@@ -135,9 +140,11 @@ function BD_ShowHideFXNodes(){
 		this.h = 90;
 		this.spacing = 5;//espacamento entre as uis
 		this.columns = Math.floor(nvg.width()/this.w);//numero de coluas no grid de uis
-		this.lines = Math.floor((nvg.height()/this.h)/2);//numero de linhas do grid
+		this.lines = Math.floor(nvg.height()/this.h);
 		this.nodeview = nvg;
-		
+		MessageLog.trace(this.columns + " ===> colunas");
+		MessageLog.trace(this.lines + " ===> lines");
+
 		//callbacks metodos da classe objeto
 		this.get_geometry = function(ui_index){
 			//retorna o rect do ui a ser criado
