@@ -367,7 +367,19 @@ Copyright:  leobazao_@Birdo
 		file.close();
 		return lmodified;
 	}
-
+	/*renomeia o arquivo para new_name
+		@filePath
+	*/
+	function BD1_rename_file(filePath, new_name){
+		var file = new QFile(filePath);
+		if(file.rename(new_name)){
+			Print("File : " + filePath + " renamed to : " + new_name);
+			return true;
+		} else {
+			Print("Error renaming file : " + filePath + " to : " + new_name);
+			return false;
+		}
+	}
 //#####################ZIP files#####################//
 	/*Cria um zip do arquivo dado no caminho de destino dado
 	@src_file => arquivo para ser compactado
