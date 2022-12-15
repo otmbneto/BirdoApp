@@ -69,8 +69,7 @@ function BD_MatteOverride(){
 				return false;
 			}
 			var pal_path = this.folder + this.mattes_list[index];
-			this.pl.addPalette(pal_path);
-			return pal_path;
+			return this.pl.addPalette(pal_path);
 		}
 
 		this.get_new_pallet_name = function(){
@@ -102,7 +101,8 @@ function BD_MatteOverride(){
 				MessageLog.trace("Canceled..");
 				return false;
 			}
-			var plt_path = this.get_matte_palette(plt_index);
+			var current_name = this.get_matte_palette(plt_index).getName();
+			var plt_path = this.folder + current_name;
 			if(!plt_path){
 				MessageBox.warning("Invalid palette index!",0,0);
 				return false;
@@ -217,7 +217,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.groupEditColors.radioCorPreset.enabled = this.presetsData.is_valid;
 	this.ui.groupEditColors.comboCorPreset.enabled = this.presetsData.is_valid;
 	this.ui.groupEditColors.comboCorPreset.addItems(Object.keys(this.presetsData.presets));
-	this.ui.groupEditColors.enabled = this.matteData.has_mattes;
+	this.ui.groupEditColors.enabled = false;
 
 	//update templates widgets
 	var tpl_list = Object.keys(this.presetsData.templates);
@@ -233,12 +233,13 @@ function CreateInterface(uiPath, matteData, presetsData){
 	}
 	
 	this.selectMattePalette = function(){//callback do combo de palettes quando muda
-		this.currPalette = this.matteData.get_matte_palette(this.ui.comboMatteList.currentIndex);
+		this.currPalette = this.matteData.get_matte_palette(this.ui.comboMatteList.currentIndex);		
 		this.ui.groupEditColors.enabled = Boolean(this.currPalette);
 		this.ui.addMatteNodeButton.enabled = Boolean(this.currPalette);
 		this.ui.pushRenamePalette.enabled = Boolean(this.currPalette);
 		if(!this.currPalette){
 			Print("No palette selected!");
+			this.ui.progressBar.format = "";
 			return;
 		}
 		//update matte color value
@@ -255,6 +256,8 @@ function CreateInterface(uiPath, matteData, presetsData){
 		this.updateColorsNamesCombo();
 		//update radios in advanced groupEditColors
 		this.changeRadio();
+		//update progressbar text
+		this.ui.progressBar.format = "matte selected: " + this.currPalette.getName();
 	}
 	
 	this.onRenamePalette = function(){
@@ -377,11 +380,6 @@ function CreateInterface(uiPath, matteData, presetsData){
 				Print("Color is already in the mattePalette: " + cor.name);
 				continue;
 			}
-			if(this.isColorIgnored(cor)){
-				Print("Ignoring color: " + cor.name);
-				counterIgnored++;
-				continue;
-			}
 			var cloneColor = this.currPalette.cloneColor(cor);
 			if(!cloneColor){
 				Print("Error cloning color: " + cor.name);
@@ -461,7 +459,6 @@ function CreateInterface(uiPath, matteData, presetsData){
 		var counter_repaint = 0;
 		var counter_removed = 0;
 		this.ui.progressBar.maximum = this.currPalette.nColors - 1;
-
 		for(var i=this.currPalette.nColors-1; i>=0; i--){
 			this.updateProgressBar();
 			var cor = this.currPalette.getColorByIndex(i);
@@ -501,11 +498,16 @@ function CreateInterface(uiPath, matteData, presetsData){
 		}
 		
 		scene.beginUndoRedoAccum("MATTEOVERRIDE - add tpl");
-
-		var selected_tpl = this.presetsData.templates[this.ui.groupTeplate.comboTemplates.currentText];
-		var importedNode = importTPL(selected_tpl)[0];
-		connectNodeUnder(selNode, importedNode);
-		scene.endUndoRedoAccum();			
+		try {
+			var selected_tpl = this.presetsData.templates[this.ui.groupTeplate.comboTemplates.currentText];
+			var importedNode = importTPL(selected_tpl)[0];
+			connectNodeUnder(selNode, importedNode);
+			this.ui.progressBar.format = "Override template added!";
+		} catch(e){
+			Print(e);
+			this.ui.progressBar.format = "fail to add Override template ...";
+		}
+		scene.endUndoRedoAccum();
 	}
 	
 	this.onAddNode = function(){
@@ -544,12 +546,8 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.groupTeplate.pushAddSpecialTpl.clicked.connect(this, this.onAddTpl);
 	this.ui.addMatteNodeButton.clicked.connect(this, this.onAddNode);
 	
-	//hide grupos
-	//this.ui.groupTeplate.pushAddSpecialTpl.setHidden(true);
-	//this.ui.groupTeplate.comboTemplates.setHidden(true);
+	//close template group
 	this.onCheckSpecialTpl();
-	//fix windows size
-	
 	
 	////Funcoes extras da interface/////
 	function Print(msg){
@@ -616,34 +614,43 @@ function CreateInterface(uiPath, matteData, presetsData){
 		var parentSel = node.parentNode(nodeSel);
 		var parentDst = node.parentNode(nodeToMove);
 		var newNode = nodeToMove;
-		
+		var node_name = node.getName(nodeToMove);
 		if(parentSel != parentDst){
-			newNode = node.moveToGroup(nodeToMove, parentSel);
+			newNode = node.moveToGroup(nodeToMove, parentSel) + "/" + node_name;
+			//tira a conexao automatica com a comp
+			var conectionInfo = node.dstNodeInfo(newNode, 0, 0);
+			if(Boolean(conectionInfo)){
+				node.unlink(conectionInfo.node, conectionInfo.port);
+			}
 		}
-
-		var nodeCoordSel = new QRect(node.coordX(nodeSel), node.coordY(nodeSel), node.width(nodeSel), node.height(nodeSel));
-		var nodeCoordDst = new QRect(node.coordX(newNode), node.coordY(newNode), node.width(newNode), node.height(newNode));
 		
+		var nodeCoordSel = getCoordRect(nodeSel);
+		var nodeCoordDst = getCoordRect(newNode);
 
-		var nodePort = node.numberOfOutputPorts(nodeSel) -1;
-		var nextNode = node.dstNode(nodeSel, nodePort, 0);
-		var end_connection = nextNode == "" || node.type(nextNode) == node.type(nodeToMove);
-		
+		var nodePort = 0;//considera a port 0 na selecao
+		var nodeInfo = node.dstNodeInfo(nodeSel, nodePort, 0);		
+		var end_connection = !Boolean(nodeInfo);
+
 		if(end_connection){
-			nodeCoordSel.translate(nodeCoordDst.width(), 80);
+			Print("Is end connection!");
+			nodeCoordSel.translate(Math.floor(nodeCoordDst.width()/2), 100);
 		} else {
-			nodeCoordSel.moveTo(nodeCoordSel.center().x() - nodeCoordDst.width()/2, nodeCoordSel.y() + 80);
+			Print("has node connected..");
+			var compNode = nodeInfo.node;
+			var compPort = nodeInfo.port;				
+			var compCoord = getCoordRect(compNode);
+			nodeCoordSel.moveTo(nodeCoordSel.center().x() - nodeCoordDst.width()/2, nodeCoordSel.united(compCoord).center().y());
+			node.unlink(compNode, compPort);
+			node.link(newNode, 0, compNode, compPort, true, true);
 		}
 		
-		if(!end_connection){
-			var compPort = node.dstNodeInfo(nodeSel, nodePort, 0).port;						
-			node.unlink(nextNode, compPort);
-			node.link(newNode, 0, nextNode, compPort);
-		}
-
 		node.link(nodeSel, nodePort, newNode, 0);
 		node.setCoord(newNode, nodeCoordSel.x(), nodeCoordSel.y());
 		Print("Node connected under!");
+	}
+	
+	function getCoordRect(nodePath){//cria QRect com as coordenadas do node na nodeview
+		return new QRect(node.coordX(nodePath), node.coordY(nodePath), node.width(nodePath), node.height(nodePath));
 	}
 	
 	function addNodeUnder(nodeSel, nodeName, type){//add node e conecta embaixo do nodeSel (retirado dos utils)
