@@ -1,0 +1,97 @@
+{
+	"paths": {
+		"root": "//192.168.10.100/projects/127_Lupi_Baduki/",
+		"projRoot": "",
+		"assetLib": {
+				"bg": "02_BG/",
+				"character": "02_CHARACTER/",
+				"prop": "03_PROP/"
+				},
+		"episodes": "01_EPISODIOS/",
+		"step": {
+			"ANIM": {
+				"folder_name": "02_ANIM",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				},
+			"RENDER": [
+				"00_ANIMATIC",
+				"01_SETUP",
+				"02_ANIMATION",
+				"03_COMP"
+				],
+			"SETUP": {
+				"folder_name": "01_SETUP",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"BG",
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				}
+			},
+		"library": "00_BIBLIOTECA/",
+		"roteiros": "04_ROTEIROS/",
+		"tblib": "_tbLib/",
+		"fazendinha": "_tbLib/_Fazendinha/",
+		"render_comp": "//192.168.10.100/projects/127_Lupi_Baduki/01_EPISODIOS/{EP}/03_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"packUpdate": "_tbLib/_birdoApp/"
+		},
+	"server": {
+		"type": "vpn",
+		"url" : null,
+		"login": false
+	},
+	"pipeline": {
+		"type": "monday",
+		"login": "suporte@birdo.com.br",
+		"projectName": "Astronauta",
+		"projectId": 153,
+		"assetsTypes": [
+					"Character", 
+					"Prop", 
+					"BG", 
+					"FX",
+					"Misc",
+					"Ilustra"
+					],
+		"assets_digits": 3,
+		"boards": {
+				"filter": "LEB",
+				"Character": {
+					"name": ":: LEB | Inventário CHAR",
+					"subgroup": "CHARACTERS",
+					"prefix": "CH"
+				},
+				"Misc": {
+					"name": ":: LEB | Inventário MI",
+					"subgroup": "MISCELANEA",
+					"prefix": "MI"
+				},
+				"Prop": {
+					"name": ":: LEB | Inventário PROP",
+					"subgroup": "PROPS",
+					"prefix": "PR"
+				},
+				"FX": {
+					"name": ":: LEB | Inventário FX",
+					"subgroup": "FX",
+					"prefix": "FX"
+				}
+		},
+		"scriptName": "pipelineScript",
+		"url": "https://api.monday.com/v2",
+		"apiKey": "0-^95{!)k-jkyfqMz{z1(awJ2e1Ys xU)6V(Z&-56,99YV~67\\!(>f{dzme,Htlh`@NyfFiplRqJJZx(P6F:Z%[-5.@2&@*!+{et=e||%i;a?;qHmybie~WW!j\"TBrW\"C6 8J<^/Z_&.i\\}..|gf?fn^.*@/br_b|_QIiLTM%?$HvEXn,K=FO\"\\}1Rv2_g|n{q@f$syDdZlKwL|gH%yf2"
+	}
+}
