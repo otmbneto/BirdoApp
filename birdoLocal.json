@@ -45,6 +45,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 2,
+			"prefix": "LEB",
+			"name": "Lupi_e_Baduki",
+			"harmony" : {
+					"version" : "20.0.3",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_LEB.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }
