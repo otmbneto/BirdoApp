@@ -16,7 +16,6 @@ Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
 	TODO: 
-		[ ] - fazer funcao pra achar um ui do script ja criada ou criar uma do zero caso nao ache;
 		[X] - aumentar o valor maximo dos pontos;
 		[X] - melhorar o esquema de selecao:
 			[-] - deixar o ultimo desenho como selecionado ate trocar de selecao (testar pra ver oq acontece quando nao existe mais a layer ou o node);
@@ -24,7 +23,20 @@ Copyright:   leobazao_@Birdo
 		[-] - add enable logic para o button reverse;
 		[X] - melhorar texto dos radios;
 		[X] - fazer logica dos radios (dentro da funcao de criar pontos);
-		[ ] - talvez mexer na disposicao das widgets?
+
+		[ ] - fazer esquema pra alternar o tipo de definicao do ponto para ponto e espacamento (automatico ou checkbox pra mudar o modo)
+		[ ] - criar botao de reset pontos (deixando somente 2 pontos com o valor maximo)
+		[ ] - separar o callback dos slides de linha diferente do ponto;
+		[ ] - fazer uma opcao de lock entre o min e max;
+		[ ] - fazer os slides mudarem os valores dos pontos q ja existem (min e max) proporcionalmente quando no lock
+		
+		[ ] - descobrir pq ele esta criando um item de thicknessPath para cada stroke da layer mesmo eu mandando somente um
+		
+		[ ] - fazer slider individual pra porcentagem SEM criar novos pontos, mudando proporcionalmente as thicks existentes
+		
+		POR ULTIMO:
+		[ ] - fazer funcao pra achar um ui do script ja criada ou criar uma do zero caso nao ache;
+
 */
 
 function BD_StrokeThicknessControl(){
@@ -240,6 +252,55 @@ function CreateInterface(pathUI){
 		}
 	}
 	
+	function getStrokesLengthList(strokeDataList, thickCount){
+		/*
+		@strokeDataList => lista de strokes da layer;
+		@thickCount => length da lista de thicknessPath da layer;
+		retorna objeto com um QPainterPath criada para cada stroke q tenha um thicknesspath 
+		(unifica os casos de layers com substrokes divididas em varias, mas que dividem mesmo path de thickness)*/
+		var strokes_object = {};
+		for(var i=0; i<thickCount; i++){
+			strokes_object[i] = null;
+		}
+		
+		strokeDataList.forEach(function(item, index){
+			if(!item.hasOwnProperty("thickness")){
+				Print("stroke with no thickness!");
+				return;
+			}
+			var tPathIndex = item.thickness.thicknessPath;
+			var stroke_path = item.path;
+			var start_point = new QPointF(scene.toOGLX(stroke_path[0].x), scene.toOGLY(stroke_path[0].y));
+			if(!strokes_object[tPathIndex]){
+				strokes_object[tPathIndex] = new QPainterPath(start_point);
+			}
+			var point_list = [];
+			for(var i=1; i<stroke_path.length; i++){
+				var point = new QPointF(scene.toOGLX(stroke_path[i].x), scene.toOGLY(stroke_path[i].y));
+				if(stroke_path[i].hasOwnProperty("onCurve")){
+					point_list = [point];
+					addCurveToPath(strokes_object[tPathIndex], point_list);
+					continue;
+				}
+				point_list.push(point);
+			}
+		});
+		return strokes_object;
+		
+		function addCurveToPath(painter_path, point_list){
+			if (point_list.length == 1){
+				painter_path.lineTo(point_list[0]);
+			} else if (point_list.length == 2){
+				painter_path.quadTo(point_list[0], point_list[1]);
+			} else if (point_list.length == 3){
+				painter_path.cubicTo(point_list[0], point_list[1], point_list[2]);
+			} else {
+				Print("wrong number of points...");
+			}
+		}
+	}	
+
+	
 	function modifyLayer(drawingData, selectionData, thickObj){//modifica os strokes com o valor de thickpath escolhido
 		scene.beginUndoRedoAccum("Stroke Thickness Control");
 		var art_obj = drawingData.arts.filter(function(item){ return item.art == selectionData.art})[0];
@@ -250,17 +311,19 @@ function CreateInterface(pathUI){
 			if(!layer_obj.hasOwnProperty("strokes")){
 				return;
 			}
-			
-			layer_obj.strokes.forEach(function(element){
+			layer_obj.strokes.forEach(function(element, index){
+				element["strokeIndex"] = index;
 				element["pencilColorId"] = element["colorId"];
 				if(!element.hasOwnProperty("thickness")){
 					return;	
 				}
-				element["thickness"]["minThickness"] = 10;
-				element["thickness"]["maxThickness"] = 20;
-				layer_obj["thicknessPaths"].splice(element.thickness.thicknessPath, 1, thickObj);
+				element["thickness"]["minThickness"] = thickObj.minThickness;
+				element["thickness"]["maxThickness"] = thickObj.maxThickness;
+				element["thickness"]["thicknessPath"] = 0;
 			});
 			
+			var newThicknesPaths = [thickObj];
+			layer_obj["thicknessPaths"] = newThicknesPaths;
 			layer_obj["layer"] = item;
 			sel_layers_list.push(layer_obj);
 		});
