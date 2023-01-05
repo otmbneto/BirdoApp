@@ -30,8 +30,8 @@ Copyright:   leobazao_@Birdo
 		[ ] - fazer uma opcao de lock entre o min e max;
 		[ ] - fazer os slides mudarem os valores dos pontos q ja existem (min e max) proporcionalmente quando no lock
 		
-		[ ] - descobrir pq ele esta criando um item de thicknessPath para cada stroke da layer mesmo eu mandando somente um
-		
+		[X] - descobrir pq ele esta criando um item de thicknessPath para cada stroke da layer mesmo eu mandando somente um
+		[ ] - criar botao funcao pra resetar linha e mesclar;
 		[ ] - fazer slider individual pra porcentagem SEM criar novos pontos, mudando proporcionalmente as thicks existentes
 		
 		POR ULTIMO:
@@ -69,12 +69,100 @@ function CreateInterface(pathUI){
 	this.t_list = null;
 	this.points_list = null;
 	this.alternate_order = ["max", "min"];//ordem da lista de pontos no modo alternate
+	this.mode = "Points";
 
 	//callbacks
 	this.onToggleMode = function(){
 		var text = this.ui.radioRandom.checked ? "Refresh" : "Invert";
 		this.ui.pushRefresh.text = text;
 		Print("toogled radios..");
+	}
+	
+	this.resetStrokes = function(){//reseta as strokes (limpando os pontos de thickness, e dando um merge nas strokes da mesma layer
+		//OBS:: NAO RODAR O RESELECT LAYERS DEPOIS DE RODAR ESSA FUNCAO!
+		scene.beginUndoRedoAccum("Reset stoke thickness");
+		//selected art object
+		var selArt = this.selection_data.art;
+		var selDrawing = this.selection_data.drawing;
+		var sel_layers = this.selection_data.selectedLayers;
+		var art_obj = this.drawing_data.arts.filter(function(item){ return item.art == selArt})[0];
+		
+		//remove layer
+		var del_config = {
+			label : ("Delete layer "),
+			drawing  : selDrawing,
+			art : selArt,
+			layers : this.selection_data.selectedLayers
+		};
+		DrawingTools.deleteLayers(del_config);
+		
+		//modify layers strokes
+		var modifiedLayers = [];
+		art_obj.layers.forEach(function(layerobj, index){
+			//se a layer nao estiver na selecao, ignora
+			if(sel_layers.indexOf(index) == -1){
+				Print("Ignoring layer that is not selected: " + index);
+				return;
+			}
+			
+			var modLayer = layerobj;
+			var new_strokes = [];
+			var merged_paths = [];
+			
+			if(!layerobj.hasOwnProperty("strokes")){
+				Print("ignoring layer with no strokes!");
+				modifiedLayers.push(modLayer);
+				return;
+			}
+			for(var i=0; i<layerobj.strokes.length; i++){
+				var newStrokeObj = layerobj.strokes[i];
+				
+				if(!newStrokeObj.hasOwnProperty("thickness")){
+					Print("invisible line found.. should not exist anymore!");
+					modifiedLayers.push(modLayer);
+					continue;
+				}
+				var path = newStrokeObj.path;
+				newStrokeObj["pencilColorId"] = newStrokeObj["colorId"];
+
+				//se ultimo ponto for igual a ultima stroke path
+				if(JSON.stringify(merged_paths[merged_paths.length -1]) == JSON.stringify(path[0])){
+					path.shift();
+					merged_paths = merged_paths.concat(path);
+					new_strokes[new_strokes.length -1].path = merged_paths;
+				} else {
+					new_strokes.push(newStrokeObj);
+					merged_paths = layerobj.strokes[i].path;
+				}
+			};
+			modLayer["strokes"] = new_strokes;
+			modLayer["thicknessPaths"] = [];
+			modifiedLayers.push(modLayer);
+		});
+
+		var modifyCommand = {
+			label : "Reset Thickness and merge strokes",
+			drawing : selDrawing,
+			art : selArt,
+			layers : modifiedLayers
+		};
+		var sucess = DrawingTools.createLayers(modifyCommand);//create new layers
+		scene.endUndoRedoAccum();
+
+		if(!sucess){
+			Print("Error reseting strokes");
+			return false;
+		}
+		Print("Reseted strokes");
+		return true;		
+	}
+	
+	this.changePointsMode = function(){//callback do mode button
+		this.mode = this.ui.pushMode.checked ? "Length" : "Points"; 
+		this.ui.groupPoints.sliderPoints.maximum = this.mode == "Points" ? 30 : 150;
+		this.ui.groupPoints.sliderPoints.minimum = this.mode == "Points" ? 2 : 30;
+		this.ui.groupPoints.sliderPoints.value = this.mode == "Points" ? 2 : 80;
+		
 	}
 	
 	this.updateSelection = function(){//atualiza a selecao de layers (retorna false se nao encontrar nada)
@@ -86,6 +174,7 @@ function CreateInterface(pathUI){
 			this.drawing_data = null;
 			this.t_list = null;
 			this.points_list = null;
+			this.ui.pushReset.enabled = false;
 			return false;
 		}	
 		var config = {
@@ -99,6 +188,7 @@ function CreateInterface(pathUI){
 			this.drawing_data = null;
 			this.t_list = null;
 			this.points_list = null;
+			this.ui.pushReset.enabled = false;
 			return false;
 		}
 		var data = Drawing.query.getData(config);
@@ -108,12 +198,23 @@ function CreateInterface(pathUI){
 		this.t_list = createTList(points);
 		var options = {
 			random : this.ui.radioRandom.checked,
-			order : this.alternate_order
+			order : this.alternate_order,
+			points_mode : this.mode
 		};
 		this.points_list = createPoinstList(this.t_list, this.ui.groupLineT.sliderMin.value, this.ui.groupLineT.sliderMax.value, options);
 		
 		Print("Selection updated!");
+		this.ui.pushReset.enabled = true;
 		return true;
+	}
+	
+	this.reSelectLayers = function(){//add layers to selection 
+		Drawing.selection.set({
+			drawing  : this.selection_data.drawing,
+			art : this.selection_data.art,
+			selectedStrokes:  this.selection_data.selectedStrokes
+		});
+		this.updateSelection();
 	}
 	
 	this.updateLabelValues = function(){//atualiza o valor do slider nos labels (roda assim q muda os sliders)
@@ -126,6 +227,8 @@ function CreateInterface(pathUI){
 	}
 	
 	this.updateStrokes = function(){//testa a selecao e roda o comando para modificar o drawing (roda quando SOLTA os sliders)
+		scene.beginUndoRedoAccum("Stroke Thickness Control");
+		
 		if(!this.updateSelection()){
 			Print("invalid selection!");
 			return;
@@ -136,18 +239,16 @@ function CreateInterface(pathUI){
 			"maxThickness": this.ui.groupLineT.sliderMax.value,
 			"keys": this.points_list
 		}
-		if(modifyLayer(this.drawing_data, this.selection_data, thicknessObject)){
+	
+		if(modifyLayer(this.drawing_data, this.selection_data, thicknessObject, this.t_list)){
 			Print("Strokes modified:\n");
 		} else {
 			Print("Fail to modify drawing strokes:\n");
 		}
 		Print(this.selection_data);
-		//add layers to selection 
-		Drawing.selection.set({
-			drawing  : this.selection_data.drawing,
-			art : this.selection_data.art,
-			selectedStrokes:  this.selection_data.selectedStrokes
-		});
+		this.reSelectLayers();
+		
+		scene.endUndoRedoAccum();
 	}	
 	
 	this.onRefresh = function(){
@@ -170,6 +271,8 @@ function CreateInterface(pathUI){
 	this.ui.radioAlternate.toggled.connect(this, this.onToggleMode);
 
 	this.ui.pushRefresh.clicked.connect(this, this.onRefresh);
+	this.ui.pushReset.clicked.connect(this, this.resetStrokes);
+	this.ui.pushMode.clicked.connect(this, this.changePointsMode);
 
 	this.ui.groupPoints.sliderPoints.valueChanged.connect(this, this.updateLabelValues);
 	this.ui.groupLineT.sliderMax.valueChanged.connect(this, this.updateLabelValues);
@@ -199,7 +302,7 @@ function CreateInterface(pathUI){
 	function getUIGeometry(){//retorna a geometry pra criar a ui
 		var camera_view = view.viewList().filter(function(x){return view.type(x) == "Camera"})[0];
 		var pos = view.viewPosition(camera_view);
-		return new QRect(pos.x() + 5, pos.y() - 25, 290, 310);
+		return new QRect(pos.x() + 5, pos.y() - 25, 284, 337);
 	}
 	
 	function createTList(points){//retorna lista de porcentagens de insercoes de thickness (em valores float)
@@ -251,13 +354,13 @@ function CreateInterface(pathUI){
 			return point;
 		}
 	}
-	
+	/*
 	function getStrokesLengthList(strokeDataList, thickCount){
-		/*
-		@strokeDataList => lista de strokes da layer;
-		@thickCount => length da lista de thicknessPath da layer;
-		retorna objeto com um QPainterPath criada para cada stroke q tenha um thicknesspath 
-		(unifica os casos de layers com substrokes divididas em varias, mas que dividem mesmo path de thickness)*/
+		
+		//@strokeDataList => lista de strokes da layer;
+		//@thickCount => length da lista de thicknessPath da layer;
+		//retorna objeto com um QPainterPath criada para cada stroke q tenha um thicknesspath 
+		//(unifica os casos de layers com substrokes divididas em varias, mas que dividem mesmo path de thickness)
 		var strokes_object = {};
 		for(var i=0; i<thickCount; i++){
 			strokes_object[i] = null;
@@ -298,11 +401,16 @@ function CreateInterface(pathUI){
 				Print("wrong number of points...");
 			}
 		}
-	}	
+	}*/	
 
+
+	function find_point(t_list, percent){//retorna o t da lista condizente com a porcentagem
+		var index = Math.floor((t_list.length -1) * percent);
+		return t_list[index];
+	}
 	
-	function modifyLayer(drawingData, selectionData, thickObj){//modifica os strokes com o valor de thickpath escolhido
-		scene.beginUndoRedoAccum("Stroke Thickness Control");
+	function modifyLayer(drawingData, selectionData, thickObj, t_list){//modifica os strokes com o valor de thickpath escolhido
+		//selected art object
 		var art_obj = drawingData.arts.filter(function(item){ return item.art == selectionData.art})[0];
 		
 		var sel_layers_list = [];
@@ -312,30 +420,32 @@ function CreateInterface(pathUI){
 				return;
 			}
 			layer_obj.strokes.forEach(function(element, index){
-				element["strokeIndex"] = index;
+				//element["strokeIndex"] = index;
 				element["pencilColorId"] = element["colorId"];
 				if(!element.hasOwnProperty("thickness")){
-					return;	
+					return;
 				}
+				var new_from = find_point(t_list, element["thickness"]["fromThickness"]);
+				var new_to = find_point(t_list, element["thickness"]["toThickness"]);
+
 				element["thickness"]["minThickness"] = thickObj.minThickness;
 				element["thickness"]["maxThickness"] = thickObj.maxThickness;
+				//element["thickness"]["fromThickness"] = new_from;
+				//element["thickness"]["toThickness"] = new_to;
 				element["thickness"]["thicknessPath"] = 0;
 			});
 			
-			var newThicknesPaths = [thickObj];
-			layer_obj["thicknessPaths"] = newThicknesPaths;
+			layer_obj["thicknessPaths"] = [thickObj];
 			layer_obj["layer"] = item;
 			sel_layers_list.push(layer_obj);
 		});
 
 		var modifyCommand = {
-			label : "test edit thickness",
+			label : "create new thickness",
 			drawing  : selectionData.drawing,
 			art : selectionData.art,
 			layers : sel_layers_list
 		};
-		
-		scene.endUndoRedoAccum();
-		return DrawingTools.modifyLayers(modifyCommand); 
+		return DrawingTools.modifyLayers(modifyCommand);
 	}
 }
