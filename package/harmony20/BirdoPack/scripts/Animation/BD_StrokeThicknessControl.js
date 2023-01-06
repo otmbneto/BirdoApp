@@ -16,31 +16,14 @@ Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
 	TODO: 
-		[X] - aumentar o valor maximo dos pontos;
-		[X] - melhorar o esquema de selecao:
-			[-] - deixar o ultimo desenho como selecionado ate trocar de selecao (testar pra ver oq acontece quando nao existe mais a layer ou o node);
-			[X] - OU adicionar as layers a selecao no fim do modify pra nao perder a selecao;
-		[-] - add enable logic para o button reverse;
-		[X] - melhorar texto dos radios;
-		[X] - fazer logica dos radios (dentro da funcao de criar pontos);
-
-		[ ] - fazer esquema pra alternar o tipo de definicao do ponto para ponto e espacamento (automatico ou checkbox pra mudar o modo)
-		[ ] - criar botao de reset pontos (deixando somente 2 pontos com o valor maximo)
-		[ ] - separar o callback dos slides de linha diferente do ponto;
-		[ ] - fazer uma opcao de lock entre o min e max;
-		[ ] - fazer os slides mudarem os valores dos pontos q ja existem (min e max) proporcionalmente quando no lock
-		
-		[X] - descobrir pq ele esta criando um item de thicknessPath para cada stroke da layer mesmo eu mandando somente um
-		[ ] - criar botao funcao pra resetar linha e mesclar;
-		[ ] - fazer slider individual pra porcentagem SEM criar novos pontos, mudando proporcionalmente as thicks existentes
+		[ ] - fazer uma opcao de lock entre o min e max (testar esquema do shift pressed);
+			[ ] - fazer os slides mudarem os valores dos pontos q ja existem (min e max) proporcionalmente quando no lock
 		
 		POR ULTIMO:
 		[ ] - fazer funcao pra achar um ui do script ja criada ou criar uma do zero caso nao ache;
-
 */
 
-function BD_StrokeThicknessControl(){
-	
+function BD_StrokeThicknessControl(){	
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -52,7 +35,6 @@ function BD_StrokeThicknessControl(){
 
 	var d = new CreateInterface(pathUI);
 	d.ui.show();
-
 }
 
 function CreateInterface(pathUI){
@@ -66,8 +48,7 @@ function CreateInterface(pathUI){
 	//drawing variables
 	this.selection_data = null;
 	this.drawing_data = null;
-	this.t_list = null;
-	this.points_list = null;
+	this.thickness_list = null;
 	this.alternate_order = ["max", "min"];//ordem da lista de pontos no modo alternate
 	this.mode = "Points";
 
@@ -159,10 +140,16 @@ function CreateInterface(pathUI){
 	
 	this.changePointsMode = function(){//callback do mode button
 		this.mode = this.ui.pushMode.checked ? "Length" : "Points"; 
+		//slides min/max update
 		this.ui.groupPoints.sliderPoints.maximum = this.mode == "Points" ? 30 : 150;
 		this.ui.groupPoints.sliderPoints.minimum = this.mode == "Points" ? 2 : 30;
-		this.ui.groupPoints.sliderPoints.value = this.mode == "Points" ? 2 : 80;
+		//spin min/max update
+		this.ui.groupPoints.spinPoints.maximum = this.mode == "Points" ? 30 : 150;
+		this.ui.groupPoints.spinPoints.minimum = this.mode == "Points" ? 2 : 30;
 		
+		this.ui.groupPoints.sliderPoints.value = this.mode == "Points" ? 2 : 80;
+		this.ui.groupPoints.labelPoints.text = this.mode;
+	Print("Teste MODE: " + this.mode);
 	}
 	
 	this.updateSelection = function(){//atualiza a selecao de layers (retorna false se nao encontrar nada)
@@ -172,8 +159,7 @@ function CreateInterface(pathUI){
 			Print("No selection!");
 			this.selection_data = null;
 			this.drawing_data = null;
-			this.t_list = null;
-			this.points_list = null;
+			this.thickness_list = null;
 			this.ui.pushReset.enabled = false;
 			return false;
 		}	
@@ -186,8 +172,7 @@ function CreateInterface(pathUI){
 			MessageBox.warning("No Stroke Layer selected!",0,0);
 			this.selection_data = null;
 			this.drawing_data = null;
-			this.t_list = null;
-			this.points_list = null;
+			this.thickness_list = null;
 			this.ui.pushReset.enabled = false;
 			return false;
 		}
@@ -195,13 +180,15 @@ function CreateInterface(pathUI){
 		this.selection_data = seletionData;
 		this.drawing_data = data;
 		var points = this.ui.groupPoints.sliderPoints.value;
-		this.t_list = createTList(points);
 		var options = {
 			random : this.ui.radioRandom.checked,
 			order : this.alternate_order,
-			points_mode : this.mode
+			points_mode : this.mode,
+			spacing : points,
+			drawing_data : this.drawing_data,
+			selection : this.selection_data
 		};
-		this.points_list = createPoinstList(this.t_list, this.ui.groupLineT.sliderMin.value, this.ui.groupLineT.sliderMax.value, options);
+		this.thickness_list = create_thickness_data(points, this.ui.groupLineT.sliderMin.value, this.ui.groupLineT.sliderMax.value, options);
 		
 		Print("Selection updated!");
 		this.ui.pushReset.enabled = true;
@@ -233,14 +220,8 @@ function CreateInterface(pathUI){
 			Print("invalid selection!");
 			return;
 		}
-		//thicknesspath object
-		var thicknessObject = {
-			"minThickness": this.ui.groupLineT.sliderMin.value,
-			"maxThickness": this.ui.groupLineT.sliderMax.value,
-			"keys": this.points_list
-		}
-	
-		if(modifyLayer(this.drawing_data, this.selection_data, thicknessObject, this.t_list)){
+
+		if(modifyLayer(this.drawing_data, this.selection_data, this.thickness_list)){
 			Print("Strokes modified:\n");
 		} else {
 			Print("Fail to modify drawing strokes:\n");
@@ -323,12 +304,37 @@ function CreateInterface(pathUI){
 		return Math.random() * (max - min) + min;
 	}
 	
-	function createPoinstList(t_list, minThick, maxThick, options){//retorna thicknessPath keys list
-		var order = options.order[0] == "max" ? [maxThick, minThick] : [minThick, maxThick];
-		return t_list.map(function(item, index){
-			var thick_value = options.random ? randomNumber(minThick, maxThick) : order[index%2];
-			return createPointObject(item, thick_value);
+	function create_thickness_data(points_value, minThick, maxThick, options){//retorna thicknessPaths list para cada layer selecionada
+		var order = options.order[0] == "max" ? [maxThick, minThick] : [minThick, maxThick];//define a ordem se for alternate
+		var points_data = {};
+		
+		options.selection.selectedLayers.forEach(function(layerIndex){ 
+			var art_obj = options.drawing_data.arts.filter(function(item){ return item.art == options.selection.art})[0];//selected art obj
+			var layer_data = art_obj.layers[layerIndex];
+			
+			var t_lists = [createTList(points_value)];
+			if(options.points_mode == "Length"){
+				t_lists = [];
+				var point_by_length = get_points_by_length(layer_data, points_value);
+				t_lists = point_by_length.map(function(points){
+					return createTList(points);
+				});
+			}
+			var thicknesspaths = [];
+			t_lists.forEach(function(t_list, index){
+				var thick_data = {
+					"minThickness": minThick,
+					"maxThickness": maxThick
+				}
+				thick_data["keys"] = t_list.map(function(t, index){
+					var thick_value = options.random ? randomNumber(minThick, maxThick) : order[index%2];
+					return createPointObject(t, thick_value);
+				});
+				thicknesspaths.push(thick_data);
+			});
+			points_data[layerIndex] = thicknesspaths;
 		});
+		return points_data;
 		
 		function createPointObject(t_num, thick){//creates thickness point to be added
 			var point = {
@@ -354,41 +360,41 @@ function CreateInterface(pathUI){
 			return point;
 		}
 	}
-	/*
-	function getStrokesLengthList(strokeDataList, thickCount){
-		
-		//@strokeDataList => lista de strokes da layer;
-		//@thickCount => length da lista de thicknessPath da layer;
-		//retorna objeto com um QPainterPath criada para cada stroke q tenha um thicknesspath 
-		//(unifica os casos de layers com substrokes divididas em varias, mas que dividem mesmo path de thickness)
-		var strokes_object = {};
-		for(var i=0; i<thickCount; i++){
-			strokes_object[i] = null;
+	
+	function get_points_by_length(layer_data, spacing){
+		//@layer_data => obejto da layer;
+		//@spacing => espaçamento entre os pontos
+		//retorna lista com o numero numero de pontos para inseir na layer
+		if(!layer_data.hasOwnProperty("thicknessPaths") || !layer_data.hasOwnProperty("strokes")){	
+			return [2]; //retorna numero minimo em caso de nao ter thickness path (nao sera usado mesmo)
 		}
-		
-		strokeDataList.forEach(function(item, index){
-			if(!item.hasOwnProperty("thickness")){
+		var stroke_List = layer_data.strokes;
+		var points_list = [];
+		stroke_List.forEach(function(stroke, index){
+			if(!stroke.hasOwnProperty("thickness")){
 				Print("stroke with no thickness!");
 				return;
 			}
-			var tPathIndex = item.thickness.thicknessPath;
-			var stroke_path = item.path;
-			var start_point = new QPointF(scene.toOGLX(stroke_path[0].x), scene.toOGLY(stroke_path[0].y));
-			if(!strokes_object[tPathIndex]){
-				strokes_object[tPathIndex] = new QPainterPath(start_point);
-			}
-			var point_list = [];
+			var stroke_path = stroke.path;
+			var start_point = new QPointF(stroke_path[0].x, stroke_path[0].y);
+			var painterPath = new QPainterPath(start_point);
+			var plist = [];
 			for(var i=1; i<stroke_path.length; i++){
-				var point = new QPointF(scene.toOGLX(stroke_path[i].x), scene.toOGLY(stroke_path[i].y));
+				var point = new QPointF(stroke_path[i].x, stroke_path[i].y);
 				if(stroke_path[i].hasOwnProperty("onCurve")){
-					point_list = [point];
-					addCurveToPath(strokes_object[tPathIndex], point_list);
+					plist = [point];
+					addCurveToPath(painterPath, plist);
 					continue;
 				}
-				point_list.push(point);
+				plist.push(point);
 			}
+			var number_points = Math.floor(painterPath.length()/spacing);
+			if(number_points < 2){
+				number_points = 2;
+			}
+			points_list.push(number_points);
 		});
-		return strokes_object;
+		return points_list;
 		
 		function addCurveToPath(painter_path, point_list){
 			if (point_list.length == 1){
@@ -401,42 +407,30 @@ function CreateInterface(pathUI){
 				Print("wrong number of points...");
 			}
 		}
-	}*/	
-
-
-	function find_point(t_list, percent){//retorna o t da lista condizente com a porcentagem
-		var index = Math.floor((t_list.length -1) * percent);
-		return t_list[index];
 	}
 	
-	function modifyLayer(drawingData, selectionData, thickObj, t_list){//modifica os strokes com o valor de thickpath escolhido
+	function modifyLayer(drawingData, selectionData, thicknessList){//modifica os strokes com o valor de thickpath escolhido
 		//selected art object
-		var art_obj = drawingData.arts.filter(function(item){ return item.art == selectionData.art})[0];
+		var art_obj = drawingData.arts.filter(function(art_item){ return art_item.art == selectionData.art})[0];
 		
 		var sel_layers_list = [];
-		selectionData.selectedLayers.forEach(function(item){ 
-			var layer_obj = art_obj.layers[item];
+		selectionData.selectedLayers.forEach(function(layer_index){ 
+			var layer_obj = art_obj.layers[layer_index];
 			if(!layer_obj.hasOwnProperty("strokes")){
 				return;
 			}
 			layer_obj.strokes.forEach(function(element, index){
-				//element["strokeIndex"] = index;
 				element["pencilColorId"] = element["colorId"];
 				if(!element.hasOwnProperty("thickness")){
 					return;
 				}
-				var new_from = find_point(t_list, element["thickness"]["fromThickness"]);
-				var new_to = find_point(t_list, element["thickness"]["toThickness"]);
-
-				element["thickness"]["minThickness"] = thickObj.minThickness;
-				element["thickness"]["maxThickness"] = thickObj.maxThickness;
-				//element["thickness"]["fromThickness"] = new_from;
-				//element["thickness"]["toThickness"] = new_to;
-				element["thickness"]["thicknessPath"] = 0;
+				element["thickness"]["minThickness"] = thicknessList[layer_index][0].minThickness;
+				element["thickness"]["maxThickness"] = thicknessList[layer_index][0].maxThickness;
+				element["thickness"]["thicknessPath"] = index;
 			});
 			
-			layer_obj["thicknessPaths"] = [thickObj];
-			layer_obj["layer"] = item;
+			layer_obj["thicknessPaths"] = thicknessList[layer_index];
+			layer_obj["layer"] = layer_index;
 			sel_layers_list.push(layer_obj);
 		});
 

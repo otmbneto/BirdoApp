@@ -594,6 +594,9 @@ QPushButton:pressed {
      <property name="cursor">
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Limpa a linha selecionada tirando os pontos de thickness, deixando somente os das pontas. &lt;/p&gt;&lt;p&gt;Tambem da um merge nas linhas quebradas no mesmo desenho, deixando as linhas mais limpas.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>CLEAR Stroke</string>
      </property>
@@ -601,6 +604,9 @@ QPushButton:pressed {
    </item>
    <item row="3" column="0">
     <widget class="QPushButton" name="pushMode">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Muda o modo de aplicacao dos pontos:&lt;/p&gt;&lt;p&gt;Points: Define o numero de thickness points a ser adicionado igualmente em cada linha;&lt;/p&gt;&lt;p&gt;Length: Adiciona os pontos baseado no comprimento de cada linha definido com espaçamento entre cada ponto pelo slide &amp;quot;Length&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>Mode</string>
      </property>
