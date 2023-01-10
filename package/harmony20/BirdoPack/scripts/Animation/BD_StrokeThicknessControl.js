@@ -32,17 +32,20 @@ function BD_StrokeThicknessControl(){
 	}
 	//ui file path
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_StrokeManager.ui";
-
-	var d = new CreateInterface(pathUI);
+	
+	var camera_view = view.currentView();
+	Print("TESTE VIEW : " + view.type(camera_view));
+	
+	var d = new CreateInterface(pathUI, camera_view);
 	d.ui.show();
 }
 
-function CreateInterface(pathUI){
+function CreateInterface(pathUI, camera_view){
 	this.ui = UiLoader.load(pathUI);
 	//set window
 	this.ui.activateWindow();
 	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
-	var ui_geom = getUIGeometry();
+	var ui_geom = getUIGeometry(camera_view);
 	this.ui.setGeometry(ui_geom.x(), ui_geom.y(), ui_geom.width(), ui_geom.height());
 	
 	//drawing variables
@@ -149,7 +152,7 @@ function CreateInterface(pathUI){
 		
 		this.ui.groupPoints.sliderPoints.value = this.mode == "Points" ? 2 : 80;
 		this.ui.groupPoints.labelPoints.text = this.mode;
-	Print("Teste MODE: " + this.mode);
+		Print("Teste MODE: " + this.mode);
 	}
 	
 	this.updateSelection = function(){//atualiza a selecao de layers (retorna false se nao encontrar nada)
@@ -280,8 +283,7 @@ function CreateInterface(pathUI){
 		MessageLog.trace(msg);
 	}
 	
-	function getUIGeometry(){//retorna a geometry pra criar a ui
-		var camera_view = view.viewList().filter(function(x){return view.type(x) == "Camera"})[0];
+	function getUIGeometry(camera_view){//retorna a geometry pra criar a ui
 		var pos = view.viewPosition(camera_view);
 		return new QRect(pos.x() + 5, pos.y() - 25, 284, 337);
 	}
