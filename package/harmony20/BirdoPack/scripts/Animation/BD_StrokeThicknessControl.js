@@ -46,7 +46,13 @@ function CreateInterface(pathUI, camera_view){
 	this.ui.activateWindow();
 	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
 	var ui_geom = getUIGeometry(camera_view);
-	this.ui.setGeometry(ui_geom.x(), ui_geom.y(), ui_geom.width(), ui_geom.height());
+	//check if is multi screen
+	var screen = QApplication.desktop();//screen geometry
+	if(screen.screenCount > 1){
+		Print("widget vai ficar no meio")
+	} else {
+		this.ui.setGeometry(ui_geom.x(), ui_geom.y(), ui_geom.width(), ui_geom.height());
+	}
 	
 	//drawing variables
 	this.selection_data = null;
