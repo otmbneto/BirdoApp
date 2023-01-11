@@ -68,8 +68,58 @@ function CreateInterface(pathUI, camera_view){
 		Print("toogled radios..");
 	}
 	
+	this.updateSelection = function(){//atualiza a selecao de layers (retorna false se nao encontrar nada)
+		var settings = Tools.getToolSettings();
+		if(!settings.currentDrawing){
+			MessageBox.warning("Nenhuma selecao de drawing!",0,0);
+			Print("No selection!");
+			this.selection_data = null;
+			this.drawing_data = null;
+			this.thickness_list = null;
+			this.ui.pushReset.enabled = false;
+			return false;
+		}	
+		var config = {
+			drawing: settings.currentDrawing,
+			art: settings.activeArt
+		};
+		var seletionData = Drawing.selection.get(config);
+		if(!seletionData || seletionData.selectedStrokes.length == 0){
+			MessageBox.warning("No Stroke Layer selected!",0,0);
+			this.selection_data = null;
+			this.drawing_data = null;
+			this.thickness_list = null;
+			this.ui.pushReset.enabled = false;
+			return false;
+		}
+		var data = Drawing.query.getData(config);
+		this.selection_data = seletionData;
+		this.drawing_data = data;
+		var points = this.ui.groupPoints.sliderPoints.value;
+		var options = {
+			random : this.ui.radioRandom.checked,
+			order : this.alternate_order,
+			points_mode : this.mode,
+			spacing : points,
+			drawing_data : this.drawing_data,
+			selection : this.selection_data,
+			fin_tips : this.ui.checkTips.checked
+		};
+		this.thickness_list = create_thickness_data(points, this.ui.groupLineT.sliderMin.value, this.ui.groupLineT.sliderMax.value, options);
+		
+		Print("Selection updated!");
+		this.ui.pushReset.enabled = true;
+		return true;
+	}
+	
 	this.resetStrokes = function(){//reseta as strokes (limpando os pontos de thickness, e dando um merge nas strokes da mesma layer
 		//OBS:: NAO RODAR O RESELECT LAYERS DEPOIS DE RODAR ESSA FUNCAO!
+		
+		if(!this.updateSelection()){
+			Print("cancel reset stroke");
+			return;
+		}
+		
 		scene.beginUndoRedoAccum("Reset stoke thickness");
 		//selected art object
 		var selArt = this.selection_data.art;
@@ -159,49 +209,6 @@ function CreateInterface(pathUI, camera_view){
 		this.ui.groupPoints.sliderPoints.value = this.mode == "Points" ? 2 : 80;
 		this.ui.groupPoints.labelPoints.text = this.mode;
 		Print("Teste MODE: " + this.mode);
-	}
-	
-	this.updateSelection = function(){//atualiza a selecao de layers (retorna false se nao encontrar nada)
-		var settings = Tools.getToolSettings();
-		if(!settings.currentDrawing){
-			MessageBox.warning("Nenhuma selecao de drawing!",0,0);
-			Print("No selection!");
-			this.selection_data = null;
-			this.drawing_data = null;
-			this.thickness_list = null;
-			this.ui.pushReset.enabled = false;
-			return false;
-		}	
-		var config = {
-			drawing: settings.currentDrawing,
-			art: settings.activeArt
-		};
-		var seletionData = Drawing.selection.get(config);
-		if(!seletionData || seletionData.selectedStrokes.length == 0){
-			MessageBox.warning("No Stroke Layer selected!",0,0);
-			this.selection_data = null;
-			this.drawing_data = null;
-			this.thickness_list = null;
-			this.ui.pushReset.enabled = false;
-			return false;
-		}
-		var data = Drawing.query.getData(config);
-		this.selection_data = seletionData;
-		this.drawing_data = data;
-		var points = this.ui.groupPoints.sliderPoints.value;
-		var options = {
-			random : this.ui.radioRandom.checked,
-			order : this.alternate_order,
-			points_mode : this.mode,
-			spacing : points,
-			drawing_data : this.drawing_data,
-			selection : this.selection_data
-		};
-		this.thickness_list = create_thickness_data(points, this.ui.groupLineT.sliderMin.value, this.ui.groupLineT.sliderMax.value, options);
-		
-		Print("Selection updated!");
-		this.ui.pushReset.enabled = true;
-		return true;
 	}
 	
 	this.reSelectLayers = function(){//add layers to selection 
@@ -334,8 +341,24 @@ function CreateInterface(pathUI, camera_view){
 					"minThickness": minThick,
 					"maxThickness": maxThick
 				}
+
+				//lista com valores percetuais pra alterar as pontas
+				var points_reduced_number = Math.floor(t_list.length/2) > 2 ? 2 : 1;
+				var tips_reduce_values = t_list.map(function(item, index){
+					var value = index == 0 ? 0.3 : index == 1 &&  points_reduced_number == 2 ? 0.6 : 1;
+					if(index == t_list.length -2 && points_reduced_number == 2){
+						value = 0.6
+					} else if (index == t_list.length -1){ 
+						value = 0.3;
+					}
+					return value;
+				});
+				
 				thick_data["keys"] = t_list.map(function(t, index){
 					var thick_value = options.random ? randomNumber(minThick, maxThick) : order[index%2];
+					if(options.fin_tips && t_list.length > 3){
+						thick_value = thick_value * tips_reduce_values[index];
+					}
 					return createPointObject(t, thick_value);
 				});
 				thicknesspaths.push(thick_data);
