@@ -401,6 +401,13 @@ QPushButton:pressed {
    <item row="5" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QCheckBox" name="checkTips">
+       <property name="text">
+        <string>Fine Tips</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_6">
        <property name="styleSheet">
         <string notr="true">color: rgb(120, 120, 255);</string>

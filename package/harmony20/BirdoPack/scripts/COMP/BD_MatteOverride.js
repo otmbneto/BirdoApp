@@ -200,7 +200,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 	this.ui.activateWindow();
 	
 	//self variables
-	this.matteColour = new QColor(255,255,255,255);//inicialmente branco
+	this.matteColour = new QColor(0,0,0,255);//inicialmente preto
 	this.ingoneColour = new QColor(0,0,0,255);//inicialmente preto
 	this.addedColors = 0;
 	this.currPalette = null;
@@ -244,7 +244,7 @@ function CreateInterface(uiPath, matteData, presetsData){
 		}
 		//update matte color value
 		var plt_is_valid = this.currPalette.nColors > 0;
-		this.matteColour = plt_is_valid ? createQColor(this.currPalette.getColorByIndex(0)) : new QColor(255,255,255,255);//inicialmente branco se nao houver cores escolhidas
+		this.matteColour = plt_is_valid ? createQColor(this.currPalette.getColorByIndex(0)) : this.matteColour;
 		
 		//update matte color button
 		try{
