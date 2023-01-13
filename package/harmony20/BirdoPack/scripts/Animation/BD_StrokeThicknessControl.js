@@ -55,7 +55,7 @@ function show_interface(ui_path){//se a ui ja existe, mostra ela, se não cria
 		var camera_view = view.currentView();
 		Print("TESTE VIEW : " + view.type(camera_view));
 
-		var d = new CreateInterface(pathUI, camera_view);
+		var d = new CreateInterface(ui_path, camera_view);
 		d.ui.show();
 		Print("Interface foi criada!");
 	}
