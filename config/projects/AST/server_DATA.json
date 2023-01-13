@@ -44,6 +44,7 @@
 		"library": "01_BIBLIOTECA/",
 		"roteiros": "00_ROTEIROS/",
 		"tblib": "_tbLib/",
+		"batch_scripts": "_tbLib/batch_scripts",
 		"fazendinha": "_tbLib/_Fazendinha/",
 		"render_comp": "//192.168.10.101/projects/153_Astronauta/1_TEMPORADA/02_EPISODIOS/{EP}/05_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
 		"packUpdate": "_tbLib/_birdoApp/"
