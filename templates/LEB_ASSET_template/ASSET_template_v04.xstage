@@ -7,9 +7,9 @@
    </drawings>
   </element>
   <element id="5" elementName="REFERENCIA" elementFolder="REFERENCIA" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
-  <element id="98" elementName="LEB_template" elementFolder="LEB_template" pixmapFormat="10" scanType="2" fieldChart="12" vectorType="0" rootFolder="elements">
+  <element id="99" elementName="Lineup" elementFolder="Lineup" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements">
    <drawings>
-    <dwg name="1"/>
+    <dwg name="completo"/>
    </drawings>
   </element>
  </elements>
@@ -33,7 +33,7 @@
      <step val="1" start="1" stop="1"/>
      <noFrames/>
      <points version="2">
-      <pt constSeg="true" x="1" yLocal="0" y="0"/>
+      <pt constSeg="true" x="1" yLocal="-2.0828776255801729" y="-2.0828776255801729"/>
      </points>
     </column>
     <column type="3" name="ATV-0A1EF785A6C3D77F" color="#C7C6BBFF" displayOrder="5" width="100" anonymous="true">
@@ -54,7 +54,7 @@
      <step val="1" start="1" stop="1"/>
      <noFrames/>
      <points version="2">
-      <pt constSeg="true" x="1" yLocal="1" y="1"/>
+      <pt constSeg="true" x="1" yLocal="1.1762138012419627" y="1.1762138012419627"/>
      </points>
     </column>
     <column type="3" name="ATV-0A1EF785A6C3D785" color="#C7C6BBFF" displayOrder="8" width="100" anonymous="true">
@@ -124,8 +124,8 @@
      </points>
     </column>
     <column type="0" name="ATV-0A1EF785A6C3D79D" color="#FFFFFFFF" displayOrder="2" width="100" anonymous="true" id="5"/>
-    <column type="0" name="ATV-0B89D63A0B902136" color="#FFFFFFFF" displayOrder="3" width="100" anonymous="true" id="98">
-     <elementSeq exposures="1-6" val="1" id="98"/>
+    <column type="0" name="ATV-0B8B507331C0159F" displayOrder="3" width="100" anonymous="true" id="99">
+     <elementSeq exposures="1-70" val="completo" id="99"/>
     </column>
    </columns>
    <options>
@@ -137,7 +137,7 @@
      <collapsed val="false"/>
     </options>
     <nodeslist>
-     <group name="SETUP" pos="291,778,3">
+     <group name="SETUP" pos="291,778,1">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -145,7 +145,7 @@
       </options>
       <attrs/>
       <nodeslist>
-       <module type="COMPOSITE" name="Comp_VIEW" pos="780,413,9" publishUnderTab="Composite">
+       <module type="COMPOSITE" name="Comp_VIEW" pos="780,413,10" publishUnderTab="Composite">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -164,13 +164,13 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="DISPLAY" name="ASSET_VIEW" pos="846,497,10" publishUnderTab="PROP_VIEW">
+       <module type="DISPLAY" name="ASSET_VIEW" pos="846,497,11" publishUnderTab="PROP_VIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="WRITE" name="EXPORT" pos="719,497,4" publishUnderTab="EXPORT">
+       <module type="WRITE" name="EXPORT" pos="719,497,5" publishUnderTab="EXPORT">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -217,7 +217,7 @@
          <port type="IMAGE" idx="1"/>
         </ports>
        </module>
-       <module type="PEG" name="Camera-P" pos="605,-225,11" publishUnderTab="Camera-P">
+       <module type="PEG" name="Camera-P" pos="605,-225,1" publishUnderTab="Camera-P">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -301,7 +301,7 @@
          <farPlane val="1000" defaultValue="1000"/>
         </attrs>
        </module>
-       <module type="COLOR_CARD" name="Colour-Card" pos="1024,99,5" publishUnderTab="Colour-Card">
+       <module type="COLOR_CARD" name="Colour-Card" pos="1024,99,6" publishUnderTab="Colour-Card">
         <options>
          <locked val="true"/>
          <collapsed val="false"/>
@@ -319,7 +319,7 @@
          </color>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_Ref" pos="584,98,8" publishUnderTab="Visibility">
+       <module type="VISIBILITY" name="Visibility_Ref" pos="584,98,9" publishUnderTab="Visibility">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -329,7 +329,7 @@
          <softrender val="false"/>
         </attrs>
        </module>
-       <module type="NOTE" name="proj" pos="803,552,3" publishUnderTab="Note">
+       <module type="NOTE" name="proj" pos="803,552,4" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -338,7 +338,7 @@
          <text val="LEB"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_LineUp" pos="851,183,6" publishUnderTab="Visibility_Ref">
+       <module type="VISIBILITY" name="Visibility_LineUp" pos="851,183,7" publishUnderTab="Visibility_Ref">
         <options>
          <locked val="true"/>
          <collapsed val="false"/>
@@ -349,7 +349,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_ColourCard" pos="1006,178,7" publishUnderTab="Visibility_Ref">
+       <module type="VISIBILITY" name="Visibility_ColourCard" pos="1006,178,8" publishUnderTab="Visibility_Ref">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -359,10 +359,9 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="LEB_template" pos="842,107,1" publishUnderTab="LEB_template">
+       <module type="READ" name="Lineup" pos="858,99,3" publishUnderTab="Lineup">
         <options>
-         <locked val="true"/>
-         <collapsed val="true"/>
+         <collapsed val="false"/>
          <version val="1"/>
         </options>
         <attrs>
@@ -420,7 +419,7 @@
          <ikStiffness val="1" defaultValue="1"/>
          <drawing>
           <elementMode val="true"/>
-          <element col="ATV-0B89D63A0B902136">
+          <element col="ATV-0B8B507331C0159F">
            <layer/>
           </element>
           <customName>
@@ -434,7 +433,7 @@
          <readColorArt val="true"/>
          <readUnderlay val="true"/>
          <overlayArtDrawingMode val="VectorDrawingMode"/>
-         <lineArtDrawingMode val="VectorDrawingMode"/>
+         <lineArtDrawingMode val="BitmapDrawingMode"/>
          <colorArtDrawingMode val="VectorDrawingMode"/>
          <underlayArtDrawingMode val="VectorDrawingMode"/>
          <pencilLineDeformationPreserveThickness val="false"/>
@@ -483,10 +482,10 @@
        <link out="Visibility_Ref" in="Comp_VIEW" inport="3"/>
        <link out="Visibility_LineUp" in="Comp_VIEW" inport="1"/>
        <link out="Visibility_ColourCard" in="Comp_VIEW" inport="0"/>
-       <link out="LEB_template" in="Visibility_LineUp"/>
+       <link out="Lineup" in="Visibility_LineUp"/>
       </linkedlist>
      </group>
-     <module type="READ" name="Asset" pos="264,-212,1" publishUnderTab="Asset">
+     <module type="READ" name="Asset" pos="264,-212,2" publishUnderTab="Asset">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -598,7 +597,7 @@
        <tileVertical val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="Composite_ASSET" pos="256,172,5" publishUnderTab="Composite_ASSET">
+     <module type="COMPOSITE" name="Composite_ASSET" pos="256,172,4" publishUnderTab="Composite_ASSET">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -617,7 +616,7 @@
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="Comp_REF" pos="586,621,9" publishUnderTab="Comp_REF">
+     <module type="COMPOSITE" name="Comp_REF" pos="586,621,8" publishUnderTab="Comp_REF">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -636,7 +635,7 @@
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="PEG" name="REFERENCIA-P" pos="583,406,7" publishUnderTab="REFERENCIA-P">
+     <module type="PEG" name="REFERENCIA-P" pos="583,406,6" publishUnderTab="REFERENCIA-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -698,7 +697,7 @@
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="READ" name="REFERENCIA" pos="567,485,6" publishUnderTab="REFERENCIA">
+     <module type="READ" name="REFERENCIA" pos="567,485,5" publishUnderTab="REFERENCIA">
       <options>
        <showTimelineThumb val="true"/>
        <collapsed val="true"/>
@@ -811,7 +810,7 @@
        <tileVertical val="false"/>
       </attrs>
      </module>
-     <module type="FADE" name="Transparency" pos="581,716,8" publishUnderTab="Transparency_1">
+     <module type="FADE" name="Transparency" pos="581,716,7" publishUnderTab="Transparency_1">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -820,7 +819,7 @@
        <transparency val="50" defaultValue="50"/>
       </attrs>
      </module>
-     <module type="PEG" name="Asset-P" pos="279,-252,4" publishUnderTab="Asset-P">
+     <module type="PEG" name="Asset-P" pos="279,-252,3" publishUnderTab="Asset-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
