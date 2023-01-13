@@ -11,6 +11,11 @@ function get_psd_anim_data(disable_psd_nodes){
 	var counter = 1;
 	var psd_files_data = {};
 
+	//disconecta o bg caso precise
+	if(disable_psd_nodes){
+		disable_bg();
+	}
+
 	for(var i=0; i<reads.length; i++){
 		var elementId = node.getElementId(reads[i]);
 		//if node drawing has no valid drawings in the library
@@ -29,10 +34,7 @@ function get_psd_anim_data(disable_psd_nodes){
 				};
 			}
 			psd_files_data[psd_name]["layers"][node.getName(reads[i])] = get_node_anim_data(reads[i]);
-			if(disable_psd_nodes){
-				Print("-Turning PSD node OFF: " + reads[i]);
-				node.setEnable(reads[i], false);
-			}
+			
 		}
 	}
 
@@ -49,7 +51,15 @@ function get_psd_anim_data(disable_psd_nodes){
 	
 	Print("Json psd file(s) created: " + counter);
 	
+	return jsonCamera;
+	
 	//extra
+	function disable_bg(){//desconecta o bg da comp final
+		var multiport_setup = "Top/SETUP/Multi-Port-In";
+		var comp_final = "Top/SETUP/FINAL";
+		return node.unlink(comp_final, 0);
+	}
+	
 	/* Get a node path and return an array of coordinates (position, rotation,
 	scale, skew) and exposure for each frame of the scene in fields.*/
 	function get_node_anim_data(nodePath){
