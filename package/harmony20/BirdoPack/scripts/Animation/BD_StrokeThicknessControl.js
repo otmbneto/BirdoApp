@@ -31,7 +31,7 @@ function BD_StrokeThicknessControl(){
 	//ui file path
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_StrokeManager.ui";
 	
-	show_interface(ui_path);
+	show_interface(pathUI);
 }
 
 function show_interface(ui_path){//se a ui ja existe, mostra ela, se não cria
