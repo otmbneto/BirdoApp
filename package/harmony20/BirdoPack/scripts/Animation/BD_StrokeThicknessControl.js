@@ -49,7 +49,6 @@ function show_interface(ui_path){//se a ui ja existe, mostra ela, se não cria
 		} else {
 			Print("Showing existing interface...");
 			d.show();
-			d.updateSelection();
 		}
 	} else {
 		var camera_view = view.currentView();
