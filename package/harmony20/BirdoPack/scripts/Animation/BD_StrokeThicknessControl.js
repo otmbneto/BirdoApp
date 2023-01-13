@@ -19,8 +19,6 @@ Copyright:   leobazao_@Birdo
 		[ ] - fazer uma opcao de lock entre o min e max (testar esquema do shift pressed);
 			[ ] - fazer os slides mudarem os valores dos pontos q ja existem (min e max) proporcionalmente quando no lock
 		
-		POR ULTIMO:
-		[ ] - fazer funcao pra achar um ui do script ja criada ou criar uma do zero caso nao ache;
 */
 
 function BD_StrokeThicknessControl(){	
@@ -33,11 +31,34 @@ function BD_StrokeThicknessControl(){
 	//ui file path
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_StrokeManager.ui";
 	
-	var camera_view = view.currentView();
-	Print("TESTE VIEW : " + view.type(camera_view));
-	
-	var d = new CreateInterface(pathUI, camera_view);
-	d.ui.show();
+	show_interface(ui_path);
+}
+
+function show_interface(ui_path){//se a ui ja existe, mostra ela, se não cria
+	var wlist = QApplication.allWidgets();
+	var d = null;
+	wlist.forEach(function(item){
+		if(item.windowTitle == "BD_StrokeManager"){
+			d = item;
+			return;
+		}
+	});
+	if(d){
+		if(d.visible){
+			Print("Widget is already opened!");
+		} else {
+			Print("Showing existing interface...");
+			d.show();
+			d.updateSelection();
+		}
+	} else {
+		var camera_view = view.currentView();
+		Print("TESTE VIEW : " + view.type(camera_view));
+
+		var d = new CreateInterface(pathUI, camera_view);
+		d.ui.show();
+		Print("Interface foi criada!");
+	}
 }
 
 function CreateInterface(pathUI, camera_view){
@@ -53,6 +74,31 @@ function CreateInterface(pathUI, camera_view){
 	} else {
 		this.ui.setGeometry(ui_geom.x(), ui_geom.y(), ui_geom.width(), ui_geom.height());
 	}
+
+	//set drag ui
+	var dragPosition;
+	var mainwindow = this.ui;
+	var drag_w = new QWidget();
+	drag_w.setParent(this.ui.labelTitle);
+	drag_w.setWindowFlags(Qt.FramelessWindowHint);
+	drag_w.setAttribute(Qt.WA_TranslucentBackground);
+	
+	drag_w.mousePressEvent = function(event) {
+		if (event.button() == Qt.LeftButton) {
+			var p = event.globalPos();
+			var corner = mainwindow.frameGeometry.topLeft();
+			dragPosition = new QPoint(p.x() - corner.x(), p.y() - corner.y());
+			event.accept();
+		}
+	}
+	drag_w.mouseMoveEvent = function(event) {
+		if (event.buttons() & Qt.LeftButton) {
+			var p = event.globalPos();
+			mainwindow.move(p.x() - dragPosition.x(), p.y() - dragPosition.y());
+			event.accept();
+		}
+	}
+	
 	
 	//drawing variables
 	this.selection_data = null;

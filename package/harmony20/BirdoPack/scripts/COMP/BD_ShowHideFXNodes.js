@@ -70,6 +70,7 @@ function BD_ShowHideFXNodes(){
 		wlist.forEach(function(item){
 			if(item.windowTitle == "ShowHideFXScript"){
 				item.close();
+				counter++;
 			}
 		});	
 		Print(counter + " uis widgets foram fechadas!");
