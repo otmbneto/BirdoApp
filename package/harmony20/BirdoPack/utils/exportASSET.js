@@ -29,6 +29,11 @@ function exportASSET(self, projData, export_config, config_json){
 
 	if(export_config.output == "images"){
 		var rendered_images = exportImages(self, export_config);
+		if(rendered_images == "RENDERED_PNG"){
+			Print("PNG4 sequence rendered!");
+			MessageBox.information("PNGs renderizados!");
+			return true;
+		}
 		if(!rendered_images){
 			Print("error rendering images");
 			return false;
@@ -183,8 +188,24 @@ function exportASSET(self, projData, export_config, config_json){
 		var counter = 0;
 		
 		//image name path 
-		var image_name = file_name_path + "_{framenumber}." + export_data.formats.selected;
-
+		var format = export_data.formats.selected;
+		var image_name = file_name_path + "_{framenumber}." + format;
+		
+		if(format == "png"){
+			image_name = image_name.replace("{framenumber}.", "");
+			var writeN = get_write_node(display_selected);
+			if(writeN){
+				set_image_write_node_to_png(writeN, image_name);
+				
+				//render the scene
+				Action.perform("onActionComposite()");
+				return "RENDERED_PNG";
+				
+			} else {
+				MessageBox.warning("Nao foi encontrado um writeNode para o display selecionado! Nao será possível exportar com transparencia!",0,0);
+			}
+		}
+		
 		var progressDlg = new QProgressDialog(self);
 		progressDlg.modal = true;
 		progressDlg.setRange(0, (export_data.end_frame - export_data.start_frame) + 1);
@@ -214,7 +235,6 @@ function exportASSET(self, projData, export_config, config_json){
 			imageList.push(image_full_path);
 			counter++;
 		}
-		
 		render.renderFinished.connect(renderFinished);
 		render.frameReady.connect(frameReady);
 		render.setRenderDisplay(display_selected);
@@ -229,6 +249,24 @@ function exportASSET(self, projData, export_config, config_json){
 
 		return imageList;
 	}		
+	
+	function set_image_write_node_to_png(write_node, drawing_name){//modifica o write node para exportar PNG4 
+		node.setTextAttr(write_node, "EXPORT_TO_MOVIE", 1, "Output Drawings");
+		node.setTextAttr(write_node, "DRAWING_NAME", 1, drawing_name);
+		node.setTextAttr(write_node, "DRAWING_TYPE", 1, "PNG4");
+	}
+	
+	function get_write_node(display_node){//retorna o write do display
+		var nodeConnected = node.srcNode(display_node,0);
+		var links = node.numberOfOutputLinks(nodeConnected, 0);	
+		for(var i=0; i<links; i++){
+			var n = node.dstNode(nodeConnected, 0, i);
+			if(node.type(n) == "WRITE"){
+				return n;
+			}
+		}
+		return false;
+	}
 }
 
 exports.exportASSET = exportASSET;
