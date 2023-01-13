@@ -54,7 +54,7 @@ function RenderPreview(){
 	var prepare_render_js = projectDATA.paths.birdoPackage + "utils/prepare_for_render.js";
 	
 	Print("...preparing for render...");
-	var output_data = require(prepare_render_js).prepare_for_render(projectDATA, render_step, render_step == "COMP");
+	var output_data = require(prepare_render_js).prepare_for_render(projectDATA, render_step, render_step == "COMP", false);
 	
 	Print("Render output data:");
 	Print(output_data);

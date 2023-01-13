@@ -30,7 +30,7 @@ function pre_comp_render(){
 	
 	var prepare_render_js = projectDATA.paths.birdoPackage + "utils/prepare_for_render.js";	
 	
-	var output_data = require(prepare_render_js).prepare_for_render(projectDATA, "PRE_COMP", false);
+	var output_data = require(prepare_render_js).prepare_for_render(projectDATA, "PRE_COMP", false, false);
 	Print("SCRIPT OUTPUT: ");
 	Print(output_data);
 		

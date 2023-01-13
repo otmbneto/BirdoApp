@@ -167,11 +167,11 @@ function BirdoProject(entity){
 		}
 	}
 	
-	this.modifyScenePreRender = function(step){
+	this.modifyScenePreRender = function(step, hide_bg){
 		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
 		if(step == "COMP"){
 			//exporta info dos psd
-			require(get_psd_data_script).get_psd_anim_data(true);
+			require(get_psd_data_script).get_psd_anim_data(hide_bg);
 		} else {
 			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
 		}

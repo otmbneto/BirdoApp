@@ -17,7 +17,7 @@ Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
 
-function prepare_for_render(projData, render_step, use_extra_writenodes){
+function prepare_for_render(projData, render_step, use_extra_writenodes, is_farm){
 	
 	var step = 	render_step == "COMP" ? "COMP" : "PRE_COMP";
 
@@ -53,7 +53,7 @@ function prepare_for_render(projData, render_step, use_extra_writenodes){
 	}
 	
 	//project modify scene before render
-	projData.modifyScenePreRender(step);
+	projData.modifyScenePreRender(step, is_farm);
 	
 	checkForIrregularNodesForRender();
 	

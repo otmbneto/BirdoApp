@@ -15,7 +15,7 @@ function get_psd_anim_data(disable_psd_nodes){
 	if(disable_psd_nodes){
 		disable_bg();
 	}
-
+	
 	for(var i=0; i<reads.length; i++){
 		var elementId = node.getElementId(reads[i]);
 		//if node drawing has no valid drawings in the library
