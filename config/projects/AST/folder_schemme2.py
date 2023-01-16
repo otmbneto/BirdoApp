@@ -216,7 +216,6 @@ class FolderManager(object):
         render_subs = self.step["RENDER"][step_index[step]]
         return os.path.join(folder,render_subs).replace("\\","/")
 
-
     def get_render_file_path(self,ep,step,scene,extension=".mov"):
 
         folder = self.get_render_step_path(ep,step)
@@ -225,6 +224,10 @@ class FolderManager(object):
     def get_server_render_file_path(self,ep,step,scene,extension=".mov"):
 
         return os.path.join(self.root,self.projRoot,self.get_render_file_path(ep,step,scene,extension=extension)).replace("\\","/")
+
+    def get_server_render_comp(self,ep,scene):
+
+        return self.render_comp.replace("{EP}",ep).replace("{SCENE}",scene)
 
     def get_local_render_file_path(self,ep,step,scene,extension=".mov"):
 
