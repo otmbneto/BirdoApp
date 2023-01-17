@@ -30,7 +30,7 @@ from app.utils.birdo_json import *
 from app.utils.ffmpeg import compress_render 
 
 # carrega os env falsos do arquivo dotenv
-load_dotenv()
+#load_dotenv()
 
 '''
 def get_batch_scripts_data():
