@@ -13,7 +13,7 @@ import os
 import re
 import sys
 import shutil
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from PySide import QtCore, QtGui, QtUiTools
 import re
 import datetime
