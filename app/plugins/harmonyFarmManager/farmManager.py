@@ -22,6 +22,7 @@ import datetime
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
 sys.path.append(birdo_app_root)
+from app.config_project2 import config_project
 version = 'v.0.1'
 
 from app.utils.birdo_zip import *
@@ -31,7 +32,7 @@ from app.utils.ffmpeg import compress_render
 # carrega os env falsos do arquivo dotenv
 load_dotenv()
 
-
+'''
 def get_batch_scripts_data():
     """retorna objeto com info dos scripts encontrados de batch para o after"""
     main_dict = {
@@ -106,7 +107,7 @@ def get_episodes():
                 "aep_fullPath": os.path.join(after_folder, last_aep)
             }
     return final_obj
-
+'''
 
 class Dialog(QtGui.QWidget):
     """
@@ -404,6 +405,7 @@ class Dialog(QtGui.QWidget):
 
     def sendToVPN(self,files,vpn_path,clean_dst=False):
 
+        vpn_path = "//192.168.10.101/projects/153_Astronauta/_tbLib/testes_ottoni"
         sucess = True
         if not self.create_folder(vpn_path):
             success = False
@@ -564,15 +566,26 @@ class Dialog(QtGui.QWidget):
 # main script
 if __name__ == "__main__":
     args = sys.argv
-    app = QtGui.QApplication(sys.argv)
+    if not len(args) == 3:
+        print("Numero de argumentos invalidos!")
+        sys.exit("error: wrong number of arguments!")
 
-    episodes_data = get_episodes()
-    if not episodes_data:
-        sys.exit("episodes data not available!")
+    project_index = int(args[1])
+    opened_scene = args[2]
+    app = QtGui.QApplication.instance()
+    project_data = config_project(project_index)
+    if not project_data:
+        MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
+        sys.exit(app.exec_())
+    else:
 
-    scripts_data = get_batch_scripts_data()
+        project_data = config_project(project_index)
+        episodes = project_data.paths.list_episodes()
+        args = sys.argv
+        app = QtGui.QApplication.instance()
+        if not app:
+            app = QtGui.QApplication(args)
 
-    appWindow = Dialog(episodes_data, scripts_data)
-    appWindow.ui.show()
-
-    sys.exit(app.exec_())
+        appWindow = Dialog(project_data)
+        appWindow.ui.show()
+        sys.exit(app.exec_())
