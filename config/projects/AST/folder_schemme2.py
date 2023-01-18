@@ -140,7 +140,8 @@ class FolderManager(object):
         ...
         RETURN: string
         """
-        return 
+        return self.step["RENDER"][0]
+        
     def get_setup_render_folder(self):
         """
         Return directory name for setup render folder
