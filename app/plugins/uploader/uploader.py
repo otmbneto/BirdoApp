@@ -349,7 +349,7 @@ class Uploader(QtGui.QMainWindow):
 
 	def getVersion(self,scene_name,path):
 
-		return "v" + str(len([f for f in os.listdir(path) if f.endswith(".mov") and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
+		return "v" + str(len([f for f in os.listdir(path) if f.endswith((".mov",".mp4")) and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
 
 	def getEpisode(self,filename):
 
