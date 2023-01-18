@@ -346,9 +346,7 @@ class Dialog(QtGui.QWidget):
 
     def increment_version(self,version):
 
-        print version
         return "v" + str(int(version.replace("v","")) + 1).zfill(2)
-
 
     def new_version(self,file):
 
@@ -405,7 +403,6 @@ class Dialog(QtGui.QWidget):
 
     def sendToVPN(self,files,vpn_path,clean_dst=False):
 
-        vpn_path = "//192.168.10.101/projects/153_Astronauta/_tbLib/testes_ottoni"
         sucess = True
         if not self.create_folder(vpn_path):
             success = False
@@ -450,6 +447,21 @@ class Dialog(QtGui.QWidget):
             output_list += ["{0}{1}{2:05d}.{3}".format(output, fl["file_name"], i, fl["format"]) for i in range(1, d["frames_number"]+1)]
 
       return output_list
+
+    def sendCompToServer(self,episode,scene,render_data):
+
+        if os.path.exists(render_data):
+            output_content = read_json_file(render_data)
+            files = self.getOutputList(output_content) #pega o caminho dos outputs
+            server_path = self.project_data.paths.get_server_render_comp(episode,scene)
+            self.sendToVPN(files,server_path)
+            #pegas os psds do BG
+            server_path = os.path.dirname(server_path)
+            server_path = os.path.join(os.path.dirname(server_path),"03_BG")
+            files = self.getOutputBG(output_content["folder"] if "folder" in output_content.keys() else "")
+            self.sendToVPN(files,server_path)
+
+        return
 
     def on_start(self):
         """callback do botao start"""
@@ -513,8 +525,9 @@ class Dialog(QtGui.QWidget):
                     if local_scene is not None:
                         xstage = self.project_data.harmony.get_xstage_last_version(local_scene)
                         print xstage
-                        if self.project_data.harmony.compile_script(script,xstage) != 0 and self.project_data.harmony.render_scene(xstage, pre_render_script=self.select_prerender_script(render_type)) in [0,12,100]:
+                        if self.project_data.harmony.compile_script(script,xstage) != 0:
 
+                            self.project_data.harmony.render_scene(xstage, pre_render_script=self.select_prerender_script(render_type))
                             if render_type == "PRE_COMP":
                                 input_scene = os.path.join(local_scene, "frames/exportFINAL.mov").replace("\\","/")
                                 print input_scene
@@ -527,6 +540,8 @@ class Dialog(QtGui.QWidget):
                                         shutil.copyfile(compressed,self.project_data.paths.get_server_render_file_path(episode,step,scene))
                             else:
                                 render_data = os.path.join(local_folder,"_renderData.json").replace("\\","/")
+                                self.sendCompToServer(episode,scene,render_data)
+                                '''
                                 if os.path.exists(render_data):
                                     output_content = read_json_file(render_data)
                                     files = self.getOutputList(output_content) #pega o caminho dos outputs
@@ -537,6 +552,7 @@ class Dialog(QtGui.QWidget):
                                     server_path = os.path.join(os.path.dirname(server_path),"03_BG")
                                     files = self.getOutputBG(output_content["folder"] if "folder" in output_content.keys() else "")
                                     self.sendToVPN(files,server_path)
+                                '''
                 else:
                     print "sending to render farm: " + scene
                     self.sendToRenderFarm(harmony_file,scene,episode,step)
@@ -579,7 +595,7 @@ if __name__ == "__main__":
         sys.exit(app.exec_())
     else:
 
-        project_data = config_project(project_index)
+        #project_data = config_project(project_index)
         episodes = project_data.paths.list_episodes()
         args = sys.argv
         app = QtGui.QApplication.instance()
