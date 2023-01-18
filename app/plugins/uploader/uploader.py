@@ -349,17 +349,38 @@ class Uploader(QtGui.QMainWindow):
 
 	def getVersion(self,scene_name,path):
 
+		print scene_name
+		print [f for f in os.listdir(path) if f.endswith((".mov",".mp4")) and scene_name in f]
 		return "v" + str(len([f for f in os.listdir(path) if f.endswith((".mov",".mp4")) and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
+
+	def getRegexPattern(self,regex,filename):
+
+		index_range = regex.split("|")
+		m = re.search(regex, filename)
+		if m is not None:
+			for i in range(len(index_range)):
+				if m.group(i+1) is not None:
+					return m.group(i+1)
 
 	def getEpisode(self,filename):
 
-		m = re.search('.*(EP\d{3}).*', filename)
-		return m.group(1) if m is not None else m
+		regex = '.*(EP\d{3}).*|(\d{3})_SC\d{4}'
+		index_range = regex.split("|")
+		m = re.search(regex, filename)
+		if m is not None:
+			for i in range(len(index_range)):
+				if m.group(i+1) is not None:
+					return m.group(i+1)
 
 	def getShot(self,filename):
 
-		m = re.search('.*SC_(\d{4}).*', filename)
-		return m.group(1) if m is not None else m
+		regex = '.*SC_(\d{4}).*|.*SC(\d{4}).*'
+		index_range = regex.split("|")
+		m = re.search(regex, filename)
+		if m is not None:
+			for i in range(len(index_range)):
+				if m.group(i+1) is not None:
+					return m.group(i+1)
 
 	def getScene(self,filename,episode):
 
