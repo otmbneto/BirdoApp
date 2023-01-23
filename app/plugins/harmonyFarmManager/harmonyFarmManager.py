@@ -27,7 +27,8 @@ version = 'v.0.1'
 
 from app.utils.birdo_zip import *
 from app.utils.birdo_json import *
-from app.utils.ffmpeg import compress_render 
+from app.utils.ffmpeg import compress_render
+from app.utils.MessageBox import CreateMessageBox
 
 # carrega os env falsos do arquivo dotenv
 #load_dotenv()
@@ -218,6 +219,21 @@ class Dialog(QtGui.QWidget):
         scenes.sort()
         self.load_scenes(scenes)
 
+    def progressBarStart(self):
+
+        self.ui.progressBar.setEnabled(True)
+        self.ui.progressBar.reset()
+
+    def progressBarStop(self):
+
+        self.ui.progressBar.setEnabled(False)
+        self.ui.progressBar.reset()
+
+    def incrementProgress(self,inc):
+
+        value = self.ui.progressBar.value()
+        self.ui.progressBar.setValue(value+inc)
+
     def set_item_state(self,item,state):
 
         item.setCheckState(state)
@@ -340,7 +356,7 @@ class Dialog(QtGui.QWidget):
                 }
 
         renderfarm = self.project_data.paths.get_render_farm_path()
-        #renderfarm = "X:/teste"
+        #renderfarm = "X:/teste/"
         request_file = scene + "_" + version + ".json"
         return write_json_file(os.path.join(renderfarm,request_file),request)
 
@@ -467,6 +483,8 @@ class Dialog(QtGui.QWidget):
         """callback do botao start"""
         self.selected_files.sort()
 
+        self.progressBarStart()
+
         episode = self.ui.listEpisodes.currentItem().data(0)
         script = os.path.join(self.batch_scripts_path,self.ui.comboScript.currentText())
         step = self.ui.stepBox.currentText() #"SETUP" if self.ui.radioStepSETUP.isChecked() else "ANIM"
@@ -478,7 +496,7 @@ class Dialog(QtGui.QWidget):
             if harmony_file is None:
                 print "Warning! No version found at server: " + scene
                 continue
-
+            self.incrementProgress(10)
             #TODO: pegar a pasta publish
             # - copiar local - done
             # - descompactar - done
@@ -509,7 +527,7 @@ class Dialog(QtGui.QWidget):
 
                     #Perguntas:
                     #criar novo versao e enviar para o servidor? - Done
-
+            self.incrementProgress(45)
             if self.ui.groupBoxRender.isChecked():
                 print "do render"
                 if self.ui.radioRenderLocal.isChecked():
@@ -524,14 +542,11 @@ class Dialog(QtGui.QWidget):
                     local_scene = local_scene[0] if len(local_scene) > 0 else None
                     if local_scene is not None:
                         xstage = self.project_data.harmony.get_xstage_last_version(local_scene)
-                        print xstage
                         if self.project_data.harmony.compile_script(script,xstage) != 0:
 
                             self.project_data.harmony.render_scene(xstage, pre_render_script=self.select_prerender_script(render_type))
                             if render_type == "PRE_COMP":
                                 input_scene = os.path.join(local_scene, "frames/exportFINAL.mov").replace("\\","/")
-                                print input_scene
-                                print os.path.join(os.path.dirname(input_scene),scene + ".mov").replace("\\","/")
                                 if os.path.exists(input_scene):
                                     compressed = os.path.join(os.path.dirname(input_scene),scene + ".mov").replace("\\","/")
                                     print compressed
@@ -541,22 +556,13 @@ class Dialog(QtGui.QWidget):
                             else:
                                 render_data = os.path.join(local_folder,"_renderData.json").replace("\\","/")
                                 self.sendCompToServer(episode,scene,render_data)
-                                '''
-                                if os.path.exists(render_data):
-                                    output_content = read_json_file(render_data)
-                                    files = self.getOutputList(output_content) #pega o caminho dos outputs
-                                    server_path = self.project_data.paths.get_server_render_comp(episode,scene)
-                                    self.sendToVPN(files,server_path)
-                                    #pegas os psdss do BG
-                                    server_path = os.path.dirname(server_path)
-                                    server_path = os.path.join(os.path.dirname(server_path),"03_BG")
-                                    files = self.getOutputBG(output_content["folder"] if "folder" in output_content.keys() else "")
-                                    self.sendToVPN(files,server_path)
-                                '''
                 else:
                     print "sending to render farm: " + scene
                     self.sendToRenderFarm(harmony_file,scene,episode,step)
+            self.incrementProgress(45)
 
+        CreateMessageBox().information("Batch Finished!")
+        self.progressBarStop()
 
     def on_close(self):
         """closes ui"""
