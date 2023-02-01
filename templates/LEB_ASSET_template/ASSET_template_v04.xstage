@@ -7,7 +7,7 @@
    </drawings>
   </element>
   <element id="5" elementName="REFERENCIA" elementFolder="REFERENCIA" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
-  <element id="100" elementName="LineUp" elementFolder="LineUp.100" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements">
+  <element id="101" elementName="LineUp" elementFolder="LineUp" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements">
    <drawings>
     <dwg name="1"/>
    </drawings>
@@ -124,8 +124,8 @@
      </points>
     </column>
     <column type="0" name="ATV-0A1EF785A6C3D79D" color="#FFFFFFFF" displayOrder="2" width="100" anonymous="true" id="5"/>
-    <column type="0" name="ATV-0B8B4E6240B018A1" displayOrder="0" width="100" anonymous="true" id="100">
-     <elementSeq exposures="1-70" val="1" id="100"/>
+    <column type="0" name="ATV-0B904A46F4B018E4" displayOrder="3" width="100" anonymous="true" id="101">
+     <elementSeq exposures="1-70" val="1" id="101"/>
     </column>
    </columns>
    <options>
@@ -359,7 +359,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="LineUp" pos="858,99,1" publishUnderTab="LineUp">
+       <module type="READ" name="LineUp" pos="857,99,1" publishUnderTab="lineUpNew">
         <options>
          <locked val="true"/>
          <collapsed val="false"/>
@@ -420,7 +420,7 @@
          <ikStiffness val="1" defaultValue="1"/>
          <drawing>
           <elementMode val="true"/>
-          <element col="ATV-0B8B4E6240B018A1">
+          <element col="ATV-0B904A46F4B018E4">
            <layer/>
           </element>
           <customName>
@@ -467,7 +467,7 @@
          <yClipFactor val="0"/>
          <alignmentRule val="ASIS"/>
          <morphingVelo val="0" defaultValue="0"/>
-         <canAnimate val="true"/>
+         <canAnimate val="false"/>
          <tileHorizontal val="false"/>
          <tileVertical val="false"/>
         </attrs>
