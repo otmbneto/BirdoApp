@@ -97,7 +97,8 @@ class BirdoApp(QtGui.QMainWindow):
         print self.project_data
         if not self.project_data:
             MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
-        self.setUI()      
+        self.setUI()
+        self.fill_login_page()      
         self.splash_page()
         return
 
@@ -191,6 +192,7 @@ class BirdoApp(QtGui.QMainWindow):
         return loader.load(ui_file)
 
     def setUI(self):
+
         self.isCloudProject = self.project_data["server"]["type"] == "nextcloud"
 
         # SETS FOLDERS BUTTON ICON
@@ -312,9 +314,17 @@ class BirdoApp(QtGui.QMainWindow):
         label.setStyleSheet(color)
         return
 
+    def fill_login_page(self):
+
+        user_data = self.getUserData()
+        if "current_user" in user_data.keys():
+            self.ui.username_line.setText(user_data["current_user"])
+
+
     # TODO: Sempre que um dado for alterado mudar o status da conexao pra false
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
     def update_login_page(self):
+
         login_status_geral = True
         msg = "Login test ok!"
         if self.isCloudProject and self.ui.status_label.text() != "LOGIN OK":
@@ -382,6 +392,15 @@ class BirdoApp(QtGui.QMainWindow):
         if not self.project_data["harmony"]["installation_default"]:
             new_user[self.project_data["prefix"]]["harmony_installation"] = str(self.ui.harmony_folder_line.text())
         return new_user
+
+    def getUserData(self):
+
+        temp_user_json = self.project_data["user_json"]
+        user_data = {}
+        if os.path.exists(temp_user_json):
+            user_data = read_json_file(temp_user_json)
+
+        return user_data
 
     # FUNCAO QUE CRIA O JSON COM AS INFOS DO USUARIO
     def update_button(self):
