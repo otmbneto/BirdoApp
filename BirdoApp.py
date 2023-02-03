@@ -211,6 +211,8 @@ class BirdoApp(QtGui.QMainWindow):
         # UPDATE USER FUNCTION COMBO
         roles_list = self.project_data["roles"]
         roles_list.insert(0, "")
+
+        self.ui.combo_funcao.clear() #fix
         self.ui.combo_funcao.addItems(roles_list)
 
         # CHECKS IF NEEDS TO DISPLAY HARMONY INSTALLATION PATH LINE
@@ -414,11 +416,11 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT USER TO LOGIN
         user_data["current_user"] = str(self.ui.username_line.text())
         # UPDATES USERDATA
+        new_user = self.createNewUser()
         if not user_data["current_user"] in user_data.keys():
-            user_data[user_data["current_user"]] = self.createNewUser()
+            user_data[user_data["current_user"]] = new_user
         else:
-            user_data[user_data["current_user"]][self.project_data["prefix"]] = self.createNewUser()[self.project_data["prefix"]]
-
+            user_data[user_data["current_user"]][self.project_data["prefix"]] = new_user[self.project_data["prefix"]]
 
         # WRITES THE TEMP JSON USER DATA
         local_user_data_folder = os.path.dirname(temp_user_json)
@@ -435,7 +437,6 @@ class BirdoApp(QtGui.QMainWindow):
 
         #self.splash_page()
         self.projectSelected(self.project_data)
-
 
 def try_to_delete_shortcut(shortcut_name):
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop',shortcut_name + ".lnk").replace("\\","/")
