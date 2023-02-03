@@ -246,7 +246,11 @@ class BirdoApp(QtGui.QMainWindow):
 
     #todo: start at editline text if not empty
     def getFolder(self,editLine):
-        folder = QtGui.QFileDialog.getExistingDirectory()
+
+        dialog = QtGui.QFileDialog()
+        if len(editLine.text()) > 0 and os.path.exists(editLine.text()):
+            dialog.setDirectory(editLine.text())
+        folder = dialog.getExistingDirectory()
         editLine.setText(folder)
         return
 
