@@ -68,6 +68,26 @@ class BirdoApp(QtGui.QMainWindow):
 
         # SETS THE APP VERSION
         self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
+        self.setupConnections()
+
+    def setupConnections(self):
+
+        #BUTTONS ACTIONS
+        self.ui.harmony_folder_button.clicked.connect(lambda: self.getFolder(self.ui.harmony_folder_line))
+        self.ui.local_folder_button.clicked.connect(lambda: self.getFolder(self.ui.localFolder_line))
+
+        self.ui.home_button.clicked.connect(self.initProjectPage)
+        self.ui.test_login_button.clicked.connect(self.test_server_login)
+
+        self.ui.update_button.clicked.connect(self.update_button)
+        self.ui.view_pw_button.clicked.connect(self.show_pw)
+
+        # LINEEDIT CONNECTIONS
+        self.ui.server_login_line.textChanged.connect(self.change_login)
+        self.ui.server_pw_line.textChanged.connect(self.change_login)
+        self.ui.localFolder_line.textChanged.connect(self.update_login_page)
+        self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
+        self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
 
     def createPluginBtn(self, plugin, project_code):
         button = QtGui.QToolButton()
@@ -221,28 +241,10 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_line.setEnabled(harmony_installation)
         self.ui.harmony_label.setEnabled(harmony_installation)
         self.ui.harmony_folder_button.setEnabled(harmony_installation)
-
-        #BUTTONS ACTIONS
-        self.ui.harmony_folder_button.clicked.connect(lambda: self.getFolder(self.ui.harmony_folder_line))
-        self.ui.local_folder_button.clicked.connect(lambda: self.getFolder(self.ui.localFolder_line))
-
-        self.ui.home_button.clicked.connect(self.initProjectPage)
-        self.ui.test_login_button.clicked.connect(self.test_server_login)
         self.ui.test_login_button.setEnabled(self.isCloudProject)
-
-        self.ui.update_button.clicked.connect(self.update_button)
-        self.ui.view_pw_button.clicked.connect(self.show_pw)
         self.ui.view_pw_button.setEnabled(self.isCloudProject)
 
-        # LINEEDIT CONNECTIONS
-        self.ui.server_login_line.textChanged.connect(self.change_login)
-        self.ui.server_login_line.setEnabled(self.isCloudProject)
-        self.ui.server_pw_line.textChanged.connect(self.change_login)
-        self.ui.server_pw_line.setEnabled(self.isCloudProject)
-        self.ui.localFolder_line.textChanged.connect(self.update_login_page)
-        self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
-        self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
-
+    #todo: start at editline text if not empty
     def getFolder(self,editLine):
         folder = QtGui.QFileDialog.getExistingDirectory()
         editLine.setText(folder)
