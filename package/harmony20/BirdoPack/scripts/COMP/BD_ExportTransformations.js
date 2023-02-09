@@ -1,4 +1,24 @@
-// get header
+ /*###########################################################################
+#                                                                  _    _     #
+#  BD_ExportTransformations.js                                    , `._) '>   #
+#                                                                 '//,,,  |   #
+#                                                                     )_/     #
+#    by: ~camelo                   '||                     ||`       /_|      #
+#    e-mail: oi@camelo.de           ||      ''             ||                 #
+#                                   ||''|,  ||  '||''| .|''||  .|''|,         #
+#    created: 08/02/2023            ||  ||  ||   ||    ||  ||  ||  ||         #
+#    modified: 09/02/2023          .||..|' .||. .||.   `|..||. `|..|'         #
+#                                                                             #
+ ###########################################################################*/
+
+/*
+
+  Comp toolbar Harmony script. Project independent.
+  Exports animation data (pos, rot, scale and skew)
+  of selected drawings and pegs nodes. Requires core
+  functionality from `utils/get_psd_anim_data.js`.
+
+*/
 
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
@@ -27,14 +47,9 @@ function BD_ExportTransformations()
 		MessageBox.information("Arquivo inválido.", 1, 0, 0, "Arquivo Inválido");
  		return;
 	}
-	var f = new File(dataFilePath);
-	// if ( f.exists )
-	// {
-	// 	var msg = "O arquivo \"" + f.name + "\" será substituído. Do you wish to overwrite Confirmar?"
-	//	var ans = MessageBox.warning(msg, MessageBox.Yes, MessageBox.No);
-	//	if(ans != MessageBox.Yes)
-	//		return;
-	//}
+	var projectData = BD2_ProjectInfo();
+	var getPsdAnimDataPath = projectData.birdoApp + "package\harmony20\BirdoPack\scripts\COMP\BD_ExportTransformations.js";
+	var getPsdAnimDataObj = require(getPsdAnimDataPath);
 
 	var finalData = {
 					"psd_file": "NO PSD FILE! Data was exported manually.",
@@ -42,38 +57,9 @@ function BD_ExportTransformations()
 	};
 	for(var i = 0; i < arr.length; i = i + 1)
 	{
-		finalData["layers"][node.getName(arr[i])] = get_node_anim_data(arr[0]);
+		finalData["layers"][node.getName(arr[i])] = getPsdAnimDataObj.get_node_anim_data(arr[i]);
 	}
 	BD1_WriteJsonFile(finalData, dataFilePath);
 	MessageBox.information("Arquivo .json salvo.", 1, 0, 0, "Sucesso!");
 	return;
-
-	// FIXME ! importar do /utils/get_psd_anim_data.js ?
-	function get_node_anim_data(nodePath){
-		if(node.type(nodePath) != "READ" && node.type(nodePath) != "PEG"){
-			Print("[getFullCoordFromNode]> Not a drawing or peg node.");
-			return false;
-		}
-		var finalObj = {
-			"visible": "Not applicable.",
-			"frames": []
-		};
-		var columnId = node.linkedColumn(nodePath, "DRAWING.ELEMENT");
-
-		for(var i=1; i<=frame.numberOf(); i++){
-			var obj = {};
-			var mat = node.getMatrix(nodePath, i);
-			var pos = mat.extractPosition()
-			obj["pos"] = [pos.x, pos.y, pos.z];
-			var rot = mat.extractRotation(); 
-			obj["rot"] = [rot.x, rot.y, rot.z];
-			var scale = mat.extractScale();
-			obj["scl"] = [scale.x, scale.y, scale.z];
-			obj["skw"] = mat.extractSkew();
-			var exposure = column.getEntry(columnId, 1, i);
-			obj["exposure"] = exposure;
-			finalObj.frames.push(obj);
-		}
-		return finalObj;
-	}
 }
