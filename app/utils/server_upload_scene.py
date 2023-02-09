@@ -103,6 +103,7 @@ def zip_scene(progressDlg, filelist, zip_path, scene_version):
 
 
 def main(imput_obj, proj_data):
+
     """Main function publish scene"""
     output = {"upload": True, "status": "starting publish..."}
     progressDlg = ProgressDialog("BirdoApp Publish", 5)
@@ -239,7 +240,8 @@ def main(imput_obj, proj_data):
 
     sendToFarm = True
     #adicionar pergunta se comp.
-    if proj_data["user_json"]["prefix"]["user_type"] in ["COMP","DT"]:
+    user_file = read_json_file(proj_data["user_json"])
+    if user_file[user_file["current_user"]][proj_data["prefix"]]["user_type"] in ["COMP","DT"]:
         sendToFarm = MessageBox.question("Voce deseja enviar a cena para a fazenda de renders?")
 
     if sendToFarm:
