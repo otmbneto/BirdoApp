@@ -71,7 +71,7 @@ function Publish(){
 	var compact_version_data = require(compactJs).create_compact_file_list();
 
 	if(!BD2_AskQuestion("Publish SHOT: Este script irá salvar esta cena, e enviar para o server com o versionamento correto!\nDeseja continuar?")){
-		Print("publish cancelado pelo usuraio!");
+		Print("publish cancelado pelo usuario!");
 		return;
 	}
 

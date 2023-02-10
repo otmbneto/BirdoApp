@@ -103,6 +103,7 @@ def zip_scene(progressDlg, filelist, zip_path, scene_version):
 
 
 def main(imput_obj, proj_data):
+
     """Main function publish scene"""
     output = {"upload": True, "status": "starting publish..."}
     progressDlg = ProgressDialog("BirdoApp Publish", 5)
@@ -237,26 +238,33 @@ def main(imput_obj, proj_data):
     output["local_zip"] = publish_local_zip_path
     output["version_published"] = scene_name + "_" + version
 
-    # ADD TO FAZENDINHA QUEUE
-    local_json_queue = create_fazendinha_queue(proj_data, imput_obj, scene_name, version)
+    sendToFarm = True
+    #adicionar pergunta se comp.
+    user_file = read_json_file(proj_data["user_json"])
+    if user_file[user_file["current_user"]][proj_data["prefix"]]["user_type"] in ["COMP","DT"]:
+        sendToFarm = MessageBox.question("Voce deseja enviar a cena para a fazenda de renders?")
 
-    if not local_json_queue:
-        output["fazendinha"] = "error creating fazendinha json local queue!"
-    else:
-        server_json_queue = fazendinha_server_path + os.path.basename(local_json_queue)
+    if sendToFarm:
+        # ADD TO FAZENDINHA QUEUE
+        local_json_queue = create_fazendinha_queue(proj_data, imput_obj, scene_name, version)
 
-        # CHECKS IF SCENE VERSION IS ALREADY IN QUEUE
-        if server.get_file_info(server_json_queue):
-            print "this scene version is already added to the renderFazendinha queue!"
-            output["fazendinha"] = "scene is already in fazendinha queue!"
+        if not local_json_queue:
+            output["fazendinha"] = "error creating fazendinha json local queue!"
         else:
-            # SEND JSON QUEUE TO SERVER
-            if not server.upload_file(server_json_queue, local_json_queue):
-                print "fail to upload json queue file to fazendinha folder!"
-                output["fazendinha"] = "fail to upload json queue file to fazendinha folder!"
+            server_json_queue = fazendinha_server_path + os.path.basename(local_json_queue)
+
+            # CHECKS IF SCENE VERSION IS ALREADY IN QUEUE
+            if server.get_file_info(server_json_queue):
+                print "this scene version is already added to the renderFazendinha queue!"
+                output["fazendinha"] = "scene is already in fazendinha queue!"
             else:
-                print "scene added to fazendinha queue!"
-                output["fazendinha"] = "scene added to fazendinha queue!"
+                # SEND JSON QUEUE TO SERVER
+                if not server.upload_file(server_json_queue, local_json_queue):
+                    print "fail to upload json queue file to fazendinha folder!"
+                    output["fazendinha"] = "fail to upload json queue file to fazendinha folder!"
+                else:
+                    print "scene added to fazendinha queue!"
+                    output["fazendinha"] = "scene added to fazendinha queue!"
 
     return output
 
