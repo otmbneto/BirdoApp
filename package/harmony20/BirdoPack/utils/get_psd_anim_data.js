@@ -82,24 +82,6 @@ function get_psd_anim_data(disable_psd_nodes){
 		});
 		return isDisplayFinal && hasVisibilityOn;
 	}
-
-	/* Returns an array of coordinates (position, rotation, scale)
-	of active camera.*/
-	function get_camera_anim_data(){
-		var arr = [];
-		for(var i=1; i<=frame.numberOf(); i++){
-			var obj = {};
-			var mat = scene.getCameraMatrix(i);
-			var pos = mat.extractPosition()
-			obj["pos"] = [pos.x, pos.y, pos.z];
-			var rot = mat.extractRotation(); 
-			obj["rot"] = [rot.x, rot.y, rot.z];
-			var scale = mat.extractScale();
-			obj["scl"] = [scale.x, scale.y, scale.z];
-			arr.push(obj);
-		}
-		return arr;
-	}
 }
 
 /* Get a node path and return an array of coordinates (position, rotation,
@@ -132,5 +114,24 @@ function get_node_anim_data(nodePath, isVisible){
 	return finalObj;
 }
 
+/* Returns an array of coordinates (position, rotation, scale)
+of active camera.*/
+function get_camera_anim_data(){
+	var arr = [];
+	for(var i=1; i<=frame.numberOf(); i++){
+		var obj = {};
+		var mat = scene.getCameraMatrix(i);
+		var pos = mat.extractPosition()
+		obj["pos"] = [pos.x, pos.y, pos.z];
+		var rot = mat.extractRotation(); 
+		obj["rot"] = [rot.x, rot.y, rot.z];
+		var scale = mat.extractScale();
+		obj["scl"] = [scale.x, scale.y, scale.z];
+		arr.push(obj);
+	}
+	return arr;
+}
+
 exports.get_psd_anim_data = get_psd_anim_data;
 exports.get_node_anim_data = get_node_anim_data;
+exports.get_camera_anim_data = get_camera_anim_data;
