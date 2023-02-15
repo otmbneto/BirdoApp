@@ -18,3 +18,22 @@ node_modules
 
 # Ignore SASS config files
 .sass-cache
+
+# ignore pycharm files
+.idea/
+
+# ignore extra folder
+extra/
+
+# ignore old files leo package sandbox
+_create_package_version.py
+package/harmony20/_create_links.bat
+
+# ignore events config file
+app/plugins/events/_events.json
+
+# ignore script leo
+app/_fix_mc_astro.py
+
+# ignore create asset template config json
+*_assetCreate.json
