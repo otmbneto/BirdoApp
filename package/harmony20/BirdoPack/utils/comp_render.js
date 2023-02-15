@@ -20,12 +20,10 @@ Copyright:   leobazao_@Birdo
 comp_render();
 fix_rig_ast();
 
-function fix_rig_ast(){
-  
+function fix_rig_ast(){//desabilita o erro de alguns rigs do projeto ASTRO q estava sem o visibility pra nao renderizar
   var reg = /TRJ_TRACKER_\d{2}/;
   var reads = node.getNodes(["READ"]).filter(function(n){ return reg.test(node.getName(n))});
-  reads.forEach(function(n){ node.enable(n, false)});
-
+  reads.forEach(function(n){ node.setEnable(n, false)});
 }
 
 function comp_render(){
