@@ -5,12 +5,23 @@ from PySide import QtGui
 from ui.progress_dialog import Ui_Form
 import sys
 import os
+from threading import Thread
 
 app_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 logo = os.path.join(app_root, 'icons', 'birdoAPPLogo.ico')
 
 
 class ProgressDialog(QtGui.QWidget):
+
+    def threadMethod(self,function,args=[]):
+        #cria uma thread para uma funcao que e passada como argumento. Como essa funcao nao e parte da classe,
+        #o self precisa ser passado para pode atualizar a interface dentro da thread.
+        arglist = [self] + args
+        t = Thread(target=function, args=arglist)
+        t.start()
+
+        return
+
     """Interface util para ProgressDialog"""
     def __init__(self, title, total_interations):
         try:
@@ -23,7 +34,6 @@ class ProgressDialog(QtGui.QWidget):
         self.running = True
         #SETS WINDOW ICON
         self.setWindowIcon(QtGui.QIcon(logo))
-
         #SETS TITLE
         self.progressUI.title_label.setText(title)
 

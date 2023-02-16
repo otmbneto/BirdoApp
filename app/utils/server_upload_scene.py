@@ -22,6 +22,7 @@ regex_version = r"v\d{2}"
 
 
 def create_fazendinha_queue(proj_data, imput_obj, scene_name, version):
+
     """creates a json file local and return the json path"""
     prefix = scene_name.split("_")[0]
     ep = scene_name.split("_")[1].replace("EP", "")
@@ -102,11 +103,12 @@ def zip_scene(progressDlg, filelist, zip_path, scene_version):
     return os.path.exists(zip_path)
 
 
-def main(imput_obj, proj_data):
+def main(progressDlg,imput_obj, proj_data):
 
+    global MessageBox
     """Main function publish scene"""
     output = {"upload": True, "status": "starting publish..."}
-    progressDlg = ProgressDialog("BirdoApp Publish", 5)
+    #progressDlg = ProgressDialog("BirdoApp Publish", 5)
 
     # PUBLISH PATH SERVER
     publish_server_path = imput_obj["scene_server_path"]
@@ -241,9 +243,12 @@ def main(imput_obj, proj_data):
     sendToFarm = True
     #adicionar pergunta se comp.
     user_file = read_json_file(proj_data["user_json"])
+    print "USER_FILE:" + str(user_file)
     if user_file[user_file["current_user"]][proj_data["prefix"]]["user_type"] in ["COMP","DT"]:
+        #MessageBox = CreateMessageBox()
         sendToFarm = MessageBox.question("Voce deseja enviar a cena para a fazenda de renders?")
 
+    '''
     if sendToFarm:
         # ADD TO FAZENDINHA QUEUE
         local_json_queue = create_fazendinha_queue(proj_data, imput_obj, scene_name, version)
@@ -265,7 +270,7 @@ def main(imput_obj, proj_data):
                 else:
                     print "scene added to fazendinha queue!"
                     output["fazendinha"] = "scene added to fazendinha queue!"
-
+    '''
     return output
 
 
@@ -273,6 +278,7 @@ if __name__ == "__main__":
     # pegar a lista dos arquivos para zipar no output.json dado como parametro
 
     args = sys.argv
+
     if not len(args) == 9:
         print("Numero de argumentos invalidos!")
         sys.exit("error: wrong number of arguments!")
@@ -298,10 +304,13 @@ if __name__ == "__main__":
 
     # GET PROJECT DATA
     proj_data = config_project(birdo_app, input_args["project_index"])
-
-    output_data = main(input_args, proj_data)
-
+    
+    progressDlg = ProgressDialog("BirdoApp Publish", 5)
+    #progressDlg.threadMethod(main,[input_args,proj_data])
+    output_data = main(progressDlg,input_args, proj_data)
+    '''
     try:
         write_json_file(output_json_file, output_data)
     except Exception as e:
         sys.exit(e)
+    '''
