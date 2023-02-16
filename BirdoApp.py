@@ -23,6 +23,13 @@ global_icons = {
 MessageBox = CreateMessageBox()
 encdec = PswEncDec()
 
+import ctypes, sys
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 class ProjectButton(QtGui.QPushButton):
     def __init__(self, project_info):
@@ -458,12 +465,15 @@ def try_to_delete_shortcut(shortcut_name):
 # main script
 if __name__ == "__main__":
 
-    app = QtGui.QApplication.instance()
-
-    try_to_delete_shortcut("open_scene")
-
-    MainWindow = BirdoApp(app_root)
-
-    MainWindow.show()
-    sys.exit(app.exec_())
+    if is_admin():
+        # Code of your program here
+        app = QtGui.QApplication.instance()
+        try_to_delete_shortcut("open_scene")
+        MainWindow = BirdoApp(app_root)
+        MainWindow.show()
+        sys.exit(app.exec_())
+    else:
+        # Re-run the program with admin rights
+        #ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+        ctypes.windll.shell32.ShellExecuteW(None, u"runas", unicode(sys.executable), unicode(" ".join(sys.argv)), None, 1)
 
