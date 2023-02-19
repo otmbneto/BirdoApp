@@ -222,6 +222,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         self.isCloudProject = self.project_data["server"]["type"] == "nextcloud"
 
+        print "Is cloud project:" + str(self.isCloudProject)
         # SETS FOLDERS BUTTON ICON
         self.ui.local_folder_button.setIcon(QtGui.QIcon(global_icons["folder"]))
         self.ui.harmony_folder_button.setIcon(QtGui.QIcon(global_icons["folder"]))
@@ -248,6 +249,9 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_line.setEnabled(harmony_installation)
         self.ui.harmony_label.setEnabled(harmony_installation)
         self.ui.harmony_folder_button.setEnabled(harmony_installation)
+
+        self.ui.server_login_line.setEnabled(self.isCloudProject)
+        self.ui.server_pw_line.setEnabled(self.isCloudProject)
         self.ui.test_login_button.setEnabled(self.isCloudProject)
         self.ui.view_pw_button.setEnabled(self.isCloudProject)
 
