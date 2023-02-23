@@ -17,14 +17,14 @@ Copyright:   leobazao_@Birdo
 
 function BD_OrganizarNodeView(){
 	
-	scene.beginUndoRedoAccum("Organize NodeView");
-	
 	var n = selection.selectedNode(0);
 
-	if(node.type(n)!="COMPOSITE"){ // checa se o node selecionado é uma composite//
+	if(node.type(n)!= "COMPOSITE"){ // checa se o node selecionado é uma composite//
 		MessageBox.information("Selecione uma Composite para organizar os Nodes Conectados nela!!"); 
 		return;
 	}
+
+	scene.beginUndoRedoAccum("Organize NodeView");
 
 	var space = 30; // Define o espaço entre os nodes//
 	var nodesCon = node.numberOfInputPorts(n);
