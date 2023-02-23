@@ -31,6 +31,35 @@ def is_admin():
     except:
         return False
 
+
+class GitProject:
+
+    def __init__(self,local_path):
+
+        self.local_path = local_path
+
+    def run_git_command(self,cmd,shell=False):
+
+        os.chdir(self.local_path)
+        output = subprocess.Popen(cmd.split(" "),stdout=subprocess.PIPE,shell=shell)
+        return_value,output = output.communicate()
+
+        return return_value,output
+
+    def status(self):
+
+        ret,out = self.run_git_command("git status")
+        
+        return ret
+
+    def change_branch(self,to):
+
+        ret,out = self.run_git_command("git checkout " + to)
+
+        print out
+
+        return ret
+
 class ProjectButton(QtGui.QPushButton):
     def __init__(self, project_info):
         super(ProjectButton, self).__init__()
@@ -75,6 +104,11 @@ class BirdoApp(QtGui.QMainWindow):
 
         # SETS THE APP VERSION
         self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
+        try:
+            self.ui.menu.insertAction(self.ui.menu.actions()[0],QtGui.QAction("Hello World", self))
+        except Exception as e:
+            print e
+            time.sleep(5)
         self.setupConnections()
 
     def setupConnections(self):
@@ -477,6 +511,9 @@ if __name__ == "__main__":
         MainWindow.show()
         sys.exit(app.exec_())
     else:
+        git = GitProject(app_root)
+        #git.run_git_command(".")
+        git.change_branch("hello")
         # Re-run the program with admin rights
         #ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         ctypes.windll.shell32.ShellExecuteW(None, u"runas", unicode(sys.executable), unicode(" ".join(sys.argv)), None, 1)
