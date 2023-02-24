@@ -56,7 +56,7 @@
 	"pipeline": {
 		"type": "monday",
 		"login": "suporte@birdo.com.br",
-		"projectName": "Astronauta",
+		"projectName": "LUPI BADUKI",
 		"projectId": 153,
 		"assetsTypes": [
 					"Character", 
@@ -70,23 +70,23 @@
 		"boards": {
 				"filter": "LEB",
 				"Character": {
-					"name": ":: LEB | Inventário CHAR",
-					"subgroup": "CHARACTERS",
+					"name": "LEB | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
 					"prefix": "CH"
 				},
 				"Misc": {
-					"name": ":: LEB | Inventário MI",
-					"subgroup": "MISCELANEA",
+					"name": "LEB | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
 					"prefix": "MI"
 				},
 				"Prop": {
-					"name": ":: LEB | Inventário PROP",
-					"subgroup": "PROPS",
+					"name": "LEB | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
 					"prefix": "PR"
 				},
 				"FX": {
-					"name": ":: LEB | Inventário FX",
-					"subgroup": "FX",
+					"name": "LEB | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
 					"prefix": "FX"
 				}
 		},
