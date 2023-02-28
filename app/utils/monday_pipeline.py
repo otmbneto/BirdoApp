@@ -7,7 +7,7 @@
 #    e-mail: oi@camelo.de           ||      ''             ||                 #
 #                                   ||''|,  ||  '||''| .|''||  .|''|,         #
 #    created: 29/04/2022            ||  ||  ||   ||    ||  ||  ||  ||         #
-#    modified: 15/02/2023          .||..|' .||. .||.   `|..||. `|..|'         #
+#    modified: 27/02/2023          .||..|' .||. .||.   `|..||. `|..|'         #
 #                                                                             #
 ###############################################################################
 
@@ -32,6 +32,7 @@
 			- [ ] Tratar bad requests
 			- [ ] Melhorar saida baseado no tipo da coluna
 			- [X] acessar multiplos valores de uma vez
+			- [X] subir arquivo
 
 		> Issues:
 			> Tive problemas em usar em Windows 10 /em ingles/ no modo
@@ -40,6 +41,8 @@
 """
 import requests
 import json
+import os
+import mimetypes
 
 def get_boards(_url, token, match=""):
 	('[ get_boards_and_groups(token, match = "") ] '
@@ -292,4 +295,139 @@ def get_values(_url, mmap, group, column):
 		else :
 			v[i["name"]] = None
 	return v
+
+get_values.__doc__ = ("[ get_values(url, items_map, group, column) ]"
+					  " Retorna um dicionario contendo todos os items do"
+					  " /group/ com seus respectivos valores na /column/.")
+
+def send_file(file_path, _url, mmap, item, column):
+	# check arguments
+	if not os.path.exists(file_path):
+		raise Exception("The first argument must be a valid file path.")
+	valid_types = [
+		'image/png',
+		'image/jpeg',
+		'application/msword',
+		('application/vnd.openxmlformats-officedocument'
+		 '.wordprocessingml.document'),
+		'application/pdf',
+		'application/vnd.ms-excel',
+		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'image/gif',
+		'video/mp4',
+		'application/vnd.ms-excel',
+		'image/svg+xml',
+		'text/plain',
+		'application/postscript'
+	]
+	file_mimetype = mimetypes.guess_type(file_path)
+	if not file_mimetype in valid_types:
+		raise Exception("Invalid file type.")
+	if type(mmap) != type({}):
+		raise Exception("The third argument must be a dictionary.")
+	if type(item) != type(u""):
+		raise Exception("The forth argument must be a unicode string.")
+	if type(column) != type(u""):
+		raise Exception("The fifith argument must be a unicode string.")
+
+	# check 'mmap' dict
+	if not "token" in mmap:
+		raise Exception("The third argument dictionary does not have a 'token' "
+						"key. Probally it is not a 'map' dict generated with "
+						"the 'get_items_map()' function.")
+	if not "items" in mmap:
+		raise Exception("The third argument dictionary does not have a 'items'"
+						" key. Probally it is not a 'map' dict generated with"
+						" the 'get_items_map()' function.")
+	if not "columns" in mmap:
+		raise Exception("The third argument dictionary does not have a"
+						" 'columns' key. Probally it is not a 'map' dict"
+						" generated with the 'get_items_map()' function.")
+	if type(mmap["items"]) != type({}):
+		valid_map = False
+	if type(mmap["columns"]) != type({}):
+		valid_map = False
+	if not valid_map :
+		raise Exception("Something is wrong with the 'map' dict. Make sure it"
+						" was returned by function 'get_items_map()'.")
+
+	# check for 'item'
+	if not item in mmap["items"]:
+		raise Exception(("Forth argument '{}' is not an item of"
+						 " the 'items_map' dict.").format(item))
+
+	# check for 'column'
+	if not column in mmap["columns"]:
+		raise Exception(("Third argument '{}' is not a"
+						 " column of 'map' dictionary.").format(column))
+
+	# header of all requests
+	headers = {
+		"Authorization": mmap['token']
+	}
+
+	# check column type !!!
+	check_column_query = {
+		'query': ("boards(ids:{}){{columns(ids:'{}'){{type}}}}").format(
+				mmap["board"]["id"], mmap["columns"][column])
+	}
+
+	check_column_resp = requests.request("GET", url,
+										 headers = headers,
+										 data = check_column_query)
+
+	if check_column_resp.status_code != 200 :
+		exeption_str = ("Something went wrong while checking the type of the"
+						" '{}' column. Here is the raw response of the query:"
+						"\n\n{}").format(column, check_column_resp.raw)
+		raise Exception(exeption_str)
+
+	check_column_json = check_column_resp.json()
+	check_str =  check_column_json["data"]["boards"][0]["columns"][0]["type"]
+	if check_str != "file" :
+		exeption_str = ("The column '{}' has the '{}' type."
+						" It's only possible to upload a file"
+						" to a column of the 'file' type.").format(
+								column, check_str)
+		raise Exception(exeption_str)
+
+	# make the request
+	clear_query = {
+			'query': ('mutation {{ change_column_value (item_id: {},'
+					  ' column_id: "{}", board_id: {},'
+					  ' value:"{{\\"clear_all\\": true}}")'
+					  ' {{id}}}}').format(mmap["items"][item]
+										  mmap["columns"][column]
+										  mmap["board"]["id"])
+	}
+
+	clear_response = requests.request("GET", url,
+									  headers = headers,
+									  data = clear_query)
+
+	if clear_response.status_code != 200 :
+		exception_str = ("Something went wrong while trying to clear the"
+						 " contents of item '{}' in column '{}'. This was"
+						 " the result of the request:\n\n{}").format(
+							item, column, clear_response.raw)
+		raise Exception(exception_str)
+
+	file_url = url + "/file"
+	upload_query = {
+	'query': ('mutation ($file: File!) {{add_file_to_column(item_id: {},'
+			  ' column_id: "{}", file: $file) {{id}}}}').format(
+				mmap["items"][item], mmap["columns"][column])
+	}
+	file_to_upload = open(file_path, 'rb')
+	files=[('variables[file]',(file_to_upload.name, f, file_mimetype))]
+	response = requests.request("POST", file_url,
+								headers = headers,
+								data = upload_query,
+								files = files)
+	close(file_to_upload)
+	return response
+
+send_file.__doc__ = ("[ send_file(file_path, url, item_map, item, column) ]"
+					 " Sobe o arquivo do caminho passado pra celula do item x"
+					 " coluna especificados.")
 
