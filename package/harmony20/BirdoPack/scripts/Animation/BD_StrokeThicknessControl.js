@@ -275,12 +275,13 @@ function CreateInterface(pathUI, camera_view){
 	}
 	
 	this.updateStrokes = function(){//testa a selecao e roda o comando para modificar o drawing (roda quando SOLTA os sliders)
-		scene.beginUndoRedoAccum("Stroke Thickness Control");
 		
 		if(!this.updateSelection()){
 			Print("invalid selection!");
 			return;
 		}
+		
+		scene.beginUndoRedoAccum("Stroke Thickness Control");
 
 		if(modifyLayer(this.drawing_data, this.selection_data, this.thickness_list)){
 			Print("Strokes modified:\n");
