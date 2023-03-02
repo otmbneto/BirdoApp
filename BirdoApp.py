@@ -74,7 +74,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.home_button.setIcon(QtGui.QIcon(global_icons["birdo_app"]))
 
         # SETS THE APP VERSION
-        self.ui.label_version.setText("v." + str(self.initial_data["app"]["app_version"]))
+        self.ui.label_version.setText(subprocess.check_output(["git", "log", "--pretty=%h", "-1"])[:-1])
         self.setupConnections()
 
     def setupConnections(self):
