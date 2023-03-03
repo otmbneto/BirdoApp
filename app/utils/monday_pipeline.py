@@ -7,7 +7,7 @@
 #    e-mail: oi@camelo.de           ||      ''             ||                 #
 #                                   ||''|,  ||  '||''| .|''||  .|''|,         #
 #    created: 29/04/2022            ||  ||  ||   ||    ||  ||  ||  ||         #
-#    modified: 27/02/2023          .||..|' .||. .||.   `|..||. `|..|'         #
+#    modified: 03/03/2023          .||..|' .||. .||.   `|..||. `|..|'         #
 #                                                                             #
 ###############################################################################
 
@@ -45,10 +45,6 @@ import os
 import mimetypes
 
 def get_boards(_url, token, match=""):
-	('[ get_boards_and_groups(token, match = "") ] '
-	 'Retorna um dicionario de todos os boards, e seus respectivos grupos, '
-	 'cujo nome combine com o conteudo de match. Caso match nao seja informado '
-	 'retorna todos os boards.')
 	d = {}
 	headers = {
 		"Authorization": token
@@ -75,6 +71,11 @@ def get_boards(_url, token, match=""):
 	d["token"] = token
 	return d
 
+get_boards.__doc__ = ('[ get_boards_and_groups(token, match = "") ]'
+					  ' Retorna um dicionario de todos os boards, e seus'
+					  ' respectivos grupos, cujo nome combine com o conteudo'
+					  ' de match cujo nome combine com o conteudo de match.'
+					  ' Caso match nao seja informado retorna todos os boards.')
 
 def get_items_map(_url, boards, board, group):
 	valid_board = True
@@ -151,6 +152,66 @@ get_items_map.__doc__ = ("[ get_items_map(token, board, group) ] "
 						"1) relacao 'item:id' das linhas do grupo informado;"
 						"2) relacao 'title:id' das colunas do board informado.")
 
+def get_raw(_url, mmap, item, column):
+	valid_map = True
+
+	# check arguments
+	if type(mmap) != type({}):
+		raise Exception("The first argument must be a dictionary.")
+	if type(item) != type(u""):
+		raise Exception("The second argument must be a unicode string.")
+	if type(column) != type(u""):
+		raise Exception("The third argument must be a unicode string.")
+
+	# check 'mmap' dict
+	if not "token" in mmap:
+		raise Exception("The first argument dictionary does not have a 'token' "
+						"key. Probally it is not a 'map' dict generated with "
+						"the 'get_items_map()' function.")
+	if not "items" in mmap:
+		raise Exception("The first argument dictionary does not have a 'items'"
+						" key. Probally it is not a 'map' dict generated with"
+						" the 'get_items_map()' function.")
+	if not "columns" in mmap:
+		raise Exception("The first argument dictionary does not have a"
+						" 'columns' key. Probally it is not a 'map' dict"
+						" generated with the 'get_items_map()' function.")
+	if type(mmap["items"]) != type({}):
+		valid_map = False
+	if type(mmap["columns"]) != type({}):
+		valid_map = False
+	if not valid_map :
+		raise Exception("Something is wrong with the 'map' dict. Make sure it"
+						" was returned by function 'get_items_map()'.")
+
+	# check for 'item'
+	if not item in mmap["items"]:
+		raise Exception(("Second argument '{}' is not a board"
+						 " of 'map' dictionary.").format(item))
+
+	# check for 'column'
+	if not column in mmap["columns"]:
+		raise Exception(("Third argument '{}' is not a"
+						 " column of 'map' dictionary.").format(column))
+
+	# make the request
+	headers = {
+		"Authorization": mmap['token']
+	}
+	query = ("{{items(ids:{}){{name id column_values(ids:{})"
+			 "{{title id type value additional_info}}}}}}").format(
+				mmap["items"][item],
+				mmap["columns"][column])
+	data = {
+		'query': query
+	}
+	r = requests.post(url=_url, json=data, headers=headers)
+	return r.json()
+
+get_raw.__doc__ = ("[ get_raw(url,item_map, item, column) ]"
+				   " Retorna o bruto da requisicao de uma"
+				   " coluna em item.")
+
 def get_value(_url, mmap, item, column):
 	valid_map = True
 
@@ -216,7 +277,7 @@ def get_value(_url, mmap, item, column):
 		return v["label"]
 	return v
 
-get_value.__doc__ = ("[ get_status(map, item, column) ]"
+get_value.__doc__ = ("[ get_value(url, map, item, column) ]"
 					 " Retorna o valor do item informado na coluna informada.")
 
 def get_value_straight(_url, token, board, group, column, item):
@@ -224,9 +285,9 @@ def get_value_straight(_url, token, board, group, column, item):
 	mmap = get_items_map(_url, boards, board, group)
 	return get_value(_url, mmap, item, column)
 
-get_value_straight.__doc__ = ("[ get_value_straight(token, board, group, column"
-							  ", item) ] Retorna o valor diretamente baseado no"
-							  " board, grupo e coluna e informados.")
+get_value_straight.__doc__ = ("[ get_value_straight(url, token, board, group,"
+							  " column, item) ] Retorna o valor diretamente"
+							  " baseado no board, grupo e coluna e informados.")
 
 def get_values(_url, mmap, group, column):
 	valid_map = True
@@ -396,8 +457,8 @@ def send_file(file_path, _url, mmap, item, column):
 			'query': ('mutation {{ change_column_value (item_id: {},'
 					  ' column_id: "{}", board_id: {},'
 					  ' value:"{{\\"clear_all\\": true}}")'
-					  ' {{id}}}}').format(mmap["items"][item]
-										  mmap["columns"][column]
+					  ' {{id}}}}').format(mmap["items"][item],
+										  mmap["columns"][column],
 										  mmap["board"]["id"])
 	}
 
@@ -430,4 +491,3 @@ def send_file(file_path, _url, mmap, item, column):
 send_file.__doc__ = ("[ send_file(file_path, url, item_map, item, column) ]"
 					 " Sobe o arquivo do caminho passado pra celula do item x"
 					 " coluna especificados.")
-
