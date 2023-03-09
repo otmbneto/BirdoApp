@@ -99,7 +99,7 @@ function SaveAssettpl(){
 		var nodes_sel = {};
 		var selected_nodes = selection.selectedNodes();
 		var is_anim_library = false;
-		var regex_rig = /\w{2}\d{4}_.+(-v\d+)?/;
+		var regex_rig = /\w{2}(\d{4}|\d{3})_.+(-v\d+)?/;
 		var regex_rig_full = /\w{3}\..+-v\d+/;
 
 		if(selected_nodes.length == 1){

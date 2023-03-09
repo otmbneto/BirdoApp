@@ -96,7 +96,6 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 				MessageBox.warning("Error deleting existing asset!",0,0);
 				return false;
 			}
-			
 		}
 	}
 
@@ -249,7 +248,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 		if(!assetInfo.fullNode){
 			assetNodeName = assetInfo.prefixo + "_" + assetInfo.assetName + "-" + assetInfo.version
-			var new_assetgroup_name = BD2_renameNode(assetInfo.assetNode, assetNodeName);
+			var new_assetgroup_name = BD2_renameNode(assetInfo.assetNode, assetNodeName);				
 			var new_full_name = "no_need";
 		} else {
 			var new_full_name = BD2_renameNode(assetInfo.fullNode, fullName);
@@ -337,7 +336,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	function find_lib_groups(main_group){//verifica se os grupos de lib do rig estao com o nome correto, e retorna lista deles
 		var allnodes = BD2_ListNodesInGroup(main_group, "", true);
 		var libs = [];
-		var regex_lib = /\w{3}.\w+-v\d+/;
+		var regex_lib = /(\w{3}|\w{4})\.(.+-v\d+)/;
 		var lib_nodes = allnodes.filter(function(x){ 
 												return regex_lib.test(node.getName(x))
 											});
@@ -356,7 +355,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			return false;
 		}
 		libs.sort(function(a, b) { return b.length - a.length;});
-		libs.pop();
+		//libs.pop();
 		return libs;
 	}
 	
