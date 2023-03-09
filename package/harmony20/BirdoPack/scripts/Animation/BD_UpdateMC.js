@@ -200,9 +200,11 @@ Print("TESTE UI SCRIPT: " + ui_script);
 	
 	function fix_mc(projectDATA, node_path){//checa se o mc do rig tem fix, e se tiver muda os atts e copia o arquivo pro scripts da cena
 		Print(" --- fix mc : " + node_path);
+
 		var regex_version = /_\d+$/; 
-		var asset_regex = /CH\d{3}_\w+/;
-		var rig_regex = /\w{3}\.\w+-v\d{2}/;
+		var asset_regex = /CH\d{3}_(\w|\d)+/;
+		var rig_regex = /\w{3}\.(\w|\d)+-v\d{2}/;
+		var regex_state_name = /(TESTE_\w\.tbState)|(CH\d+-v\d+_BOCA_\w\.tbState)/;//regex pra achar o nome do arquivo no mc atual;
 		var mc_data = {};
 		
 		var folder_fix = projectDATA.getTBLIB("server") + "MC_data/SCRIPTS/";
@@ -224,8 +226,7 @@ Print("TESTE UI SCRIPT: " + ui_script);
 		mc_data["rig_name"] = asset_regex.exec(node_path)[0].replace(regex_version, "");
 		mc_data["rig_version"] = rig_regex.exec(node_path)[0].split("-")[1];
 		mc_data["mc_name"] = node.getName(node_path);
-		mc_data["original_script_name"] = mc_data["mc_name"].replace("BOCA", "TESTE") + ".tbState";
-		
+
 		//define fix file info
 		var char_fix_folder = folder_fix + mc_data["rig_name"].split("_")[0] + "/";
 		var fix_rig_name = mc_data["rig_name"].split("_")[0] + "-" + mc_data["rig_version"];
@@ -233,6 +234,7 @@ Print("TESTE UI SCRIPT: " + ui_script);
 		var fix_file = rig_fix_folder + "/" + fix_rig_name + "_" + mc_data["mc_name"] + ".tbState";
 		if(!BD1_FileExists(fix_file)){
 			Print("No fix file found for rig : " + fix_rig_name);
+			Print("----fix file not found: " + fix_file);
 			return false;
 		}
 		mc_data["new_script_name"] = BD1_fileBasename(fix_file);
@@ -248,11 +250,11 @@ Print("TESTE UI SCRIPT: " + ui_script);
 		//fix mc node
 		//att ui_data
 		var ui_att_raw = node.getTextAttr(mc_data["mc_node"], 1, "UI_DATA");
-		var new_ui_att = ui_att_raw.replace(mc_data["original_script_name"], mc_data["new_script_name"]);
+		var new_ui_att = ui_att_raw.replace(regex_state_name, mc_data["new_script_name"]);
 		node.setTextAttr(mc_data["mc_node"], "UI_DATA", 1, new_ui_att);
 		//att files
 		var col = node.linkedColumn(mc_data["mc_node"], "FILES");
-		var new_files_att = column.getEntry(col, 1, 1).replace(mc_data["original_script_name"], mc_data["new_script_name"]);
+		var new_files_att = column.getEntry(col, 1, 1).replace(regex_state_name, mc_data["new_script_name"]);
 		column.setEntry(col, 1, 1, new_files_att);
 
 		return true;
