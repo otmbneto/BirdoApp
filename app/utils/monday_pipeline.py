@@ -381,7 +381,7 @@ def send_file(file_path, _url, mmap, item, column):
 		'text/plain',
 		'application/postscript'
 	]
-	file_mimetype = mimetypes.guess_type(file_path)
+	file_mimetype = mimetypes.guess_type(file_path)[0]
 	if not file_mimetype in valid_types:
 		raise Exception("Invalid file type.")
 	if type(mmap) != type({}):
@@ -404,6 +404,7 @@ def send_file(file_path, _url, mmap, item, column):
 		raise Exception("The third argument dictionary does not have a"
 						" 'columns' key. Probally it is not a 'map' dict"
 						" generated with the 'get_items_map()' function.")
+	valid_map = True
 	if type(mmap["items"]) != type({}):
 		valid_map = False
 	if type(mmap["columns"]) != type({}):
@@ -429,11 +430,11 @@ def send_file(file_path, _url, mmap, item, column):
 
 	# check column type !!!
 	check_column_query = {
-		'query': ("boards(ids:{}){{columns(ids:'{}'){{type}}}}").format(
+		'query': '{{boards(ids:[{}]){{columns(ids:"{}"){{type}}}}}}'.format(
 				mmap["board"]["id"], mmap["columns"][column])
 	}
 
-	check_column_resp = requests.request("GET", url,
+	check_column_resp = requests.request("GET", _url,
 										 headers = headers,
 										 data = check_column_query)
 
@@ -444,7 +445,13 @@ def send_file(file_path, _url, mmap, item, column):
 		raise Exception(exeption_str)
 
 	check_column_json = check_column_resp.json()
-	check_str =  check_column_json["data"]["boards"][0]["columns"][0]["type"]
+	try :
+		check_str = check_column_json["data"]["boards"][0]["columns"][0]["type"]
+	except :
+		exeption_str = ("Something went wrong while checking the type of the"
+						" '{}' column. Here is the raw response of the query:"
+						"\n\n{}").format(column, check_column_resp.raw)
+		raise Exception(exeption_str)
 	if check_str != "file" :
 		exeption_str = ("The column '{}' has the '{}' type."
 						" It's only possible to upload a file"
@@ -462,7 +469,7 @@ def send_file(file_path, _url, mmap, item, column):
 										  mmap["board"]["id"])
 	}
 
-	clear_response = requests.request("GET", url,
+	clear_response = requests.request("GET", _url,
 									  headers = headers,
 									  data = clear_query)
 
@@ -473,19 +480,20 @@ def send_file(file_path, _url, mmap, item, column):
 							item, column, clear_response.raw)
 		raise Exception(exception_str)
 
-	file_url = url + "/file"
+	file_url = _url + "/file"
 	upload_query = {
 	'query': ('mutation ($file: File!) {{add_file_to_column(item_id: {},'
 			  ' column_id: "{}", file: $file) {{id}}}}').format(
 				mmap["items"][item], mmap["columns"][column])
 	}
 	file_to_upload = open(file_path, 'rb')
-	files=[('variables[file]',(file_to_upload.name, f, file_mimetype))]
+	files=[('variables[file]',(file_to_upload.name,
+							   file_to_upload, file_mimetype))]
 	response = requests.request("POST", file_url,
 								headers = headers,
 								data = upload_query,
 								files = files)
-	close(file_to_upload)
+	file_to_upload.close()
 	return response
 
 send_file.__doc__ = ("[ send_file(file_path, url, item_map, item, column) ]"
