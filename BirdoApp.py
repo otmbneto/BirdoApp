@@ -469,7 +469,8 @@ def try_to_delete_shortcut(shortcut_name):
 # main script
 if __name__ == "__main__":
 
-    if is_admin():
+    args = sys.argv
+    if "--noadmin" in args or is_admin():
         # Code of your program here
         app = QtGui.QApplication.instance()
         try_to_delete_shortcut("open_scene")
@@ -480,4 +481,3 @@ if __name__ == "__main__":
         # Re-run the program with admin rights
         #ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         ctypes.windll.shell32.ShellExecuteW(None, u"runas", unicode(sys.executable), unicode(" ".join(sys.argv)), None, 1)
-
