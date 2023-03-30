@@ -57,6 +57,9 @@ function SaveAssettpl(){
 		}
 	}
 	
+	//update mc data info
+	selNodes["mcs"] = checkMCnodes(nodeList);
+	
 	var listaPaletaUsadas = require(projectDATA["paths"]["birdoPackage"] + "utils/checkNodesPallet.js").checkNodesPallet(nodeList);//lista as paletas usadas no asset
 
 	if(!checkPallets(listaPaletaUsadas)){
@@ -66,6 +69,7 @@ function SaveAssettpl(){
 	if(!selNodes["is_animation_lib"]){
 		assetData = getAssetsProjectData(projectDATA);
 	} else {
+		selNodes["mcs"] = null;
 		var asset_prefix = selNodes.asset_name.slice(0,2);
 		var typeFullName = asset_prefix == "CH" ? "Character" : asset_prefix == "PR" ? "Prop": asset_prefix;
 		assetData = {};
@@ -83,6 +87,7 @@ function SaveAssettpl(){
 		MessageBox.warning("ERRO ao pegar as informacoes de Assets da pipeline do projeto! Avise a Direcao Tecnica!", 0 ,0 );
 		return false;
 	}
+	
 	Print("ASSETDATA: ");
 	Print(assetData);
 
@@ -93,6 +98,53 @@ function SaveAssettpl(){
 	function warningAsk(msg){
 		var ask = MessageBox.warning(msg, 3, 4);
 		return ask == 3;
+	}
+		
+	function checkMCnodes(nodes){//checa se existem MC nodes no rig e retorna ojbeto com info do mc
+		var mcnodes = nodes.filter(function(element){ return node.type(element) == "MasterController";});
+		var mcObject = {
+			"checkbox": [],
+			"mastercontrollers": [],
+			"extra_scripts": []
+		};
+		if(mcnodes.length > 0){
+			for(var i=0; i<mcnodes.length; i++){
+				var mcnode = mcnodes[i];
+				
+				//add main mc checkbox node
+				if(node.getName(mcnode) == "mc_Function"){
+					mcObject["checkbox"].push(mcnode);
+					continue;
+				}
+				
+				//create mc data object
+				var mcdata = {
+					"node": mcnode,
+					"tbStateFiles": []
+				};
+				var col = node.linkedColumn(mcnode, "FILES");
+				var files_list = column.getEntry(col, 1, 1).split("\n");
+				files_list.forEach(function(f){ 
+					var fname = BD1_fileBasename(f);
+					var fullpath = scene.currentProjectPath() + "/" + f;
+					if(!BD1_FileExists(fullpath)){
+						var msg = "Arquivo de MC nao encontrado na pasta da cena: " + fullpath + "\nEncontre o arquivo ou acerte o MC antes de continuar!";
+						MessageBox.warning(msg, 0,0);
+						Print(msg);
+						return false;
+					}
+					if(BD1_file_extension(f) == "tbState"){
+						mcdata["tbStateFiles"].push(fullpath);
+					}
+					if(BD1_file_extension(f) == "js" && fname.slice(0,3) == "BD_" && mcObject.extra_scripts.indexOf(fullpath) == -1){
+						mcObject["extra_scripts"].push(fullpath);
+					}
+				});
+				mcObject["mastercontrollers"].push(mcdata);
+			}
+			return mcObject;
+		}
+		return false;
 	}
 	
 	function getSelection(assetType){
@@ -514,7 +566,8 @@ function initiateUI(selectionData, projData, projectAssetData){
 			assetNode : selectionData.asset,
 			fullNode : selectionData.rigFull, 
 			version : selectionData.is_animation_lib ? "ANIM" : this.ui.groupRIG.spinVersion.text,
-			id : selectionData.is_animation_lib ? "null" : this.ui.groupAsset.labelID.text
+			id : selectionData.is_animation_lib ? "null" : this.ui.groupAsset.labelID.text,
+			mcs: selectionData.mcs
 		};
 		
 		var typeFullName = selectionData.is_animation_lib ? Object.keys(projectAssetData)[0] : this.projData.getAssetTypeFullName();
@@ -522,6 +575,7 @@ function initiateUI(selectionData, projData, projectAssetData){
 		
 		if(typeFullName == "Misc"){
 			assetInfo["prefixo"] = "MI";
+			assetInfo["mcs"] = null;
 		} else {
 			assetInfo["prefixo"] = this.ui.assetIndex.text;
 		}

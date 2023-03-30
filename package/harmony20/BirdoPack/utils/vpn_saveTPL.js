@@ -2,27 +2,20 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 /*TODO : mudar o checkRig version para a UI (fazer checar a versao do rig e ja sugerir na Ui e bloquear a troca de versao com reconhecer uma versao de rig existente)
-	[x] fazer funcao para checar nomes das libs no rig (falta aplicar)
-	[x] trocar a pasta local pela pasta do server (ja troquei as variaveis no inicio)
-	[x] getMainAsset update para pegar da lista de assets gerada antes
-	[x] recuperar a verificacao de versao do rig pra este script em js
-	[x] nao precisa da funcao python! resolver tudo por aqui mesmo!
 	
 	[ ] testar pq esta travando na funcao de rename nodes na hora de renomear o grupo do rig de fora (sem ser o full)
-	
-	versao do vpn para salvar assets no birdoASSETS
+	[ ] tirar as funcoes de MC aqui desses dois scripts e criar um require util so pra MC separado com mais opções.
+	versao do vpn para salvar assets no birdoASSETS (com Master Controllers);
 */	
 function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 	var assetInfo = assetInfoFromOtherScript;
-
 	if(assetInfo.isAnim){
 		MessageBox.warning("Por enquanto salvar animacao neste script esta desabilitado!", 0,0);
 		return false;
 	}
 
 	var libs = find_lib_groups(assetInfo.fullNode);
-
 	if(!libs){
 		Print("Canceled to check libs groups name...");
 		return false;
@@ -108,7 +101,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	self.ui.progressBar.format = "...renaming assets...";
 	if(!assetInfo.isAnim){
 		updateColorNames();//change color names to UPPDERCASE
-		var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix);
+		var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
 
 		if(!updatedAssetInfo){
 			MessageBox.warning("Error updating node names!",0,0);
@@ -190,6 +183,43 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		return false;
 	}	
 	
+	//check master controller nodes files
+	if(!assetInfo["mcs"]){
+		Print(">> No Master Controller nodes found in this asset!");
+	} else {
+		Print("Copying MC files to server.. ");
+		self.ui.progressBar.format = "...saving MC files...";
+		var server_mcfiles_zip = data_rede + "mcFiles.zip";
+		var extrascriptsCounter = 0;
+		var mcFilesCounter = 0;
+		var server_mc_extra_scripts_folder = projectDATA.getTBLIB("server") + "mcDATA/MCScripts/";
+		
+		//cria o folder de MC em tblib se ainda nao existir
+		if(!BD1_DirExist(server_mc_extra_scripts_folder)){
+			if(!BD1_createDirectoryREDE(server_mc_extra_scripts_folder)){
+				MessageBox.warning("Falha ao criar folder de scritpts mc na rede: " + server_mc_extra_scripts_folder,0,0);
+				return false;
+			}				
+		}
+		
+		if(assetInfo.mcs.temp_zip){
+			if(!BD1_CopyFile(assetInfo.mcs.temp_zip, server_mcfiles_zip)){
+				MessageBox.warning("ERROR enviando o zip de arquivos do MC pra rede!",0,0);
+			}
+			mcFilesCounter++;
+		}
+		assetInfo.mcs.extra_scripts.forEach(function(jsfile){
+			var server_script_path = server_mc_extra_scripts_folder + BD1_fileBasename(jsfile);
+			if(!BD1_CopyFile(jsfile, server_script_path)){
+				MessageBox.warning("ERROR enviando o zip de arquivos do MC pra rede!",0,0);
+				return;
+			}
+			extrascriptsCounter++;
+		});
+		Print(">>> MC files enviados pra rede com sucesso: \n - mc files: " + mcFilesCounter + "\ - extra script files: " + extrascriptsCounter);
+	}
+	
+	
 	self.ui.progressBar.setValue(8);
 	self.ui.progressBar.format = "DONE!!!";
 	
@@ -197,6 +227,23 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	return true;
 
 	//////FUNCOES EXTRAS/////////
+	function updateMCAtt(mcNode, rigVersionName){//atualiza os atts do node com as novas infos de nome da versao do rig
+		//atualiza o att de files do mc
+		var col = node.linkedColumn(mcNode, "FILES");
+		var files_list = column.getEntry(col, 1, 1);
+		var reg = /CH\d+-v\d+/g;
+		var new_files_att = files_list.replace(reg, rigVersionName);
+		column.setEntry(col, 1, 1, new_files_att);
+		
+		//atuzaliza a uidata
+		var ui_att_raw = node.getTextAttr(mcNode, 1, "UI_DATA");
+		var new_att_data = ui_att_raw.replace(reg, rigVersionName);
+		node.setTextAttr(mcNode, "UI_DATA", 1, new_att_data);
+		
+		return files_list != new_files_att || ui_att_raw != new_att_data;
+	}
+	
+	
 	function getMainASSETFolder(prefixo, assetName, assetsList, assetfolder){//retorna o nome da pasta principal do asset na estrutura do BirdoASSETs
 		if(prefixo == "MI"){
 			Print("Tipo Misc... definindo main folder");
@@ -231,12 +278,58 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		}
 	}
 
-	function renameNodesAsset(assetInfoOriginal, projeto){//renomeia a selecao de nodes para o Asset
+	function renameNodesAsset(assetInfoOriginal, projeto, temp_folder){//renomeia a selecao de nodes para o Asset
 		scene.beginUndoRedoAccum("Save tpl.. change ASSSET");
 		var assetInfo = assetInfoOriginal;
 		//renomeia backdrop
 		if(!renameBackdrop(assetInfo)){
 			MessageBox.warning("Error setting the asset backdrop!",0,0);
+		}
+		
+		//atualiza os mc nodes
+		if(!assetInfo.mcs){
+			Print("No master controller nodes found... continuing");
+		} else {
+			Print("Analizing mc nodes files and data...");
+			var rigversioname = assetInfo.prefixo + "-" + assetInfo.version;
+	Print("TESTE rig version name: " + rigversioname);
+			var files_folder = scene.currentProjectPath() + "/scripts/" + rigversioname + "/";
+
+			//hide main checkbox mc
+			assetInfo.mcs.checkbox.forEach(function(cbNode){
+				node.setTextAttr(cbNode, "SHOW_CONTROLS_MODE", 1, "Normal");
+				node.showControls(cbNode, false);
+			});
+			//update mcs 
+			assetInfo.mcs.mastercontrollers.forEach(function(item){
+				node.showControls(item.node, false);
+				if(!updateMCAtt(item.node, rigversioname)){
+					Print("No changes in MC files...");
+					return;
+				}
+				//cria o folder com nome do rig em scripts
+				if(!BD1_DirExist(files_folder)){
+					if(!BD1_createDirectoryREDE(files_folder)){
+						Print("fail to create script MC rig folder : " + files_folder);
+						MessageBox.warning("Error creating script MC RIG folder!");
+						return false;
+					}
+				}
+				//copia os arquivos para o novo destino
+				item.tbStateFiles.forEach(function(file){
+					var newFilePath = files_folder + BD1_fileBasename(file);
+					BD1_CopyFile(file, newFilePath);
+				});
+			});
+			
+			//update main object with zip temp for mc files
+			assetInfo["mcs"]["temp_zip"] = BD1_ZipFile(files_folder, "mcFiles", temp_folder);
+			
+			//mostra de volta o Checkbox
+			assetInfo.mcs.checkbox.forEach(function(cb){
+				node.setTextAttr(cb, "SHOW_CONTROLS_MODE", 1, "Always");
+				node.showControls(cb, true);	
+			});
 		}
 		
 		var pegName = "STAGE_" + assetInfo.assetName + "-P";
@@ -260,7 +353,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			MessageBox.warning("error renaming assets nodes!",0,0);
 			scene.cancelUndoRedoAccum();
 			return false;
-		}
+		}		
 		scene.endUndoRedoAccum();
 		
 		//update do assetINfo com os novos nomes dos nodes!
