@@ -303,7 +303,7 @@ Copyright:  leobazao_@Birdo
 		try {
 			var copy = fileToCopy.copy(copyOfFile);
 			if(!copy){
-				Print("[COPYFILE][ERROR] Fail to copy the file: '" + copyPath + "'!");
+				Print("[COPYFILE][ERROR] Fail to copy the file: \n from: " + copyPath + "\n to: " + pastePath);
 			} else {
 	 			if(!BD1_CompareFileSize(copyPath, pastePath)){
 					Print("[COPYFILE][ERROR] Copy fail! Size is not the same of origin: " + pastePath);
