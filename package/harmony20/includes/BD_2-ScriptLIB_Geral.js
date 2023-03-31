@@ -472,6 +472,14 @@ function BD2_RelinkDrawingDeformation(initial_node, obj_name){
 	}
 }
 
+/*retorna se o node é do tipo Transformation Type
+@nodeP => path do group node pra checar
+*/
+function BD2_isTransformationNode(nodeP){
+	var transtypelist = ["Shake","ORTHOLOCK","Quake","PEG","QUADMAP","TransformLoop"];
+	return transtypelist.indexOf(node.type(nodeP)) != -1;
+}
+
 //################# MATRIX #############################//
 /*calcula a media de scale para lista de nodes
 @drawingsNodesList => lista de nodes paara calcular a media da matrix de SCALE
@@ -513,8 +521,9 @@ function BD2_getCameraFrameValue(atFrame){
 /*Roda o script dado na cena dada
 @tbFile => caminho do arquivo para rodar os scritp (com versao .xstage)
 @scriptName => nome do script para ser rodado
+@readOnly => true para nao modificar o aruqivo quando rodar o script
 */
-function BD2_CompileScript(tbFile, scriptName){
+function BD2_CompileScript(tbFile, scriptName, readOnly){
 	if(scriptName.indexOf("/") != -1){
 		var scriptPath = scriptName;
 	} else {
@@ -527,6 +536,9 @@ function BD2_CompileScript(tbFile, scriptName){
 	commandArguments.push("-batch");
 	commandArguments.push("-compile");
 	commandArguments.push(scriptPath);
+	if(readOnly){
+		commandArguments.push("-readonly");
+	}
 	try {
 		Process.execute(commandArguments);
 	} catch (err){
