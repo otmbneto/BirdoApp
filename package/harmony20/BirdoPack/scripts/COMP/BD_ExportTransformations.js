@@ -48,7 +48,7 @@ function BD_ExportTransformations()
 	}
 
 	var projectData = BD2_ProjectInfo();
-	var getPsdAnimDataPath = projectData.birdoApp + "package\harmony20\BirdoPack\scripts\COMP\BD_ExportTransformations.js";
+	var getPsdAnimDataPath = projectData.birdoApp + "package\\harmony20\\BirdoPack\\utils\\get_psd_anim_data.js";
 	var getPsdAnimDataObj = require(getPsdAnimDataPath);
 
 	if(hasCam && selection.numberOfNodesSelected() == 1)
