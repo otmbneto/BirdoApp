@@ -16,6 +16,11 @@ var styles = {
 }
 exports.styles = styles;
 
+/*
+	TODO: 
+		[ ] - fazer funcionar o createThumbnails pra funcao edit (forçar gerar sempre com o specialThumbs??);
+*/
+
 
 //#########FOLDERS#############//
 /*
@@ -34,6 +39,162 @@ function getTempFolder(){
 }
 exports.getTempFolder = getTempFolder;
 
+
+//#########CHECK_SELECTION##########
+/*
+checa se a selecao na timeline esta valida para salvar na lib
+*/
+function validateTimelineSelection(rig_group_node){
+	Print(">>VALIDATE TIMELINE SELECTION start...");
+	var firstFrame = Timeline.firstFrameSel;
+	var endFrame = firstFrame + Timeline.numFrameSel - 1;
+	var readNodes = BD2_ListNodesInGroup(rig_group_node, ["READ"], true);
+	var layersData = {
+		"counter_empty" : 0,
+		"counter_inv_names": 0,
+		"counter_deform": [],
+		"layers": {}
+	};
+	
+	var progressDlg = new QProgressDialog();
+	progressDlg.setStyleSheet(progressDlg_style);
+	progressDlg.modal = true;
+	progressDlg.setRange(0, (readNodes.length - 1));
+	progressDlg.setLabelText("Validating selection... ");
+	progressDlg.open();
+
+	for(var i=0; i<readNodes.length; i++){
+		progressDlg.setValue(i);
+		if(progressDlg.wasCanceled){
+			MessageBox.information("Peidou!");
+			progressDlg.close();
+			return false;
+		}
+		
+		var node_name = node.getName(readNodes[i]);
+		var coluna = node.linkedColumn(readNodes[i], "DRAWING.ELEMENT");
+		progressDlg.setLabelText("Validating selection...\n -layer: " + node_name);
+		
+		if(layersData.layers.hasOwnProperty(coluna)){//testa se ja tem info dessa camada no objeto
+			continue;
+		}
+		
+		var framesList = [];
+		var drawList = [];
+		var a = firstFrame;
+		while(a <= endFrame){
+			var draw = column.getEntry(coluna, 1, a);
+			if(draw == ""){//empty exposure check
+				Print(" -- layer with empty exposure found: " + node_name + " at frame: " + a);
+				layersData["counter_empty"]++;
+				framesList.push(a);
+			}else if(/\d/.test(draw[0]) && drawList.indexOf(draw) == -1){//invalid drawing name
+				Print(" -- layer with invalid drawing name found: " + node_name + " drawing name: " + draw);
+				layersData["counter_inv_names"]++;
+				drawList.push(draw);
+			}
+			if(!checkDeformationChain(readNodes[i], draw, a) && layersData["counter_deform"].indexOf(readNodes[i]) == -1){
+				layersData["counter_deform"].push(readNodes[i]);
+				Print("-- Node has invalid drawing in deformation chain: " + readNodes[i]);
+			}
+			a++;
+		}
+		if(framesList.length == 0 && drawList.length == 0){
+			continue;
+		}
+		layersData["layers"][coluna] = {
+			"name": node_name,
+			"empty_frames": framesList,
+			"invalid_drawings": drawList
+		};
+	}
+	progressDlg.hide();
+	
+	//check result
+	if(layersData.counter_empty == 0 && layersData.counter_inv_names == 0){
+		Print("Layers selection is valid!");
+		return true;
+	}
+	
+	if(layersData.counter_deform.length > 0){
+		MessageBox.warning("Erro detectado! Foram encontrado(s) " + layersData.counter_deform.length + " node(s) com drawings que nao estao no deformation chain: \n\n - " + 
+		layersData.counter_deform + "\n\nNao vai funcionar se for assim para lib! Use o drawing com o deform q já existe no rig!",0,0);
+		return false;
+	}
+	
+	var msg = "Foram encontrados inconsistencias na seleção na timeline:\n - Exposições vazias: " + 
+		layersData.counter_empty + ";\n - Drawings com nomes incorretos: " + layersData.counter_inv_names + 
+		";\n Deseja acertar essas inconsistências?";
+	if(!BD2_AskQuestion(msg)){
+		return false;
+	}
+	progressDlg.close();
+	
+	Print(layersData);
+	return fixLayers(layersData);
+	
+	//extra functions
+	function checkDeformationChain(nodeP, draw, frame){//checa se o node tem  drawing q nao está no deformation chain
+		if(draw == "Zzero"){
+			return true;
+		}
+		var up_node = node.srcNode(nodeP, 0);
+		var switchTranformation = up_node + "/Transformation-Switch";
+		if(node.isGroup(up_node) && node.getName(switchTranformation) != ""){
+			var def_drawings = node.getTextAttr(switchTranformation, frame, "TransformationNames").split(";");
+			return def_drawings.indexOf(draw) != -1 && draw != "Zzero";
+		}
+		return true;
+	}
+	
+	function fixEmptyLayer(layerColun, frame){//fix individual empty layer in frame
+		var zzero = "Zzero";//nome do Zzero
+		return column.setEntry(layerColun, 1, frame, zzero);		
+	}
+	
+	function fixInvalidNameLayer(layerName, layerColun, draw){//fix individual invalid name layers in frame
+		for(var i=0; i<10; i++){
+			var new_name = "x_" + Math.floor(Math.random() * 10000);
+			if(column.renameDrawing(layerColun, draw, new_name)){
+				Print("A camada " + layerName + " teve o desenho : " + draw + " renomeado para : " + new_name);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	function fixLayers(layersData){//fix all layers with erros
+		Print(">>START FIX LAYERS...");
+		var layer_counter = layersData.counter_empty + layersData.counter_inv_names;
+		for(layer in layersData.layers){
+			var layerName = layersData.layers[layer].name;
+			Print(" -- fix layer: " + layerName);
+
+			for(var i=0; i<layersData.layers[layer].empty_frames.length; i++){
+				var fr = layersData.layers[layer].empty_frames[i];
+				if(!fixEmptyLayer(layer, fr)){
+					var mensagem = "ERROR acertando exposicao vazia da camada: " + layer + " in frame: "+ fr;
+					MessageBox.warning(mensagem,0,0);
+					Print(mensagem);
+					return false;
+				}
+				Print(" - changed empty layer to Zzero!");
+			}
+			for(var i=0; i<layersData.layers[layer].invalid_drawings.length; i++){
+				var drawing = layersData.layers[layer].invalid_drawings[i];
+				if(!fixInvalidNameLayer(layerName, layer, drawing)){
+					var mensagem = "ERROR renomeando o drawing: " + drawing + " da camada: " + layerName;
+					MessageBox.warning(mensagem,0,0);
+					Print(mensagem);
+					return false;
+				}
+			}
+		}
+		MessageBox.information("Erros corrigidos:\n - " + layer_counter + " camada(s) corrigidas.");
+		return true;
+	}
+}
+exports.validateTimelineSelection = validateTimelineSelection;
 
 
 //#########STATUS#############//
@@ -232,7 +393,7 @@ function edit_item(self, lib_path, item_data, user_data){
 	self.ui.progressBar.format = "generating thumbnails...";
 	//run script to generate thumbnails
 	if(!BD2_createThumbnails(temp_tpl)){
-		MessageBox.warning("Fail to generate Thumbnails for the saves temp tpl!",0,0);
+		MessageBox.warning("Fail to generate Thumbnails editing the tpl!",0,0);
 		Print("ERROR! fail to create thumbs!");
 		return false;
 	}
@@ -595,7 +756,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	self.updateProgressBar();
 	self.ui.progressBar.format = "generating thumbnails...";
 	//run script to generate thumbnails
-	if(!BD2_createThumbnails(temp_tpl)){
+	if(!createThumbnails(temp_tpl, projectDATA, rig_data["needs_special_thumbs"])){
 		MessageBox.warning("Fail to generate Thumbnails for the saves temp tpl!",0,0);
 		Print("ERROR! fail to create thumbs!");
 		return false;
@@ -689,6 +850,17 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	return true;
 	
 	///////////////////////helper functions/////////////////////
+	function createThumbnails(tplPath, projData, specialThumbs){//gera os thumbnails
+		if(specialThumbs){
+			Print("Special thumbnails render needed...");
+			var tplFullStage = tplPath + "/scene.xstage";
+			var batScriptRenderThumbs = projData.birdoApp + "batch/BAT_ExportThumbsEspecial.js";
+			return BD2_CompileScript(tplFullStage, batScriptRenderThumbs, true);	
+		}	
+		
+		return BD2_createThumbnails(temp_tpl);
+	}
+	
 	function createItemFolderScheeme(lib_version_path, item_name){//create item folder scheeme
 		var folders = ["DATA", "THUMBS"];
 		var item_path = lib_version_path + item_name + "/";
@@ -734,13 +906,16 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	}
 
 	function save_template(tpl_path, tpl_name){
-		copyPaste.useCreateTemplateSpecial(false, false, false, false);//avoid scanning for additional files.
+		copyPaste.useCreateTemplateSpecial(false, false, true, false);//avoid scanning for additional files.
 		var tpl = copyPaste.createTemplateFromSelection(tpl_name, tpl_path);
 		if(!tpl){
 			MessageBox.warning("ERROR saving the temporary tpl!",0,0);
 			return false;
 		}
-		return tpl_path + tpl;
+		var tplFullpath = tpl_path + tpl;
+		//limpa o folder de scripts
+		BD1_RemoveDirs(tplFullpath + "/scripts");
+		return tplFullpath;
 	}
 	
 	function create_rig_version(lib_path, rig_data){//if is first item, create rig version json
@@ -916,10 +1091,12 @@ function apply_selected_template(self, user_data, lib_path, item_list, rig_group
 		copyPaste.setPasteSpecialDrawingFileMode("ONLY_CREATE_IF_DOES_NOT_EXIST");
 		copyPaste.setPasteSpecialDrawingAutomaticExtendExposure(use_drawings, use_drawings);
 		copyPaste.setPasteSpecialMatchNodeName(true);
+		copyPaste.setPasteSpecialReplaceExpressionColumns(false);
+		copyPaste.setPasteSpecialCopyScanFiles(false);
 		var backupPasteLocalValue = copyPaste.getCurrentPasteOptions().fullTransfer;
 		
 		copyPaste.setPasteSpecialFullTransfer(false);
-		copyPaste.useCreateTemplateSpecial(false, false, false, false);  // avoid scanning folders for additional files.
+		copyPaste.useCreateTemplateSpecial(false, false, true, false);  // avoid scanning folders for additional files.
 
 		// make sure that we do not paste any palettes (as requested).
 		copyPaste.setPasteSpecialColorPaletteOption( "REUSE_PALETTES" );
@@ -927,12 +1104,14 @@ function apply_selected_template(self, user_data, lib_path, item_list, rig_group
 
 		var pasteOptions = copyPaste.getCurrentPasteOptions();
 		pasteOptions.startDeleteFrame = insertFrame;
-		pasteOptions.actionTemplateMode = false;
+		pasteOptions.actionTemplateMode = true;
 		//pasteOptions.writeMode = paste_key ? "OVERWRITE" : "DO_NOTHING";
 
 		var dragObject = copyPaste.copyFromTemplate(template, duration.start, duration.numFrames, copyPaste.getCurrentCreateOptions());
+
+		copyPaste.usePasteSpecial(true);
 		var apply = copyPaste.paste(dragObject, [rig_group], insertFrame, duration.numFrames, pasteOptions);
-		
+
 		//backup fullTransfer
 		copyPaste.setPasteSpecialFullTransfer(backupPasteLocalValue);
 		return apply;

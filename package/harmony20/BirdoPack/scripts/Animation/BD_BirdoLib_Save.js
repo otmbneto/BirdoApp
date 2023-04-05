@@ -18,7 +18,6 @@ Copyright:   @leobazao
 */
 //TODO: 
 //    mudar messagebox para portugues
-//    tirar os sardinha do codigo
 //    fazer a funcao para editar as main tags (fazer um lock somente para este arquivo?) - DONE
 //    conferir se a funcao de add tab nova de tag e tags, esta verificando se o item criado ja existe - DONE
 
@@ -66,12 +65,23 @@ function BD_BirdoLib_Save(){
 		return;
 	}
 	
-	var tags_data = utils.get_main_tag_list(library_root);
+	if(!utils.validateTimelineSelection(sel_node)){
+		Print("Invalid selection... canceling!");
+		return;
+	}
 	
+	var tags_data = utils.get_main_tag_list(library_root);
 	if(!tags_data){
 		Print("Fail to get tags information!");
 		return;
 	}
+	
+	//save scene before continuing
+	if(!BD2_AskQuestion("A cena precisa ser salva antes de continuar. Deseja salvar?")){
+		Print("canceled..");
+		return;
+	}
+	scene.saveAll();
 	
 	//ui file
 	var uipath = projectDATA.paths.birdoPackage + "ui/BD_BirdoLibSave.ui";
@@ -115,6 +125,9 @@ function BD_BirdoLib_Save(){
 		rig_data["rig_match"] = null;
 		rig_data["is_full_rig"] = check_is_full_rig(sel_node);
 		
+		//indica se o nodegroup tem mais de uma saida e necessita criacao especial dos thumbs pelo script
+		rig_data["needs_special_thumbs"] = hasMultipleOutputs(sel_node);
+		
 		//rig node list (relative path);
 		var selected_rig_node_list = BD2_ListNodesInGroup(sel_node, "", false).filter(function(item){
 				var arr = item.split("/");
@@ -152,6 +165,17 @@ function BD_BirdoLib_Save(){
 		}
 		function get_rig_name(rig_group){//return Rig Lib Name from rig group (project prefix.Name);
 			return node.getName(rig_group).split(".")[1].split("-")[0];
+		}
+		function hasMultipleOutputs(groupNode){//checa se o grupo tem mais de uma saida de imagem 
+			var outPorts = node.numberOfOutputPorts(groupNode);
+			var outputModule = node.getGroupOutputModule(sel, "", 0,0,0);
+			var outPutCounts = 0;
+			for(var i=0; i<outPorts; i++){
+				if(!BD2_isTransformationNode(node.srcNode(outputModule, i))){
+					outPutCounts++;
+				}
+			}
+			return outPutCounts > 1;
 		}
 	}
 }
