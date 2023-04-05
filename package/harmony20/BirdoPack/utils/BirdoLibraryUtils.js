@@ -42,7 +42,10 @@ exports.getTempFolder = getTempFolder;
 
 //#########CHECK_SELECTION##########
 /*
-checa se a selecao na timeline esta valida para salvar na lib
+	Script para validar a selecao na timeline do rig antes de ser salvo checando:
+	 - se tem exposição vazia;
+	 - se tem drawings com numero no nome (em vez de A1, X1..);
+	 - se tem drawings duplicados com deformation chain 
 */
 function validateTimelineSelection(rig_group_node){
 	Print(">>VALIDATE TIMELINE SELECTION start...");
