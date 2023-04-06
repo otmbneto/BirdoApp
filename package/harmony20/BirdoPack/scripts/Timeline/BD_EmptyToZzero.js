@@ -18,17 +18,17 @@ Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
 function BD_EmptyToZzero(){
-	scene.beginUndoRedoAccum("Empty To Zzero");
 
 	if(selection.selectedNode(0) == ""){
 		MessageBox.information("Selecione a MASTER do RIG minimizada na Timeline!!!");
 		return;
 	}
+	
+	scene.beginUndoRedoAccum("Empty To Zzero");
 
 	var firstFrame = Timeline.firstFrameSel;
 	var endFrame = firstFrame + Timeline.numFrameSel - 1;
 	var numSelLayers = Timeline.numLayerSel;
-	var drawingName = "Zzero";//nome do Zzero
 	var counter = 0;
 	
 	var progressDlg = new QProgressDialog();
@@ -38,47 +38,45 @@ function BD_EmptyToZzero(){
 	progressDlg.setRange(0, (numSelLayers - 1));
 
 	progressDlg.setLabelText("Analizando... ");
-
 	for(var i=0; i<numSelLayers; i++){
-		
 		progressDlg.setValue(i);
-		
 		if(progressDlg.wasCanceled){
 			MessageBox.information("Cancelado!");
+			scene.cancelUndoRedoAccum();
 			return;
 		}
 	
-		if(Timeline.selIsColumn(i)){
-			var nomeC = Timeline.selToColumn(i);
+		if(!Timeline.selIsColumn(i)){
+			continue;
 		}
-
+		var nomeC = Timeline.selToColumn(i);
+		
+		if(column.type(nomeC) != "DRAWING"){
+			continue;				
+		}
+		
+		var colName = column.getDisplayName(nomeC);
 		var a = firstFrame;
-
 		while(a<=endFrame){
-			
-			var tipo = column.type(nomeC);
+
 			var draw = column.getEntry(nomeC, 1, a);
-			var colName = column.getDisplayName(nomeC);
-			
-			if(tipo == "DRAWING" && draw == ""){
-				Print("[EMPTYTOZZERO]" + colName + " virou " + drawingName + " no frame: " + a);
-				column.setEntry(nomeC, 1, a, drawingName);
+			if(draw == ""){
+				BD2_addZzero(nomeC, a)
 				counter++;
 			}
 			
 			progressDlg.setLabelText("Analizando...\n" + colName);
 			a++;
-			
 		}
 	}
 	
-	progressDlg.hide();
-	
+	progressDlg.close();	
 	scene.endUndoRedoAccum();
 
 	if(counter != 0){
-		MessageBox.information("Pronto! " + counter + " camadas foram corrigidas para '" + drawingName + "'!\nVeja o Log para mais detalhes!");
-		Print("[EMPTYTOZZERO] Pronto! " + counter + " camadas foram corrigidas para '" + drawingName + "'!\nVeja o Log para mais detalhes!");
+		var msg = "Pronto! " + counter + " camadas foram trocadas para 'Zzero'!\nVeja o Log para mais detalhes!";
+		MessageBox.information(msg);
+		Print(msg);
 	} else {
 		MessageBox.information("Nenhuma camada precisou ser mudada!");
 		Print("[EMPTYTOZZERO] Nenhuma camada precisou ser mudada!");

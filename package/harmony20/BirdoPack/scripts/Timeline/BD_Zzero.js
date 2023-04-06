@@ -18,49 +18,35 @@ include("BD_2-ScriptLIB_Geral.js");
 
 
 function BD_Zzero(){
-	scene.beginUndoRedoAccum("Apply Zzero");
 
 	if(selection.selectedNode(0) == ""){
 		MessageBox.warning("Selecione um drawing!!!",0,0);
 		return;
 	}
+	
+	scene.beginUndoRedoAccum("Apply Zzero");
 
 	var firstFrame = Timeline.firstFrameSel;
 	var endFrame = firstFrame + Timeline.numFrameSel - 1;
 	var numSelLayers = Timeline.numLayerSel;
-	var drawingName = "Zzero";
 
 	for(var i=0; i<numSelLayers; i++){
 		
-		var a = firstFrame;
-		
-		if(Timeline.selIsColumn(i)){
-			var nomeC = Timeline.selToColumn(i);
+		if(!Timeline.selIsColumn(i)){
+			continue;
 		}
 		
+		var nomeC = Timeline.selToColumn(i);		
 		if(column.type(nomeC) != "DRAWING"){
 			continue;
 		}
-
-		fixeCaseSensitivity(nomeC);
-
+		
+		var a = firstFrame;
 		while(a<=endFrame){
-			column.setEntry(nomeC, 1, a, drawingName);
+			BD2_addZzero(nomeC, a)
 			a++;
 		}
 	}
 	scene.endUndoRedoAccum();
 
-	////////FUNCOES EXTRAS/////////////////////////
-	function fixeCaseSensitivity(coluna){
-		var timmings = column.getDrawingTimings(coluna);
-		for(var i=0; i<timmings.length; i++){
-			if(timmings[i].toString().toLowerCase() == drawingName.toLowerCase()){
-				if(timmings[i] != drawingName){
-					column.renameDrawing(coluna, timmings[i], drawingName);
-					Print("Conflito Case Sensitivity na camada: " + column.getDisplayName(coluna) + " ==> atualizado para: " + drawingName);
-				}
-			}	
-		}
-	}
 }

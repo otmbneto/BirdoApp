@@ -755,6 +755,52 @@ function BD2_getPalettes(useProgressBar){
 
 
 /*
+add exposure 'Zzero' to drawing column
+@coluna > draing column to add exposure 'Zzero'
+@frame > number of frame to add exposure 'Zzero'
+*/
+function BD2_addZzero(coluna, frame){
+	var zzero = "Zzero";//nome do Zzero
+	fixeCaseSensitivity(coluna);
+	return column.setEntry(coluna, 1, frame, zzero);
+	//extra function
+	function fixeCaseSensitivity(coluna){//se tiver conflito de case sensitivity, renomeia o drawing antes de trocar
+		var timmings = column.getDrawingTimings(coluna);
+		for(var i=0; i<timmings.length; i++){
+			if(timmings[i].toString().toLowerCase() == zzero.toLowerCase()){
+				if(timmings[i] != zzero){
+					column.renameDrawing(coluna, timmings[i], zzero);
+					Print("Conflito Case Sensitivity na camada: " + column.getDisplayName(coluna) + " ==> atualizado para: " + zzero);
+				}
+			}	
+		}
+	}
+}
+/*
+renomeia a camada com o prefixo para o proximo numero disponivel do drawing
+@current_drawing > nome do drawing para ser mudado
+@prefixo > prefixo para o novo nome dos drawings
+@coluna > nome da coluna do drawing
+*/
+function BD2_RenameDrawingWithNumber(coluna, current_drawing, prefixo){
+	var number = 1;
+	var timmings = column.getDrawingTimings(coluna);
+	var new_name = prefixo + number;
+
+	while(true){
+		if(timmings.indexOf(new_name) == -1){
+			column.renameDrawing(coluna, current_drawing, new_name);
+			Print("[RENAME_DRAWING_WITH_NUMBER] drawing was renamed from : " + current_drawing + " to " + new_name + " in  layer :" +  column.getDisplayName(coluna));
+			return new_name;
+		}
+		number++;
+		new_name = prefixo + number;
+	}
+	Print("[RENAME_DRAWING_WITH_NUMBER] Something went wrong.. number limit !");
+	return false;
+}
+
+/*
 renomeia todos os drawings que tem numero como nome para um prefixo com um numero unico (usado em uma selecao na timeline
 @prefixo > prefixo para o novo nome dos drawings
 @useRandom > boolean que determina se sera usado numeros randomicos para o novo nome
