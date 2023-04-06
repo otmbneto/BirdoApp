@@ -17,7 +17,6 @@ Copyright:   leobazao_@Birdo
 */
 
 function BD_RenameNumbersToX(){
-	scene.beginUndoRedoAccum("Rename Numbers Drawings to 'X'");
 	var prefix = "X";//mudar o prefixo aqui caso queria salvar algum outro tipo de nome para o drawing
 
 	if(selection.selectedNode(0) == ""){
@@ -31,6 +30,8 @@ function BD_RenameNumbersToX(){
 		MessageLog.trace("canceled...");
 		return;
 	}
+	
+	scene.beginUndoRedoAccum("Rename Numbers Drawings to 'X'");
 
 	var counter = BD2_RenameDrawingsWithNumber(prefix, random);
 	
