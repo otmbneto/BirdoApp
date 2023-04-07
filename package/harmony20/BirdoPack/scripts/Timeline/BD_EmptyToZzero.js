@@ -50,7 +50,6 @@ function BD_EmptyToZzero(){
 			continue;
 		}
 		var nomeC = Timeline.selToColumn(i);
-		
 		if(column.type(nomeC) != "DRAWING"){
 			continue;				
 		}
@@ -61,7 +60,9 @@ function BD_EmptyToZzero(){
 
 			var draw = column.getEntry(nomeC, 1, a);
 			if(draw == ""){
-				BD2_addZzero(nomeC, a)
+				if(BD2_addZzero(nomeC, a)){
+					Print(" -- camada " + colName + " alterada de vazio para Zzero no frame: " + a); 	
+				}
 				counter++;
 			}
 			

@@ -43,7 +43,11 @@ function BD_Zzero(){
 		
 		var a = firstFrame;
 		while(a<=endFrame){
-			BD2_addZzero(nomeC, a)
+			if(BD2_addZzero(nomeC, a)){
+				Print("-- Changed in frame: " + a);
+			} else {
+				Print("-- ERROR changing to zzero at frame: " + a);	
+			}
 			a++;
 		}
 	}

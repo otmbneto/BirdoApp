@@ -19,7 +19,6 @@ include("BD_2-ScriptLIB_Geral.js");
 
 
 function BD_3DPathToSeparate(){
-	scene.beginUndoRedoAccum("3DPath To Separate");
 
 	var n = selection.numberOfNodesSelected();
 	if(n == 0){
@@ -34,6 +33,8 @@ function BD_3DPathToSeparate(){
 		MessageBox.information("Nenhuma PEG ou DRAWING na selecao!");
 		return;
 	}
+	
+	scene.beginUndoRedoAccum("3DPath To Separate");
 	
 	Print(nodeList);
 	
