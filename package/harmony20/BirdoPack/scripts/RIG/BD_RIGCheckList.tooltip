@@ -1,7 +1,8 @@
-Name Drawings For Pose
-Use este Script para renomear todos os drawings 
-da pose selecionada na Timeline.
-
-Selecione a MASTER na Timeline, e escolha a pose 
-referente na caixa de Dialogo.
+Rig CHECKLIST
+Este Script serve para rodar um checklist de ações na timeline 
+com a seleção do TURN do personagem: 
+ - muda desenhos vazios para Zzero;
+ - Cria keyframes de desenho para todas poses;
+ - Cria keysframes de transformação para todas poses;
+ - Renomeia os drawings fora do padrao para a pose;
 (Feito para Riggers)
