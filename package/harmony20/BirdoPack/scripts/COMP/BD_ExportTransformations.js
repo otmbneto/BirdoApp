@@ -7,7 +7,7 @@
 #    e-mail: oi@camelo.de           ||      ''             ||                 #
 #                                   ||''|,  ||  '||''| .|''||  .|''|,         #
 #    created: 08/02/2023            ||  ||  ||   ||    ||  ||  ||  ||         #
-#    modified: 09/02/2023          .||..|' .||. .||.   `|..||. `|..|'         #
+#    modified: 11/04/2023          .||..|' .||. .||.   `|..||. `|..|'         #
 #                                                                             #
  ###########################################################################*/
 
@@ -48,7 +48,7 @@ function BD_ExportTransformations()
 	}
 
 	var projectData = BD2_ProjectInfo();
-	var getPsdAnimDataPath = projectData.birdoApp + "package\\harmony20\\BirdoPack\\utils\\get_psd_anim_data.js";
+	var getPsdAnimDataPath = projectData.birdoApp + "package/harmony20/BirdoPack/utils/get_psd_anim_data.js";
 	var getPsdAnimDataObj = require(getPsdAnimDataPath);
 
 	if(hasCam && selection.numberOfNodesSelected() == 1)
