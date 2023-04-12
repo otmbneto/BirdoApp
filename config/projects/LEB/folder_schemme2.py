@@ -91,7 +91,7 @@ class FolderManager(object):
         step_folder = self.step[step]["folder_name"]
         return os.path.join(self.get_episodes(),
                             ep_no_prefix,
-                            "05_CENAS",
+                            "03_CENAS",
                             step_folder).replace("\\", "/")
 
     def get_scenes(self,ep,step):
@@ -125,7 +125,7 @@ class FolderManager(object):
         step_folder = self.step[step]["folder_name"]
         return os.path.join(self.get_episodes(),
                             ep,
-                            "05_CENAS",
+                            "03_CENAS",
                             step_folder,
                             scene_name).replace("\\", "/")
 
@@ -199,7 +199,7 @@ class FolderManager(object):
         ep_no_prefix = ep.replace(self.prefix + "_", "")
         return os.path.join(self.get_episodes(),
                             ep_no_prefix,
-                            "05_CENAS",
+                            "03_CENAS",
                             "00_RENDER").replace("\\", "/")
 
     def get_server_render_path(self,ep):

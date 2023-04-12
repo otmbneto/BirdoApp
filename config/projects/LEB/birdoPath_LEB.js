@@ -194,7 +194,7 @@ function BirdoProject(entity){
 		var sceneName = this.entity["name"];
 		var publish = null;
 		
-		publish = this.paths["episodes"] + ep + "/05_CENAS/" + this.get_scene_step_folder(step) + "/" + this.entity["name"];
+		publish = this.paths["episodes"] + ep + "/03_CENAS/" + this.get_scene_step_folder(step) + "/" + this.entity["name"];
 		return publish;
 	}
 	
@@ -252,7 +252,7 @@ function BirdoProject(entity){
 			MessageLog.trace("[GETRENDERPATH] Step nao encontrado para este nome de step!");
 			return false;
 		}
-		return tb_root + this.paths["episodes"] + ep + "/05_CENAS/_RENDER/" + step_folder + "/";
+		return tb_root + this.paths["episodes"] + ep + "/03_CENAS/_RENDER/" + step_folder + "/";
 	}
 	
 	this.getRenderAnimaticLocalFolder = function(){//retorna o folder local dos renders do animatic
