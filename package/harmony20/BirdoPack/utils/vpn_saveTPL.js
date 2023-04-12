@@ -101,8 +101,12 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	self.ui.progressBar.format = "...renaming assets...";
 	if(!assetInfo.isAnim){
 		updateColorNames();//change color names to UPPDERCASE
-		var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
-
+		try{
+			var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
+		} catch(e){
+			Print(e);
+			return false;
+		}
 		if(!updatedAssetInfo){
 			MessageBox.warning("Error updating node names!",0,0);
 			return false;
