@@ -252,7 +252,7 @@ function BirdoProject(entity){
 			MessageLog.trace("[GETRENDERPATH] Step nao encontrado para este nome de step!");
 			return false;
 		}
-		return tb_root + this.paths["episodes"] + ep + "/03_CENAS/_RENDER/" + step_folder + "/";
+		return tb_root + this.paths["episodes"] + ep + "/03_CENAS/00_RENDER/" + step_folder + "/";
 	}
 	
 	this.getRenderAnimaticLocalFolder = function(){//retorna o folder local dos renders do animatic
