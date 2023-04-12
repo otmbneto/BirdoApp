@@ -1,8 +1,8 @@
 Rig CHECKLIST
-Este Script serve para rodar um checklist de ações na timeline 
-com a seleção do TURN do personagem: 
+Este Script serve para rodar um checklist de acoes na timeline 
+com a selecao do TURN do personagem: 
  - muda desenhos vazios para Zzero;
  - Cria keyframes de desenho para todas poses;
- - Cria keysframes de transformação para todas poses;
+ - Cria keysframes de transformacao para todas poses;
  - Renomeia os drawings fora do padrao para a pose;
 (Feito para Riggers)

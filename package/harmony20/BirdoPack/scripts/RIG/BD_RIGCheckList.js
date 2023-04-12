@@ -34,6 +34,7 @@ function BD_RIGCheckList(){
 	var firstFrame = Timeline.firstFrameSel;
 	var endFrame = firstFrame + Timeline.numFrameSel - 1;
 	var numSelLayers = Timeline.numLayerSel;
+	var fullNode_list = [];
 	
 	if(firstFrame != 1){
 		if(!BD2_AskQuestion("Estranho, a seleção na Timeline não está começando no primeiro frame. Deseja continuar?")){
@@ -84,6 +85,12 @@ function BD_RIGCheckList(){
 		
 		//Verifica se precisa continuar
 		if(node_type == "READ"){
+			//check FULL node
+			if(node.getName(node_path).indexOf("FULL") != -1 && fullNode_list.indexOf(node_path) == -1 && options.check_full){
+				Print("Full node found>> " + node_path);
+				fullNode_list.push(node_path);
+				check_full_node(node_path);
+			}
 			//se node do drawing nao permitir animaçao, somente continua se for coluna de DRAWING
 			if(!node.getAttr(node_path, 1, "CAN_ANIMATE").boolValue() && col_type != "DRAWING"){
 				continue;					
@@ -101,6 +108,9 @@ function BD_RIGCheckList(){
 
 	}
 	
+	Print("FULL nodes found: ");
+	Print(fullNode_list);
+	
 	progressDlg.close();
 	scene.endUndoRedoAccum();
 	
@@ -108,10 +118,22 @@ function BD_RIGCheckList(){
 	" camadas foram alteradas:\n - to Zzeo: " + counter_empty +
 	";\n - renamed: " + counter_rename + 
 	";\n - Created Drawings keyframes: " + options.d_key + 
-	";\n - Created Transformation keyframes: " + options.c_key + ";");
+	";\n - Created Transformation keyframes: " + options.c_key +
+	";\n - Full nodes Checked: " + fullNode_list.length + ";");
 	Print("<<End RIG CHECKLIST>>");
 	
 	//HELPER FUNCTIONS
+	function check_full_node(full_node){//acerta pivot do full node para ficar na peg e seta pivot da peg pra 0,0
+		var fullPeg = node.srcNode(full_node, 0);
+		Print(node.setTextAttr(full_node, "USE_DRAWING_PIVOT", 1, "Apply Embedded Pivot on Parent Peg"));
+		if(node.type(fullPeg) != "PEG"){
+			Print("--no FULL peg found for node full--");
+			return;
+		}
+		node.setTextAttr(fullPeg, "PIVOT.X", 1, 0);
+		node.setTextAttr(fullPeg, "PIVOT.Y", 1, 0);
+	}
+	
 	function modify_drawing(coluna, fr, prefixo){//modifica camada de desenho (se tiver vazia muda pra zzero e se for numero renomeia)
 		var current_drawing = column.getEntry(coluna, 1, fr);
 		var modifyed = false;
@@ -191,6 +213,11 @@ function get_options(){//interface simples para pegar options
 	rename_rig.text = "Rename RIG poses;";
 	rename_rig.checked = true;
 	group.add(rename_rig);
+	
+	var check_full = new CheckBox();
+	check_full.text = "Check FULL;";
+	check_full.checked = true;
+	group.add(check_full);
 
 	d.addSpace(5);
 	d.add(group);
@@ -207,7 +234,8 @@ function get_options(){//interface simples para pegar options
 		d_key: drawing_key.checked,
 		c_key: colun_key.checked,
 		zzero: empty_zzero.checked,
-		rename_poses: rename_rig.checked
+		rename_poses: rename_rig.checked,
+		check_full: check_full
 	}
 	
 	//test options
