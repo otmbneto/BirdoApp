@@ -66,7 +66,7 @@ class FolderManager:
         return os.path.join(self.paths["episodes"],
                             ep_no_prefix,
                             "05_CENAS",
-                            "00_RENDER").replace("\\", "/")
+                            "_RENDER").replace("\\", "/")
 
     def get_animatic_folder(self):
         """retorna o nome do folder do animatic"""
@@ -114,7 +114,7 @@ class FolderManager:
                                    self.paths["episodes"],
                                    ep_no_prefix,
                                    "05_CENAS",
-                                   "00_RENDER")
+                                   "_RENDER")
         render_subs = self.paths["step"]["RENDER"]
         for folder in render_subs:
             sub_folder = os.path.join(render_folder, folder)
