@@ -16,8 +16,6 @@ Copyright:   leobazao_@Birdo
 */
 function BD_ExposeAll(){
 
-	scene.beginUndoRedoAccum("Expose Drawings To Timeline");
-
 	var colum = Timeline.selToColumn(0);
 	var type = column.type(colum);
 		
@@ -25,6 +23,8 @@ function BD_ExposeAll(){
 		MessageBox.information("Selecione um Drawing!!!");
 		return;
 	}
+	
+	scene.beginUndoRedoAccum("Expose Drawings To Timeline");
 
 	var curFrame = frame.current();
 	var timmings = column.getDrawingTimings(colum);
@@ -35,6 +35,7 @@ function BD_ExposeAll(){
 	} else {
 		if(currExposure == ""){
 			MessageBox.information("Mude a exposicao do drawing neste frame!");
+			scene.cancelUndoRedoAccum();
 			return;
 		}
 		var drawingList =  listDrawings(currExposure[0]);

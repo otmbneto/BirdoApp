@@ -31,7 +31,7 @@ function BD_FindDrawingWithColour(){
 	var nodCores = [];
 	var curr_color_id = PaletteManager.getCurrentColorId();
 	var curr_color_name = PaletteManager.getCurrentColorName();
-	
+
 	if(!curr_color_id){
 		MessageBox.warning("No color selected!");
 		return;
