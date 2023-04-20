@@ -11,6 +11,7 @@ from PySide import QtCore, QtGui, QtUiTools
 import os
 import sys
 import subprocess
+import re
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
@@ -151,9 +152,6 @@ class BirdoApp(QtGui.QMainWindow):
                 permissions = j["user_types"]
 
         user_data = self.project_data["user_data"]
-        print "\n"
-        print user_data
-        print "\n"
         if "current_user" in user_data.keys():
             username = user_data["current_user"]
         else:
@@ -281,8 +279,12 @@ class BirdoApp(QtGui.QMainWindow):
         #ADD LAYOUT LOGO
         self.ui.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
 
+        if "current_user" in self.project_data["user_data"].keys() and not self.isDiscordName(self.project_data["user_data"]["current_user"]):
+            MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
+            self.getDiscordUserName(self.project_data)
+            self.login_page()
         # CHECK IF CONFIG IS READY
-        if not self.project_data["ready"]:
+        elif not self.project_data["ready"]:
             # OPEN LOGIN PAGE
             self.login_page()
         elif not main_update(self.project_data, self):
@@ -292,6 +294,21 @@ class BirdoApp(QtGui.QMainWindow):
             ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
             #self.close()
             self.initPluginPage()
+
+    def isDiscordName(self,current_name):
+
+        return re.match(".*#\d{4}$",current_name) is not None
+
+    def getDiscordUserName(self,project_data):
+
+        user_data = self.getUserData()
+        self.ui.username_line.setText("")
+        self.ui.localFolder_line.setText(user_data[user_data["current_user"]][project_data["prefix"]]["local_folder"])
+        index = self.ui.combo_funcao.findText(user_data[user_data["current_user"]][project_data["prefix"]]["user_type"])
+        if index >= 0:
+            self.ui.combo_funcao.setCurrentIndex(index)
+
+        return
 
     #Mostra a pagina pra preencher os dados
     def login_page(self):
