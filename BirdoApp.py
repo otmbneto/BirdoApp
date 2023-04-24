@@ -4,7 +4,7 @@ from app.utils.nextcloud_server import NextcloudServer
 from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
-from app.utils.birdo_json import write_json_file
+from app.utils.birdo_json import write_json_file,write_json_file_from_string
 from app.utils.check_updates import main_update
 from app.utils.system import SystemFolders, get_short_path_name
 from PySide import QtCore, QtGui, QtUiTools
@@ -448,7 +448,8 @@ class BirdoApp(QtGui.QMainWindow):
             first_login = False
 
         # SETS THE CURRENT USER TO LOGIN
-        user_data["current_user"] = str(self.ui.username_line.text())
+        user_data["current_user"] = self.ui.username_line.text()
+        print user_data["current_user"]
         # UPDATES USERDATA
         new_user = self.createNewUser()
         if not user_data["current_user"] in user_data.keys():
@@ -461,7 +462,8 @@ class BirdoApp(QtGui.QMainWindow):
         if not os.path.exists(local_user_data_folder):
             os.makedirs(local_user_data_folder)
 
-        if write_json_file(temp_user_json, user_data):
+        #if write_json_file(temp_user_json, user_data,op_code="wb"):
+        if write_json_file_from_string(temp_user_json,user_data,op_code="wb",encoding="utf-8",ensure_ascii=False):
             self.setLabelAttributes(self.ui.loading_label, "Login done!", "color: rgb(37, 255, 201);")
             print "login data saved!"
         else:
