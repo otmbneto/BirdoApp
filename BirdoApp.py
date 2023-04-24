@@ -93,6 +93,8 @@ class BirdoApp(QtGui.QMainWindow):
         # LINEEDIT CONNECTIONS
         self.ui.server_login_line.textChanged.connect(self.change_login)
         self.ui.server_pw_line.textChanged.connect(self.change_login)
+
+        self.ui.username_line.textChanged.connect(self.update_login_page)
         self.ui.localFolder_line.textChanged.connect(self.update_login_page)
         self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
