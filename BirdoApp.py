@@ -209,9 +209,9 @@ class BirdoApp(QtGui.QMainWindow):
 
     def showEvent(self, event):
         # do stuff here
+        event.accept()
         self.on_init()
         self.initProjectPage()
-        event.accept()
 
     def loadPage(self, page):
         ui_file = QtCore.QFile(page)
@@ -364,7 +364,6 @@ class BirdoApp(QtGui.QMainWindow):
         if "current_user" in user_data.keys():
             self.ui.username_line.setText(user_data["current_user"])
 
-
     def check_username(self):
 
         username = self.ui.username_line.text().replace(" #","#")
@@ -376,6 +375,7 @@ class BirdoApp(QtGui.QMainWindow):
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
     def update_login_page(self):
 
+        self.check_username()
         login_status_geral = True
         msg = "Login test ok!"
         if self.isCloudProject and self.ui.status_label.text() != "LOGIN OK":
