@@ -5,7 +5,7 @@ from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
 from app.utils.birdo_json import write_json_file,write_json_file_from_string
-from app.utils.check_updates import main_update
+from app.utils.check_updates import main_update,first_update
 from app.utils.system import SystemFolders, get_short_path_name
 from PySide import QtCore, QtGui, QtUiTools
 import os
@@ -77,6 +77,7 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE APP VERSION
         self.ui.label_version.setText(subprocess.check_output(["git", "log", "--pretty=%h", "-1"])[:-1])
         self.setupConnections()
+        self.on_init()
 
     def setupConnections(self):
 
@@ -269,6 +270,11 @@ class BirdoApp(QtGui.QMainWindow):
     def isConnected(self):
         return self.owncloud is not None or self.owncloud.get_roots()
 
+
+    def on_init(self):
+        self.ui.stackedWidget.setCurrentIndex(1)
+        first_update(main_app = self)
+
     def splash_page(self):
         # change page to splash index 1
         self.ui.stackedWidget.setCurrentIndex(1)
@@ -358,6 +364,13 @@ class BirdoApp(QtGui.QMainWindow):
         if "current_user" in user_data.keys():
             self.ui.username_line.setText(user_data["current_user"])
 
+
+    def check_username(self):
+
+        username = self.ui.username_line.text().replace(" #","#")
+        self.ui.username_line.setText(username)
+
+        return
 
     # TODO: Sempre que um dado for alterado mudar o status da conexao pra false
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
