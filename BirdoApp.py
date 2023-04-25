@@ -5,7 +5,7 @@ from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
 from app.utils.birdo_json import write_json_file,write_json_file_from_string
-from app.utils.check_updates import main_update,first_update
+from app.utils.check_updates import main_update,first_update,rev_parse
 from app.utils.system import SystemFolders, get_short_path_name
 from PySide import QtCore, QtGui, QtUiTools
 import os
@@ -270,10 +270,17 @@ class BirdoApp(QtGui.QMainWindow):
     def isConnected(self):
         return self.owncloud is not None or self.owncloud.get_roots()
 
+    def isRepoUpdated(self):
+
+        return rev_parse("@") == rev_parse("@{u}")
 
     def on_init(self):
-        self.ui.stackedWidget.setCurrentIndex(1)
-        first_update(main_app = self)
+
+        print "is updated: " + str(self.isRepoUpdated())
+        if not self.isRepoUpdated():
+            self.ui.stackedWidget.setCurrentIndex(1)
+            first_update(main_app = self)
+            os.execv(sys.executable, ['python'] + sys.argv)
 
     def splash_page(self):
         # change page to splash index 1

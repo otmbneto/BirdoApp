@@ -8,6 +8,7 @@
 import sys
 import os
 import re
+import subprocess
 from subprocess import Popen
 from datetime import datetime
 from shutil import copytree, copyfile, rmtree
@@ -103,6 +104,9 @@ def install_harmony_package_config(proj_data):
         copyfile(script_src_fullpath, script_dst_fullpath)
         print "include script copied: {0}".format(script)
 
+def rev_parse(repo):
+
+    return subprocess.check_output(['git', 'rev-parse', repo], stdin=None, stderr=None,shell=False, universal_newlines=False).replace("\n","")
 
 def pull_remote_repo(main_app = None):
 
