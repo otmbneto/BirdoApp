@@ -104,13 +104,35 @@ def install_harmony_package_config(proj_data):
         print "include script copied: {0}".format(script)
 
 
+def pull_remote_repo(main_app = None):
+
+    return os.system(os.path.join(main_app.app_root,"update.bat")) if main_app is not None else 0
+
+def first_update(main_app = None):
+
+    main_app.ui.progressBar.setRange(0, 3)
+    main_app.ui.progressBar.setValue(0)
+    print "first_update"
+    main_app.ui.progressBar.setValue(1)
+    
+    result = pull_remote_repo(main_app = main_app)
+    main_app.ui.progressBar.setValue(2)
+    
+    if result != 0:
+        print "something went wrong with update"
+        main_app.ui.progressBar.setValue(0)
+        return False
+
+    main_app.ui.progressBar.setValue(3)
+    main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
+
 def main_update(proj_data, main_app=None):
     
     main_app.ui.progressBar.setRange(0, 4)
     main_app.ui.progressBar.setValue(0)
     print "main_update"
     main_app.ui.progressBar.setValue(1)
-    result = os.system(os.path.join(main_app.app_root,"update.bat"))
+    result = pull_remote_repo(main_app = main_app)
     main_app.ui.progressBar.setValue(2)
     if result != 0:
         print "something went wrong with update"
