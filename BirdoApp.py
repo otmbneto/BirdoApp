@@ -77,7 +77,6 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE APP VERSION
         self.ui.label_version.setText(subprocess.check_output(["git", "log", "--pretty=%h", "-1"])[:-1])
         self.setupConnections()
-        self.on_init()
 
     def setupConnections(self):
 
@@ -209,7 +208,8 @@ class BirdoApp(QtGui.QMainWindow):
         return
 
     def showEvent(self, event):
-        # do stuff here 
+        # do stuff here
+        self.on_init()
         self.initProjectPage()
         event.accept()
 
