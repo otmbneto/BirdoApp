@@ -1426,7 +1426,12 @@ function BD2_GenerateThumbnailsForNode(nodePath, update_existing){
 
 
 ///COLOR
-
+/*
+	converte cor para valor numerico unico
+*/
+function BD2_fromRGBAtoInt(r, g, b, a){
+  return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+}
 /*
 retorna os valores em rgb da cor  
 @colorId => color id da cor desejada 
