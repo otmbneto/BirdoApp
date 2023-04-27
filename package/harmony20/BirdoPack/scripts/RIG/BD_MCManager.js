@@ -17,6 +17,8 @@ Copyright:   @leobazao
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
+//version
+var version = "v.1.0";
 
 function BD_MCManager(){
 	
@@ -42,13 +44,13 @@ function BD_MCManager(){
 
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_BirdoMCManager.ui";
 
-	var d = new createInrterface(ui_path, rig_data, utils);
+	var d = new createInrterface(ui_path, rig_data, utils, projectDATA);
 	d.ui.show();	
 		
 }
 
 
-function createInrterface(uifile, rig_data, utils){//cria objeto da interface
+function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da interface
 
 	this.ui = UiLoader.load(uifile);
 
@@ -63,113 +65,194 @@ function createInrterface(uifile, rig_data, utils){//cria objeto da interface
 	this.ui.groupInfo.labelMCMasterCount.text = rig_data.mcs.master.length;
 	this.ui.groupInfo.labelMCExtraCount.text = rig_data.mcs.extras.length;	
 	
+	//update version
+	this.ui.labelVersion.text = version;
+	
+	//keys
+	this.font = projectDATA.project_font;
+	this.rig_name = rig_data.rig_name
+	//current selected MC
+	this.current_selection = null;
+	//script files paths
+	this.scripts = utils.get_script_files(projectDATA);
+	//script folder name
+	this.script_folder_name = rig_data.script_folder_name;
+	
+	//update master 2 check state
+	masterPage.groupMaster2.checked = rig_data.mcs.master.length == 2;
+	
 	//update masters buttons state
 	masterPage.groupMaster.pushActionMaster.text = rig_data.mcs.master.length == 0 ? "Create" : "Update";
 	masterPage.groupMaster2.pushActionMaster2.text = rig_data.mcs.extras.length == 2 ? "Update" : "Create";
-	masterPage.pushMCcheckbox.text = rig_data.mcs.checkbox == null ? "Create MC_Checkbox" : "Update MC_Checkbox";
+	masterPage.pushMCcheckbox.text = Boolean(rig_data.mcs.checkbox) ? "Update MC_Checkbox" : "Create MC_Checkbox";
 
 	//update status masters
 	masterPage.groupMaster.labelMasterStatus.text = "Create Selection...";
 	masterPage.groupMaster2.labelMaster2Status.text = "";
 
-	//update comp destiny if available
+	//validate comps destinys 
 	var cb_comp = rig_data.mcs.checkbox ? rig_data.mcs.checkbox.comp : null;
 	if(rig_data.mcs.master.length == 2){
+		this.master_comp = rig_data.mcs.master[0].comp;
 		var valid_comps = Boolean(cb_comp) ? rig_data.mcs.master[0].comp == rig_data.mcs.master[1].comp == cb_comp : rig_data.mcs.master[0].comp == rig_data.mcs.master[1].comp;	
 	} else if(rig_data.mcs.master.length == 1 && Boolean(cb_comp)){
+		this.master_comp = rig_data.mcs.master[0].comp;
 		var valid_comps = rig_data.mcs.master[0].comp == cb_comp;
 	} else {
-		var valid_comps = " - * - ";
+		this.master_comp = " - * - ";
+		var valid_comps = true;
 	}
-	masterPage.labelCompMaster.text = valid_comps ==  " - * - " ? valid_comps : Boolean(valid_comps) ? rig_data.mcs.master[0].comp : "Different comps for Masters MCs...";
+	masterPage.labelCompMaster.text = valid_comps ? this.master_comp : "Different comps for Masters MCs!!!";
 
-	//cria keys para o objeto da interface
-	this.master_data = {
-		node: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["node"] : null),
-		comp: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["comp"] : null),
-		selection: null
+	//main MC objects list (MASTER: index 0 = Master 1 e index 1 = Master 2)
+	this.mc_data = {
+		MASTER: [
+			{
+				node: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["node"] : null),
+				comp: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["comp"] : null),
+				group_node: rig_data.rig_group,
+				turn_types: ["Fliped", "Full Turn"],
+				turn_data: null,
+				selection: null,
+				slider: {
+					horizontal: true,
+					color1: null,
+					color2: null
+				},
+				widgets: {
+					groupBox: masterPage.groupMaster,
+					color1: masterPage.groupMaster.pushMasterCor1,
+					color2: masterPage.groupMaster.pushMasterCor2,
+					name: masterPage.groupMaster.labelMasterName,
+					states: [masterPage.groupMaster.labelMasterStFile],
+					turn_type: masterPage.groupMaster.comboTurnType,
+					action: masterPage.groupMaster.pushActionMaster,
+					select: masterPage.groupMaster.pushSelectTL,
+					status: masterPage.groupMaster.labelMasterStatus
+				}
+			},
+			{
+				node: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["node"] : null),
+				comp: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["comp"] : null),
+				group_node: rig_data.rig_group,
+				turn_types: ["Fliped", "Full Turn"],
+				turn_data: null,
+				selection: null,
+				slider: {
+					horizontal: true,
+					color1: null,
+					color2: null
+				},
+				widgets: {
+					groupBox: masterPage.groupMaster2,
+					color1: masterPage.groupMaster2.pushMaster2Cor1,
+					color2: masterPage.groupMaster2.pushMaster2Cor2,
+					name: masterPage.groupMaster2.labelMaster2Name,
+					states: [masterPage.groupMaster2.labelMaster2StFile],
+					turn_type: masterPage.groupMaster2.comboTurnType2,
+					action: masterPage.groupMaster2.pushActionMaster2,
+					select: masterPage.groupMaster2.pushSelectTL2,
+					status: masterPage.groupMaster2.labelMaster2Status
+				}
+			}
+		],
+		CHECKBOX: {
+			node: (rig_data.mcs.checkbox == null ? null : rig_data.mcs.checkbox["node"]),
+			comp: (rig_data.mcs.checkbox == null ? null : rig_data.mcs.checkbox["comp"])
+		},
+		EXTRAS: []//criar funcao pra gerar lista de widgets dos extras no utils!
 	};
-	this.master2_data = {
-		node: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["node"] : null),
-		comp: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["comp"] : null),
-		selection: null
-	};
-	this.checkbox_mc = {
-		node: (rig_data.mcs.checkbox == null ? null : rig_data.mcs.master[1]["node"]),
-		comp: (rig_data.mcs.checkbox == null ? null : rig_data.mcs.master[1]["comp"])
-	};
-	this.extras_data = null;//criar funcao pra gerar lista de widgets dos extras no utils!
 	
-	//current selection
-	this.current_selection = null;
+	//set MC callbacks
+	for(mc_type in this.mc_data){
+		if(mc_type == "CHECKBOX"){
+			continue;
+		}
+		for(var i=0; i<this.mc_data[mc_type].length; i++){
+			utils.createMCObjectCallbacks(this, this.mc_data[mc_type][i], mc_type, i)
+		}
+	}
 	
+
+	// // CALLBACKS // // 
+	this.getCurrentSelection = function(){//retorna current selection object
+		return Boolean(this.current_selection) ? this.mc_data[this.current_selection.type][this.current_selection.index].selection : null;
+	}
 	
-	//CALLBACKS
+	this.getCurrent_mc = function(){//retorna objeto do current MC
+		return Boolean(this.current_selection) ? this.mc_data[this.current_selection.type][this.current_selection.index] : null;
+	}
+	
 	this.updateFramesSelection = function(){//atualiza as widgets do grupo frames com selecao valida
-		masterPage.groupFrames.labelStart.text = Boolean(this.current_selection) ? this.current_selection.start_frame : " -- ";
-		masterPage.groupFrames.labelStop.text = Boolean(this.current_selection) ? this.current_selection.end_frame : " -- ";
-		var valid_current_frame = frame.current() <= this.current_selection.end_frame && frame.current() >= this.current_selection.start_frame;
-		masterPage.groupFrames.labelCurrentFrame.text = Boolean(this.current_selection) && valid_current_frame ? frame.current() : " -- ";
-		if(!this.current_selection){
+
+		var curr_selection = this.getCurrentSelection();
+		var curr_mc = this.getCurrent_mc();
+		var valid_selection = Boolean(curr_selection) ? frame.current() <= parseInt(curr_selection.end_frame) && frame.current() >= parseInt(curr_selection.start_frame) : false;
+		//updated widgets labels
+
+		if(!valid_selection){
 			masterPage.groupFrames.labelFront.text = " - - ";
 			masterPage.groupFrames.labelBack.text = " - - ";
-			masterPage.groupFrames.pushUpdateTurn.enabled = false;
 		}
-		//update do titulo do groupbox dos frames
-		masterPage.groupFrames.title = Boolean(this.current_selection) && valid_current_frame ? "Edit Turn: " + this.current_selection.name : "Select MC to Edit...";
+		masterPage.groupFrames.labelCurrentFrame.text = valid_selection ? frame.current() : " -- ";
+		masterPage.groupFrames.labelStart.text = valid_selection ? curr_selection.start_frame : " -- ";
+		masterPage.groupFrames.labelStop.text = valid_selection ? curr_selection.end_frame : " -- ";
+		//masterPage.groupFrames.pushUpdateTurn.enabled = valid_selection;
 		
-		//if current frame is invalida
-		if(!valid_current_frame){
+		//update do titulo do groupbox dos frames
+		masterPage.groupFrames.title = valid_selection ? "Edit Turn: " + this.current_selection.type + " - " + this.current_selection.index : "Select MC to Edit...";
+		
+		//if current frame is invalid
+		if(Boolean(curr_selection) && !valid_selection){
 			MessageBox.warning("ATENCAO! Seu cursor esta fora da selecao da timeline do treixo escolhido para criar o MC!",0,0);
 			Print("Cursor fora da selecao!");
 			masterPage.groupFrames.enabled = false;
-			this.current_selection.status.text = "invalid selection!";
 			this.current_selection = null;
-			return;
-		}
-		
-		//lida com enable dos botoes de prev e next
-		masterPage.groupFrames.pushPrev.enabled = frame.current() > this.current_selection.start_frame;
-		masterPage.groupFrames.pushNext.enabled = frame.current() < this.current_selection.end_frame;
-		
+		} else if(valid_selection){
+			//lida com enable dos botoes de prev e next
+			masterPage.groupFrames.pushPrev.enabled = frame.current() > curr_selection.start_frame;
+			masterPage.groupFrames.pushNext.enabled = frame.current() < curr_selection.end_frame;
+		}		
 		//desabilita ou habilita o groupFrames
-		masterPage.groupFrames.enabled = Boolean(this.current_selection);
+		masterPage.groupFrames.enabled = valid_selection;
+		
+		//update label mc
+		curr_mc["widgets"]["status"].text = valid_selection ? "Selection Valid! Edit Turn..." : "invalid selection!";	
+		
 	}
-	
-	this.selectMaster = function(){//callback do botao selecionar timeline do mc master
+		
+	this.select_mc = function(mc_type, index){//seleciona o MC
 		//reseta current selection
 		this.current_selection = null;
 		
-		this.master_data.selection = utils.get_selection_data(rig_data);
-		this.current_selection = this.master_data.selection;
-		if(!this.master_data.selection){
+		var selectionData = utils.get_selection_data(rig_data);
+		if(!selectionData){
 			Print("Selecao invalida!");
-			masterPage.groupMaster.labelMasterStatus.text = "Invalid Selection!";
+			this.mc_data[mc_type][index]["widgets"]["status"].text = "Invalid Selection!";
 			return;
 		}
-		//update current selection name and status widget to be updated outside this function
-		this.current_selection["name"] = masterPage.groupMaster.labelMasterName.text;
-		this.current_selection["status"] = masterPage.groupMaster.labelMasterName;
-		this.current_selection["action_button"] = masterPage.groupMaster.pushActionMaster;
-
-		
-		//seta combo widget 		
-		masterPage.groupMaster.comboTurnType.enabled = Boolean(this.master_data.selection) && this.master_data.selection.is_master;
-		masterPage.groupMaster.comboTurnType.clear();
-	
-		//checa se selecao e da master peg
-		if(!this.master_data.selection.is_master){
+		//checa se selecao e da master peg para a master 0
+		if(!selectionData.is_master && (mc_type == "MASTER" && index == 0)){
 			MessageBox.warning("Selecione a master peg do rig para criar um Master CM!",0,0);
-			this.current_selection = null;
-			masterPage.groupMaster.comboTurnType.enabled = false;
-		} else {
-			masterPage.groupMaster.comboTurnType.addItems(["Fliped", "Full Turn"]);
+			this.mc_data[mc_type][index]["widgets"]["type"].enabled = false;
+			this.mc_data[mc_type][index]["widgets"]["type"].clear();
+			this.mc_data[mc_type][index]["widgets"]["action"].enabled = false;
+			return;
 		}
+		//update selection
+		this.mc_data[mc_type][index]["selection"] = selectionData;
+		
+		//updates current selection value
+		this.current_selection = {
+			type: mc_type,
+			index: index
+		};
 		
 		//update dos frmaes widgets 
 		this.updateFramesSelection();
-		masterPage.groupMaster.labelMasterStatus.text = "Selection Valid! Edit Turn...";
+		Print("Selection set to : " + mc_type + " index : " + index);
 	}
+	
 	this.prevFrame = function(){//callback do pushPrev button
 		var pFrame = frame.current() - 1;
 		frame.setCurrent(pFrame);
@@ -199,12 +282,36 @@ function createInrterface(uifile, rig_data, utils){//cria objeto da interface
 	}
 	
 	this.updateTurn = function(){//callback do butao de update do turn
+		var curr_selection = this.getCurrentSelection();
+		var curr_mc = this.getCurrent_mc();
+		var startFrame = curr_selection.start_frame;
+		var endFrame = curr_selection.end_frame;
+		var front = parseInt(masterPage.groupFrames.labelFront.text);
+		var back = parseInt(masterPage.groupFrames.labelBack.text);
+		var fliped = curr_mc.widgets.turn_type.currentText == "Fliped";
+		var turn_data = utils.createTurn(startFrame, endFrame, front, back, fliped);
+		if(!turn_data){
+			Print("Invalid turn formation!");
+			masterPage.groupFrames.labelFront.text = " - - ";
+			masterPage.groupFrames.labelBack.text = " - - ";
+		}
+		//update current selection with turn data
+		curr_mc["turn_data"] = turn_data;
 		
-		
+		//altera o node turn com as definicoes 
+		if(!utils.modify_turn_node(turn_data, rig_data.turn_node)){
+			MessageBox.warning("Algo deu errado ao setar o node turn!",0,0);
+			curr_mc.widgets.action.enabled = false;
+		} else {
+			curr_mc.widgets.action.enabled = true;	
+		}
+		//update selection
+		this.current_selection = null;
+		this.updateFramesSelection();
+		Print("Turn edit finished!");
 	}
 	
 	//Connections
-	masterPage.groupMaster.pushSelectTL.clicked.connect(this, this.selectMaster);
 	masterPage.groupFrames.pushPrev.clicked.connect(this, this.prevFrame);
 	masterPage.groupFrames.pushNext.clicked.connect(this, this.nextFrame);
 	masterPage.groupFrames.pushSetFront.clicked.connect(this, this.setFront);

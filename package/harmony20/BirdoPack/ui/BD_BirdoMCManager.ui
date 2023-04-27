@@ -344,7 +344,7 @@ QLineEdit:disabled{
          <enum>QFrame::Raised</enum>
         </property>
         <property name="text">
-         <string>CH000-v01</string>
+         <string>nonoNo</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -440,10 +440,69 @@ QLineEdit:disabled{
            <property name="title">
             <string>Master</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <property name="topMargin">
-             <number>15</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Color 1: </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushMasterCor1">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Color 2:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushMasterCor2">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="1,2">
               <item>
@@ -580,12 +639,71 @@ QLineEdit:disabled{
             <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <property name="topMargin">
-             <number>25</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_19">
+              <item>
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>Color 1: </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushMaster2Cor1">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>Color 2:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushMaster2Cor2">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_16" stretch="1,2">
               <item>
@@ -598,7 +716,7 @@ QLineEdit:disabled{
               <item>
                <widget class="QLineEdit" name="labelMaster2Name">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>mc_Master2</string>
@@ -763,7 +881,7 @@ QLineEdit:disabled{
             <item>
              <widget class="QPushButton" name="pushSetFront">
               <property name="text">
-               <string>SET</string>
+               <string> SET </string>
               </property>
              </widget>
             </item>
@@ -943,7 +1061,7 @@ QLineEdit:disabled{
             <item>
              <widget class="QPushButton" name="pushSetBack">
               <property name="text">
-               <string>SET</string>
+               <string> SET </string>
               </property>
              </widget>
             </item>

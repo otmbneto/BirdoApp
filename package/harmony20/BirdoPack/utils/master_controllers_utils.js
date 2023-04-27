@@ -40,7 +40,7 @@ function get_checkbox_specs(on_color, off_color, label, font, labelcolor){
 	retorna valor das specs pro slider mc
 */
 var slider_specs = '<specs>\n  <ports>\n    <in type=\"PEG\"/>\n    <out type=\"IMAGE\"/>\n  </ports>\n  <attributes>\n' +
-	'    <attr type=\"BOOL\"     name=\"invert\"                    value=\"{INVERT}\" tooltip=\"Flip slider direction.\"/>\n' +
+	'    <attr type=\"BOOL\"     name=\"invert\"                    value=\"false\" tooltip=\"Flip slider direction.\"/>\n' +
     '    <attr type=\"BOOL\"     name=\"horizontal\"                value=\"{HORIZONTAL}\" tooltip=\"Horizontal slider layout.\"/>\n' +
 	'    <attr type=\"BOOL\"     name=\"label_screen_space\"        value=\"false\" tooltip=\"Check this options for the label size to be in screen space.\"/>\n' +
 	'    <attr type=\"BOOL\"     name=\"interpolate_poses\"         value=\"false\" tooltip=\"Allow fractional interpolation between frames.\"/>\n' +
@@ -55,8 +55,7 @@ var slider_specs = '<specs>\n  <ports>\n    <in type=\"PEG\"/>\n    <out type=\"
 	'    <attr type=\"COLOUR\"     name=\"label_bg_color\"            value=\"0,0,0,0\" tooltip=\"Label background color.\"/>\n' +
 	'  </attributes>\n</specs>';
 	
-function get_slider_specs(invert, horizontal, label, font, framecolor, slidercolor, labelcolor){
-	var new_value = slider_specs.replace("{INVERT}", invert);
+function get_slider_specs(horizontal, label, font, framecolor, slidercolor, labelcolor){
 	new_value = new_value.replace("{HORIZONTAL}", horizontal);	
 	new_value = new_value.replace("{LABEL}", label);	
 	new_value = new_value.replace("{FONT}", font);	
@@ -65,8 +64,6 @@ function get_slider_specs(invert, horizontal, label, font, framecolor, slidercol
 	new_value = new_value.replace("{LABEL_COLOR}", labelcolor);	
 	return new_value;
 }
-
-
 
 /*
 	create back drop 
@@ -113,31 +110,79 @@ function add_backdrop(group, name){
 	return newBackdrop;
 }
 
+/*
+	retorna o backdrop e comp de mc do grupo dado (se nao existir, cria)
+*/
+function find_backdrop_mc(group, name){
+	var output = {backdrop: null, comp: null};
+	var allbd = Backdrop.backdrops(group);
+	var mc_reg = /(MASTER|MC)/;
+	var mc_bds = allbd.filter(function(item){
+		var title = item.title.text
+		return title.indexOf("FULL") == -1 && mc_reg.test(title);
+	});
+	if(mc_bds.length == 0){
+		Print("No backdrop mc found in group: " + group + "... will need to create!");
+		output["backdrop"] = add_backdrop(group, name);
+	}else {
+		output["backdrop"] = mc_bds[0];
+	}
+	var allcomps = BD2_ListNodesInGroup(group, ["COMPOSITE"], true);
+	var bdpos = output["backdrop"].position;
+	var bd_rect = new QRect(bdpos.x, bdpos.y, bdpos.w, bdpos.h);
+	var comp = allcomps.filter(function(item){
+		var nodeRect =	BD2_createRectCoord(item);
+		return bd_rect.contains(nodeRect);
+	});
+	//cria comp se necessario
+	if(comp.length == 0){
+		//add mc comp
+		var cordC = new QPoint(bd_rect.center().x() - 47, bd_rect.y() + (Math.floor(bd_rect.height()*3/4)));
+		output["comp"] = node.add(group, "comp_MC", "COMPOSITE", cordC.x(), cordC.y(), 0);
+		//find dst comp 
+		var dstComp = allcomps.sort(function(a,b){ return node.coordY(b) - node.coordY(a)})[0];
+		//link nodes
+		node.link(output["comp"], 0, dstComp, 0, false, true); 
+		//BD2_connectWithWaypoint(output["comp"], dstComp, true);
+	} else {
+		output["comp"] = comp[0];
+	}
+	return output;
+}
 
 /*
 	create mc master, check box nodes and backdrop
 */
-function create_mcs_master(selection_data){
+function add_mc(group_node, name){
 	//add backdrop
-	var bd = add_backdrop(selection_data.rig_node, "MC - MASTER");
-	var bdrect = new QRect(bd.position.x, bd.position.y, bd.position.w, bd.position.h);
+	var base_setup = find_backdrop_mc(group_node, name.toUpperCase());
+	var bdrect = new QRect(base_setup.backdrop.position.x, base_setup.backdrop.position.y, base_setup.backdrop.position.w, base_setup.backdrop.position.h);
 	
-	//add mc comp
-	var cordC = new QPoint(bdrect.center().x() - 47, bdrect.y() + (Math.floor(bdrect.height()*3/4)));
-	var comp = node.add(selection_data.rig_node, "comp_MC", "COMPOSITE", cordC.x(), cordC.y(), 0);
+	//number of mcs in comp
+	var mc_number =  node.numberOfInputPorts(base_setup.comp);
+	var desloc = Math.floor(bdrect.width()/4) * mc_number;
 	
 	//add mc node master
-	var cordMC = new QPoint(bdrect.center().x() - Math.floor(bdrect.width()*1/4) - 48, bdrect.center().y());
-	var mcMaster = create_mc(cordMC, "mc_Master", selection_data.rig_node);
+	var cordMC = new QPoint(bdrect.x() + Math.floor(bdrect.width()*1/4) + desloc, bdrect.center().y());
+	var mc_node = create_mc(cordMC, name, group_node);
+	base_setup["mc_node"] = mc_node;
 	
-	//add node 2
-	var cordMCCB = new QPoint(bdrect.center().x() + Math.floor(bdrect.width()*1/4) - 48, bdrect.center().y());
-	var mcCheckBox = create_mc(cordMCCB, "mc_Function", selection_data.rig_node);
+	//add static
+	var staticnode = node.add(group_node, "st-" + name, "StaticConstraint", 0, 0, 0);
+	node.setCoord(staticnode, (cordMC.x() + (node.width(mc_node)/2))- (node.width(staticnode)/2), cordMC.y() - 75);	
 	
-	//todo: add aqui as conexoes desses nodes criados (achar destinos)
+	//node de saida do grupo
+	var outputNode = node.getGroupInputModule(group_node, "Multi-Port-In", 0, 0, 0);
 	
-	return [mcCheckBox, mcMaster];
+	//link nodes
+	node.link(mc_node, 0, base_setup.comp, 0, false, true); 
+	node.link(staticnode, 0, mc_node, 0, false, false); 
+	node.link(outputNode, 0, staticnode, 0, false, false);
+
+	return base_setup;
 }
+exports.add_mc = add_mc;
+
 
 /*
 	get initial rig selection data 
@@ -259,7 +304,9 @@ function create_tbStateFile(stage_file, states){//cria arquivo tbState com state
 	for(var i=0; i < states.length; ++i){
 		sData += (states[i].toString(rigNode) + "\n");
 	}
-	
+	if(BD1_FileExists(stage_file)){
+		BD1_RemoveFile(stage_file);
+	}
 	var file = new File(stage_file);
 	file.open( 2 ); //2=Write File Access
 	file.write(sData);
@@ -364,7 +411,6 @@ function validate_attribute(colum, attribute, start_frame, end_frame, filter_att
 }
 
 
-
 /*
 	cria um master controller node
 */
@@ -405,7 +451,7 @@ function update_mcNode(mcNode, options){
 	if(options.is_checkbox_mc){
 		var specs = get_checkbox_specs(options.on_color, options.off_color, options.label, options.font, options.labelcolor);
 	} else {
-		var specs = get_slider_specs(options.invert, options.horizontal, options.label, options.font, options.framecolor, options.slidercolor, options.labelcolor);
+		var specs = get_slider_specs(options.horizontal, options.label, options.font, options.framecolor, options.slidercolor, options.labelcolor);
 	}
 	//update specs
 	var uiSpecsEditor = node.getAttr(mcNode, 1, "specsEditor");
@@ -442,7 +488,7 @@ function update_mcNode(mcNode, options){
 
 	return true;
 }
-
+exports.update_mcNode = update_mcNode;
 
 /*
 	retorna objeto com info dos mcs nodes achados no rig
@@ -530,3 +576,148 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 	Print("Turn Type is: '" + turn_type + "' and fliped: " + fliped);
 	return turn_data;
 }
+exports.createTurn = createTurn;
+
+
+/*
+	atualiza o node de turn com as infos fornecidas 
+*/
+function modify_turn_node(turn_data, turn_node){
+	
+	var d_column = node.linkedColumn(turn_node, "DRAWING.ELEMENT");
+	
+	scene.beginUndoRedoAccum("[MC Manager] modify TURN node");	
+	
+	for(fr in turn_data){
+		if(!column.setEntry(d_column, 1, fr, turn_data[fr])){	
+			Print(" - ERROR setting turn node to " + turn_data[fr] + " at fr: " + fr);
+			scene.cancelUndoRedoAccum();
+			return false;
+		}
+		Print(" -- turn node changed to " + turn_data[fr] + " at frame: " + fr);
+	}
+
+	scene.endUndoRedoAccum();
+	return true;
+}
+exports.modify_turn_node = modify_turn_node;
+
+
+/*
+	return birdo mc script files
+*/
+function get_script_files(projData){
+	return {
+		slider_special: projData["paths"]["birdoPackage"] + "utils/BD_mcInterpolationSlider_215.js",
+		slider_standard: projData["paths"]["birdoPackage"] + "utils/mcInterpolationSlider_215.js"
+	}		
+}
+exports.get_script_files = get_script_files;
+
+
+/*
+	seta cor do butao e retorna o objeto da current color
+*/
+function setButtonColor(button){
+	var curr_cor = BD2_get_current_color();
+	if(!curr_cor){
+		MessageBox.warning("Nenhuma cor selecionada!",0,0);
+		return false;
+	}
+	var css_color = BD2_GetColorValues(curr_cor.id, true);	
+	button.styleSheet = "background : " + css_color;
+	return css_color.replace(/(rgb\(|\);|\s)/g, "");//formated to only values
+}
+exports.setButtonColor = setButtonColor;
+
+
+/*
+	create mc callbacks
+*/
+function createMCObjectCallbacks(self, mc_data, type, index){
+	var mc_name = mc_data.widgets.name.text;
+	
+	//callback do botao de cor 1
+	var setColor1 = function(){
+		var corButton = mc_data.widgets.color1;
+		var cor1 = setButtonColor(corButton);
+		if(!cor1){
+			Print("No color found..");
+			return;
+		}
+		mc_data["slider"]["color1"] = cor1;
+		Print("Color 1 " + mc_name + " set to " + cor1);
+	}
+	//callback do botao de cor 2
+	var setColor2 = function(){
+		var corButton = mc_data.widgets.color2;
+		var cor2 = setButtonColor(corButton);
+		if(!cor2){
+			Print("No color found..");
+			return;
+		}
+		mc_data["slider"]["color2"] = cor2;
+		Print("Color 2 " + mc_name + " set to " + cor2);
+	}
+	//callback do action button
+	var action_callback = function(){
+		Print("start action " + mc_name);
+		if(!mc_data.group_node){
+			MessageBox.warning("Defina o grupo de destino!",0,0);
+			return;			
+		}
+		if(!mc_data.turn_data){
+			MessageBox.warning("Algo deu errado! O Turn ainda nao foi denifido!",0,0);
+			return;
+		}
+		if(!mc_data.node){//cria o mc
+			var created = utils.add_mc(mc_data.group_node, mc_name);
+			Print("Created nodes: ");
+			Print(created);
+			//update main object info
+			mc_data["node"] = created.mc_node;
+			mc_data["comp"] = created.comp;
+			//change button text to update
+			mc_data.widgets.action.text = "Update";
+			//update mc count 
+			self.ui.groupInfo.labelMCMasterCount.text = parseInt(self.ui.groupInfo.labelMCMasterCount.text)++;
+		}
+
+		//update node info
+		var scriptFile = type == "MASTER" ? this.scripts.slider_standard : this.scripts.slider_special;
+		var statesFiles_list = mc_data.states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
+		var ui_data = type == "MASTER" ? {"poses": "/"+statesFiles_list[0],"location":"scn"} : "PLACEHOLDER__FAZER FUNCAO PRA GERAR UIDATA do eXTRAS";
+		var options = {
+			is_checkbox_mc : false,
+			scriptFile: scriptFile,
+			uidata: ui_data,
+			stageFiles: statesFiles_list,
+			horizontal: mc_data.slider.horizontal,
+			label: self.rig_name,
+			font: self.font,
+			framecolor: mc_data.slider.color2,
+			slidercolor: mc_data.slider.color1,
+			labelcolor: mc_data.slider.color2
+		}
+		update_mcNode(mc_data.node, options);
+		Print("fim action Master 0");
+	};
+	//selection callback
+	var select_callback = function(){
+		Print("Callback selection " + mc_name);
+		try{	
+			self.select_mc(type, index);
+		} catch(e){
+			Print(e);
+			Print("Selection error!");
+		}
+	};  
+	mc_data.widgets.color1.clicked.connect(self, setColor1);
+	mc_data.widgets.color2.clicked.connect(self, setColor2);
+	
+	mc_data.widgets.action.clicked.connect(self, action_callback);
+	mc_data.widgets.select.clicked.connect(self, select_callback);
+	
+	Print("End callback creation for :  " + mc_name);
+}
+exports.createMCObjectCallbacks = createMCObjectCallbacks;
