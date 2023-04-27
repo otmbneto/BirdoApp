@@ -104,6 +104,45 @@ def install_harmony_package_config(proj_data):
         copyfile(script_src_fullpath, script_dst_fullpath)
         print "include script copied: {0}".format(script)
 
+def execute_git_command(cmd):
+
+    return subprocess.check_output(cmd.split(" "))
+
+def list_branches():
+
+    cmd = "git branch"
+    return execute_git_command(cmd)
+
+def rename_branch(branch,new_name):
+
+    cmd = "git branch -m {0} {1}".format(branch,new_name)
+
+    return execute_git_command(cmd)
+
+def set_upstream(remote_repo="origin",remote_branch="main"):
+
+    cmd = "git branch -u {0}/{1} {1}".format(remote_repo,remote_branch)
+
+    return execute_git_command(cmd)
+
+#created this to fix old installations that still point to master
+def fix_old_repos(old_name="master",new_name="main"):
+
+    branches = list_branches()
+    if "main" in branches:
+        print "main already exist! moving on..."
+        return
+
+    if "* " + old_name in branches:
+        result = rename_branch(old_name,new_name)
+        #do something with output
+        result = set_upstream(remote_branch=new_name)
+        #do something with output
+    else:
+        print "local repo is fine"
+
+    return
+
 def rev_parse(repo):
 
     return subprocess.check_output(['git', 'rev-parse', repo], stdin=None, stderr=None,shell=False, universal_newlines=False).replace("\n","")
