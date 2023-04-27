@@ -413,6 +413,14 @@ function BD2_AddNodeUp(nodeSel, nodeName,  type, end_connection){
 	return newNode;
 }
 
+/*
+	create QRect from node coordenates
+*/
+function BD2_createRectCoord(node_path){
+	var rect = new QRect(node.coordX(node_path), node.coordY(node_path), node.width(node_path), node.height(node_path));
+	return rect;	
+}
+
 /*Relinka drawings depois de renomeados e retorna o path do TransformationSwitch atualizado
 @initial_node => drawing Node
 @obj_name => objeto onde os KEYS sao os old_names e os VALUES sao os new_names
@@ -1427,6 +1435,25 @@ function BD2_GenerateThumbnailsForNode(nodePath, update_existing){
 
 ///COLOR
 /*
+	get current selected color
+*/
+function BD2_get_current_color(){
+	var paletteList = PaletteObjectManager.getScenePaletteList();
+	var curr_cor_id = PaletteManager.getCurrentColorId();
+	var curr_pal_id = PaletteManager.getCurrentPaletteId();
+	var palete = paletteList.getPaletteById(curr_pal_id);
+	var cor = palete.getColorById(curr_cor_id);
+	return cor;
+}
+
+/*
+	converte cor da palete para QColor
+*/
+function BD2_createQColor(palColor){//cria cor QColor baseado numa cor de uma palette
+	return new QColor(palColor.colorData.r, palColor.colorData.g, palColor.colorData.b, palColor.colorData.a);	
+}
+
+/*
 	converte cor para valor numerico unico
 */
 function BD2_fromRGBAtoInt(r, g, b, a){
@@ -1482,4 +1509,20 @@ function BD2_GetMostUsedPaletteInNode(nodePath){
 										}
 									});
 	return paleteList.getPaletteById(mostUsedPaletteId);
+}
+
+//############# waypoints ######################
+/*
+	conecta dois nodes com waypoint entre eles (retorna wp)	
+	DESCOBRIR: só funciona na Top view??? 
+*/
+function BD2_connectWithWaypoint(nodeA, nodeB, createPort){
+	var nodeARect = BD2_createRectCoord(nodeA); 
+	var nodeBRect = BD2_createRectCoord(nodeB); 
+	var parentN = node.parentNode(nodeA);
+	var wp_coord = new Point2d(nodeARect.center().x(), nodeARect.y() + (nodeBRect.y() - nodeARect.y())/2);
+	var wp = parentN + "/" + waypoint.add(parentN, "wp_", wp_coord.x, wp_coord.y);
+	Print("connect with node: " + waypoint.linkOutportToWaypoint(nodeA, 0, wp));
+	Print("connect with comp: " + waypoint.linkWaypointToInport(wp, nodeB, 0, createPort));
+	return wp;
 }
