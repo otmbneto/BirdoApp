@@ -139,6 +139,90 @@ function BD2_getTimingsOfSelected(selected){
 }
 
 //#################NODES #############################//
+/*
+	deleta copia o node e cola no mesmo lugar e conexoes anteriores 
+	(serve pra atalizar os atts do node em alguns casos)
+*/
+function BD2_updateNode(nodeP){
+	selection.clearSelection();
+	var coordRect = BD2_createRectCoord(nodeP);
+	var nodeConnectionsData = BD2_get_node_connections_data(nodeP);
+
+	var dragObj = copyPaste.copy([nodeP], frame.current(), 1, copyPaste.getCurrentCreateOptions());
+	copyPaste.pasteNewNodes(dragObj, node.parentNode(nodeP), copyPaste.getCurrentPasteOptions());
+	var sNewMCNodeCopy = selection.selectedNode(0);
+	var sOriginalNameOnly = node.getName(nodeP);
+	BD2_unlink_all(nodeConnectionsData, nodeP);
+	node.deleteNode(nodeP);
+	node.rename(sNewMCNodeCopy, sOriginalNameOnly);
+	BD2_ApplyNodeQRectCoord(coordRect, nodeP);
+	BD2_connect_node(nodeConnectionsData, nodeP);
+}
+
+/*
+	retorna um objeto com info das conexoes do node
+*/
+function BD2_get_node_connections_data(node_path){
+	var c_data = {
+		input: [],
+		output: []
+	};
+	for(var i=0; i< node.numberOfInputPorts(node_path); i++){
+			var upnode = node.srcNodeInfo(node_path, i);
+			c_data["input"].push(upnode);	
+	}
+	for(var i=0; i<node.numberOfOutputPorts(node_path); i++){
+		var links = [];
+		for(var y=0; y<node.numberOfOutputLinks(node_path, i); y++){
+			var downNode = node.dstNodeInfo(node_path, i, y);
+			links.push(downNode);
+		}	
+		c_data["output"].push(links);	
+	}
+	return c_data;
+}
+
+/*
+	copia as conexoes do nodeConnections data object da funcao get_node_connections_data
+	para o node dado
+*/
+function BD2_connect_node(connections_data, node_path){
+	//connect inputs
+	Print("reconnect inputs: ");
+	connections_data.input.forEach(function(node_info, p){
+		if(!node_info){
+			return;
+		}
+		Print(node.link(node_info.node, node_info.port, node_path, p));
+	});	
+
+	//connect outputs
+	Print("reconnect outputs: ");
+	connections_data.output.forEach(function(links, p){
+		if(links.length == 0){
+			return;
+		}
+		links.forEach(function(node_info){
+			Print(node.link(node_path, p, node_info.node, node_info.port));
+		});
+	});	
+}
+
+
+/*
+	unlink all nodes connections	
+*/
+function BD2_unlink_all(connections_data, nodeP){
+	for(var i=0; i<connections_data.input.length; i++){
+		node.unlink(nodeP, i);
+	}
+	connections_data.output.forEach(function(item, index){
+		for(var i=0; i<item.length; i++){
+			node.unlink(item[i].node, item[i].port);
+		}
+	});
+}
+
 /*Lista todos os nodes dentro do grupo dado, usa filtros par ao tipo
 @firstGroup => grupo inicial para listar os nodes dentro
 @typeList => array com tipos de nodes a ser listados ("" vazio para nao filtrar e retornar TODOS nodes)
@@ -419,6 +503,13 @@ function BD2_AddNodeUp(nodeSel, nodeName,  type, end_connection){
 function BD2_createRectCoord(node_path){
 	var rect = new QRect(node.coordX(node_path), node.coordY(node_path), node.width(node_path), node.height(node_path));
 	return rect;	
+}
+
+/*
+	set node coord from QRect
+*/
+function BD2_ApplyNodeQRectCoord(rect_coord, nodeP){
+	return node.setCoord(nodeP, rect_coord.x(), rect_coord.y());
 }
 
 /*Relinka drawings depois de renomeados e retorna o path do TransformationSwitch atualizado
