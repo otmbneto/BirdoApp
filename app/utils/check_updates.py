@@ -46,7 +46,7 @@ def get_most_recent_pack(server_packages_list):
 def install_harmony_package_config(proj_data):
     """instala o pacote de scripts para o harmony e copia o menu.xml para a pasta correspondente!"""
     # GAMBS PARA EVITAR PERDER ALTERACEOS NO PACKAGE DO LEO
-    if proj_data["user_data"]["current_user"] == "LeoBazao":
+    if proj_data["user_data"]["current_user"] == "LeoBazilio#2873":
         print "gambs Leo para nao perder scripts.."
         return
 
