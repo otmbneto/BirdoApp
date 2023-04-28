@@ -69,7 +69,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.ui.labelVersion.text = version;
 	
 	//keys
-	this.font = projectDATA.project_font;
+	this.font = "Cooper Black" //projectDATA.project_font; FIXM-ME
 	this.rig_name = rig_data.rig_name
 	//current selected MC
 	this.current_selection = null;
@@ -85,7 +85,8 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	masterPage.groupMaster.pushActionMaster.text = rig_data.mcs.master.length == 0 ? "Create" : "Update";
 	masterPage.groupMaster2.pushActionMaster2.text = rig_data.mcs.extras.length == 2 ? "Update" : "Create";
 	masterPage.pushMCcheckbox.text = Boolean(rig_data.mcs.checkbox) ? "Update MC_Checkbox" : "Create MC_Checkbox";
-
+	masterPage.pushMCcheckbox.enabled = rig_data.mcs.master.length > 0;
+	
 	//update status masters
 	masterPage.groupMaster.labelMasterStatus.text = "Create Selection...";
 	masterPage.groupMaster2.labelMaster2Status.text = "";
@@ -109,6 +110,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		MASTER: [
 			{
 				node: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["node"] : null),
+				peg: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["peg"] : null),
 				comp: (rig_data.mcs.master.length > 0 ? rig_data.mcs.master[0]["comp"] : null),
 				group_node: rig_data.rig_group,
 				turn_types: ["Fliped", "Full Turn"],
@@ -133,6 +135,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			},
 			{
 				node: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["node"] : null),
+				peg: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["peg"] : null),
 				comp: (rig_data.mcs.master.length == 2 ? rig_data.mcs.master[1]["comp"] : null),
 				group_node: rig_data.rig_group,
 				turn_types: ["Fliped", "Full Turn"],
@@ -221,11 +224,24 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		
 	}
 		
+	this.enable_mc_widgets = function(mc_data, enable){//(dis)enables the mc object's  widgets (exepc action button)
+		mc_data["widgets"]["turn_type"].clear();
+		if(enable){
+			mc_data["widgets"]["turn_type"].addItems(mc_data["turn_types"]);	
+		}
+		mc_data["widgets"]["turn_type"].enabled = enable;
+		mc_data["widgets"]["color1"].enabled = enable;
+		mc_data["widgets"]["color2"].enabled = enable;
+	}
+		
 	this.select_mc = function(mc_type, index){//seleciona o MC
 		//reseta current selection
 		this.current_selection = null;
 		
 		var selectionData = utils.get_selection_data(rig_data);
+		//update selection
+		this.mc_data[mc_type][index]["selection"] = selectionData;
+		
 		if(!selectionData){
 			Print("Selecao invalida!");
 			this.mc_data[mc_type][index]["widgets"]["status"].text = "Invalid Selection!";
@@ -234,20 +250,21 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		//checa se selecao e da master peg para a master 0
 		if(!selectionData.is_master && (mc_type == "MASTER" && index == 0)){
 			MessageBox.warning("Selecione a master peg do rig para criar um Master CM!",0,0);
-			this.mc_data[mc_type][index]["widgets"]["type"].enabled = false;
-			this.mc_data[mc_type][index]["widgets"]["type"].clear();
-			this.mc_data[mc_type][index]["widgets"]["action"].enabled = false;
+			this.enable_mc_widgets(this.mc_data[mc_type][index], false);
+			//update selection
+			this.mc_data[mc_type][index]["selection"] = null;
 			return;
 		}
-		//update selection
-		this.mc_data[mc_type][index]["selection"] = selectionData;
 		
 		//updates current selection value
 		this.current_selection = {
 			type: mc_type,
 			index: index
 		};
-		
+		//update mc widgets
+		this.enable_mc_widgets(this.mc_data[mc_type][index], true)
+		this.mc_data[mc_type][index]["widgets"]["status"].text = "Valid Selection!";
+
 		//update dos frmaes widgets 
 		this.updateFramesSelection();
 		Print("Selection set to : " + mc_type + " index : " + index);
@@ -299,11 +316,12 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		curr_mc["turn_data"] = turn_data;
 		
 		//altera o node turn com as definicoes 
+		var valid_colors = Boolean(curr_mc["slider"]["color1"]) && Boolean(curr_mc["slider"]["color2"]);
 		if(!utils.modify_turn_node(turn_data, rig_data.turn_node)){
 			MessageBox.warning("Algo deu errado ao setar o node turn!",0,0);
 			curr_mc.widgets.action.enabled = false;
 		} else {
-			curr_mc.widgets.action.enabled = true;	
+			curr_mc.widgets.action.enabled = valid_colors;
 		}
 		//update selection
 		this.current_selection = null;

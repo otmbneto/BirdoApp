@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>579</width>
-    <height>598</height>
+    <height>603</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -455,6 +455,9 @@ QLineEdit:disabled{
               </item>
               <item>
                <widget class="QPushButton" name="pushMasterCor1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>50</width>
@@ -484,6 +487,9 @@ QLineEdit:disabled{
               </item>
               <item>
                <widget class="QPushButton" name="pushMasterCor2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>50</width>
@@ -513,15 +519,12 @@ QLineEdit:disabled{
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="labelMasterName">
-                <property name="frameShape">
-                 <enum>QFrame::Box</enum>
+               <widget class="QLineEdit" name="labelMasterName">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
                 <property name="text">
                  <string>mc_Master</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -656,6 +659,9 @@ QLineEdit:disabled{
               </item>
               <item>
                <widget class="QPushButton" name="pushMaster2Cor1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>50</width>
@@ -685,6 +691,9 @@ QLineEdit:disabled{
               </item>
               <item>
                <widget class="QPushButton" name="pushMaster2Cor2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>50</width>

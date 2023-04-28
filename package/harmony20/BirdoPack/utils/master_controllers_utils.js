@@ -7,6 +7,17 @@ include("BD_2-ScriptLIB_Geral.js");
 
 
 /*
+	return scene scripts folder (creates if dont exist)
+*/
+function getSceneScriptFolder(){
+	var folder = scene.currentProjectPath() + "/scripts/";	
+	if(!BD1_DirExist(folder)){
+		BD1_makeDir(folder);
+	}
+	return folder;
+}
+
+/*
 	lista com numero de prefixos (alfabeto maiusculo)
 */
 var prefix_list = BD2_all_chars.slice(26, 52);
@@ -56,7 +67,7 @@ var slider_specs = '<specs>\n  <ports>\n    <in type=\"PEG\"/>\n    <out type=\"
 	'  </attributes>\n</specs>';
 	
 function get_slider_specs(horizontal, label, font, framecolor, slidercolor, labelcolor){
-	new_value = new_value.replace("{HORIZONTAL}", horizontal);	
+	var new_value = slider_specs.replace("{HORIZONTAL}", horizontal);
 	new_value = new_value.replace("{LABEL}", label);	
 	new_value = new_value.replace("{FONT}", font);	
 	new_value = new_value.replace("{FRAME_COLOR}", framecolor);	
@@ -156,14 +167,15 @@ function find_backdrop_mc(group, name){
 function add_mc(group_node, name){
 	//add backdrop
 	var base_setup = find_backdrop_mc(group_node, name.toUpperCase());
-	var bdrect = new QRect(base_setup.backdrop.position.x, base_setup.backdrop.position.y, base_setup.backdrop.position.w, base_setup.backdrop.position.h);
+	var bdpos = base_setup.backdrop.position;
+	var bdrect = new QRect(bdpos.x, bdpos.y, bdpos.w, bdpos.h);
 	
 	//number of mcs in comp
 	var mc_number =  node.numberOfInputPorts(base_setup.comp);
-	var desloc = Math.floor(bdrect.width()/4) * mc_number;
+	var desloc = (Math.floor(bdrect.width()/4) * mc_number) + 15;
 	
 	//add mc node master
-	var cordMC = new QPoint(bdrect.x() + Math.floor(bdrect.width()*1/4) + desloc, bdrect.center().y());
+	var cordMC = new QPoint(bdrect.x() + desloc, bdrect.center().y());
 	var mc_node = create_mc(cordMC, name, group_node);
 	base_setup["mc_node"] = mc_node;
 	
@@ -176,8 +188,10 @@ function add_mc(group_node, name){
 	
 	//link nodes
 	node.link(mc_node, 0, base_setup.comp, 0, false, true); 
-	node.link(staticnode, 0, mc_node, 0, false, false); 
 	node.link(outputNode, 0, staticnode, 0, false, false);
+	//node.link(staticnode, 0, mc_node, 0, false, false); NAO funciona pq o mc node ainda é saida de imagem e nao de peg
+	
+	base_setup["static_node"] = staticnode;
 
 	return base_setup;
 }
@@ -297,14 +311,22 @@ function get_create_coordinate(sel_nodes){//retorna coordenadas pra criacao da c
 	return new Point2d(full_rect.right() + 200, center.y()-(h/4));	
 }*/
 
-
-function create_tbStateFile(stage_file, states){//cria arquivo tbState com states objects criados
+/*
+	atualiza o arquivo stage com as infos da selecao (usar filtro true para os extras e false para as masters)
+*/
+function update_states(stage_file, selection_data, parent_node, filter_atts){//cria arquivo tbState com states objects criados
 	
+	var states = generate_selection_states(selection_data, filter_atts);
 	var sData = "[TB_StateManager]\n" + ("State Count:" + states.length + "\n");
 	for(var i=0; i < states.length; ++i){
-		sData += (states[i].toString(rigNode) + "\n");
+		sData += (states[i].toString(parent_node) + "\n");
+	}
+	var script_version_dir = BD1_dirname(stage_file);
+	if(!BD1_DirExist(script_version_dir)){
+		BD1_makeDir(script_version_dir);		
 	}
 	if(BD1_FileExists(stage_file)){
+		Print("-- arquivo existia e foi deletado para ser atualizado: " + stage_file);
 		BD1_RemoveFile(stage_file);
 	}
 	var file = new File(stage_file);
@@ -315,6 +337,7 @@ function create_tbStateFile(stage_file, states){//cria arquivo tbState com state
 	Print("File created: " + stage_file);
 	return true;
 }
+exports.update_states = update_states;
 
 
 /*
@@ -410,12 +433,11 @@ function validate_attribute(colum, attribute, start_frame, end_frame, filter_att
 	return false;
 }
 
-
 /*
 	cria um master controller node
 */
 function create_mc(coord, mcName, parentGroup){
-	return node.add(parentGroup, mcName, "MasterController", coord.x, coord.y, 0);
+	return node.add(parentGroup, mcName, "MasterController", coord.x(), coord.y(), 0);
 }
 
 /*
@@ -436,7 +458,7 @@ function update_mcNode(mcNode, options){
 		'include(fileMapper.toNativePath(specialFolders.resource+\"/scripts/utilities/ui/functionWizard/mcs/mcCheckboxFunction.js\"));';
 	} else {
 		var scriptBaseName = BD1_fileBasename(options.scriptFile);
-		var scriptAtt =  'include(fileMapper.toNativePath(scene.currentProjectPath()+\"/scripts/" + ' + scriptBaseName + '+ \"))';
+		var scriptAtt = 'include(fileMapper.toNativePath(scene.currentProjectPath()+"/scripts/' + scriptBaseName + '"))';
 	}
 
 	//update script editor att
@@ -466,7 +488,7 @@ function update_mcNode(mcNode, options){
 			column.add(colfile, "FILE_LIBRARY");
 			node.linkAttr(mcNode, "FILES", colfile);
 		}
-		var filesatt = options.scriptFile + "\n" + options.stageFiles.toString().replace(",", "\n");
+		var filesatt = "scripts/" + scriptBaseName + "\n" + options.stageFiles.toString().replace(",", "\n");
 		column.setEntry(colfile, 1, 1, filesatt);
 
 		//create colum for widget value
@@ -479,12 +501,9 @@ function update_mcNode(mcNode, options){
 	}
 	
 	//Hack : Copy-paste the newly created node, to force-trigger its update with the new specs.
-	var dragObj = copyPaste.copy([mcNode], frame.current(), 1, copyPaste.getCurrentCreateOptions());
-	copyPaste.pasteNewNodes(dragObj, node.parentNode(mcNode), copyPaste.getCurrentPasteOptions());
-	var sNewMCNodeCopy = selection.selectedNode(0);
-	var sOriginalNameOnly = node.getName(mcNode);
-	node.deleteNode(mcNode);
-	node.rename(sNewMCNodeCopy, sOriginalNameOnly);
+	BD2_updateNode(mcNode);
+	
+	node.showControls(mcNode, false);
 
 	return true;
 }
@@ -499,7 +518,7 @@ function difine_mcs(mcs_list){
 	var mcs = {master: [], checkbox: null, extras: []};
 
 	sorted.forEach(function(item){
-		var object = {node: item, comp: findConnectedComp(item)};
+		var object = {node: item, comp: findConnectedComp(item), peg: findConnectedPeg(item)};
 		if(node.getName(item) == "mc_Master"){
 			mcs["master"].push(object);
 		} else if(node.getName(item) == "mc_Function"){
@@ -531,6 +550,21 @@ function findConnectedComp(nodeP){
 			return comp;
 		}
 		comp = node.dstNode(comp, 0, 0);
+	}
+	Print("ERRO! No comp found for node: " + nodeP);
+	return false;
+}
+
+/*
+	retorna peg ou static conectado ao node
+*/
+function findConnectedPeg(nodeP){
+	var peg = node.srcNode(nodeP, 0);
+	while(peg){
+		if(node.type(peg) == "PEG" || node.type(peg) == "StaticConstraint"){
+			return peg;
+		}
+		peg = node.srcNode(peg, 0);
 	}
 	Print("ERRO! No comp found for node: " + nodeP);
 	return false;
@@ -646,6 +680,12 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			return;
 		}
 		mc_data["slider"]["color1"] = cor1;
+		
+		//update action button enable state
+		var valid_selection = Boolean(mc_data.turn_data) && Boolean(mc_data.selection);
+		var valid_colors = Boolean(mc_data["slider"]["color1"]) && Boolean(mc_data["slider"]["color2"]);
+		mc_data.widgets.action.enabled = valid_colors && valid_selection;
+		
 		Print("Color 1 " + mc_name + " set to " + cor1);
 	}
 	//callback do botao de cor 2
@@ -657,50 +697,101 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			return;
 		}
 		mc_data["slider"]["color2"] = cor2;
+		
+		//update action button enable state
+		var valid_selection = Boolean(mc_data.turn_data) && Boolean(mc_data.selection);
+		var valid_colors = Boolean(mc_data["slider"]["color1"]) && Boolean(mc_data["slider"]["color2"]);
+		mc_data.widgets.action.enabled = valid_colors && valid_selection;
+		
 		Print("Color 2 " + mc_name + " set to " + cor2);
 	}
 	//callback do action button
 	var action_callback = function(){
-		Print("start action " + mc_name);
-		if(!mc_data.group_node){
-			MessageBox.warning("Defina o grupo de destino!",0,0);
-			return;			
-		}
-		if(!mc_data.turn_data){
-			MessageBox.warning("Algo deu errado! O Turn ainda nao foi denifido!",0,0);
-			return;
-		}
-		if(!mc_data.node){//cria o mc
-			var created = utils.add_mc(mc_data.group_node, mc_name);
-			Print("Created nodes: ");
-			Print(created);
-			//update main object info
-			mc_data["node"] = created.mc_node;
-			mc_data["comp"] = created.comp;
-			//change button text to update
-			mc_data.widgets.action.text = "Update";
-			//update mc count 
-			self.ui.groupInfo.labelMCMasterCount.text = parseInt(self.ui.groupInfo.labelMCMasterCount.text)++;
-		}
+		try{
+			Print("start action " + mc_name);
+			if(!mc_data.group_node){
+				MessageBox.warning("Defina o grupo de destino!",0,0);
+				return;			
+			}
+			if(!mc_data.turn_data){
+				MessageBox.warning("Algo deu errado! O Turn ainda nao foi denifido!",0,0);
+				return;
+			}
+			
+			//begin undo
+			scene.beginUndoRedoAccum("[MC Manager] Action - " + mc_name);	
 
-		//update node info
-		var scriptFile = type == "MASTER" ? this.scripts.slider_standard : this.scripts.slider_special;
-		var statesFiles_list = mc_data.states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
-		var ui_data = type == "MASTER" ? {"poses": "/"+statesFiles_list[0],"location":"scn"} : "PLACEHOLDER__FAZER FUNCAO PRA GERAR UIDATA do eXTRAS";
-		var options = {
-			is_checkbox_mc : false,
-			scriptFile: scriptFile,
-			uidata: ui_data,
-			stageFiles: statesFiles_list,
-			horizontal: mc_data.slider.horizontal,
-			label: self.rig_name,
-			font: self.font,
-			framecolor: mc_data.slider.color2,
-			slidercolor: mc_data.slider.color1,
-			labelcolor: mc_data.slider.color2
-		}
-		update_mcNode(mc_data.node, options);
-		Print("fim action Master 0");
+			if(!mc_data.node){//cria o mc
+				var created = add_mc(mc_data.group_node, mc_name);
+				Print("Created nodes: ");
+				Print(created);
+				//update main object info
+				mc_data["node"] = created.mc_node;
+				mc_data["comp"] = created.comp;
+				mc_data["peg"] = created.static_node;
+				//change button text to update
+				mc_data.widgets.action.text = "Update";
+				//update mc count 
+				var status_label = type == "MASTER" ? self.ui.groupInfo.labelMCMasterCount : self.ui.groupInfo.labelMCExtraCount;
+				status_label.text = parseFloat(status_label.text) + 1;
+			}
+
+			//update node info
+			var scriptFile = type == "MASTER" ? self.scripts.slider_standard : self.scripts.slider_special;
+			var statesFiles_list = mc_data.widgets.states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
+			var ui_data = type == "MASTER" ? {"poses": "/"+statesFiles_list[0],"location":"scn"} : "PLACEHOLDER__FAZER FUNCAO PRA GERAR UIDATA do eXTRAS";
+
+			var options = {
+				is_checkbox_mc : false,
+				scriptFile: scriptFile,
+				uidata: ui_data,
+				stageFiles: statesFiles_list,
+				horizontal: mc_data.slider.horizontal,
+				label: self.rig_name,
+				font: self.font,
+				framecolor: mc_data.slider.color2,
+				slidercolor: mc_data.slider.color1,
+				labelcolor: mc_data.slider.color2
+			}
+			
+			try{//update node mc files
+				//copia arquivo de script
+				var scriptBaseName = BD1_fileBasename(scriptFile);
+				var script_folder =	getSceneScriptFolder();
+				var scene_script_path = script_folder + scriptBaseName;
+				if(!BD1_CopyFile(scriptFile, scene_script_path)){
+					MessageBox.warning("Erro copiando o arquivo de script: " + scriptBaseName + " para o script folder da cena",0,0);
+				}
+				//update state file
+				var filter_atts = type != "MASTER";
+				var stage_file = scene.currentProjectPath() + "/" + statesFiles_list[0];
+				update_states(stage_file, mc_data.selection, node.parentNode(mc_data.node), filter_atts);
+				
+			} catch(e){
+				Print("Update Files failed!");
+				Print(e);
+			}
+			
+			try{//update node mc atts
+				update_mcNode(mc_data.node, options);
+				node.showControls(mc_data.node, true);
+			} catch(e){
+				Print("Update mc node error!");
+				Print(e);	
+			}
+			
+			//conecta o  mc node ao static
+			node.link(mc_data.peg, 0, mc_data.node, 0, false, false);
+			
+			Print("End action : " + mc_name);
+			
+			mc_data.widgets.status.text = "Mc node Updated!";
+			
+			scene.endUndoRedoAccum();
+		} catch(e){
+			Print(e);
+			Print("Action failed!");
+		}	
 	};
 	//selection callback
 	var select_callback = function(){
@@ -719,5 +810,6 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 	mc_data.widgets.select.clicked.connect(self, select_callback);
 	
 	Print("End callback creation for :  " + mc_name);
+	
 }
 exports.createMCObjectCallbacks = createMCObjectCallbacks;
