@@ -4,13 +4,14 @@ from app.utils.nextcloud_server import NextcloudServer
 from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
-from app.utils.birdo_json import write_json_file
-from app.utils.check_updates import main_update
+from app.utils.birdo_json import write_json_file,write_json_file_from_string
+from app.utils.check_updates import main_update,first_update,rev_parse,fix_old_repos
 from app.utils.system import SystemFolders, get_short_path_name
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import sys
 import subprocess
+import re
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
@@ -92,6 +93,8 @@ class BirdoApp(QtGui.QMainWindow):
         # LINEEDIT CONNECTIONS
         self.ui.server_login_line.textChanged.connect(self.change_login)
         self.ui.server_pw_line.textChanged.connect(self.change_login)
+
+        self.ui.username_line.textChanged.connect(self.update_login_page)
         self.ui.localFolder_line.textChanged.connect(self.update_login_page)
         self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
@@ -151,9 +154,6 @@ class BirdoApp(QtGui.QMainWindow):
                 permissions = j["user_types"]
 
         user_data = self.project_data["user_data"]
-        print "\n"
-        print user_data
-        print "\n"
         if "current_user" in user_data.keys():
             username = user_data["current_user"]
         else:
@@ -208,9 +208,10 @@ class BirdoApp(QtGui.QMainWindow):
         return
 
     def showEvent(self, event):
-        # do stuff here 
-        self.initProjectPage()
+        # do stuff here
         event.accept()
+        self.on_init()
+        self.initProjectPage()
 
     def loadPage(self, page):
         ui_file = QtCore.QFile(page)
@@ -269,6 +270,19 @@ class BirdoApp(QtGui.QMainWindow):
     def isConnected(self):
         return self.owncloud is not None or self.owncloud.get_roots()
 
+    def isRepoUpdated(self):
+
+        return rev_parse("@") == rev_parse("@{u}")
+
+    def on_init(self):
+
+        fix_old_repos()
+        print "is updated: " + str(self.isRepoUpdated())
+        if not self.isRepoUpdated():
+            self.ui.stackedWidget.setCurrentIndex(1)
+            first_update(main_app = self)
+            os.execv(sys.executable, ['python'] + sys.argv)
+
     def splash_page(self):
         # change page to splash index 1
         self.ui.stackedWidget.setCurrentIndex(1)
@@ -281,8 +295,12 @@ class BirdoApp(QtGui.QMainWindow):
         #ADD LAYOUT LOGO
         self.ui.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
 
+        if "current_user" in self.project_data["user_data"].keys() and not self.isDiscordName(self.project_data["user_data"]["current_user"]):
+            MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
+            self.getDiscordUserName(self.project_data)
+            self.login_page()
         # CHECK IF CONFIG IS READY
-        if not self.project_data["ready"]:
+        elif not self.project_data["ready"]:
             # OPEN LOGIN PAGE
             self.login_page()
         elif not main_update(self.project_data, self):
@@ -292,6 +310,21 @@ class BirdoApp(QtGui.QMainWindow):
             ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
             #self.close()
             self.initPluginPage()
+
+    def isDiscordName(self,current_name):
+
+        return re.match(".*#\d{4}$",current_name) is not None
+
+    def getDiscordUserName(self,project_data):
+
+        user_data = self.getUserData()
+        self.ui.username_line.setText("")
+        self.ui.localFolder_line.setText(user_data[user_data["current_user"]][project_data["prefix"]]["local_folder"])
+        index = self.ui.combo_funcao.findText(user_data[user_data["current_user"]][project_data["prefix"]]["user_type"])
+        if index >= 0:
+            self.ui.combo_funcao.setCurrentIndex(index)
+
+        return
 
     #Mostra a pagina pra preencher os dados
     def login_page(self):
@@ -339,11 +372,18 @@ class BirdoApp(QtGui.QMainWindow):
         if "current_user" in user_data.keys():
             self.ui.username_line.setText(user_data["current_user"])
 
+    def check_username(self):
+
+        username = self.ui.username_line.text().replace(" #","#")
+        self.ui.username_line.setText(username)
+
+        return
 
     # TODO: Sempre que um dado for alterado mudar o status da conexao pra false
     # VERIFICA O STATUS DE TODOS OS CAMPOS NO LOGIN E LIBERA O BOTAO UPDATE E MOSTRA STATUS NO LOADING LABEL
     def update_login_page(self):
 
+        self.check_username()
         login_status_geral = True
         msg = "Login test ok!"
         if self.isCloudProject and self.ui.status_label.text() != "LOGIN OK":
@@ -431,7 +471,8 @@ class BirdoApp(QtGui.QMainWindow):
             first_login = False
 
         # SETS THE CURRENT USER TO LOGIN
-        user_data["current_user"] = str(self.ui.username_line.text())
+        user_data["current_user"] = self.ui.username_line.text()
+        print user_data["current_user"]
         # UPDATES USERDATA
         new_user = self.createNewUser()
         if not user_data["current_user"] in user_data.keys():
@@ -444,7 +485,8 @@ class BirdoApp(QtGui.QMainWindow):
         if not os.path.exists(local_user_data_folder):
             os.makedirs(local_user_data_folder)
 
-        if write_json_file(temp_user_json, user_data):
+        #if write_json_file(temp_user_json, user_data,op_code="wb"):
+        if write_json_file_from_string(temp_user_json,user_data,op_code="wb",encoding="utf-8",ensure_ascii=False):
             self.setLabelAttributes(self.ui.loading_label, "Login done!", "color: rgb(37, 255, 201);")
             print "login data saved!"
         else:
