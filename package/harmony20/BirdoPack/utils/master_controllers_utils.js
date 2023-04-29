@@ -519,7 +519,7 @@ function difine_mcs(mcs_list){
 
 	sorted.forEach(function(item){
 		var object = {node: item, comp: findConnectedComp(item), peg: findConnectedPeg(item)};
-		if(node.getName(item) == "mc_Master"){
+		if(node.getName(item).indexOf("mc_Master") != -1){
 			mcs["master"].push(object);
 		} else if(node.getName(item) == "mc_Function"){
 			mcs["checkbox"] = object;
@@ -578,11 +578,11 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 	var turn_data = {};
 	var duracao = endFrame - (startFrame-1);
 	var turn_type = front == startFrame ? "foward" : "front_middle";//define se a pose front fica no inicio ou no meio
-	var middle = Math.round((duracao-1)/2) + 1;
+	var middle = Math.round((duracao-1)/2);
 	var msg = "Turn Invalido! Marque corretamente as informacoes\ndo Turn. As opcoes sao:\n\n -1): (FRONT---BACK---) - Selecao de frames PAR;\n -2): (BACK---FRONT---BACK) - Selecao de frames IMPAR;";
 	//check if info is valid
 	if(turn_type == "foward"){
-		if(back != middle || duracao%2 != 0){
+		if(back != (startFrame + middle) || duracao%2 != 0){
 			MessageBox.warning(msg,0,0);
 			return false;
 		}
@@ -592,7 +592,7 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 			reduced_list = prefix_list.slice(0, middle).split("").concat(prefix_list.slice(1, middle-1).split("").reverse());
 		}
 	} else if (turn_type == "front_middle"){
-		if((back != startFrame && back != endFrame) || duracao%2 == 0 || front != middle){
+		if((back != startFrame && back != endFrame) || duracao%2 == 0 || front != (startFrame + middle)){
 			MessageBox.warning(msg,0,0);
 			return false;
 		}
@@ -604,7 +604,7 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 	}
 
 	reduced_list.forEach(function(item, index){
-		var frame = index + 1;
+		var frame = startFrame + index;
 		turn_data[frame] = item;
 	});
 	Print("Turn Type is: '" + turn_type + "' and fliped: " + fliped);
@@ -664,6 +664,89 @@ function setButtonColor(button){
 }
 exports.setButtonColor = setButtonColor;
 
+/*
+	apply MC static position
+*/
+function applyMCStaticPosition(read_nodes, staticNode, mc_type, index){
+	var rect = getReadsBox(read_nodes);
+	var side = mc_type == "MASTER" ? "bottom" : mc_type == "CHECKBOX" ? "top" : index%2 == 0 ? "left" : "rigth";
+	var desloc = {x: 2 * index, y: 0.75 * index};
+	var valueX = side == "top" || side == "bottom" ? rect.center().x() : side == "left" ? rect.x0 - 1 - desloc.x : rect.x1 + 1 + desloc.x;
+	var valueY = side == "left" || side == "rigth" ? rect.center().y() + 1 : side == "top" ? rect.y1 + 1 + desloc.y : rect.y0 - 1 - desloc.y;
+	var xAtt = node.getAttr(staticNode, 1, "translate.X");
+	var yAtt = node.getAttr(staticNode, 1, "translate.Y");
+	var activeAtt = node.getAttr(staticNode, 1, "active");
+	xAtt.setValue(valueX);
+	yAtt.setValue(valueY);
+	activeAtt.setValue(true);
+
+	Print("Set translate pos x : " + valueX + " pos Y : " + valueY);
+}
+
+/*
+	constructor to creates a box Object
+*/
+function Box(boxObject){
+	//valor pra converter de drawing coord to peg coord
+	this.toPegX = 208.25;
+	this.toPegY = 156.19;
+	
+	this.x0 = boxObject.x0/this.toPegX;
+	this.x1 = boxObject.x1/this.toPegX;
+	this.y0 = boxObject.y0/this.toPegY;
+	this.y1 = boxObject.y1/this.toPegY;
+
+	this.width = function(){
+		return this.x1 - this.x0;
+	}
+	this.height = function(){
+		return this.y1 - this.y0;
+	}
+	this.center = function(){
+		var x = this.x0 + (this.width()/2);
+		var y = this.y0 + (this.height()/2);
+		return new QPoint(x, y);
+	}
+};
+
+/*
+	retorna box de todos nodes reads da lista
+*/
+function getReadsBox(read_list){
+	var final_pos = {
+		x0: 0,
+		x1: 0,
+		y0: 0,
+		y1: 0
+	};
+	for(var i=0; i<read_list.length; i++){
+		var node_box = getNodeBox(read_list[i]);
+		if(!node_box){
+			continue;
+		}
+		final_pos["x0"] = Math.min(final_pos["x0"], node_box.x0);
+		final_pos["x1"] = Math.max(final_pos["x1"], node_box.x1);
+		final_pos["y0"] = Math.min(final_pos["y0"], node_box.y0);
+		final_pos["y1"] = Math.max(final_pos["y1"], node_box.y1);
+	}
+	return new Box(final_pos);
+}
+
+/*
+	retorna box dos drawings do node
+*/
+function getNodeBox(node_path){
+	var currentDrawing = Drawing.Key({node : node_path, frame : frame.current()});
+	var config = {
+		drawing  : currentDrawing
+	};
+	var data = Drawing.query.getData(config); 
+	var box = data.box;
+	if(!box || box.hasOwnProperty("empty")){
+		return false;
+	}
+	return box;
+}
 
 /*
 	create mc callbacks
@@ -687,6 +770,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 		mc_data.widgets.action.enabled = valid_colors && valid_selection;
 		
 		Print("Color 1 " + mc_name + " set to " + cor1);
+		mc_data.widgets.status.text = "Cor 1 escolhida!";
 	}
 	//callback do botao de cor 2
 	var setColor2 = function(){
@@ -704,6 +788,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 		mc_data.widgets.action.enabled = valid_colors && valid_selection;
 		
 		Print("Color 2 " + mc_name + " set to " + cor2);
+		mc_data.widgets.status.text = "Cor 2 escolhida!";
 	}
 	//callback do action button
 	var action_callback = function(){
@@ -734,6 +819,10 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 				//update mc count 
 				var status_label = type == "MASTER" ? self.ui.groupInfo.labelMCMasterCount : self.ui.groupInfo.labelMCExtraCount;
 				status_label.text = parseFloat(status_label.text) + 1;
+				
+				//update peg (static) position:
+				var read_nodes = mc_data.selection.nodes.filter(function(item){ return node.type(item) == "READ"});
+				applyMCStaticPosition(read_nodes, mc_data["peg"], type, index);
 			}
 
 			//update node info
@@ -747,11 +836,11 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 				uidata: ui_data,
 				stageFiles: statesFiles_list,
 				horizontal: mc_data.slider.horizontal,
-				label: self.rig_name,
+				label: (type == "MASTER" ? "" : self.rig_name),
 				font: self.font,
 				framecolor: mc_data.slider.color2,
 				slidercolor: mc_data.slider.color1,
-				labelcolor: mc_data.slider.color2
+				labelcolor: mc_data.slider.color1
 			}
 			
 			try{//update node mc files
@@ -787,7 +876,13 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			
 			mc_data.widgets.status.text = "Mc node Updated!";
 			
+			//update enable extras tab
+			if(type == "MASTER" && index == 0){
+				self.ui.tabWidget.setTabEnabled(1, true);
+			}
+			
 			scene.endUndoRedoAccum();
+			
 		} catch(e){
 			Print(e);
 			Print("Action failed!");
@@ -802,7 +897,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			Print(e);
 			Print("Selection error!");
 		}
-	};  
+	};
 	mc_data.widgets.color1.clicked.connect(self, setColor1);
 	mc_data.widgets.color2.clicked.connect(self, setColor2);
 	

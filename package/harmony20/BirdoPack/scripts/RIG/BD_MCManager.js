@@ -38,7 +38,7 @@ function BD_MCManager(){
 	}
 	
 	if(rig_data.mcs.master.length > 2){//evita que selecione nodes de mcs invalidos de masters!
-		MessageBox.warning("Algo estranho! Há mais de 2 Mc considerados Master! Verifique o nome dos mcs Masters do Rig!",0,0);
+		MessageBox.warning("Algo estranho! Tem mais de 2 Mc considerados Master! Verifique o nome dos mcs Masters do Rig!",0,0);
 		return;
 	}
 
@@ -58,6 +58,9 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	var main_tab_widget = this.ui.tabWidget;
 	var masterPage = main_tab_widget.widget(0);
 	var extrasPage = main_tab_widget.widget(1);
+
+	//hide extras tab
+	main_tab_widget.setTabEnabled(1, false);
 
 	//update rig info
 	this.ui.groupInfo.labelRigName.text = rig_data.rig_name;
@@ -83,7 +86,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	
 	//update masters buttons state
 	masterPage.groupMaster.pushActionMaster.text = rig_data.mcs.master.length == 0 ? "Create" : "Update";
-	masterPage.groupMaster2.pushActionMaster2.text = rig_data.mcs.extras.length == 2 ? "Update" : "Create";
+	masterPage.groupMaster2.pushActionMaster2.text = rig_data.mcs.master.length == 2 ? "Update" : "Create";
 	masterPage.pushMCcheckbox.text = Boolean(rig_data.mcs.checkbox) ? "Update MC_Checkbox" : "Create MC_Checkbox";
 	masterPage.pushMCcheckbox.enabled = rig_data.mcs.master.length > 0;
 	
@@ -219,9 +222,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		//desabilita ou habilita o groupFrames
 		masterPage.groupFrames.enabled = valid_selection;
 		
-		//update label mc
-		curr_mc["widgets"]["status"].text = valid_selection ? "Selection Valid! Edit Turn..." : "invalid selection!";	
-		
 	}
 		
 	this.enable_mc_widgets = function(mc_data, enable){//(dis)enables the mc object's  widgets (exepc action button)
@@ -263,7 +263,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		};
 		//update mc widgets
 		this.enable_mc_widgets(this.mc_data[mc_type][index], true)
-		this.mc_data[mc_type][index]["widgets"]["status"].text = "Valid Selection!";
+		this.mc_data[mc_type][index]["widgets"]["status"].text = "Valid Selection! Edit Turn!";
 
 		//update dos frmaes widgets 
 		this.updateFramesSelection();
@@ -320,12 +320,18 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		if(!utils.modify_turn_node(turn_data, rig_data.turn_node)){
 			MessageBox.warning("Algo deu errado ao setar o node turn!",0,0);
 			curr_mc.widgets.action.enabled = false;
+			curr_mc.widgets.status.text = "ERRO ao settar o node TURN!";
 		} else {
 			curr_mc.widgets.action.enabled = valid_colors;
 		}
 		//update selection
 		this.current_selection = null;
 		this.updateFramesSelection();
+		
+		if(!valid_colors){//add escolha cores no status caso ainda nao tenha cores escolhidas!
+			curr_mc.widgets.status.text = "- Escolha as cores!";
+		}	
+		
 		Print("Turn edit finished!");
 	}
 	
