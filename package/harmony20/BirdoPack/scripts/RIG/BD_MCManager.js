@@ -80,6 +80,8 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.scripts = utils.get_script_files(projectDATA);
 	//script folder name
 	this.script_folder_name = rig_data.script_folder_name;
+	//master turn widgets info
+	this.master_turn = null;
 	
 	//update master 2 check state
 	masterPage.groupMaster2.checked = rig_data.mcs.master.length == 2;
@@ -125,7 +127,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 					color2: null
 				},
 				widgets: {
-					groupBox: masterPage.groupMaster,
 					color1: masterPage.groupMaster.pushMasterCor1,
 					color2: masterPage.groupMaster.pushMasterCor2,
 					name: masterPage.groupMaster.labelMasterName,
@@ -150,7 +151,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 					color2: null
 				},
 				widgets: {
-					groupBox: masterPage.groupMaster2,
 					color1: masterPage.groupMaster2.pushMaster2Cor1,
 					color2: masterPage.groupMaster2.pushMaster2Cor2,
 					name: masterPage.groupMaster2.labelMaster2Name,
@@ -179,7 +179,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		}
 	}
 	
-
 	// // CALLBACKS // // 
 	this.getCurrentSelection = function(){//retorna current selection object
 		return Boolean(this.current_selection) ? this.mc_data[this.current_selection.type][this.current_selection.index].selection : null;
@@ -228,6 +227,9 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		mc_data["widgets"]["turn_type"].clear();
 		if(enable){
 			mc_data["widgets"]["turn_type"].addItems(mc_data["turn_types"]);	
+		}
+		if("group_combo" in mc_data.widgets){
+			mc_data["widgets"]["group_combo"].enabled = enable;
 		}
 		mc_data["widgets"]["turn_type"].enabled = enable;
 		mc_data["widgets"]["color1"].enabled = enable;
@@ -335,12 +337,65 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		Print("Turn edit finished!");
 	}
 	
+	this.updateTab = function(){//atualiza a tab (se for a EXTRAS atualiza o mc selecionado)
+		var curr_index = this.ui.tabWidget.currentIndex;
+		Print("Tab changed to : " + curr_index);
+		this.current_selection = null;
+		if(curr_index == 0){
+			//is master tab
+			this.updateFramesSelection();
+		} else {
+			//update extras widgets
+			if(this.mc_data.EXTRAS.length > 0){
+				for(var i=0; i<this.mc_data.EXTRAS.length; i++){
+					var item = this.mc_data.EXTRAS[i];
+					if(item.widgets.radio.checked){	
+						this.current_selection = {
+							type: "EXTRAS",
+							index: i
+						};
+						//update name widget
+						item.widgets.name.text = item.mc_name;
+						//reseta as widgets de states
+						item.widgets.states.forEach(function(labelState){
+							labelState.text = "null";
+						});
+						break;
+					}
+				}
+			}	
+		}
+	}	
+	
+	this.addExtra = function(){//callback do botao de add novo extra MC
+		var extra_name = Input.getText("Name: ", "", "Create Extra MC");
+		if(!extra_name){
+			Print("Add extra mc: canceled!");
+			return;
+		}
+		
+		var index = this.mc_data.EXTRAS.length;
+		var mc_extra = utils.createExtraObject(this, extrasPage, extra_name, index);
+		this.mc_data.EXTRAS.push(mc_extra);
+		
+		//mark new dario as checked
+		this.mc_data.EXTRAS[index].widgets.radio.checked = true;
+		
+		Print("Extra added: " + index);
+	}
+	
+	
+	
 	//Connections
 	masterPage.groupFrames.pushPrev.clicked.connect(this, this.prevFrame);
 	masterPage.groupFrames.pushNext.clicked.connect(this, this.nextFrame);
 	masterPage.groupFrames.pushSetFront.clicked.connect(this, this.setFront);
 	masterPage.groupFrames.pushSetBack.clicked.connect(this, this.setBack);
 	masterPage.groupFrames.pushUpdateTurn.clicked.connect(this, this.updateTurn);
+	extrasPage.groupExtrasList.pushAddExtra.clicked.connect(this, this.addExtra);
+
+	//quando muda a tab
+	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
 
 
 	/*
@@ -348,7 +403,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.ui.groupFilter.removeTagButton.clicked.connect(this, this.removeTagItem);
 	this.ui.cancelButton.clicked.connect(this, this.close);
 	this.ui.applyButton.clicked.connect(this, this.applyButton);
-	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
 	this.ui.groupFilter.comboType["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
 	this.ui.groupFilter.comboStatus["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
 	this.ui.groupAdvanced.spinStart["valueChanged(int)"].connect(this, this.updateSpinStart);

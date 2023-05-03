@@ -836,7 +836,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 				uidata: ui_data,
 				stageFiles: statesFiles_list,
 				horizontal: mc_data.slider.horizontal,
-				label: (type == "MASTER" ? "" : self.rig_name),
+				label: (type == "MASTER" ? "" : mc_name.replace("mc_", "")),
 				font: self.font,
 				framecolor: mc_data.slider.color2,
 				slidercolor: mc_data.slider.color1,
@@ -875,10 +875,14 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			Print("End action : " + mc_name);
 			
 			mc_data.widgets.status.text = "Mc node Updated!";
-			
-			//update enable extras tab
+
 			if(type == "MASTER" && index == 0){
+				//update enable extras tab
 				self.ui.tabWidget.setTabEnabled(1, true);
+				//update master_turn data
+				var extraTab = self.ui.tabWidget.widget(1);
+				create_turn_widget(self, mc_data.turn_data, extraTab);
+				
 			}
 			
 			scene.endUndoRedoAccum();
@@ -905,6 +909,88 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 	mc_data.widgets.select.clicked.connect(self, select_callback);
 	
 	Print("End callback creation for :  " + mc_name);
-	
 }
 exports.createMCObjectCallbacks = createMCObjectCallbacks;
+
+/*
+	cria as widgets de turn na tab 2 (extras) com cada selecao do turn do MC Master
+*/
+function create_turn_widget(self, turn_data, extraTab){
+	var gridLayout = extraTab.groupTurn.layout();
+	self.master_turn = {};
+	Object.keys(turn_data).forEach(function(item, index){
+		var pose = turn_data[item];
+		var checkbox = new QCheckBox(pose, extraTab.groupTurn);
+		var label = new QLabel("null", extraTab.groupTurn);
+		label.setFrameStyle(QFrame.Box | QFrame.Plain);
+		gridLayout.addWidget(checkbox, index, 0, Qt.AlignTop);
+		gridLayout.addWidget(label, index, 1, Qt.AlignTop);
+		
+		//callback da checkbox (somente habilita a label)
+		checkbox.toggled.connect(function(){
+			var curr_mc = self.getCurrent_mc();
+			if(checkbox.cb.checked){
+				var l_text = extraTab.comboType.currentText == "Individual" ? curr_mc.mc_name + item + ".tbState" : curr_mc.mc_name + ".tbState";
+			} else {
+				var l_text = "null";
+			}
+			label.text = l_text;
+			label.enabled = checkbox.checked;
+		});
+		self.master_turn[pose] = {cb: checkbox, state_label: label};
+	});
+}
+
+/*
+	adiciona um novo objeto de mc no EXTRAS (cria radiobutton);
+*/
+function createExtraObject(self, extrasPage, mc_name, index){
+	var scrollWidget = extrasPage.groupExtrasList.scrollRadioList.widget();
+	var gridLayout = scrollWidget.layout();
+	var radioButton = new QRadioButton(scrollWidget);
+	radioButton.text = mc_name;
+	gridLayout.addWidget(radioButton, index, 0, Qt.AlignTop);
+	
+	//states widgets list
+	var states_widgets = Object.keys(self.master_turn).map(function(item){return obj[item]});
+	
+	radioButton.toggled.connect(function(){
+		self.current_selection = null;
+		if(radioButton.checked){
+			self.current_selection = {
+				type: "EXTRAS",
+				index: index
+			};	
+		}
+	});
+	
+	return {
+		mc_name: mc_name,
+		node: null,
+		peg: null,
+		comp: null,
+		group_node: null,
+		turn_types: ["Individual", "Simple"],
+		turn_data: null,
+		selection: null,
+		slider: {
+			horizontal: false,
+			color1: null,
+			color2: null
+		},
+		widgets: {
+			radio: radioButton,
+			color1: extrasPage.pushCor1,
+			color2: extrasPage.pushCor2,
+			name: extrasPage.lineName,
+			states: states_widgets,
+			group_combo: extrasPage.comboGroup,
+			turn_type: extrasPage.comboType,
+			action: extrasPage.pushAction,
+			select: extrasPage.pushSelectTLExtra,
+			status: extrasPage.labelStatus
+		}
+	};
+}
+exports.createExtraObject = createExtraObject;
+
