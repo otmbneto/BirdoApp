@@ -82,7 +82,10 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.script_folder_name = rig_data.script_folder_name;
 	//master turn widgets info
 	this.master_turn = null;
-	
+	//all nodes list
+	this.all_nodes = rig_data.node_list;
+	//rig group 
+	this.rig_group = rig_data.rig_group;
 	//update master 2 check state
 	masterPage.groupMaster2.checked = rig_data.mcs.master.length == 2;
 	
@@ -188,7 +191,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		return Boolean(this.current_selection) ? this.mc_data[this.current_selection.type][this.current_selection.index] : null;
 	}
 	
-	this.updateFramesSelection = function(){//atualiza as widgets do grupo frames com selecao valida
+	this.updateFramesSelection = function(){//atualiza as widgets do grupo frames com selecao valida(somente MASTER)
 
 		var curr_selection = this.getCurrentSelection();
 		var curr_mc = this.getCurrent_mc();
@@ -224,14 +227,9 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	}
 		
 	this.enable_mc_widgets = function(mc_data, enable){//(dis)enables the mc object's  widgets (exepc action button)
-		mc_data["widgets"]["turn_type"].clear();
-		if(enable){
-			mc_data["widgets"]["turn_type"].addItems(mc_data["turn_types"]);	
-		}
 		if("group_combo" in mc_data.widgets){
 			mc_data["widgets"]["group_combo"].enabled = enable;
 		}
-		mc_data["widgets"]["turn_type"].enabled = enable;
 		mc_data["widgets"]["color1"].enabled = enable;
 		mc_data["widgets"]["color2"].enabled = enable;
 	}
@@ -300,7 +298,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		masterPage.groupFrames.pushUpdateTurn.enabled = masterPage.groupFrames.labelFront.text != " - - ";
 	}
 	
-	this.updateTurn = function(){//callback do butao de update do turn
+	this.updateTurn = function(){//callback do butao de update do turn (somente MASTER);
 		var curr_selection = this.getCurrentSelection();
 		var curr_mc = this.getCurrent_mc();
 		var startFrame = curr_selection.start_frame;
@@ -377,14 +375,25 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		var index = this.mc_data.EXTRAS.length;
 		var mc_extra = utils.createExtraObject(this, extrasPage, extra_name, index);
 		this.mc_data.EXTRAS.push(mc_extra);
-		
-		//mark new dario as checked
-		this.mc_data.EXTRAS[index].widgets.radio.checked = true;
+		//mark new radio as checked
+		this.mc_data.EXTRAS[index].widgets.radio.setChecked(true);
 		
 		Print("Extra added: " + index);
 	}
 	
-	
+	this.updateComboTurnType = function(){//callback do combo de turn type na aba EXTRAS
+		var is_advanced = extrasPage.comboType.currentText == "Advanced";
+		for(pose in this.master_turn){
+			var item = this.master_turn[pose];
+			if(is_advanced){
+				item.cb.autoExclusive = true;
+			} else {
+				item.cb.setChecked(false);
+				item.cb.autoExclusive = false;				
+			}
+		}
+		Print("advanced mode for mc extra creation is : " + is_advanced);
+	}
 	
 	//Connections
 	masterPage.groupFrames.pushPrev.clicked.connect(this, this.prevFrame);
@@ -393,6 +402,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	masterPage.groupFrames.pushSetBack.clicked.connect(this, this.setBack);
 	masterPage.groupFrames.pushUpdateTurn.clicked.connect(this, this.updateTurn);
 	extrasPage.groupExtrasList.pushAddExtra.clicked.connect(this, this.addExtra);
+	extrasPage.comboType["currentIndexChanged(QString)"].connect(this, this.updateComboTurnType);
 
 	//quando muda a tab
 	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);

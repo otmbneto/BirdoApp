@@ -754,6 +754,10 @@ function getNodeBox(node_path){
 function createMCObjectCallbacks(self, mc_data, type, index){
 	var mc_name = mc_data.widgets.name.text;
 	
+	//update combo types
+	mc_data["widgets"]["turn_type"].clear();
+	mc_data["widgets"]["turn_type"].addItems(mc_data["turn_types"]);	
+	
 	//callback do botao de cor 1
 	var setColor1 = function(){
 		var corButton = mc_data.widgets.color1;
@@ -790,6 +794,23 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 		Print("Color 2 " + mc_name + " set to " + cor2);
 		mc_data.widgets.status.text = "Cor 2 escolhida!";
 	}
+	
+	//se for extras e tiver group comboGroup
+	if("group_combo" in mc_data.widgets){
+		var filteredGroupNodes = self.all_nodes.filter(function(item){ return node.isGroup(item) && !/(^Def|PATCH|Patch)/.test(node.getName(item))});
+		var modList = filteredGroupNodes.map(function(item){ return item.replace(self.rig_group, "~")});
+		mc_data.widgets.group_combo.clear();
+		mc_data.widgets.group_combo.addItems(modList);		
+		var selectGroupCallback = function(){
+			//update group info in mc data
+			var selectedGroup = filteredGroupNodes[mc_data.widgets.group_combo.currentIndex];
+			mc_data["group_node"] = selectedGroup;
+			Print("Selected Group: " + selectedGroup);
+		}
+		mc_data.widgets.group_combo["currentIndexChanged(QString)"].connect(self, selectGroupCallback);
+		
+	}
+	
 	//callback do action button
 	var action_callback = function(){
 		try{
@@ -882,7 +903,6 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 				//update master_turn data
 				var extraTab = self.ui.tabWidget.widget(1);
 				create_turn_widget(self, mc_data.turn_data, extraTab);
-				
 			}
 			
 			scene.endUndoRedoAccum();
@@ -920,25 +940,38 @@ function create_turn_widget(self, turn_data, extraTab){
 	self.master_turn = {};
 	Object.keys(turn_data).forEach(function(item, index){
 		var pose = turn_data[item];
-		var checkbox = new QCheckBox(pose, extraTab.groupTurn);
+		if(pose in self.master_turn){
+			return;
+		}
+		var radioBox = new QRadioButton(pose, extraTab.groupTurn);
+		radioBox.autoExclusive = false;
 		var label = new QLabel("null", extraTab.groupTurn);
 		label.setFrameStyle(QFrame.Box | QFrame.Plain);
-		gridLayout.addWidget(checkbox, index, 0, Qt.AlignTop);
+		label.enabled = false;
+		gridLayout.addWidget(radioBox, index, 0, Qt.AlignTop);
 		gridLayout.addWidget(label, index, 1, Qt.AlignTop);
 		
 		//callback da checkbox (somente habilita a label)
-		checkbox.toggled.connect(function(){
+		radioBox.toggled.connect(self, function(){
 			var curr_mc = self.getCurrent_mc();
-			if(checkbox.cb.checked){
-				var l_text = extraTab.comboType.currentText == "Individual" ? curr_mc.mc_name + item + ".tbState" : curr_mc.mc_name + ".tbState";
+			if(!curr_mc){
+				Print("no current mc selected!");
+				return;
+			}
+			if(radioBox.checked){
+				var name_clean = curr_mc.mc_name.replace("mc_", "");
+				var l_text = extraTab.comboType.currentText == "Advanced" ? name_clean + pose + ".tbState" : name_clean + ".tbState";
 			} else {
 				var l_text = "null";
 			}
 			label.text = l_text;
-			label.enabled = checkbox.checked;
+			label.enabled = radioBox.checked;
+			Print("Pose " + pose + " => " + l_text);
 		});
-		self.master_turn[pose] = {cb: checkbox, state_label: label};
+		self.master_turn[pose] = {cb: radioBox, state_label: label};
 	});
+	//set seccond column stretch to 2
+	gridLayout.setColumnStretch(1, 2);
 }
 
 /*
@@ -952,25 +985,40 @@ function createExtraObject(self, extrasPage, mc_name, index){
 	gridLayout.addWidget(radioButton, index, 0, Qt.AlignTop);
 	
 	//states widgets list
-	var states_widgets = Object.keys(self.master_turn).map(function(item){return obj[item]});
+	var states_widgets = Object.keys(self.master_turn).map(function(item){return self.master_turn[item]});
 	
-	radioButton.toggled.connect(function(){
+	radioButton.toggled.connect(self, function(){
+		//habilita widgets
+		extrasPage.groupTurn.enabled = true;
+		extrasPage.pushSelectTLExtra.enabled = true;
+		extrasPage.comboType.enabled = true;
+		
+		//reseta current selection
 		self.current_selection = null;
 		if(radioButton.checked){
 			self.current_selection = {
 				type: "EXTRAS",
 				index: index
-			};	
+			};
+			extrasPage.pushSelectTLExtra.enabled = true;
+			extrasPage.comboType.enabled = true;
+			extrasPage.labelStatus.text = "mc selected: " + mc_name;
+			
+			//atualiza callbacks 
+			var curr_mc = self.getCurrent_mc();
+			createMCObjectCallbacks(self, curr_mc, "EXTRAS", index);
+			extrasPage.lineName.text = curr_mc.mc_name;
 		}
 	});
 	
+	//obs: todo objeto de extra criado, tem as mesmas widgets na tab 2, q mudam de connect toda vez q muda a selecao do radio do mc
 	return {
 		mc_name: mc_name,
 		node: null,
 		peg: null,
 		comp: null,
 		group_node: null,
-		turn_types: ["Individual", "Simple"],
+		turn_types: ["Advanced", "Simple"],
 		turn_data: null,
 		selection: null,
 		slider: {
