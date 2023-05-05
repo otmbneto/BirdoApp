@@ -86,6 +86,9 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.all_nodes = rig_data.node_list;
 	//rig group 
 	this.rig_group = rig_data.rig_group;
+	//turn node
+	this.turn_node = rig_data.turn_node;
+	
 	//update master 2 check state
 	masterPage.groupMaster2.checked = rig_data.mcs.master.length == 2;
 	
@@ -238,21 +241,24 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		//reseta current selection
 		this.current_selection = null;
 		
+		//current mc data object
+		var mc_data = this.mc_data[mc_type][index];
+		
 		var selectionData = utils.get_selection_data(rig_data);
 		//update selection
-		this.mc_data[mc_type][index]["selection"] = selectionData;
+		mc_data["selection"] = selectionData;
 		
 		if(!selectionData){
 			Print("Selecao invalida!");
-			this.mc_data[mc_type][index]["widgets"]["status"].text = "Invalid Selection!";
+			mc_data["widgets"]["status"].text = "Invalid Selection!";
 			return;
 		}
 		//checa se selecao e da master peg para a master 0
 		if(!selectionData.is_master && (mc_type == "MASTER" && index == 0)){
 			MessageBox.warning("Selecione a master peg do rig para criar um Master CM!",0,0);
-			this.enable_mc_widgets(this.mc_data[mc_type][index], false);
+			this.enable_mc_widgets(mc_data, false);
 			//update selection
-			this.mc_data[mc_type][index]["selection"] = null;
+			mc_data["selection"] = null;
 			return;
 		}
 		
@@ -261,13 +267,27 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			type: mc_type,
 			index: index
 		};
-		//update mc widgets
-		this.enable_mc_widgets(this.mc_data[mc_type][index], true)
-		this.mc_data[mc_type][index]["widgets"]["status"].text = "Valid Selection! Edit Turn!";
-
-		//update dos frmaes widgets 
-		this.updateFramesSelection();
-		Print("Selection set to : " + mc_type + " index : " + index);
+		
+		//edit extras
+		if(mc_type == "EXTRAS"){
+			mc_data["selection"]
+			var turn_widgets = this.master_turn;
+			var poses = Object.keys(turn_widgets).filter(function(item){ return turn_widgets[item].cb.checked});
+			if(!mc_data["turn_data"]){
+				mc_data["turn_data"] = {};
+			}
+			poses.forEach(function(pose){
+				mc_data["turn_data"][pose] = selectionData;
+			});
+			mc_data["widgets"]["status"].text = "selected poses: " + poses;
+			Print("Selected timeline for poses: " + poses);
+		} else {// if MASTER
+			mc_data["widgets"]["status"].text = "Valid Selection! Edit Turn!";
+			//update dos frmaes widgets 
+			this.updateFramesSelection();
+			Print("Selection set to : " + mc_type + " index : " + index);
+		}
+		this.enable_mc_widgets(mc_data, true);
 	}
 	
 	this.prevFrame = function(){//callback do pushPrev button
@@ -370,6 +390,8 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		if(!extra_name){
 			Print("Add extra mc: canceled!");
 			return;
+		} else {
+			extra_name = "mc_" + extra_name.replace(/^(mc|Mc|MC)_?/, "");	
 		}
 		
 		var index = this.mc_data.EXTRAS.length;
@@ -385,12 +407,18 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		var is_advanced = extrasPage.comboType.currentText == "Advanced";
 		for(pose in this.master_turn){
 			var item = this.master_turn[pose];
+			item.cb.setChecked(false);
 			if(is_advanced){
 				item.cb.autoExclusive = true;
 			} else {
-				item.cb.setChecked(false);
 				item.cb.autoExclusive = false;				
 			}
+		}
+		var curr_mc = this.getCurrent_mc();
+		if(!curr_mc){
+			Print("No mc selected!");
+		} else {
+			curr_mc["selection"] = null;
 		}
 		Print("advanced mode for mc extra creation is : " + is_advanced);
 	}

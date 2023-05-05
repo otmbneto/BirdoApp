@@ -162,7 +162,7 @@ function find_backdrop_mc(group, name){
 }
 
 /*
-	create mc master, check box nodes and backdrop
+	create mc node with backdrop if dont exist
 */
 function add_mc(group_node, name){
 	//add backdrop
@@ -314,7 +314,7 @@ function get_create_coordinate(sel_nodes){//retorna coordenadas pra criacao da c
 /*
 	atualiza o arquivo stage com as infos da selecao (usar filtro true para os extras e false para as masters)
 */
-function update_states(stage_file, selection_data, parent_node, filter_atts){//cria arquivo tbState com states objects criados
+function update_states(stage_file, selection_data, parent_node, filter_atts){
 	
 	var states = generate_selection_states(selection_data, filter_atts);
 	var sData = "[TB_StateManager]\n" + ("State Count:" + states.length + "\n");
@@ -467,7 +467,7 @@ function update_mcNode(mcNode, options){
 	
 	//update ui data att
 	var uiDataAttr = node.getAttr(mcNode,1,"uiData");
-	uiDataAttr.setValue(JSON.stringify(options.uidata), null, 2);
+	uiDataAttr.setValue(JSON.stringify(options.uidata), null, 1);
 	
 	//difine specs type
 	if(options.is_checkbox_mc){
@@ -488,7 +488,7 @@ function update_mcNode(mcNode, options){
 			column.add(colfile, "FILE_LIBRARY");
 			node.linkAttr(mcNode, "FILES", colfile);
 		}
-		var filesatt = "scripts/" + scriptBaseName + "\n" + options.stageFiles.toString().replace(",", "\n");
+		var filesatt = "scripts/" + scriptBaseName + "\n" + options.stageFiles.toString().replace(/,/g, "\n");
 		column.setEntry(colfile, 1, 1, filesatt);
 
 		//create colum for widget value
@@ -752,6 +752,7 @@ function getNodeBox(node_path){
 	create mc callbacks
 */
 function createMCObjectCallbacks(self, mc_data, type, index){
+	
 	var mc_name = mc_data.widgets.name.text;
 	
 	//update combo types
@@ -825,7 +826,13 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			}
 			
 			//begin undo
-			scene.beginUndoRedoAccum("[MC Manager] Action - " + mc_name);	
+			scene.beginUndoRedoAccum("[MC Manager] Action - " + mc_name);
+
+			//update turn node if necessary
+			if(type == "EXTRAS"){
+				checkExtraSelectionTurnNode(self, mc_data);
+					
+			}
 
 			if(!mc_data.node){//cria o mc
 				var created = add_mc(mc_data.group_node, mc_name);
@@ -848,8 +855,9 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 
 			//update node info
 			var scriptFile = type == "MASTER" ? self.scripts.slider_standard : self.scripts.slider_special;
-			var statesFiles_list = mc_data.widgets.states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
-			var ui_data = type == "MASTER" ? {"poses": "/"+statesFiles_list[0],"location":"scn"} : "PLACEHOLDER__FAZER FUNCAO PRA GERAR UIDATA do eXTRAS";
+			var filtered_states = mc_data.widgets.states.filter(function(item){ return item.text != "null";});
+			var statesFiles_list = filtered_states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
+			var ui_data = createExtras_ui_data(self, type, mc_data, statesFiles_list);
 
 			var options = {
 				is_checkbox_mc : false,
@@ -873,7 +881,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 					MessageBox.warning("Erro copiando o arquivo de script: " + scriptBaseName + " para o script folder da cena",0,0);
 				}
 				//update state file
-				var filter_atts = type != "MASTER";
+				var filter_atts = type == "EXTRAS";
 				var stage_file = scene.currentProjectPath() + "/" + statesFiles_list[0];
 				update_states(stage_file, mc_data.selection, node.parentNode(mc_data.node), filter_atts);
 				
@@ -1006,8 +1014,9 @@ function createExtraObject(self, extrasPage, mc_name, index){
 			
 			//atualiza callbacks 
 			var curr_mc = self.getCurrent_mc();
+	Print(curr_mc);
 			createMCObjectCallbacks(self, curr_mc, "EXTRAS", index);
-			extrasPage.lineName.text = curr_mc.mc_name;
+			extrasPage.lineName.text = mc_name;
 		}
 	});
 	
@@ -1042,3 +1051,43 @@ function createExtraObject(self, extrasPage, mc_name, index){
 }
 exports.createExtraObject = createExtraObject;
 
+/*
+	check if turn is in EXTRA mc selection and change node exposure to fit pose selection
+*/
+function checkExtraSelectionTurnNode(self, mc_data){
+	for(pose in mc_data.turn_data){
+		var pose_selection = mc_data.turn_data[pose];
+		if(pose_selection.nodes.indexOf(self.turn_node) != -1){
+			var d_column = node.linkedColumn(self.turn_node, "DRAWING.ELEMENT");
+			for(var f=pose_selection.start_frame; f<=pose_selection.end_frame; f++){
+				column.setEntry(d_column, 1, f, pose);
+				Print("Node turn changed to " + pose + " at frame " + f);
+			}			
+		}
+	}
+}
+
+
+/*
+	create mc ui_data object att to ui_data mc node
+*/
+function createExtras_ui_data(self, type, mc_data, statesFiles_list){
+	if(type == "EXTRAS"){
+		var ui_data = {
+			"node_ref" : self.turn_node.replace(mc_data.group_node, "~"),
+			"files": {},
+			"poses": null,
+			"location":"scn"
+		};
+		for(pose in self.master_turn){
+			var stateLabelText = self.master_turn[pose].state_label.text;
+			if(stateLabelText == "null"){
+				continue;
+			}
+			ui_data["files"][pose] = ["/scripts", self.script_folder_name, stateLabelText].join("/");
+		}
+	} else {//if MASTER
+		var ui_data = {"poses": "/"+statesFiles_list[0],"location":"scn"};	
+	}
+	return ui_data;
+}
