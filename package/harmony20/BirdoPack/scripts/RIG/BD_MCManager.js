@@ -175,16 +175,10 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		EXTRAS: []//criar funcao pra gerar lista de widgets dos extras no utils!
 	};
 	
-	//set MC callbacks
-	for(mc_type in this.mc_data){
-		if(mc_type == "CHECKBOX"){
-			continue;
-		}
-		for(var i=0; i<this.mc_data[mc_type].length; i++){
-			utils.createMCObjectCallbacks(this, this.mc_data[mc_type][i], mc_type, i)
-		}
-	}
-	
+	//set MC callbacks for MASTER and MASTER2
+	utils.createMCObjectCallbacks(this, this.mc_data["MASTER"][0], "MASTER", 0);
+	utils.createMCObjectCallbacks(this, this.mc_data["MASTER"][1], "MASTER", 1);
+
 	// // CALLBACKS // // 
 	this.getCurrentSelection = function(){//retorna current selection object
 		return Boolean(this.current_selection) ? this.mc_data[this.current_selection.type][this.current_selection.index].selection : null;
@@ -382,6 +376,10 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 					}
 				}
 			}	
+			if(this.mc_data.EXTRAS.length == 0){
+				var mc_list = rig_data.mcs.extras;
+				utils.addMCsNodesToMainObject(this, extrasPage, mc_list);
+			}	
 		}
 	}	
 	
@@ -434,7 +432,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 
 	//quando muda a tab
 	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
-
 
 	/*
 	this.ui.groupFilter.addTagButton.clicked.connect(this, this.addTagItem);

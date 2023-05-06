@@ -280,19 +280,19 @@ QRadioButton::indicator:checked {
 }
 
 QRadioButton:disabled{
-	color: gray;
+	color: #455d7a;
 }
 
 QRadioButton::indicator:checked:disabled {
-    color: rgb(250, 90, 120);
-	background-color: rgb(40, 30, 50);
-	border-color: gray;
+	color: #455d7a;
+	background-color: #233142;
+	border-color: #455d7a;
 }
 
 QRadioButton::indicator:unchecked:disabled {
-    color: rgb(250, 90, 120);
-	background-color: rgb(40, 30, 50);
-	border-color: gray;
+	color: #455d7a;
+	background-color: #233142;
+	border-color: #455d7a;
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_6">
@@ -1307,7 +1307,7 @@ QRadioButton::indicator:unchecked:disabled {
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_24" stretch=""/>
+          <layout class="QHBoxLayout" name="horizontalLayout_24"/>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_21">

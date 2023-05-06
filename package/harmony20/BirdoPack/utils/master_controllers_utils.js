@@ -467,7 +467,7 @@ function update_mcNode(mcNode, options){
 	
 	//update ui data att
 	var uiDataAttr = node.getAttr(mcNode,1,"uiData");
-	uiDataAttr.setValue(JSON.stringify(options.uidata), null, 1);
+	uiDataAttr.setValue(JSON.stringify(options.uidata, null, 1));
 	
 	//difine specs type
 	if(options.is_checkbox_mc){
@@ -993,8 +993,10 @@ function createExtraObject(self, extrasPage, mc_name, index){
 	gridLayout.addWidget(radioButton, index, 0, Qt.AlignTop);
 	
 	//states widgets list
-	var states_widgets = Object.keys(self.master_turn).map(function(item){return self.master_turn[item]});
-	
+	var states_widgets = Object.keys(self.master_turn).map(function(item){return self.master_turn[item].state_label});
+	//update line name with mc name
+	extrasPage.lineName.text = mc_name;
+
 	radioButton.toggled.connect(self, function(){
 		//habilita widgets
 		extrasPage.groupTurn.enabled = true;
@@ -1002,8 +1004,8 @@ function createExtraObject(self, extrasPage, mc_name, index){
 		extrasPage.comboType.enabled = true;
 		
 		//reseta current selection
-		self.current_selection = null;
 		if(radioButton.checked){
+			self.current_selection = null;
 			self.current_selection = {
 				type: "EXTRAS",
 				index: index
@@ -1014,9 +1016,8 @@ function createExtraObject(self, extrasPage, mc_name, index){
 			
 			//atualiza callbacks 
 			var curr_mc = self.getCurrent_mc();
-	Print(curr_mc);
 			createMCObjectCallbacks(self, curr_mc, "EXTRAS", index);
-			extrasPage.lineName.text = mc_name;
+			extrasPage.pushAction.text = Boolean(curr_mc.node) ? "Updata" : "Create";
 		}
 	});
 	
@@ -1091,3 +1092,34 @@ function createExtras_ui_data(self, type, mc_data, statesFiles_list){
 	}
 	return ui_data;
 }
+
+
+/*
+	cria mc_data dos mcs EXTRAS nodes existentes encontrados no rig
+*/
+function addMCsNodesToMainObject(self, extrasPage, mc_list){
+	if(mc_list.length == 0){
+		Print("No need to create EXTRAS mcs objects!");
+		return;
+	}
+	try{	
+		//create extra mc objects
+		for(var i=0; i<mc_list.length; i++){
+			var mc_object = mc_list[i];
+			var mc_name = node.getName(mc_object.node);
+			var mc_extra = utils.createExtraObject(self, extrasPage, mc_name, i);
+			mc_extra["mc_name"] = mc_name;
+			mc_extra["node"] = mc_object.node;	
+			mc_extra["peg"] = mc_object.peg;	
+			mc_extra["comp"] = mc_object.comp;
+			//update main object
+			self.mc_data["EXTRAS"].push(mc_extra);
+			Print("Extra MC object created: " + mc_extra["node"]);
+		}
+	} catch(e){
+		Print(e);
+		MessageBox.warning("ERROR creating existing EXTRAS mcs objects!",0,0);
+		return;
+	}
+}
+exports.addMCsNodesToMainObject = addMCsNodesToMainObject;
