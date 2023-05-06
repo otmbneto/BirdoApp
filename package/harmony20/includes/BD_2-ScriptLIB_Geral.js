@@ -116,6 +116,13 @@ function BD2_isArray(obj){
 
 }
 
+/*
+	retorna lista com values do objeto!
+*/
+function BD2_listObjectValues(obj){
+	return Object.keys(obj).map(function(item){ return obj[item];});
+}
+
 //#################COLUMN#############################//
 /*Lista Todos os drawings do node SELECIONADO na mesma ordem da library de desenhos
 */
