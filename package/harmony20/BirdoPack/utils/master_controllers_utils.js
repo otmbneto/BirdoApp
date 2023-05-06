@@ -831,7 +831,6 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			//update turn node if necessary
 			if(type == "EXTRAS"){
 				checkExtraSelectionTurnNode(self, mc_data);
-					
 			}
 
 			if(!mc_data.node){//cria o mc
@@ -855,10 +854,13 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 
 			//update node info
 			var scriptFile = type == "MASTER" ? self.scripts.slider_standard : self.scripts.slider_special;
-			var filtered_states = mc_data.widgets.states.filter(function(item){ return item.text != "null";});
-			var statesFiles_list = filtered_states.map(function(item){ return ["scripts", self.script_folder_name, item.text].join("/");});
-			var ui_data = createExtras_ui_data(self, type, mc_data, statesFiles_list);
-
+			var statesFiles_list = get_states_files(self, type, mc_data);
+			var ui_data = get_ui_data(self, type, mc_data, statesFiles_list);
+Print("TESTE STATES LIST: ");
+Print(statesFiles_list);
+Print("TESTE UI_DATA");
+Print(ui_data);
+			
 			var options = {
 				is_checkbox_mc : false,
 				scriptFile: scriptFile,
@@ -880,11 +882,23 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 				if(!BD1_CopyFile(scriptFile, scene_script_path)){
 					MessageBox.warning("Erro copiando o arquivo de script: " + scriptBaseName + " para o script folder da cena",0,0);
 				}
-				//update state file
+				//update states files
 				var filter_atts = type == "EXTRAS";
-				var stage_file = scene.currentProjectPath() + "/" + statesFiles_list[0];
-				update_states(stage_file, mc_data.selection, node.parentNode(mc_data.node), filter_atts);
-				
+				if(type == "MASTER" || statesFiles_list.length == 0){//se for master ou extra simples
+					var stage_file = scene.currentProjectPath() + "/" + statesFiles_list[0];
+					update_states(stage_file, mc_data.selection, mc_data.group_node, filter_atts);
+				} else {//modifica cada state pra cada pose do EXTRA advanced
+					for(item in mc_data.turn_data){
+						var stage_file = mc_data.turn_data[item].state_file;
+Print("<<<TESTE Stage Files update>>>");
+Print("stage_file : " + stage_file);
+Print("TESTE script_folder_name > " + self.script_folder_name);
+Print("Pose : " + item + " selection...");
+Print(mc_data.turn_data[item].selection);
+
+						update_states(stage_file, mc_data.turn_data[item].selection, mc_data.group_node, filter_atts);
+					}
+				}
 			} catch(e){
 				Print("Update Files failed!");
 				Print(e);
@@ -1057,7 +1071,7 @@ exports.createExtraObject = createExtraObject;
 */
 function checkExtraSelectionTurnNode(self, mc_data){
 	for(pose in mc_data.turn_data){
-		var pose_selection = mc_data.turn_data[pose];
+		var pose_selection = mc_data.turn_data[pose].selection;
 		if(pose_selection.nodes.indexOf(self.turn_node) != -1){
 			var d_column = node.linkedColumn(self.turn_node, "DRAWING.ELEMENT");
 			for(var f=pose_selection.start_frame; f<=pose_selection.end_frame; f++){
@@ -1068,11 +1082,29 @@ function checkExtraSelectionTurnNode(self, mc_data){
 	}
 }
 
+/*
+	return used state files list for each case
+*/
+function get_states_files(self, type, mc_data){
+	var state_list = [];
+	if(type == "EXTRAS"){
+		for(pose in mc_data.turn_data){
+			var stateFileName = mc_data.turn_data[pose].state_name;
+			var stateFile = ["scripts", self.script_folder_name, stateFileName].join("/");
+			if(state_list.indexOf(stateFile) == -1){
+				state_list.push(stateFile);
+			}
+		}
+	} else {
+		state_list.push(["scripts", self.script_folder_name, mc_data.widgets.states[0].text].join("/"));	
+	}
+	return state_list;
+}	
 
 /*
 	create mc ui_data object att to ui_data mc node
 */
-function createExtras_ui_data(self, type, mc_data, statesFiles_list){
+function get_ui_data(self, type, mc_data, statesFiles_list){
 	if(type == "EXTRAS"){
 		var ui_data = {
 			"node_ref" : self.turn_node.replace(mc_data.group_node, "~"),
@@ -1080,18 +1112,20 @@ function createExtras_ui_data(self, type, mc_data, statesFiles_list){
 			"poses": null,
 			"location":"scn"
 		};
-		for(pose in self.master_turn){
-			var stateLabelText = self.master_turn[pose].state_label.text;
-			if(stateLabelText == "null"){
-				continue;
-			}
-			ui_data["files"][pose] = ["/scripts", self.script_folder_name, stateLabelText].join("/");
+		var name_clean = mc_data.mc_name.replace("mc_", "");
+		for(pose in mc_data.turn_data){
+			var stateName = mc_data.turn_data[pose].state_name;
+			ui_data["files"][pose] = ["/scripts", self.script_folder_name, stateName].join("/");
 		}
 	} else {//if MASTER
 		var ui_data = {"poses": "/"+statesFiles_list[0],"location":"scn"};	
 	}
 	return ui_data;
 }
+
+/*
+	cria objeto com info dos states
+*/
 
 
 /*

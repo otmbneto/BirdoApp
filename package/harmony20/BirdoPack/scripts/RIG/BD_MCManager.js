@@ -264,14 +264,18 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		
 		//edit extras
 		if(mc_type == "EXTRAS"){
-			mc_data["selection"]
 			var turn_widgets = this.master_turn;
 			var poses = Object.keys(turn_widgets).filter(function(item){ return turn_widgets[item].cb.checked});
 			if(!mc_data["turn_data"]){
 				mc_data["turn_data"] = {};
 			}
+			var folder_name = this.script_folder_name;
 			poses.forEach(function(pose){
-				mc_data["turn_data"][pose] = selectionData;
+				mc_data["turn_data"][pose] = {
+					selection: selectionData,
+					state_name: turn_widgets[pose].state_label.text,
+					state_file: [scene.currentProjectPath(), "scripts", folder_name, turn_widgets[pose].state_label.text].join("/")	
+				};
 			});
 			mc_data["widgets"]["status"].text = "selected poses: " + poses;
 			Print("Selected timeline for poses: " + poses);
@@ -417,6 +421,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			Print("No mc selected!");
 		} else {
 			curr_mc["selection"] = null;
+			curr_mc["turn_data"] = null;
 		}
 		Print("advanced mode for mc extra creation is : " + is_advanced);
 	}
