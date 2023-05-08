@@ -34,15 +34,16 @@ var checkbox_specs = '<specs>\n  <ports>\n    <in type=\"PEG\"/>\n    <out type=
 	'    <attr type=\"STRING\"     name=\"label_font\"                value=\"{FONT}\" tooltip=\"Label font.\"/>\n' + 
 	'    <attr type=\"DOUBLE\"     name=\"label_size\"                value=\"15.0\" tooltip=\"Label font size, in points.\"/>\n' + 
 	'    <attr type=\"COLOUR\"     name=\"label_color\"               value=\"{LABEL_COLOR}\" tooltip=\"Label color.\"/>\n' +
-	'    <attr type=\"COLOUR\"     name=\"label_bg_color\"            value=\"0,0,0,0\" tooltip=\"Label background color.\"/>\n' +
+	'    <attr type=\"COLOUR\"     name=\"label_bg_color\"            value=\"{BG_COLOR}\" tooltip=\"Label background color.\"/>\n' +
 	'  </attributes>\n</specs>';
 
-function get_checkbox_specs(on_color, off_color, label, font, labelcolor){
+function get_checkbox_specs(on_color, off_color, label, font, labelcolor, bg_color){
 	var new_value = checkbox_specs.replace("{ON_COLOR}", on_color);
 	new_value = new_value.replace("{OFF_COLOR}", off_color);	
 	new_value = new_value.replace("{LABEL}", label);	
 	new_value = new_value.replace("{FONT}", font);	
 	new_value = new_value.replace("{LABEL_COLOR}", labelcolor);	
+	new_value = new_value.replace("{BG_COLOR}", bg_color);
 	return new_value;
 }
 
@@ -75,6 +76,19 @@ function get_slider_specs(horizontal, label, font, framecolor, slidercolor, labe
 	new_value = new_value.replace("{LABEL_COLOR}", labelcolor);	
 	return new_value;
 }
+
+/*
+	UI script string value for CHECKBOX
+*/
+function getUiCheckBoxScriptValue(master_count){
+	var script_ui_CheckBox = 'function onCheckboxValueChanged(params, checkedVal){\n  var master_count = params.targetNodes.length - ' + master_count + '; //index of master MCs\n' + 
+	'  //loop to show MCs\n  for(var i=0; i<params.targetNodes.length; i++){\n    var mc = params.targetNodes[i];\n    ' + 
+	'if(i >= master_count) {//if master\n      node.showControls(mc, !checkedVal);\n    } else {\n      node.showControls(mc, checkedVal);\n    }\n  }\n  ' + 
+	'MessageLog.trace("Check box value is: " + !checkedVal);\n}\n\n' + 
+	'include(fileMapper.toNativePath(specialFolders.resource+"/scripts/utilities/ui/functionWizard/mcs/mcCheckboxFunction.js"))';
+	return script_ui_CheckBox;
+}
+
 
 /*
 	create back drop 
@@ -448,18 +462,14 @@ function update_mcNode(mcNode, options){
 	
 	//define script files type
 	if(options.is_checkbox_mc){
-		var scriptAtt = 'function onCheckboxValueChanged(params, checkedVal){\n' + 
-		'  var targetNodes = params.targetNodes;\n' +	
-		'  for(var i=0; i<targetNodes.length-1; i++){\n' +
-		'    //head MCs\n' +
-		'    node.showControls(targetNodes[i], checkedVal);\n' +
-		'  }\n  //master mc\n' +
-		'  node.showControls(targetNodes[targetNodes.length-1], !checkedVal);\n\n' +
-		'  MessageLog.trace(\"Check box value is: \" + checkedVal);\n}\n' +
-		'include(fileMapper.toNativePath(specialFolders.resource+\"/scripts/utilities/ui/functionWizard/mcs/mcCheckboxFunction.js\"));';
+		var scriptAtt = options.scriptFile;
+		var specs = get_checkbox_specs(options.on_color, options.off_color, options.label, options.font, options.labelcolor, options.bg_color);
+
 	} else {
 		var scriptBaseName = BD1_fileBasename(options.scriptFile);
 		var scriptAtt = 'include(fileMapper.toNativePath(scene.currentProjectPath()+"/scripts/' + scriptBaseName + '"))';
+		var specs = get_slider_specs(options.horizontal, options.label, options.font, options.framecolor, options.slidercolor, options.labelcolor);
+
 	}
 
 	//update script editor att
@@ -470,12 +480,6 @@ function update_mcNode(mcNode, options){
 	var uiDataAttr = node.getAttr(mcNode,1,"uiData");
 	uiDataAttr.setValue(JSON.stringify(options.uidata, null, 1));
 	
-	//difine specs type
-	if(options.is_checkbox_mc){
-		var specs = get_checkbox_specs(options.on_color, options.off_color, options.label, options.font, options.labelcolor);
-	} else {
-		var specs = get_slider_specs(options.horizontal, options.label, options.font, options.framecolor, options.slidercolor, options.labelcolor);
-	}
 	//update specs
 	var uiSpecsEditor = node.getAttr(mcNode, 1, "specsEditor");
 	uiSpecsEditor.setValue(specs);
@@ -857,10 +861,6 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			var scriptFile = type == "MASTER" ? self.scripts.slider_standard : self.scripts.slider_special;
 			var statesFiles_list = get_states_files(self, type, mc_data);
 			var ui_data = get_ui_data(self, type, mc_data, statesFiles_list);
-Print("TESTE STATES LIST: ");
-Print(statesFiles_list);
-Print("TESTE UI_DATA");
-Print(ui_data);
 			
 			var options = {
 				is_checkbox_mc : false,
@@ -891,12 +891,6 @@ Print(ui_data);
 				} else {//modifica cada state pra cada pose do EXTRA advanced
 					for(item in mc_data.turn_data){
 						var stage_file = mc_data.turn_data[item].state_file;
-Print("<<<TESTE Stage Files update>>>");
-Print("stage_file : " + stage_file);
-Print("TESTE script_folder_name > " + self.script_folder_name);
-Print("Pose : " + item + " selection...");
-Print(mc_data.turn_data[item].selection);
-
 						update_states(stage_file, mc_data.turn_data[item].selection, mc_data.group_node, filter_atts);
 					}
 				}
@@ -1034,6 +1028,8 @@ function createExtraObject(self, extrasPage, mc_name, index){
 			createMCObjectCallbacks(self, curr_mc, "EXTRAS", index);
 			extrasPage.pushAction.text = Boolean(curr_mc.node) ? "Updata" : "Create";
 		}
+		Print("current selection is: ");
+		Print(self.current_selection);
 	});
 	
 	//obs: todo objeto de extra criado, tem as mesmas widgets na tab 2, q mudam de connect toda vez q muda a selecao do radio do mc
@@ -1128,6 +1124,30 @@ function get_ui_data(self, type, mc_data, statesFiles_list){
 	cria objeto com info dos states
 */
 
+/*
+	get ui_data do checkbox
+*/
+function get_checkbox_uidata(self, group_master){
+	var ui_data = {
+	  "targetNodes": [],
+	  "operationType": "Show/Hide Node Controls",
+	  "label": "mc_Function",
+	  "createKeyframes": false
+	};
+	self.mc_data.EXTRAS.forEach(function(item){
+		if(!item.node){
+			return;
+		}
+		ui_data["targetNodes"].push(item.node.replace(group_master, "~"));
+	});
+	self.mc_data.MASTER.forEach(function(item){
+		if(!item.node){
+			return;
+		}
+		ui_data["targetNodes"].push(item.node.replace(group_master, "~"));
+	});
+	return ui_data;
+}
 
 /*
 	cria mc_data dos mcs EXTRAS nodes existentes encontrados no rig
@@ -1158,3 +1178,67 @@ function addMCsNodesToMainObject(self, extrasPage, mc_list){
 	}
 }
 exports.addMCsNodesToMainObject = addMCsNodesToMainObject;
+
+/*
+	update checkbox mc
+*/
+function updateCheckBoxMC(self, mainTab){
+	
+	//check if exist mcs in the rig
+	if(self.mc_data.MASTER.length == 0 && self.mc_data.EXTRAS.length == 0){
+		MessageBox.warning("Ainda nao existem mcs neste RIG! Somente é possivel editar o CHECKBOX quando houverem MCs criados!",0,0);
+		Print("Update/Create CHECKBOX canceled...");
+		return;			
+	}
+	
+	//begin undo
+	scene.beginUndoRedoAccum("[MC Manager] Update CHeckBox MC ");
+
+	var cb_data = self.mc_data.CHECKBOX;	
+	var group_node = self.mc_data.MASTER[0].group_node;
+	if(!cb_data.node){//cria o checkbox mc
+		var created = add_mc(group_node, "mc_Function");
+		Print("Created checkbox node: ");
+		Print(created);
+		//update main object info
+		self.mc_data["CHECKBOX"]["node"] = created.mc_node;
+		self.mc_data["CHECKBOX"]["comp"] = created.comp;
+		self.mc_data["CHECKBOX"]["peg"] = created.static_node;
+		//change button text to update
+		mainTab.pushMCcheckbox.text = "Update CheckBox";
+	
+		//update peg (static) position:
+		var read_nodes = self.all_nodes.filter(function(item){ return node.type(item) == "READ"});
+		applyMCStaticPosition(read_nodes, created.static_node, "CHECKBOX", 0);
+	}
+	
+	//update node info
+	var scriptFile = getUiCheckBoxScriptValue(self.ui.groupInfo.labelMCMasterCount.text);
+	var ui_data = get_checkbox_uidata(self, group_node);
+	
+	var options = {
+		is_checkbox_mc : true,
+		scriptFile: scriptFile,
+		uidata: ui_data,
+		horizontal: true,
+		label: self.rig_name,
+		font: self.font,
+		on_color: self.mc_data["MASTER"][0].slider.color2,
+		off_color: self.mc_data["MASTER"][0].slider.color1,
+		labelcolor: self.mc_data["MASTER"][0].slider.color1,
+		bg_color: self.mc_data["MASTER"][0].slider.color2
+	}
+	
+	//update checkbox node
+	update_mcNode(self.mc_data["CHECKBOX"].node, options);
+	node.showControls(self.mc_data["CHECKBOX"].node, true);
+	
+	//conecta o  mc node ao static
+	node.link(self.mc_data["CHECKBOX"].peg, 0, self.mc_data["CHECKBOX"].node, 0, false, false);
+	Print("End action checkbox");
+	
+	mainTab.labelStatusCB.text = "Check box updated!";
+
+	scene.endUndoRedoAccum();
+}
+exports.updateCheckBoxMC = updateCheckBoxMC;

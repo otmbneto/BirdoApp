@@ -426,12 +426,24 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		Print("advanced mode for mc extra creation is : " + is_advanced);
 	}
 	
+	this.onUpdateCheckBox = function(){//callback do botao de atualizar o checkbox
+		try{//update node mc files
+			utils.updateCheckBoxMC(this, masterPage);
+			MessageBox.information("CheckBox foi atualizado!");		
+		} catch(e){
+			Print("Action CheckBox failed!");
+			Print(e);
+		}
+	}
+	
 	//Connections
 	masterPage.groupFrames.pushPrev.clicked.connect(this, this.prevFrame);
 	masterPage.groupFrames.pushNext.clicked.connect(this, this.nextFrame);
 	masterPage.groupFrames.pushSetFront.clicked.connect(this, this.setFront);
 	masterPage.groupFrames.pushSetBack.clicked.connect(this, this.setBack);
 	masterPage.groupFrames.pushUpdateTurn.clicked.connect(this, this.updateTurn);
+	masterPage.pushMCcheckbox.clicked.connect(this, this.onUpdateCheckBox);
+
 	extrasPage.groupExtrasList.pushAddExtra.clicked.connect(this, this.addExtra);
 	extrasPage.comboType["currentIndexChanged(QString)"].connect(this, this.updateComboTurnType);
 

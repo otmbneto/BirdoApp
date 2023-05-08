@@ -455,7 +455,7 @@ QRadioButton::indicator:unchecked:disabled {
    <item row="2" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="intro">
       <attribute name="title">
@@ -866,19 +866,13 @@ QRadioButton::indicator:unchecked:disabled {
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,1">
+        <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="0,0">
          <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QLabel" name="labelStatusCB">
+           <property name="text">
+            <string/>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushMCcheckbox">
