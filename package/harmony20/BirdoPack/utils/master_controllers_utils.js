@@ -254,7 +254,7 @@ exports.get_rig_selection = get_rig_selection;
 function get_selection_data(rig_data){
 		
 	var initial_node = selection.selectedNode(0);
-	var ignore_list = ["COMPOSITE", "MasterController"];
+	var suported_list = ["PEG", "READ", "OffsetModule", "CurveModule"]; // ADD new types to this list if necessary!
 	var sel_data = {
 		start_frame: Timeline.firstFrameSel,
 		end_frame: (Timeline.firstFrameSel + Timeline.numFrameSel - 1),
@@ -288,7 +288,7 @@ function get_selection_data(rig_data){
 	}
 	selected.sort(function(a,b){ return a.split("/").length - b.split("/").length;});
 	selected.forEach(function(item, index){
-		if(ignore_list.indexOf(node.type(item)) == -1){
+		if(suported_list.indexOf(node.type(item)) != -1){
 			sel_data.nodes.push(item);
 		}
 	});
@@ -299,6 +299,7 @@ function get_selection_data(rig_data){
 	return sel_data;
 }
 exports.get_selection_data = get_selection_data;
+
 
 /* OLD
 function get_create_coordinate(sel_nodes){//retorna coordenadas pra criacao da comp mc
@@ -884,7 +885,7 @@ Print(ui_data);
 				}
 				//update states files
 				var filter_atts = type == "EXTRAS";
-				if(type == "MASTER" || statesFiles_list.length == 0){//se for master ou extra simples
+				if(type == "MASTER" || statesFiles_list.length == 1){//se for master ou extra simples
 					var stage_file = scene.currentProjectPath() + "/" + statesFiles_list[0];
 					update_states(stage_file, mc_data.selection, mc_data.group_node, filter_atts);
 				} else {//modifica cada state pra cada pose do EXTRA advanced
