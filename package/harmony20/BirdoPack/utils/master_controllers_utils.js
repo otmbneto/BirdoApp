@@ -803,8 +803,16 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 	
 	//se for extras e tiver group comboGroup
 	if("group_combo" in mc_data.widgets){
-		var filteredGroupNodes = self.all_nodes.filter(function(item){ return node.isGroup(item) && !/(^Def|PATCH|Patch)/.test(node.getName(item))});
-		var modList = filteredGroupNodes.map(function(item){ return item.replace(self.rig_group, "~")});
+		var filteredGroupNodes = self.all_nodes.filter(function(item){ return node.isGroup(item) && !/(\/Def|PATCH|Patch)/.test(item)});
+		filteredGroupNodes.sort(function(a,b){return a.length - b.length});
+		filteredGroupNodes.unshift(self.rig_group);
+		var modList = filteredGroupNodes.map(function(item){ 
+			if(item == self.rig_group){
+				return "~/MASTER";
+			}
+			return item.replace(self.rig_group, "~");
+		});
+
 		mc_data.widgets.group_combo.clear();
 		mc_data.widgets.group_combo.addItems(modList);		
 		var selectGroupCallback = function(){

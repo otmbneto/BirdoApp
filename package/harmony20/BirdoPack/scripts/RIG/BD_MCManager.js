@@ -18,7 +18,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 //version
-var version = "v.1.0";
+var version = "v.1.1";
 
 function BD_MCManager(){
 	

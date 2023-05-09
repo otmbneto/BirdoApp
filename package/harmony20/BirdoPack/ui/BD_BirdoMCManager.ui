@@ -455,7 +455,7 @@ QRadioButton::indicator:unchecked:disabled {
    <item row="2" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="intro">
       <attribute name="title">
@@ -1295,6 +1295,12 @@ QRadioButton::indicator:unchecked:disabled {
             <widget class="QComboBox" name="comboGroup">
              <property name="enabled">
               <bool>false</bool>
+             </property>
+             <property name="maxVisibleItems">
+              <number>99</number>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
              </property>
             </widget>
            </item>
