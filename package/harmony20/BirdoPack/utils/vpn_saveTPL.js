@@ -101,12 +101,9 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	self.ui.progressBar.format = "...renaming assets...";
 	if(!assetInfo.isAnim){
 		updateColorNames();//change color names to UPPDERCASE
-		try{
-			var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
-		} catch(e){
-			Print(e);
-			return false;
-		}
+
+		var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
+		
 		if(!updatedAssetInfo){
 			MessageBox.warning("Error updating node names!",0,0);
 			return false;
@@ -195,34 +192,16 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		self.ui.progressBar.format = "...saving MC files...";
 		var server_mcfiles_zip = data_rede + "mcFiles.zip";
 		var extrascriptsCounter = 0;
-		var mcFilesCounter = 0;
-		var server_mc_extra_scripts_folder = projectDATA.getTBLIB("server") + "mcDATA/MCScripts/";
-		
-		//cria o folder de MC em tblib se ainda nao existir
-		if(!BD1_DirExist(server_mc_extra_scripts_folder)){
-			if(!BD1_createDirectoryREDE(server_mc_extra_scripts_folder)){
-				MessageBox.warning("Falha ao criar folder de scritpts mc na rede: " + server_mc_extra_scripts_folder,0,0);
-				return false;
-			}				
-		}
+		var mcFilesCounter = 0;		
 		
 		if(assetInfo.mcs.temp_zip){
 			if(!BD1_CopyFile(assetInfo.mcs.temp_zip, server_mcfiles_zip)){
 				MessageBox.warning("ERROR enviando o zip de arquivos do MC pra rede!",0,0);
+				Print("Erro ao enviar o 'mcFiles.zip' para a rede!");
 			}
 			mcFilesCounter++;
 		}
-		assetInfo.mcs.extra_scripts.forEach(function(jsfile){
-			var server_script_path = server_mc_extra_scripts_folder + BD1_fileBasename(jsfile);
-			if(!BD1_CopyFile(jsfile, server_script_path)){
-				MessageBox.warning("ERROR enviando o zip de arquivos do MC pra rede!",0,0);
-				return;
-			}
-			extrascriptsCounter++;
-		});
-		Print(">>> MC files enviados pra rede com sucesso: \n - mc files: " + mcFilesCounter + "\ - extra script files: " + extrascriptsCounter);
 	}
-	
 	
 	self.ui.progressBar.setValue(8);
 	self.ui.progressBar.format = "DONE!!!";
@@ -296,7 +275,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		} else {
 			Print("Analizing mc nodes files and data...");
 			var rigversioname = assetInfo.prefixo + "-" + assetInfo.version;
-	Print("TESTE rig version name: " + rigversioname);
+			Print("- rig version name: " + rigversioname);
 			var files_folder = scene.currentProjectPath() + "/scripts/" + rigversioname + "/";
 
 			//hide main checkbox mc
@@ -307,6 +286,8 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			//update mcs 
 			assetInfo.mcs.mastercontrollers.forEach(function(item){
 				node.showControls(item.node, false);
+				BD2_updateNode(item.node);
+
 				if(!updateMCAtt(item.node, rigversioname)){
 					Print("No changes in MC files...");
 					return;
@@ -332,7 +313,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			//mostra de volta o Checkbox
 			assetInfo.mcs.checkbox.forEach(function(cb){
 				node.setTextAttr(cb, "SHOW_CONTROLS_MODE", 1, "Always");
-				node.showControls(cb, true);	
+				BD2_updateNode(cb);
 			});
 		}
 		
