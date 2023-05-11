@@ -1034,7 +1034,7 @@ function createExtraObject(self, extrasPage, mc_name, index){
 			//atualiza callbacks 
 			var curr_mc = self.getCurrent_mc();
 			createMCObjectCallbacks(self, curr_mc, "EXTRAS", index);
-			extrasPage.pushAction.text = Boolean(curr_mc.node) ? "Updata" : "Create";
+			extrasPage.pushAction.text = Boolean(curr_mc.node) ? "Update" : "Create";
 		}
 		Print("current selection is: ");
 		Print(self.current_selection);

@@ -18,7 +18,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 //version
-var version = "v.1.1";
+var version = "v.1.2";
 
 function BD_MCManager(){
 	
@@ -355,7 +355,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	
 	this.updateTab = function(){//atualiza a tab (se for a EXTRAS atualiza o mc selecionado)
 		var curr_index = this.ui.tabWidget.currentIndex;
-		Print("Tab changed to : " + curr_index);
 		this.current_selection = null;
 		if(curr_index == 0){
 			//is master tab
@@ -380,11 +379,12 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 					}
 				}
 			}	
-			if(this.mc_data.EXTRAS.length == 0){
-				var mc_list = rig_data.mcs.extras;
+			var mc_list = rig_data.mcs.extras;
+			if(this.mc_data.EXTRAS.length == 0 && mc_list.length > 0){
 				utils.addMCsNodesToMainObject(this, extrasPage, mc_list);
 			}	
 		}
+		Print("Tab changed to : " + curr_index);	
 	}	
 	
 	this.addExtra = function(){//callback do botao de add novo extra MC
@@ -436,6 +436,11 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		}
 	}
 	
+	this.updateLineName = function(){//callback do edit name master2
+		masterPage.groupMaster2.labelMaster2StFile.text = masterPage.groupMaster2.labelMaster2Name.text + ".tbState";
+		Print("Name updated to : " + masterPage.groupMaster2.labelMaster2Name.text);
+	}
+	
 	//Connections
 	masterPage.groupFrames.pushPrev.clicked.connect(this, this.prevFrame);
 	masterPage.groupFrames.pushNext.clicked.connect(this, this.nextFrame);
@@ -443,6 +448,8 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	masterPage.groupFrames.pushSetBack.clicked.connect(this, this.setBack);
 	masterPage.groupFrames.pushUpdateTurn.clicked.connect(this, this.updateTurn);
 	masterPage.pushMCcheckbox.clicked.connect(this, this.onUpdateCheckBox);
+	masterPage.groupMaster2.labelMaster2Name.editingFinished.connect(this, this.updateLineName);
+
 
 	extrasPage.groupExtrasList.pushAddExtra.clicked.connect(this, this.addExtra);
 	extrasPage.comboType["currentIndexChanged(QString)"].connect(this, this.updateComboTurnType);
