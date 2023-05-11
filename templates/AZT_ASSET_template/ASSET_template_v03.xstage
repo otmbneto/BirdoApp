@@ -127,25 +127,27 @@
     <column type="0" name="ATV-0BAAC6499AE14AEB" displayOrder="3" width="100" anonymous="true" id="100">
      <elementSeq exposures="1-70" val="1" id="100"/>
     </column>
-    <column type="5" name="LockZero" color="#C4D1DFFF" displayOrder="5" width="100" anonymous="false">
+    <column type="5" name="LockZero" color="#C4D1DFFF" displayOrder="4" width="100" anonymous="false">
      <JS>
       <![CDATA[0]]>
      </JS>
     </column>
-    <column type="5" name="LockScale" color="#C4D1DFFF" displayOrder="6" width="100" anonymous="false">
+    <column type="5" name="LockScale" color="#C4D1DFFF" displayOrder="5" width="100" anonymous="false">
      <JS>
       <![CDATA[1]]>
      </JS>
     </column>
     <column type="3" name="position.x" color="#C7C6BBFF" displayOrder="3" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="0" y="0"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="0" y="0"/>
      </points>
     </column>
-    <column type="3" name="position.y" color="#C7C6BBFF" displayOrder="4" width="100" anonymous="false">
+    <column type="3" name="position.y" color="#C7C6BBFF" displayOrder="6" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="0" y="0"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="0" y="0"/>
@@ -153,6 +155,7 @@
     </column>
     <column type="3" name="position.z" color="#C7C6BBFF" displayOrder="7" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="0" y="0"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="0" y="0"/>
@@ -160,6 +163,7 @@
     </column>
     <column type="3" name="scale.x" color="#C7C6BBFF" displayOrder="8" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="1" y="1"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="1" y="1"/>
@@ -167,6 +171,7 @@
     </column>
     <column type="3" name="scale.y" color="#C7C6BBFF" displayOrder="9" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="1" y="1"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="1" y="1"/>
@@ -174,6 +179,7 @@
     </column>
     <column type="3" name="rotation.anglez" color="#C7C6BBFF" displayOrder="10" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="0" y="0"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="0" y="0"/>
@@ -181,6 +187,7 @@
     </column>
     <column type="3" name="skew" color="#C7C6BBFF" displayOrder="11" width="100" anonymous="false">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="false" x="10,14,18,22,27,31,35,39" yLocal="0" y="0"/>
       <pt constSeg="true" x="1,26,43,50,90,94,98,110,156,187,218" yLocal="0" y="0"/>
@@ -193,12 +200,14 @@
     </column>
     <column type="3" name="ATV-0BAAC6499AE8F9B0" displayOrder="27" width="100" anonymous="true">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="true" x="31" yLocal="0" y="0"/>
      </points>
     </column>
     <column type="3" name="ATV-0BAAC6499AE8F9B1" displayOrder="28" width="100" anonymous="true">
      <step val="1" start="1" stop="1"/>
+     <noFrames/>
      <points version="2">
       <pt constSeg="true" x="31" yLocal="0" y="0"/>
      </points>
@@ -293,7 +302,7 @@
          <port type="IMAGE" idx="1"/>
         </ports>
        </module>
-       <module type="PEG" name="Camera-P" pos="605,-225,1" publishUnderTab="Camera-P">
+       <module type="PEG" name="Camera-P" pos="605,-225,2" publishUnderTab="Camera-P">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -405,13 +414,13 @@
          <softrender val="false"/>
         </attrs>
        </module>
-       <module type="NOTE" name="proj" pos="803,552,5" publishUnderTab="Note">
+       <module type="NOTE" name="proj" pos="803,552,1" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
         <attrs>
-         <text val="ast"/>
+         <text val="AZT"/>
         </attrs>
        </module>
        <module type="VISIBILITY" name="Visibility_LineUp" pos="851,183,4" publishUnderTab="Visibility_Ref">
@@ -563,7 +572,7 @@
        <link out="LineUp" in="Visibility_LineUp"/>
       </linkedlist>
      </group>
-     <module type="READ" name="Asset" pos="272,-403,3" publishUnderTab="Asset">
+     <module type="READ" name="Asset" pos="272,-403,4" publishUnderTab="Asset">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -675,7 +684,7 @@
        <tileVertical val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="Composite_ASSET" pos="256,172,4" publishUnderTab="Composite_ASSET">
+     <module type="COMPOSITE" name="Composite_ASSET" pos="256,172,5" publishUnderTab="Composite_ASSET">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -694,7 +703,7 @@
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="Comp_REF" pos="586,621,8" publishUnderTab="Comp_REF">
+     <module type="COMPOSITE" name="Comp_REF" pos="586,621,9" publishUnderTab="Comp_REF">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -713,7 +722,7 @@
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="PEG" name="REFERENCIA-P" pos="583,406,6" publishUnderTab="REFERENCIA-P">
+     <module type="PEG" name="REFERENCIA-P" pos="583,406,7" publishUnderTab="REFERENCIA-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -775,7 +784,7 @@
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="READ" name="REFERENCIA" pos="567,485,5" publishUnderTab="REFERENCIA">
+     <module type="READ" name="REFERENCIA" pos="567,485,6" publishUnderTab="REFERENCIA">
       <options>
        <showTimelineThumb val="true"/>
        <collapsed val="true"/>
@@ -888,7 +897,7 @@
        <tileVertical val="false"/>
       </attrs>
      </module>
-     <module type="FADE" name="Transparency" pos="581,716,7" publishUnderTab="Transparency_1">
+     <module type="FADE" name="Transparency" pos="581,716,8" publishUnderTab="Transparency_1">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -897,7 +906,7 @@
        <transparency val="50" defaultValue="50"/>
       </attrs>
      </module>
-     <module type="PEG" name="Asset-P" pos="287,-443,2" publishUnderTab="Asset-P">
+     <module type="PEG" name="Asset-P" pos="287,-443,3" publishUnderTab="Asset-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
