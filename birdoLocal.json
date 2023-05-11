@@ -68,6 +68,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 3,
+			"prefix": "AZT",
+			"name": "Batman_Azteca",
+			"harmony" : {
+					"version" : "20.0.3",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_AZT.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }

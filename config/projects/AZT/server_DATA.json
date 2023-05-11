@@ -1,0 +1,99 @@
+{
+	"paths": {
+		"root": "//192.168.10.100/projects/181_AztecB/",
+		"projRoot": "",
+		"assetLib": {
+				"bg": "01_BG/",
+				"character": "02_CHARACTER/",
+				"prop": "03_PROP/"
+				},
+		"episodes": "02_EPISODIOS/",
+		"step": {
+			"ANIM": {
+				"folder_name": "02_ANIM",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				},
+			"RENDER": [
+				"01_ANIMATIC",
+				"02_SETUP",
+				"03_ANIMATION",
+				"04_COMP"
+				],
+			"SETUP": {
+				"folder_name": "01_SETUP",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"BG",
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				}
+			},
+		"library": "01_BIBLIOTECA/",
+		"roteiros": "00_ROTEIROS/",
+		"tblib": "_tbLib/",
+		"batch_scripts": "_tbLib/batch_scripts",
+		"fazendinha": "_tbLib/_Fazendinha/",
+		"render_comp": "//192.168.10.100/projects/181_AztecB/02_EPISODIOS/{EP}/05_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"packUpdate": "_tbLib/_birdoApp/"
+		},
+	"server": {
+		"type": "vpn",
+		"url" : null,
+		"login": false
+	},
+	"pipeline": {
+		"type": "",
+		"login": "",
+		"projectName": "",
+		"projectId": "",
+		"assetsTypes": [
+					"Character", 
+					"Prop", 
+					"BG", 
+					"FX",
+					"Misc",
+					"Ilustra"
+					],
+		"assets_digits": 3,
+		"boards": {
+				"filter": "",
+				"Character": {
+					"name": "",
+					"subgroup": "",
+					"prefix": ""
+				},
+				"Misc": {
+					"name": "",
+					"subgroup": "",
+					"prefix": ""
+				},
+				"Prop": {
+					"name": "",
+					"subgroup": "",
+					"prefix": ""
+				},
+				"FX": {
+					"name": "",
+					"subgroup": "",
+					"prefix": ""
+				}
+		},
+		"scriptName": "pipelineScript",
+		"url": "https://api.monday.com/v2",
+		"apiKey": "0-^95{!)k-jkyfqMz{z1(awJ2e1Ys xU)6V(Z&-56,99YV~67\\!(>f{dzme,Htlh`@NyfFiplRqJJZx(P6F:Z%[-5.@2&@*!+{et=e||%i;a?;qHmybie~WW!j\"TBrW\"C6 8J<^/Z_&.i\\}..|gf?fn^.*@/br_b|_QIiLTM%?$HvEXn,K=FO\"\\}1Rv2_g|n{q@f$syDdZlKwL|gH%yf2"
+	},
+	"project_font": "Vertigo Upright 2 BRK"
+}
