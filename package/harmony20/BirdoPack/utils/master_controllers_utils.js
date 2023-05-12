@@ -1264,3 +1264,31 @@ function listtbStates(mcnode){
 	return matches.map(function(item){ return scene.currentProjectPath() + item});
 }
 exports.listtbStates = listtbStates;
+
+
+/*
+	da um update em todos MCs da cena, dando refresh no erro de mostrar os deform!
+*/
+function updateSceneMCs(){
+	var scene_mcs = node.getNodes(["MasterController"]);
+	var satate = null;
+	if(scene_mcs.length == 0){
+		MessageBox.information("Nenhum MC encontrado na cena!");
+		return;
+	}
+
+	scene_mcs.forEach(function(item){ 
+		if(node.getName(item) == "mc_Function"){
+			var showAttr = node.getAttr(item, 1, "SHOW_CONTROLS_MODE");
+			var showValue = showAttr.textValue();
+			var new_mode = showValue == "Always" ? "Normal" : "Always";
+			showAttr.setValue(new_mode);
+			satate = new_mode;
+		}
+	      node.showControls(item, false);
+		Print("node mc hidden: " + item);
+	});
+	//Action.perform("onActionHideAllControls()");
+	return {mcs: scene_mcs, satate: satate};
+}
+exports.updateSceneMCs = updateSceneMCs;
