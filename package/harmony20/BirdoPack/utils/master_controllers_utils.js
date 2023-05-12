@@ -247,6 +247,8 @@ function get_rig_selection(){
 
 	//get mcs data
 	rig_data["mcs"] = difine_mcs(mcs);
+	//add all nodes to one list
+	rig_data["mcs"]["all"] = mcs;
 	
 	//find master peg
 	var master_peg = null;
@@ -1250,3 +1252,15 @@ function updateCheckBoxMC(self, mainTab){
 	scene.endUndoRedoAccum();
 }
 exports.updateCheckBoxMC = updateCheckBoxMC;
+
+
+/*
+	lsita todos arquivos tbState usados no mc node
+*/
+function listtbStates(mcnode){
+	var uiDataAttr = node.getTextAttr(mcnode,1,"uiData");
+	var regex = /\/scripts\/.+\.tbState/g;
+	var matches = uiDataAttr.match(regex);
+	return matches.map(function(item){ return scene.currentProjectPath() + item});
+}
+exports.listtbStates = listtbStates;

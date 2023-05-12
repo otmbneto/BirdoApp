@@ -108,7 +108,6 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			MessageBox.warning("Error updating node names!",0,0);
 			return false;
 		}
-		assetInfo = updatedAssetInfo;
 	}
 	
 	self.ui.progressBar.format = "...creating version json";	
@@ -286,7 +285,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			//update mcs 
 			assetInfo.mcs.mastercontrollers.forEach(function(item){
 				node.showControls(item.node, false);
-				BD2_updateNode(item.node);
+				//BD2_updateNode(item.node);
 
 				if(!updateMCAtt(item.node, rigversioname)){
 					Print("No changes in MC files...");
@@ -313,7 +312,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			//mostra de volta o Checkbox
 			assetInfo.mcs.checkbox.forEach(function(cb){
 				node.setTextAttr(cb, "SHOW_CONTROLS_MODE", 1, "Always");
-				BD2_updateNode(cb);
+				//BD2_updateNode(cb);
 			});
 		}
 		
