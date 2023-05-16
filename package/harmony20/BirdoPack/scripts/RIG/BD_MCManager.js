@@ -279,6 +279,8 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			});
 			mc_data["widgets"]["status"].text = "selected poses: " + poses;
 			Print("Selected timeline for poses: " + poses);
+			Print(" - - turn data: ");
+			Print(mc_data["turn_data"]);
 		} else {// if MASTER
 			mc_data["widgets"]["status"].text = "Valid Selection! Edit Turn!";
 			//update dos frmaes widgets 

@@ -585,7 +585,7 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 	var turn_data = {};
 	var duracao = endFrame - (startFrame-1);
 	var turn_type = front == startFrame ? "foward" : "front_middle";//define se a pose front fica no inicio ou no meio
-	var middle = Math.round((duracao-1)/2);
+	var middle = Math.round((duracao)/2);
 	var msg = "Turn Invalido! Marque corretamente as informacoes\ndo Turn. As opcoes sao:\n\n -1): (FRONT---BACK---) - Selecao de frames PAR;\n -2): (BACK---FRONT---BACK) - Selecao de frames IMPAR;";
 	//check if info is valid
 	if(turn_type == "foward"){
@@ -596,10 +596,10 @@ function createTurn(startFrame, endFrame, front, back, fliped){
 		//reduz prefix list para ordem certa
 		var reduced_list = prefix_list.slice(0, duracao).split("");
 		if(fliped){
-			reduced_list = prefix_list.slice(0, middle).split("").concat(prefix_list.slice(1, middle-1).split("").reverse());
+			reduced_list = prefix_list.slice(0, middle+1).split("").concat(prefix_list.slice(1, middle).split("").reverse());
 		}
 	} else if (turn_type == "front_middle"){
-		if((back != startFrame && back != endFrame) || duracao%2 == 0 || front != (startFrame + middle)){
+		if(back != startFrame || duracao%2 == 0 || front != (startFrame + middle-1)){
 			MessageBox.warning(msg,0,0);
 			return false;
 		}
