@@ -51,7 +51,7 @@ class BirdoApp(QtGui.QMainWindow):
         super(BirdoApp, self).__init__()
         self.owncloud = None
         self.app_root = root
-        self.isCloudProject = None
+        self.isCloudProject = False
         ui_path = os.path.join(self.app_root, "gui/birdoApp.ui").replace("\\", "/")
         self.ui = self.loadPage(ui_path)
 
