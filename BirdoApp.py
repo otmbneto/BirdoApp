@@ -222,6 +222,8 @@ class BirdoApp(QtGui.QMainWindow):
 
     def setUI(self):
 
+        roles_list = []
+        harmony_installation = False
         if self.project_data and "server" in self.project_data.keys():
 
             self.isCloudProject =  self.project_data["server"]["type"] == "nextcloud" if "type" in self.project_data["server"].keys() else False
