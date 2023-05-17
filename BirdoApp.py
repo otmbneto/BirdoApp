@@ -455,11 +455,12 @@ class BirdoApp(QtGui.QMainWindow):
         return new_user
 
     def getUserData(self):
-
-        temp_user_json = self.project_data["user_json"]
+        
         user_data = {}
-        if os.path.exists(temp_user_json):
-            user_data = read_json_file(temp_user_json)
+        if project_data:
+            temp_user_json = self.project_data["user_json"]
+            if os.path.exists(temp_user_json):
+                user_data = read_json_file(temp_user_json)
 
         return user_data
 
