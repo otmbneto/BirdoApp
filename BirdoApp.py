@@ -221,7 +221,12 @@ class BirdoApp(QtGui.QMainWindow):
 
     def setUI(self):
 
-        self.isCloudProject = self.project_data["server"]["type"] == "nextcloud"
+        if self.project_data and "server" in self.project_data.keys():
+
+            self.isCloudProject =  self.project_data["server"]["type"] == "nextcloud" if "type" in self.project_data["server"].keys() else False
+            roles_list = self.project_data["roles"] if "role" in self.project_data.keys() else []
+            roles_list.insert(0, "")
+            harmony_installation = not self.project_data["harmony"]["installation_default"]
 
         print "Is cloud project:" + str(self.isCloudProject)
         # SETS FOLDERS BUTTON ICON
@@ -237,15 +242,9 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.actionChange_User.setEnabled(True)
         self.ui.actionChange_User.triggered.connect(self.changeUserAction)
 
-        # UPDATE USER FUNCTION COMBO
-        roles_list = self.project_data["roles"]
-        roles_list.insert(0, "")
-
         self.ui.combo_funcao.clear() #fix
         self.ui.combo_funcao.addItems(roles_list)
 
-        # CHECKS IF NEEDS TO DISPLAY HARMONY INSTALLATION PATH LINE
-        harmony_installation = not self.project_data["harmony"]["installation_default"]
         print "teste installation defalut: {0}".format(harmony_installation)
         self.ui.harmony_folder_line.setEnabled(harmony_installation)
         self.ui.harmony_label.setEnabled(harmony_installation)
