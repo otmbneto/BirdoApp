@@ -452,10 +452,10 @@ QRadioButton::indicator:unchecked:disabled {
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="2" column="0" alignment="Qt::AlignTop">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="intro">
       <attribute name="title">
@@ -1445,6 +1445,100 @@ QRadioButton::indicator:unchecked:disabled {
       </layout>
       <zorder>groupExtrasList</zorder>
       <zorder></zorder>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Advanced</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>530</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_23">
+         <item>
+          <widget class="QLabel" name="label_24">
+           <property name="text">
+            <string>Expose MC Poses</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>530</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_27" stretch="1,2,3">
+         <item>
+          <widget class="QPushButton" name="pushExpose">
+           <property name="text">
+            <string>Expose</string>
+           </property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignTop">
+          <widget class="QComboBox" name="comboMcs"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="labelExposeInfo">
+           <property name="text">
+            <string>info..</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>271</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+      <zorder>label_24</zorder>
+      <zorder>line</zorder>
+      <zorder>pushExpose</zorder>
+      <zorder>comboMcs</zorder>
+      <zorder>labelExposeInfo</zorder>
+      <zorder>horizontalSpacer</zorder>
+      <zorder>label_24</zorder>
+      <zorder>horizontalSpacer_4</zorder>
+      <zorder>verticalSpacer</zorder>
      </widget>
     </widget>
    </item>

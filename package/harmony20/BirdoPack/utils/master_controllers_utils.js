@@ -6,6 +6,10 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
+//require do script de mc do toon boom
+var stateLib = require(specialFolders.resource+"/scripts/utilities/state/TB_StateManager.js");
+
+
 /*
 	return scene scripts folder (creates if dont exist)
 */
@@ -1292,3 +1296,94 @@ function updateSceneMCs(){
 	return {mcs: scene_mcs, satate: satate};
 }
 exports.updateSceneMCs = updateSceneMCs;
+
+
+function updateAdvancedTab(self, advancedPage, rig_data){
+	//expose mcs advanced tool
+	advancedPage.comboMcs.clear();
+	advancedPage.pushExpose.enabled = false;
+
+	//var mcs = self.getMcNodes();
+	var mcs = rig_data.mcs.all;
+
+	if(mcs.length == 0){
+		advancedPage.comboMcs.enabled = false;
+		return;
+	}
+	
+	var mc_data = {SELECT_MC: {node: null, states: []}};
+	mcs.forEach(function(item){
+		var name = node.getName(item);
+		if(name == "mc_Function"){
+			return;
+		}
+		var tbStates = listtbStates(item);
+		if(tbStates.length == 0){
+			return;
+		}
+		mc_data[name] = {node: item, states: tbStates};		
+	});
+
+	advancedPage.comboMcs.addItems(Object.keys(mc_data));
+
+	var comboExposeMcCallBack = function(){
+		var currIndex = advancedPage.comboMcs.currentIndex;
+		advancedPage.pushExpose.enabled = currIndex != 0;
+		var curr_item = Object.keys(mc_data)[currIndex];
+		advancedPage.labelExposeInfo.text = curr_item + " poses : " + mc_data[curr_item].states.length;
+	}
+	
+	var pushExposeCallBack = function(){
+		
+		if(!BD2_AskQuestion("Esta ação irá expor na timeline toda informação do mc selecionado a partir do frame atual. Poderá sobrepor informações na timeline. Deseja prosseguir?")){
+			return;
+		}
+		
+		var mc_node = advancedPage.comboMcs.currentText;
+		Print("Node choosen : " + mc_node);
+		Print(mc_data[mc_node]);
+		//begin 
+		scene.beginUndoRedoAccum("Expose MC States");	
+		
+		var counter = [];
+		mc_data[mc_node]["states"].forEach(function(tbStateFile){
+			if(counter.indexOf(tbStateFile) == -1){
+				if(applyTbStateFile(mc_data[mc_node]["node"], tbStateFile)){
+					counter.push(tbStateFile);
+				}
+			}
+		});	
+		scene.endUndoRedoAccum();
+	}
+	
+	//connections
+	advancedPage.comboMcs["currentIndexChanged(QString)"].connect(self, comboExposeMcCallBack);
+	advancedPage.pushExpose.clicked.connect(self, pushExposeCallBack);
+	
+}
+exports.updateAdvancedTab = updateAdvancedTab;
+
+/*
+	aplica as poses do tb state file na timeline
+*/
+function applyTbStateFile(mcNode, tbStateFile){
+	Print("apply tbState file: " + tbStateFile);
+	var stateManager = new stateLib.TB_StateManager();
+	var sCurGroup = node.parentNode(mcNode);
+	stateManager.loadFile(tbStateFile, sCurGroup);
+
+	var loadedStates = stateManager.getStates();
+
+  	if(loadedStates.length == 0){
+		MessageBox.warning("Nenhuma state achada no arquivo : " + tbStateFile,0,0);
+		return false;
+  }
+
+	loadedStates.forEach(function(state, index){
+		var fr = frame.current() + index;
+		state.applyState(fr); //Set values
+		Action.performForEach("onActionInvalidateCanvas","cameraView");
+		Print("Applyed at frame : " + fr);
+	});
+	return true;
+}

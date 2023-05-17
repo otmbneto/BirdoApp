@@ -58,6 +58,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	var main_tab_widget = this.ui.tabWidget;
 	var masterPage = main_tab_widget.widget(0);
 	var extrasPage = main_tab_widget.widget(1);
+	var advancedPage = main_tab_widget.widget(2);
 
 	//hide extras tab
 	main_tab_widget.setTabEnabled(1, false);
@@ -361,7 +362,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		if(curr_index == 0){
 			//is master tab
 			this.updateFramesSelection();
-		} else {
+		} else if(curr_index == 1){
 			//update extras widgets
 			if(this.mc_data.EXTRAS.length > 0){
 				for(var i=0; i<this.mc_data.EXTRAS.length; i++){
@@ -385,6 +386,13 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			if(this.mc_data.EXTRAS.length == 0 && mc_list.length > 0){
 				utils.addMCsNodesToMainObject(this, extrasPage, mc_list);
 			}	
+		} else {
+			try {
+				utils.updateAdvancedTab(this, advancedPage, rig_data);
+			} catch(e) {
+				Print(e);
+				Print("ERROR setting advanced page!");
+			}
 		}
 		Print("Tab changed to : " + curr_index);	
 	}	
@@ -441,6 +449,23 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	this.updateLineName = function(){//callback do edit name master2
 		masterPage.groupMaster2.labelMaster2StFile.text = masterPage.groupMaster2.labelMaster2Name.text + ".tbState";
 		Print("Name updated to : " + masterPage.groupMaster2.labelMaster2Name.text);
+	}
+	
+	this.getMcNodes = function(){//retorna uma lista com TODOS mc nodes existentes exeto  o checkbox
+		var mc_list = [];
+		for(item in this.mc_data){
+			if(item == "CHECKBOX"){
+				continue;
+			}
+			Print(item);
+			for(var i=0; i< this.mc_data[item].length; i++){
+				Print(this.mc_data[item].node);
+				if(Boolean(this.mc_data[item].node)){
+					mc_list.push(this.mc_data[item].node);
+				}
+			}
+		}
+		return mc_list;
 	}
 	
 	//Connections
