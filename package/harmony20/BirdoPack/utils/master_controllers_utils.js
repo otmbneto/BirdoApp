@@ -927,7 +927,7 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			Print("End action : " + mc_name);
 			
 			mc_data.widgets.status.text = "Mc node Updated!";
-
+			
 			if(type == "MASTER" && index == 0){
 				//update enable extras tab
 				self.ui.tabWidget.setTabEnabled(1, true);
@@ -937,10 +937,12 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			}
 			
 			scene.endUndoRedoAccum();
-			
+			MessageBox.information("MC node Updated!");
+
 		} catch(e){
 			Print(e);
 			Print("Action failed!");
+			MessageBox.warning("MC node UPDATE FAIL!",0,0);
 		}	
 	};
 	//selection callback
@@ -1273,6 +1275,7 @@ exports.listtbStates = listtbStates;
 /*
 	da um update em todos MCs da cena, dando refresh no erro de mostrar os deform!
 */
+
 function updateSceneMCs(){
 	var scene_mcs = node.getNodes(["MasterController"]);
 	var satate = null;
@@ -1289,7 +1292,7 @@ function updateSceneMCs(){
 			showAttr.setValue(new_mode);
 			satate = new_mode;
 		}
-	      node.showControls(item, false);
+	    node.showControls(item, false);
 		Print("node mc hidden: " + item);
 	});
 	//Action.perform("onActionHideAllControls()");
@@ -1302,6 +1305,9 @@ function updateAdvancedTab(self, advancedPage, rig_data){
 	//expose mcs advanced tool
 	advancedPage.comboMcs.clear();
 	advancedPage.pushExpose.enabled = false;
+
+	//hide combo states
+	advancedPage.comboTbStateFiles.hide();
 
 	//var mcs = self.getMcNodes();
 	var mcs = rig_data.mcs.all;
@@ -1326,11 +1332,15 @@ function updateAdvancedTab(self, advancedPage, rig_data){
 
 	advancedPage.comboMcs.addItems(Object.keys(mc_data));
 
-	var comboExposeMcCallBack = function(){
+	var comboMCCallBack = function(){
 		var currIndex = advancedPage.comboMcs.currentIndex;
 		advancedPage.pushExpose.enabled = currIndex != 0;
 		var curr_item = Object.keys(mc_data)[currIndex];
-		advancedPage.labelExposeInfo.text = curr_item + " poses : " + mc_data[curr_item].states.length;
+		advancedPage.labelExposeInfo.text = curr_item + " tbState Files Count: " + mc_data[curr_item].states.length;
+		advancedPage.comboTbStateFiles.show();
+		advancedPage.comboTbStateFiles.clear();
+		advancedPage.comboTbStateFiles.addItems(mc_data[curr_item].states.map(function(item){ return BD1_fileBasename(item)}));
+
 	}
 	
 	var pushExposeCallBack = function(){
@@ -1343,21 +1353,18 @@ function updateAdvancedTab(self, advancedPage, rig_data){
 		Print("Node choosen : " + mc_node);
 		Print(mc_data[mc_node]);
 		//begin 
-		scene.beginUndoRedoAccum("Expose MC States");	
+		scene.beginUndoRedoAccum("Expose MC States");
 		
 		var counter = [];
-		mc_data[mc_node]["states"].forEach(function(tbStateFile){
-			if(counter.indexOf(tbStateFile) == -1){
-				if(applyTbStateFile(mc_data[mc_node]["node"], tbStateFile)){
-					counter.push(tbStateFile);
-				}
-			}
-		});	
+		var tbStateFile = mc_data[mc_node]["states"][advancedPage.comboTbStateFiles.currentIndex];
+		applyTbStateFile(mc_data[mc_node]["node"], tbStateFile);
 		scene.endUndoRedoAccum();
+		
+		advancedPage.labelExposeInfo.text = "Done! tbState File: " + advancedPage.comboTbStateFiles.currentText;
 	}
 	
 	//connections
-	advancedPage.comboMcs["currentIndexChanged(QString)"].connect(self, comboExposeMcCallBack);
+	advancedPage.comboMcs["currentIndexChanged(QString)"].connect(self, comboMCCallBack);
 	advancedPage.pushExpose.clicked.connect(self, pushExposeCallBack);
 	
 }

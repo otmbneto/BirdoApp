@@ -1510,9 +1510,42 @@ QRadioButton::indicator:unchecked:disabled {
          <item>
           <widget class="QLabel" name="labelExposeInfo">
            <property name="text">
-            <string>info..</string>
+            <string/>
            </property>
           </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_28" stretch="1,2,3">
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboTbStateFiles"/>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -1530,15 +1563,12 @@ QRadioButton::indicator:unchecked:disabled {
         </spacer>
        </item>
       </layout>
-      <zorder>label_24</zorder>
-      <zorder>line</zorder>
-      <zorder>pushExpose</zorder>
-      <zorder>comboMcs</zorder>
-      <zorder>labelExposeInfo</zorder>
       <zorder>horizontalSpacer</zorder>
-      <zorder>label_24</zorder>
       <zorder>horizontalSpacer_4</zorder>
       <zorder>verticalSpacer</zorder>
+      <zorder>comboTbStateFiles</zorder>
+      <zorder>horizontalSpacer_5</zorder>
+      <zorder>horizontalSpacer_6</zorder>
      </widget>
     </widget>
    </item>
