@@ -51,6 +51,7 @@ class BirdoApp(QtGui.QMainWindow):
         super(BirdoApp, self).__init__()
         self.owncloud = None
         self.app_root = root
+        self.isCloudProject = False
         ui_path = os.path.join(self.app_root, "gui/birdoApp.ui").replace("\\", "/")
         self.ui = self.loadPage(ui_path)
 
@@ -221,7 +222,15 @@ class BirdoApp(QtGui.QMainWindow):
 
     def setUI(self):
 
-        self.isCloudProject = self.project_data["server"]["type"] == "nextcloud"
+        roles_list = []
+        harmony_installation = False
+        if self.project_data:
+
+            if "server" in self.project_data.keys():
+                self.isCloudProject =  self.project_data["server"]["type"] == "nextcloud" if "type" in self.project_data["server"].keys() else False
+            roles_list = self.project_data["roles"] if "roles" in self.project_data.keys() else []
+            roles_list.insert(0, "")
+            harmony_installation = not self.project_data["harmony"]["installation_default"]
 
         print "Is cloud project:" + str(self.isCloudProject)
         # SETS FOLDERS BUTTON ICON
@@ -237,15 +246,9 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.actionChange_User.setEnabled(True)
         self.ui.actionChange_User.triggered.connect(self.changeUserAction)
 
-        # UPDATE USER FUNCTION COMBO
-        roles_list = self.project_data["roles"]
-        roles_list.insert(0, "")
-
         self.ui.combo_funcao.clear() #fix
         self.ui.combo_funcao.addItems(roles_list)
 
-        # CHECKS IF NEEDS TO DISPLAY HARMONY INSTALLATION PATH LINE
-        harmony_installation = not self.project_data["harmony"]["installation_default"]
         print "teste installation defalut: {0}".format(harmony_installation)
         self.ui.harmony_folder_line.setEnabled(harmony_installation)
         self.ui.harmony_label.setEnabled(harmony_installation)
@@ -453,11 +456,12 @@ class BirdoApp(QtGui.QMainWindow):
         return new_user
 
     def getUserData(self):
-
-        temp_user_json = self.project_data["user_json"]
+        
         user_data = {}
-        if os.path.exists(temp_user_json):
-            user_data = read_json_file(temp_user_json)
+        if self.project_data:
+            temp_user_json = self.project_data["user_json"]
+            if os.path.exists(temp_user_json):
+                user_data = read_json_file(temp_user_json)
 
         return user_data
 
