@@ -147,6 +147,33 @@ function BD2_getTimingsOfSelected(selected){
 
 //#################NODES #############################//
 /*
+	retorna info do rig do node dado como full node, nome do rig
+*/
+function BD2_getNodeRigData(nodeP){
+	var namesplit = nodeP.split("/");
+	var rig_full_regex = /\w{3}\.(\w|\d)+-v\d+/;
+	var rig_name_regex = /\w{2}\d{3}_(\w|\d)+(_v\d{2})?/;
+	var version_regex = /v\d{2}/;
+	var prefix_regex = /\w{2}\d{3}_/;
+	var index_regex = /_(\d+|\d)$/;
+	var rig_name = rig_name_regex.test(nodeP) ? rig_name_regex.exec(nodeP)[0] : null;
+	var rig_node = rig_name ? namesplit.slice(0, namesplit.indexOf(rig_name)+1).join("/") : null;
+	var fullname =  rig_full_regex.test(nodeP) ? rig_full_regex.exec(nodeP)[0] : null;
+	var fullnode = fullname ? namesplit.slice(0, namesplit.indexOf(fullname)+1).join("/") : null;
+	var version = version_regex.test(nodeP) ? version_regex.exec(nodeP)[0] : null;
+	return {
+		rig_name: rig_name.replace(index_regex, "") ,
+		char_name: rig_name ? rig_name.replace(prefix_regex, "").replace(index_regex, ""): null,
+		rig_node: rig_node, 
+		full_name: fullname,
+		full_node: fullnode,
+		prefix: rig_name ? rig_name.split("_")[0] : null,
+		version: version
+	};
+}
+
+
+/*
 	deleta copia o node e cola no mesmo lugar e conexoes anteriores 
 	(serve pra atalizar os atts do node em alguns casos)
 */
