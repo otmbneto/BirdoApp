@@ -1276,27 +1276,33 @@ exports.listtbStates = listtbStates;
 	da um update em todos MCs da cena, dando refresh no erro de mostrar os deform!
 */
 
-function updateSceneMCs(){
+function updateSceneMCs(showMCs){
 	var scene_mcs = node.getNodes(["MasterController"]);
 	var satate = null;
 	if(scene_mcs.length == 0){
 		MessageBox.information("Nenhum MC encontrado na cena!");
 		return;
 	}
-
+	var checkboxMCs = scene_mcs.filter(function(item){ return node.getName(item) == "mc_Function"});
+	if(checkboxMCs.length == 0){
+		Print("No check box function found in scene!");
+		return false;
+	}
+	//update checkboxes
+	checkboxMCs.forEach(function(item){
+		var showAttr = node.getAttr(item, 1, "SHOW_CONTROLS_MODE");
+		var mode = showMCs ? "Always" : "Normal";
+		showAttr.setValue(mode);
+		satate = mode;
+	});
+	
+	//update all mcs show control values
 	scene_mcs.forEach(function(item){ 
-		if(node.getName(item) == "mc_Function"){
-			var showAttr = node.getAttr(item, 1, "SHOW_CONTROLS_MODE");
-			var showValue = showAttr.textValue();
-			var new_mode = showValue == "Always" ? "Normal" : "Always";
-			showAttr.setValue(new_mode);
-			satate = new_mode;
-		}
 	    node.showControls(item, false);
 		Print("node mc hidden: " + item);
 	});
 	//Action.perform("onActionHideAllControls()");
-	return {mcs: scene_mcs, satate: satate};
+	return scene_mcs;
 }
 exports.updateSceneMCs = updateSceneMCs;
 
@@ -1394,3 +1400,36 @@ function applyTbStateFile(mcNode, tbStateFile){
 	});
 	return true;
 }
+
+/*
+	retorna o mc files zip do rig na rede
+*/
+function findServerMCDataZip(projDATA, rig_data){
+	var assetRoot = projDATA.getTBLIB("server") + "BirdoASSET/";
+	var prefix = rig_data.prefix.slice(0, 2);
+	var assetTypeFolder = findAssetTypeFolder();
+	if(!assetTypeFolder){
+		Print("Error finding asset folder type!");
+		return false;
+	}
+	var path = assetRoot + assetTypeFolder;
+	var rigFolderName = findRigFolder();
+	if(!rigFolderName){
+		Print("Error finding asset main folder!");
+		return false;
+	}
+	
+	return path + "/" + rigFolderName + "/" + rig_data.version + "/" + rig_data.char_name + "/DATA/mcFiles.zip";
+	
+	//find asset type 
+	function findAssetTypeFolder(){
+		var assetsTypes = BD1_ListFolders(assetRoot);
+		return assetsTypes.filter(function(item){ return item.toUpperCase().indexOf(prefix) == 0})[0];
+	}
+	//find asset name folder in type folder
+	function findRigFolder(){
+		var rigsFolders = BD1_ListFolders(path);
+		return rigsFolders.filter(function(item){ return item.indexOf(rig_data.prefix) == 0})[0];
+	}
+}
+exports.findServerMCDataZip = findServerMCDataZip;
