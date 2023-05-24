@@ -444,7 +444,7 @@ Copyright:  leobazao_@Birdo
 	*/	
 	function BD1_UnzipFile(zipFile, destiny){
 		var command = BD1_Find7Zip();
-		var commandArguments = [command, "x", zipFile, "-o" + destiny];
+		var commandArguments = [command, "x", zipFile, "-o" + destiny, "-aoa"];
 		try {
 			Process.execute(commandArguments);
 		} catch (err){
