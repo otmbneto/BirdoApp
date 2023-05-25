@@ -143,6 +143,7 @@ class Uploader(QtGui.QMainWindow):
 		self.listOfWidgets = []
 		self.ui.cleanBtn.setEnabled(False)
 		self.ui.progressBar.setVisible(False)
+		self.ui.progressBar.setValue(0)
 
 		return
 
@@ -164,7 +165,7 @@ class Uploader(QtGui.QMainWindow):
 		self.ui.progressBar.setVisible(True)
 		for movie in self.listOfWidgets:
 			QtGui.qApp.processEvents()
-			movie.upload(self.root,self.project_folders,temp)
+			movie.upload(self.root,self.project_folders,self.project_data,temp)
 			self.incrementProgress(progression)
 
 		self.setProgress(100)
@@ -230,6 +231,7 @@ class Uploader(QtGui.QMainWindow):
 				u = str(url.toLocalFile())
 				movWidget = self.getTemplateItem(u,self.episodes)
 				episode = self.getEpisode(u)
+				print "EPISODE:" + str(episode)
 				if episode is not None:
 					movWidget.setEpisode(self.findIndexOf(episode))
 				if movWidget.isValid():
