@@ -9,6 +9,7 @@ class uiItem(QtGui.QGroupBox):
 		super(uiItem,self).__init__()
 
 		self.filename = "ITEM_NAME"
+		self.filetypes = (".mov",".mp4")
 		if fullpath is not None:
 			self.filename = fullpath.split("/")[-1]
 			self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
@@ -22,9 +23,11 @@ class uiItem(QtGui.QGroupBox):
 		self.setMaximumHeight(50)
 
 		horizontal_layout = QtGui.QHBoxLayout()
-		item_label = QtGui.QLabel(self.filename)
-		item_font = QtGui.QFont("Arial", 12)
+		item_label = QtGui.QLabel(self.filename.split(".")[0])
+		item_font = QtGui.QFont("Arial", 8)
 		item_label.setFont(item_font)
+
+		item_label.setMinimumWidth(150)
 
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
@@ -37,6 +40,7 @@ class uiItem(QtGui.QGroupBox):
 		self.progress_bar.setValue(0)
 
 		self.status_label = QtGui.QLabel("<font>Ready to go</font>")
+		self.status_label.setFont(item_font)
 		self.status_label.setStyleSheet("QLabel { color : blue; }")
 		self.status_label.setFont(item_font)
 		self.status_label.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
@@ -46,6 +50,7 @@ class uiItem(QtGui.QGroupBox):
 		self.status_label.setMaximumHeight(25)
 
 		self.delete_button = QtGui.QPushButton("X")
+		self.delete_button.setMinimumWidth(25)
 		self.delete_button.setMaximumWidth(25)
 
 		horizontal_layout.addWidget(item_label)
@@ -60,22 +65,18 @@ class uiItem(QtGui.QGroupBox):
 
 		self.delete_button.clicked.connect(self.close)
 
-	def getUi(self):
-
-		return self.ui
-
 	def isValid(self):#method needs to be changed by project necessity
 
-		return self.filename.endswith((".mov",".mp4"))
+		return self.filename.endswith(self.filetypes)
 
 	def setSceneName(self,name):
-		self.ui.item_label.setText(name)
+		self.item_label.setText(name)
 
 	def getProgress(self):
-	    return self.ui.progress_bar.value()
+	    return self.progress_bar.value()
 
 	def setProgress(self,value):
-	    self.ui.progress_bar.setValue(value)
+	    self.progress_bar.setValue(value)
 
 	def incrementProgress(self,increment):
 	    value = self.getProgress()
@@ -96,35 +97,35 @@ class uiItem(QtGui.QGroupBox):
 		self.setSceneName(self.filename)
 
 	def getStatus(self):
-	    return self.ui.status_label
+	    return self.status_label
 
 	def setStatus(self,text,color):
-	    self.ui.status_label.setText(text)
-	    self.ui.status_label.setStyleSheet("QLabel { color : " + color + "; }")
+	    self.status_label.setText(text)
+	    self.status_label.setStyleSheet("QLabel { color : " + color + "; }")
 
 	def getEpisode(self):
-		return self.ui.episodes.currentText()
+		return self.episodes.currentText()
 
 	def setEpisode(self,index):
-		self.ui.episodes.setCurrentIndex(index)
+		self.episodes.setCurrentIndex(index)
 
 	def addEpisodes(self,episodes):
-		self.ui.episodes.addItems(episodes)
+		self.episodes.addItems(episodes)
 
 	def setDone(self):
-	    self.ui.status_label.setText("Done")
-	    self.ui.status_label.setStyleSheet("QLabel { color : green; }")
+	    self.status_label.setText("Done")
+	    self.status_label.setStyleSheet("QLabel { color : green; }")
 
 	def setError(self):
-	    self.ui.status_label.setText("ERROR")
-	    self.ui.status_label.setStyleSheet("QLabel { color : red; }")
+	    self.status_label.setText("ERROR")
+	    self.status_label.setStyleSheet("QLabel { color : red; }")
 
 	def setEnable(self,value):
-	    self.ui.delete_button.setEnabled(value)
+	    self.delete_button.setEnabled(value)
 
 	def getVersion(self,scene_name,path):
 
-		return "v" + str(len([f for f in os.listdir(path) if f.endswith((".mov",".mp4")) and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
+		return "v" + str(len([f for f in os.listdir(path) if f.endswith(self.filetypes) and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
 
 	def getAnimaticPath(self,episode_code,root,project_folders):
 
