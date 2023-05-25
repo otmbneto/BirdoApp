@@ -67,7 +67,16 @@ class uiItem(QtGui.QGroupBox):
 
 	def initLogic(self):
 
+		episode = self.getEpisode(self.getFullpath())
+		print "EPISODE:" + str(episode)
+		if episode is not None:
+			self.setEpisode(self.findIndexOf(episode))
+
 		self.delete_button.clicked.connect(self.close)
+
+	def findIndexOf(self,text):
+	    index = self.episodes.findText(text, QtCore.Qt.MatchFixedString)
+	    return index if index >= 0 else 0
 
 	def isValid(self):#method needs to be changed by project necessity
 
@@ -107,7 +116,7 @@ class uiItem(QtGui.QGroupBox):
 	    self.status_label.setText(text)
 	    self.status_label.setStyleSheet("QLabel { color : " + color + "; }")
 
-	def getEpisode(self):
+	def getCurrentEpisode(self):
 		return self.episodes.currentText()
 
 	def setEpisode(self,index):
@@ -135,15 +144,22 @@ class uiItem(QtGui.QGroupBox):
 
 		return os.path.join(root,project_folders.get_animatic_folder_path(episode_code)).replace("\\","/")
 
-	def getShot(self,filename):
+	def getRegexPattern(self,regex,filename):
 
-		regex = '.*SC_(\d{4}).*|.*SC(\d{4}).*'
 		index_range = regex.split("|")
 		m = re.search(regex, filename)
 		if m is not None:
 			for i in range(len(index_range)):
 				if m.group(i+1) is not None:
 					return m.group(i+1)
+
+	def getEpisode(self,filename):
+
+		return self.getRegexPattern('.*(EP\d{3}).*|(\d{3})_SC\d{4}',filename)
+
+	def getShot(self,filename):
+
+		return self.getRegexPattern('.*SC_(\d{4}).*|.*SC(\d{4}).*',filename)
 
 	def getScene(self,filename,episode,project_data):
 
@@ -163,12 +179,12 @@ class uiItem(QtGui.QGroupBox):
 
 	def upload(self,root,project_folders,project_data,temp):
 
-		episode_code = self.getEpisode()
+		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
 			self.setStatus("No Episode","red")
 			return
 		self.incrementProgress(10)
-		scene_name = self.getScene(self.getFilename().upper(),self.getEpisode(),project_data)
+		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
 		self.incrementProgress(10)
 		animatic_path = self.getAnimaticPath(episode_code,root,project_folders)
 		self.incrementProgress(10)

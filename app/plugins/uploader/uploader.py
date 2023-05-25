@@ -112,7 +112,6 @@ class Uploader(QtGui.QMainWindow):
 		self.getRoot()
 		self.project_folders = FolderManager(self.project_data)
 		if self.project_folders is not None:
-			print "PROJECT FOLDERS: " + str(self.project_folders.get_episodes())
 			self.getProjectEpisodes()
 
 		self.ui.progressBar.setVisible(False)
@@ -127,13 +126,12 @@ class Uploader(QtGui.QMainWindow):
 
 		value = self.ui.globalEpisodes.currentIndex()
 		for item in self.listOfWidgets:
-			item.setEpisode(value)
+			item.setCurrentEpisode(value)
 
 	def getProjectEpisodes(self):
 
 		self.episodes = [""]
 		folder = os.path.join(self.root,self.project_folders.get_episodes()).replace("\\","/")
-		print folder
 		self.episodes += [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder,f))]
 		self.ui.globalEpisodes.addItems(self.episodes)
 
@@ -173,25 +171,6 @@ class Uploader(QtGui.QMainWindow):
 
 		return
 
-	def getRegexPattern(self,regex,filename):
-
-		index_range = regex.split("|")
-		m = re.search(regex, filename)
-		if m is not None:
-			for i in range(len(index_range)):
-				if m.group(i+1) is not None:
-					return m.group(i+1)
-
-	def getEpisode(self,filename):
-
-		regex = '.*(EP\d{3}).*|(\d{3})_SC\d{4}'
-		index_range = regex.split("|")
-		m = re.search(regex, filename)
-		if m is not None:
-			for i in range(len(index_range)):
-				if m.group(i+1) is not None:
-					return m.group(i+1)
-
 	def getProgress(self):
 		return self.ui.progressBar.value()
 
@@ -230,10 +209,6 @@ class Uploader(QtGui.QMainWindow):
 				QtGui.qApp.processEvents()
 				u = str(url.toLocalFile())
 				movWidget = self.getTemplateItem(u,self.episodes)
-				episode = self.getEpisode(u)
-				print "EPISODE:" + str(episode)
-				if episode is not None:
-					movWidget.setEpisode(self.findIndexOf(episode))
 				if movWidget.isValid():
 					self.listOfWidgets.append(movWidget)
 					self.verticalLayout.addWidget(movWidget)
