@@ -168,7 +168,7 @@ function BD_BirdoLib_Save(){
 		}
 		function hasMultipleOutputs(groupNode){//checa se o grupo tem mais de uma saida de imagem 
 			var outPorts = node.numberOfOutputPorts(groupNode);
-			var outputModule = node.getGroupOutputModule(sel, "", 0,0,0);
+			var outputModule = node.getGroupOutputModule(groupNode, "", 0,0,0);
 			var outPutCounts = 0;
 			for(var i=0; i<outPorts; i++){
 				if(!BD2_isTransformationNode(node.srcNode(outputModule, i))){
