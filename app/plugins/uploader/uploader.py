@@ -160,15 +160,14 @@ class Uploader(QtGui.QMainWindow):
 
 		self.ui.cleanBtn.setEnabled(True)
 
-		#progression = 100.0/len(self.listOfWidgets) if len(self.listOfWidgets) > 0 else 100
-		#self.ui.progressBar.setVisible(True)
+		progression = 100/len(self.listOfWidgets) if len(self.listOfWidgets) > 0 else 100
+		self.ui.progressBar.setVisible(True)
 		for movie in self.listOfWidgets:
 			QtGui.qApp.processEvents()
 			movie.upload(self.root,self.project_folders,temp)
-			print "Hello world!"
-			#self.incrementProgress(progression)
+			self.incrementProgress(progression)
 
-		#self.setProgress(100)
+		self.setProgress(100)
 		MessageBox.information("Copias feitas com sucesso!")
 
 		return
