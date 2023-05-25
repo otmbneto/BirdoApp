@@ -3,6 +3,10 @@ import os
 import shutil
 import re
 
+curr_dir = os.path.dirname(os.path.realpath(__file__))
+birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
+print birdo_app_root
+
 class uiItem(QtGui.QGroupBox):
 
 	def __init__(self,fullpath,episode_list):
@@ -141,10 +145,10 @@ class uiItem(QtGui.QGroupBox):
 				if m.group(i+1) is not None:
 					return m.group(i+1)
 
-	def getScene(self,filename,episode):
+	def getScene(self,filename,episode,project_data):
 
 		m = self.getShot(filename)
-		return "_".join([self.project_data["prefix"],episode,"SC" + m]) if m is not None else m
+		return "_".join([project_data["prefix"],episode,"SC" + m]) if m is not None else m
 
 	def getFFMPEG(self):
 
@@ -157,14 +161,14 @@ class uiItem(QtGui.QGroupBox):
 	  print(cmd)
 	  return os.system(cmd)
 
-	def upload(self,root,project_folders,temp):
+	def upload(self,root,project_folders,project_data,temp):
 
 		episode_code = self.getEpisode()
 		if episode_code == "":
 			self.setStatus("No Episode","red")
 			return
 		self.incrementProgress(10)
-		scene_name = self.getScene(self.getFilename().upper(),self.getEpisode())
+		scene_name = self.getScene(self.getFilename().upper(),self.getEpisode(),project_data)
 		self.incrementProgress(10)
 		animatic_path = self.getAnimaticPath(episode_code,root,project_folders)
 		self.incrementProgress(10)
