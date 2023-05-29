@@ -288,44 +288,71 @@ class uiItem(QtGui.QGroupBox):
 		if not harmony_file.endswith(".xstage"):
 			print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
 			return False
-		cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.harmony_path,os.path.normpath(harmony_file),os.path.normpath(script))
+		cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.harmony_path,os.path.normpath(harmony_file),script)
 		print cmd
 		return subprocess.call(shlex.split(cmd)) == 0
 
+	def getVersion(self,name,path):
+
+		version = 1
+		files = os.listdir(path)
+		for file in files:
+			if name in file:
+				version += 1
+
+		return "_v" + str(version).zfill(2)
+
 	def upload(self,root,project_folders,project_data,temp):
 
+		temp_files = []
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
 			self.setStatus("No Episode","red")
 			return
-
+		self.incrementProgress(5)
 		local_zip = os.path.join(temp,self.getFilename()).replace("\\","/")
 		shutil.copyfile(self.getFullpath(),local_zip)
+		self.incrementProgress(10)
 		local_scene = None
 		if local_zip.endswith(".zip"):
 			local_scene = self.birdoUnzipFile(local_zip,temp)
 			os.remove(local_zip)
 		else:
+			os.remove(local_zip)
 			return
-
+		self.incrementProgress(10)
 		xstage = self.get_xstage_last_version(local_scene)
-		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],"BAT_birdofy.js").replace("\\","/")
-		
+		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],"BAT_birdofy.js").replace("/","\\\\")
+		print "SCRIPT PATH: " + str(script)
+		self.incrementProgress(5)
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		result = self.compile_script(script,xstage)
-
-		xstage = os.path.basename(self.get_xstage_last_version(local_scene))
-		print local_scene
-		output = self.birdoZipFile(local_scene,saveAs = xstage.replace(".xstage",""))
-
+		self.incrementProgress(20)
+		temp_files = [os.path.join(temp,f).replace("\\","/") for f in os.listdir(temp)]
+		result = list(set(temp_files) - set([local_scene.replace("\\","/")])) #pega ultima versao
+		shutil.rmtree(local_scene)
+		if len(result) == 0:
+			print "cena nao encontrada"
+			return
+		new_scene = result[0]
+		new_scene_name = os.path.basename(new_scene)
+		#xstage = os.path.basename(self.get_xstage_last_version(local_scene))
+		#print local_scene
+		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
+		print server_path
+		self.incrementProgress(10)
+		if not os.path.exists(server_path):
+			os.makedirs(server_path)
+		output = self.birdoZipFile(new_scene,saveAs = new_scene_name + self.getVersion(new_scene_name,server_path))
+		self.incrementProgress(10)
+		shutil.rmtree(new_scene)
 		if os.path.exists(output):
-			server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
-			print server_path
-			if not os.path.exists(server_path):
-				os.makedirs(server_path)
+			#server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
 			server_file = os.path.join(server_path,os.path.basename(output)).replace("\\","/")
 			print server_file
 			shutil.copyfile(output,server_file)
-
+		self.incrementProgress(20)
+		os.remove(output)
+		self.incrementProgress(10)
 		return
