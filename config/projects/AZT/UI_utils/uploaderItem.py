@@ -292,8 +292,19 @@ class uiItem(QtGui.QGroupBox):
 		print cmd
 		return subprocess.call(shlex.split(cmd)) == 0
 
+	def getVersion(self,name,path):
+
+		version = 1
+		files = os.listdir(path)
+		for file in files:
+			if name in file:
+				version += 1
+
+		return "_v" + str(version).zfill(2)
+
 	def upload(self,root,project_folders,project_data,temp):
 
+		temp_files = []
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
@@ -307,6 +318,7 @@ class uiItem(QtGui.QGroupBox):
 			local_scene = self.birdoUnzipFile(local_zip,temp)
 			os.remove(local_zip)
 		else:
+			os.remove(local_zip)
 			return
 
 		xstage = self.get_xstage_last_version(local_scene)
@@ -315,17 +327,26 @@ class uiItem(QtGui.QGroupBox):
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		result = self.compile_script(script,xstage)
 
-		xstage = os.path.basename(self.get_xstage_last_version(local_scene))
-		print local_scene
-		output = self.birdoZipFile(local_scene,saveAs = xstage.replace(".xstage",""))
-
+		temp_files = [os.path.join(temp,f) for f in os.listdir(temp)]
+		result = list(set(temp_files) - set([local_scene])) #pega ultima versao
+		shutil.rmtree(local_scene)
+		if len(result) == 0:
+			print "cena nao encontrada"
+			return
+		new_scene = result[0]
+		new_scene_name = os.path.basename(new_scene)
+		#xstage = os.path.basename(self.get_xstage_last_version(local_scene))
+		#print local_scene
+		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
+		output = self.birdoZipFile(new_scene,saveAs = new_scene_name + self.getVersion(new_scene_name,server_path))
+		shutil.rmtree(new_scene)
 		if os.path.exists(output):
-			server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
+			#server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
 			print server_path
 			if not os.path.exists(server_path):
 				os.makedirs(server_path)
 			server_file = os.path.join(server_path,os.path.basename(output)).replace("\\","/")
 			print server_file
 			shutil.copyfile(output,server_file)
-
+		os.remove(output)
 		return
