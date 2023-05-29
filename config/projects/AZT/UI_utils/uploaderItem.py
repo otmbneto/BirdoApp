@@ -288,7 +288,7 @@ class uiItem(QtGui.QGroupBox):
 		if not harmony_file.endswith(".xstage"):
 			print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
 			return False
-		cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.harmony_path,os.path.normpath(harmony_file),os.path.normpath(script))
+		cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.harmony_path,os.path.normpath(harmony_file),script)
 		print cmd
 		return subprocess.call(shlex.split(cmd)) == 0
 
@@ -322,13 +322,14 @@ class uiItem(QtGui.QGroupBox):
 			return
 
 		xstage = self.get_xstage_last_version(local_scene)
-		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],"BAT_birdofy.js").replace("\\","/")
+		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],"BAT_birdofy.js").replace("/","\\\\")
+		print "SCRIPT PATH: " + str(script)
 		
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		result = self.compile_script(script,xstage)
 
-		temp_files = [os.path.join(temp,f) for f in os.listdir(temp)]
-		result = list(set(temp_files) - set([local_scene])) #pega ultima versao
+		temp_files = [os.path.join(temp,f).replace("\\","/") for f in os.listdir(temp)]
+		result = list(set(temp_files) - set([local_scene.replace("\\","/")])) #pega ultima versao
 		shutil.rmtree(local_scene)
 		if len(result) == 0:
 			print "cena nao encontrada"
