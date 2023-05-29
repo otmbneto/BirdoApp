@@ -111,7 +111,7 @@ class HarmonyManager(object):
             return False
         cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.harmony_path,
                                                          os.path.normpath(harmony_file),
-                                                         os.path.normpath(script))
+                                                         script.replace("/", "\\\\"))
         return subprocess.call(shlex.split(cmd)) == 0
 
     def create_thumbnails(self, harmony_tpl):
