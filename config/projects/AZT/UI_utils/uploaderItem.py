@@ -338,13 +338,14 @@ class uiItem(QtGui.QGroupBox):
 		#xstage = os.path.basename(self.get_xstage_last_version(local_scene))
 		#print local_scene
 		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
+		print server_path
+		if not os.path.exists(server_path):
+			os.makedirs(server_path)
 		output = self.birdoZipFile(new_scene,saveAs = new_scene_name + self.getVersion(new_scene_name,server_path))
+		
 		shutil.rmtree(new_scene)
 		if os.path.exists(output):
 			#server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
-			print server_path
-			if not os.path.exists(server_path):
-				os.makedirs(server_path)
 			server_file = os.path.join(server_path,os.path.basename(output)).replace("\\","/")
 			print server_file
 			shutil.copyfile(output,server_file)
