@@ -162,6 +162,11 @@ class Uploader(QtGui.QMainWindow):
 		progression = 100/len(self.listOfWidgets) if len(self.listOfWidgets) > 0 else 100
 		self.ui.progressBar.setVisible(True)
 		for movie in self.listOfWidgets:
+
+			if os.path.exists(temp):
+				shutil.rmtree(temp)
+			os.makedirs(temp)
+
 			QtGui.qApp.processEvents()
 			movie.upload(self.root,self.project_folders,self.project_data,temp)
 			self.incrementProgress(progression)
