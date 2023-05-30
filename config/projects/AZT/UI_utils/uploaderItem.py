@@ -304,6 +304,7 @@ class uiItem(QtGui.QGroupBox):
 
 	def upload(self,root,project_folders,project_data,temp):
 
+		QtGui.qApp.processEvents()
 		temp_files = []
 		self.harmony_path = project_data['harmony']['paths']["program"]
 		episode_code = self.getCurrentEpisode()
@@ -339,7 +340,7 @@ class uiItem(QtGui.QGroupBox):
 		new_scene_name = os.path.basename(new_scene)
 		#xstage = os.path.basename(self.get_xstage_last_version(local_scene))
 		#print local_scene
-		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"ANIM"),"PUBLISH")
+		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"SETUP"),"PUBLISH")
 		print server_path
 		self.incrementProgress(10)
 		if not os.path.exists(server_path):
