@@ -247,7 +247,7 @@ function BD2_connect_node(connections_data, node_path){
 	unlink all nodes connections	
 */
 function BD2_unlink_all(connections_data, nodeP){
-	for(var i=0; i<connections_data.input.length; i++){
+	for(var i=connections_data.input.length; i>=0; i--){
 		node.unlink(nodeP, i);
 	}
 	connections_data.output.forEach(function(item, index){
