@@ -156,7 +156,9 @@ function find_backdrop_mc(group, name){
 	}else {
 		output["backdrop"] = mc_bds[0];
 	}
-	var allcomps = BD2_ListNodesInGroup(group, ["COMPOSITE"], true);
+	var allcomps = node.subNodes(group).filter(function(item){ 
+		return node.type(item) == "COMPOSITE";
+	});
 	var bdpos = output["backdrop"].position;
 	var bd_rect = new QRect(bdpos.x, bdpos.y, bdpos.w, bdpos.h);
 	var comp = allcomps.filter(function(item){
@@ -170,6 +172,7 @@ function find_backdrop_mc(group, name){
 		output["comp"] = node.add(group, "comp_MC", "COMPOSITE", cordC.x(), cordC.y(), 0);
 		//find dst comp 
 		var dstComp = allcomps.sort(function(a,b){ return node.coordY(b) - node.coordY(a)})[0];
+		Print(">>>TESTE dest created mc comp: " + dstComp);
 		//link nodes
 		node.link(output["comp"], 0, dstComp, 0, false, true); 
 		//BD2_connectWithWaypoint(output["comp"], dstComp, true);
@@ -178,6 +181,7 @@ function find_backdrop_mc(group, name){
 	}
 	return output;
 }
+exports.find_backdrop_mc = find_backdrop_mc;
 
 /*
 	create mc node with backdrop if dont exist
