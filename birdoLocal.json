@@ -91,6 +91,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 4,
+			"prefix": "BAB",
+			"name": "Bia_and_the_Beats",
+			"harmony" : {
+					"version" : "20.0.3",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_BAB.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }
