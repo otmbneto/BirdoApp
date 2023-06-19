@@ -39,9 +39,6 @@ class uiItem(QtGui.QGroupBox):
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
 
-		self.step = QtGui.QComboBox()
-		self.step.addItems(["SETUP","ANIM"])
-
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
 		self.progress_bar.setMaximum(100)
@@ -65,7 +62,10 @@ class uiItem(QtGui.QGroupBox):
 
 		horizontal_layout.addWidget(item_label)
 		horizontal_layout.addWidget(self.episodes)
-		horizontal_layout.addWidget(self.step)
+		if self.filename.endswith(".zip"):
+			self.step = QtGui.QComboBox()
+			self.step.addItems(["SETUP","ANIM"])
+			horizontal_layout.addWidget(self.step)
 		horizontal_layout.addWidget(self.progress_bar)
 		horizontal_layout.addWidget(self.status_label)        
 		horizontal_layout.addWidget(self.delete_button)
@@ -306,7 +306,38 @@ class uiItem(QtGui.QGroupBox):
 
 		return "_v" + str(version).zfill(2)
 
-	def upload(self,root,project_folders,project_data,temp):
+
+	def upload_animatic(self,root,project_folders,project_data,temp):
+
+		episode_code = self.getCurrentEpisode()
+		if episode_code == "":
+			self.setStatus("No Episode","red")
+			return
+		self.incrementProgress(10)
+		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
+		self.incrementProgress(10)
+		animatic_path = self.getAnimaticPath(episode_code,root,project_folders)
+		self.incrementProgress(10)
+		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
+		self.incrementProgress(10)
+		if not os.path.exists(animatic_path):
+			os.makedirs(animatic_path)
+		self.incrementProgress(10)
+		dst = os.path.join(animatic_path,scene_name)
+		
+		compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
+		result = self.compressScene(self.getFullpath(),compressed) == 0
+		self.incrementProgress(25)
+		if result:
+			print dst
+			shutil.copyfile(compressed,dst)
+		self.incrementProgress(25)
+		os.remove(compressed)
+		self.setStatus("Done","green")
+
+		return
+
+	def upload_scene(self,root,project_folders,project_data,temp):
 
 		QtGui.qApp.processEvents()
 		temp_files = []
@@ -360,4 +391,16 @@ class uiItem(QtGui.QGroupBox):
 		self.incrementProgress(20)
 		os.remove(output)
 		self.incrementProgress(10)
+
+		return
+
+	def upload(self,root,project_folders,project_data,temp):
+
+		if self.getFilename().endswith((".mov",".mp4")):
+			self.upload_animatic(root,project_folders,project_data,temp)
+		elif self.getFilename().endswith(".zip"):
+			self.upload_scene(root,project_folders,project_data,temp)
+		else:
+			print "ERROR: Format unknown!"
+
 		return
