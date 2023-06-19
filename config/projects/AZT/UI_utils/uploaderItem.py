@@ -162,19 +162,28 @@ class uiItem(QtGui.QGroupBox):
 
 	def getEpisode(self,filename):
 
-		regex = '(\d{3})_\d{4}'
-		if not self.getFilename().endswith(".zip"):
-			regex = 'EP(\d{3})_SC\d{3}'
+		filename = os.path.basename(filename).replace("AZTC264_","")
+		regexes = ['(\d{3})_\d{4}','(\d{3})_\d{3}','EP(\d{3})_\d{4}','EP(\d{3})_SC\d{4}','(\d{3})_SC\d{4}','(\d{3})_SC\d{3}','EP(\d{3})_SC\d{3}','EP(\d{3})_\d{3}']
+		for r in regexes:
+			print r
+			print filename
+			if re.search(r,filename) is not None:
+				regex = r
+				break
 
 		return "EP" + self.getRegexPattern(regex,filename)
 
 	def getShot(self,filename):
 
-		regex = '(\d{3})_\d{4}'
-		if not self.getFilename().endswith(".zip"):
-			regex = 'EP\d{3}_SC(\d{3})'
+		filename = os.path.basename(filename).replace("AZTC264_","")
+		regexes = ['\d{3}_(\d{4})','\d{3}_(\d{3})','EP\d{3}_(\d{4})','EP\d{3}_SC(\d{4})','\d{3}_SC(\d{4})','EP\d{3}_(\d{3})','EP\d{3}_SC(\d{3})','\d{3}_SC(\d{3})']
+		for r in regexes:
+			if re.search(r,filename) is not None:
+				regex = r
+				break
 
-		return "SC" + self.getRegexPattern(regex,filename) + "0"
+		result = "SC" + self.getRegexPattern(regex,filename)
+		return result + "0" if len(result) == 3 else result
 
 	def getScene(self,filename,episode,project_data):
 
