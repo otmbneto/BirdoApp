@@ -39,6 +39,9 @@ class uiItem(QtGui.QGroupBox):
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
 
+		self.step = QtGui.QComboBox()
+		self.step.addItems(["SETUP","ANIM"])
+
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
 		self.progress_bar.setMaximum(100)
@@ -62,6 +65,7 @@ class uiItem(QtGui.QGroupBox):
 
 		horizontal_layout.addWidget(item_label)
 		horizontal_layout.addWidget(self.episodes)
+		horizontal_layout.addWidget(self.step)
 		horizontal_layout.addWidget(self.progress_bar)
 		horizontal_layout.addWidget(self.status_label)        
 		horizontal_layout.addWidget(self.delete_button)
@@ -340,7 +344,7 @@ class uiItem(QtGui.QGroupBox):
 		new_scene_name = os.path.basename(new_scene)
 		#xstage = os.path.basename(self.get_xstage_last_version(local_scene))
 		#print local_scene
-		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),"SETUP"),"PUBLISH")
+		server_path = os.path.join(root,project_folders.get_scene_path("_".join([project_data["prefix"],self.getEpisode(self.getFilename()),self.getShot(self.getFilename())]),self.step.currentText()),"PUBLISH")
 		print server_path
 		self.incrementProgress(10)
 		if not os.path.exists(server_path):
