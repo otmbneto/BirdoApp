@@ -198,6 +198,7 @@ function BD2_updateNode(nodeP){
 */
 function BD2_get_node_connections_data(node_path){
 	var c_data = {
+		source_node:  node_path,
 		input: [],
 		output: []
 	};
@@ -222,23 +223,24 @@ function BD2_get_node_connections_data(node_path){
 */
 function BD2_connect_node(connections_data, node_path){
 	//connect inputs
+	Print(">> Connect nodes (SOURCE NODE): " + node_path.source_node);
 	Print("reconnect inputs: ");
 	connections_data.input.forEach(function(node_info, p){
-		if(!node_info){
-			return;
+		if(node_info && !node.isLinked(node_info, p)){
+			Print(node.link(node_info.node, node_info.port, node_path, p));
 		}
-		Print(node.link(node_info.node, node_info.port, node_path, p));
 	});	
 
 	//connect outputs
 	Print("reconnect outputs: ");
 	connections_data.output.forEach(function(links, p){
-		if(links.length == 0){
-			return;
+		if(links.length != 0){
+			links.forEach(function(node_info, link){
+				if(!node.dstNodeInfo(node_path, p, link)){
+					Print(node.link(node_path, p, node_info.node, node_info.port));
+				}
+			});
 		}
-		links.forEach(function(node_info){
-			Print(node.link(node_path, p, node_info.node, node_info.port));
-		});
 	});	
 }
 
@@ -462,6 +464,9 @@ function BD2_copyAtributes(node1, node2, only_columns){
 			if(!col && only_columns){
 				return;
 			}
+			if(col && !only_columns){
+				return;
+			}
 			var attrVal = x.textValue();
 			node.setTextAttr(node2, fullAttName, a, attrVal);
 			counter++;
@@ -477,7 +482,7 @@ function BD2_copyAtributes(node1, node2, only_columns){
 @type => node type like "BLUR".. "WRITE"...
 @end_connection => if its a end type node like Display or Write (bool)
 */
-function BD2_AddNodeUnder(nodeSel, nodeName,  type, end_connection){
+function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection){
 
 	var parentGroup = node.parentNode(nodeSel);
 	var x = node.coordX(nodeSel);
@@ -530,6 +535,30 @@ function BD2_AddNodeUp(nodeSel, nodeName,  type, end_connection){
 	node.link(up_node, 0, newNode, 0);
 	return newNode;
 }
+
+/*Adiciona um node 
+@parentGroup => parent group to add
+@name => new node name
+@coord => object with coordinates info
+*/
+function BD2_addNode(type, parentGroup, name, coord){
+	if(type == "READ"){
+		var elemId = element.add(name, "COLOR", scene.numberOfUnitsZ(), "SCAN", "TVG");
+		if(elemId == -1){
+			Print("falha ao criar elemento com nome> " + name);
+			return null; // no read to add.
+		}
+		var uniqueColumnName = BD2_getUniqueColumnName(name);
+		column.add(uniqueColumnName , "DRAWING");
+		column.setElementIdOfDrawing( uniqueColumnName, elemId );
+
+		var read = node.add(parentGroup, name, "READ", coord.x, coord.y, coord.z);
+		node.linkAttr(read, "DRAWING.ELEMENT", uniqueColumnName);
+		return read;
+	} 
+	return node.add(parentGroup, name, type, coord.x, coord.y, coord.z);
+}
+
 
 /*
 	create QRect from node coordenates
