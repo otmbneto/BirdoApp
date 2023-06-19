@@ -182,8 +182,9 @@ class uiItem(QtGui.QGroupBox):
 				regex = r
 				break
 
-		result = "SC" + self.getRegexPattern(regex,filename)
-		return result + "0" if len(result) == 3 else result
+		result = self.getRegexPattern(regex,filename)
+		print result
+		return "SC" + result + "0" if len(result) == 3 else "SC" + result
 
 	def getScene(self,filename,episode,project_data):
 
