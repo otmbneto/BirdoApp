@@ -162,11 +162,19 @@ class uiItem(QtGui.QGroupBox):
 
 	def getEpisode(self,filename):
 
-		return "EP" + self.getRegexPattern('(\d{3})_\d{4}',filename)
+		regex = '(\d{3})_\d{4}'
+		if not self.getFilename().endswith(".zip"):
+			regex = 'EP(\d{3})_SC\d{3}'
+
+		return "EP" + self.getRegexPattern(regex,filename)
 
 	def getShot(self,filename):
 
-		return "SC" + self.getRegexPattern('\d{3}_(\d{4})',filename)
+		regex = '(\d{3})_\d{4}'
+		if not self.getFilename().endswith(".zip"):
+			regex = 'EP\d{3}_SC(\d{3})'
+
+		return "SC" + self.getRegexPattern(regex,filename) + "0"
 
 	def getScene(self,filename,episode,project_data):
 
@@ -318,10 +326,10 @@ class uiItem(QtGui.QGroupBox):
 		self.incrementProgress(10)
 		animatic_path = self.getAnimaticPath(episode_code,root,project_folders)
 		self.incrementProgress(10)
-		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
-		self.incrementProgress(10)
 		if not os.path.exists(animatic_path):
 			os.makedirs(animatic_path)
+		self.incrementProgress(10)
+		scene_name += self.getVersion(scene_name,animatic_path) + ".mov"
 		self.incrementProgress(10)
 		dst = os.path.join(animatic_path,scene_name)
 		
