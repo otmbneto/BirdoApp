@@ -31,7 +31,11 @@ function UpdateAnimatic(){
 
 	var animaticPath = "Top/ANIMATIC_";
 	var portIn = animaticPath + "/Multi-Port-In";
-	var comp = animaticPath + "/Comp_Animatic";
+	var comp = getGroupComposite(animaticPath, 0);
+	if(!comp){
+		MessageBox.warning("ERRO! Nao foi encontrada a comp de animatic para efetuar atualização!");
+		return;
+	}
 	var old_animatic = getAnimaticNode(animaticPath);
 	var animatic_version = getCurretnAnimaticVersion(old_animatic);
 
@@ -124,6 +128,19 @@ function UpdateAnimatic(){
 	scene.endUndoRedoAccum();
 
 	////////////FUNCOES EXTRAS////////////////////////
+	function getGroupComposite(group, port){
+		
+		var multiout = node.getGroupOutputModule(group, "Multi-Port-Out", 0,0,0);
+		var next = node.srcNode(multiout, port);
+		while(next != ""){
+			if(node.type(next) == "COMPOSITE"){
+				return next;
+			}
+			next = node.srcNode(next, port);
+		}
+		return null;
+	}
+	
 	function getCurretnAnimaticVersion(animatic_node){//pega a versao do animatic atual da cena atraves do node de animatic
 			
 		var version = "v00";
