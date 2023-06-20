@@ -7,7 +7,7 @@
 #    e-mail: oi@camelo.de           ||      ''             ||                 #
 #                                   ||''|,  ||  '||''| .|''||  .|''|,         #
 #    created: 29/04/2022            ||  ||  ||   ||    ||  ||  ||  ||         #
-#    modified: 03/03/2023          .||..|' .||. .||.   `|..||. `|..|'         #
+#    modified: 16/06/2023          .||..|' .||. .||.   `|..||. `|..|'         #
 #                                                                             #
 ###############################################################################
 
@@ -49,7 +49,7 @@ def get_boards(_url, token, match=""):
 	headers = {
 		"Authorization": token
 	}
-	query = '{boards(limit:100){name id groups{title id}}}'
+	query = '{boards(limit:300){name id groups{title id}}}'
 	data = {
 		'query': query
 	}
