@@ -27,7 +27,7 @@ function BAT_ImportAnimatic(){
 
 	var animaticPath = "Top/ANIMATIC_";
 	var portIn = animaticPath + "/Multi-Port-In";
-	var comp = animaticPath + "/Comp_Animatic";
+	var comp = getGroupComposite(animaticPath, 0);
 	var old_animatic = getAnimaticNode(animaticPath);
 	
 	var extension = "png";
@@ -78,6 +78,18 @@ function BAT_ImportAnimatic(){
 
 
 ////////////FUNCOES EXTRAS////////////////////////
+function getGroupComposite(group, port){
+	var multiout = node.getGroupOutputModule(group, "Multi-Port-Out", 0,0,0);
+	var next = node.srcNode(multiout, port);
+	while(next != ""){
+		if(node.type(next) == "COMPOSITE"){
+			return next;
+		}
+		next = node.srcNode(next, port);
+	}
+	return null;
+}
+
 function deleteOldAnimatic(animaticPath){//deleta o animatic antigo e seus audios!
 	var del = node.deleteNode(animaticPath, true, true);
 	Print("animatic deleted: " + del);
