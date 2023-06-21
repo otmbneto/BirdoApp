@@ -59,7 +59,7 @@ class Uploader(QtGui.QMainWindow):
             # script = os.path.join(ui_utils,"uploaderItem.py")
             sys.path.append(ui_utils)
             import uploaderItem as upi
-            template_item = upi.uiItem(path, episodes, self.checkDecimal.isChecked())
+            template_item = upi.uiItem(path, episodes, self.ui.checkDecimal.isChecked())
 
         return template_item
 
