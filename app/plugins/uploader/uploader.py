@@ -59,7 +59,7 @@ class Uploader(QtGui.QMainWindow):
             # script = os.path.join(ui_utils,"uploaderItem.py")
             sys.path.append(ui_utils)
             import uploaderItem as upi
-            template_item = upi.uiItem(path, episodes, self.ui.checkDecimal.isChecked())
+            template_item = upi.uiItem(path, episodes, self.ui.checkDecimal)
 
         return template_item
 
@@ -109,7 +109,11 @@ class Uploader(QtGui.QMainWindow):
         self.ui.executeBtn.clicked.connect(self.execute)
         self.ui.cleanBtn.clicked.connect(self.cleanScrollList)
         self.ui.cancelBtn.clicked.connect(self.close)
+        self.ui.checkDecimal.stateChanged.connect(self.checkDecimal)
         return
+
+    def checkDecimal(self):
+        print "decimal changed to : {0}".format(self.ui.checkDecimal.isChecked())
 
     def episodeChanged(self):
 

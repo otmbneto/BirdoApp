@@ -144,7 +144,6 @@ QComboBox QAbstractItemView{
 	background-color: lightgray;
     selection-background-color: rgb(40, 30, 50);
 	selection-color: white;
-	selection-item-border-radius: 2px;
 	padding: 3px 3px ;
 }
 
@@ -235,6 +234,21 @@ QLineEdit:disabled{
 	color: #f95959;
 	background-color: #79c2d0;
 	border-color: rgb(255, 230, 220);
+}
+
+QProgressBar {
+	color: rgb(0, 255, 255);
+	padding: 2 2px;
+	border: null;
+	border-radius: 10px;
+	min-height: 20px;
+	background-color: rgb(40, 60, 90);	
+}
+
+QProgressBar::chunk {
+	border: null;
+	border-radius: 10px;
+	background: green;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,1,5,0,1,0,1">
@@ -451,23 +465,7 @@ QLineEdit:disabled{
       <bool>false</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">QProgressBar {
-	color: rgb(0, 255, 255);
-	padding: 2 2px;
-	border: null;
-	border-radius: 10px;
-	min-height: 20px;
-	background-color: rgb(40, 60, 90);	
-}
-
-QProgressBar::chunk {
-	border-top: 3px solid rgb(0, 255, 255);
-	border-bottom: 1px solid white;
-	border-left: 2px solid rgb(0, 255, 255);
-	border-right: 2px solid rgb(0, 255, 255);
-	border-radius: 10px;
-	background: rgb(40, 70, 100);
-}</string>
+      <string notr="true"/>
      </property>
      <property name="value">
       <number>0</number>
