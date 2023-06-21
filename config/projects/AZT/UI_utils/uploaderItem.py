@@ -48,10 +48,11 @@ class uiItem(QtGui.QGroupBox):
         self.progress_bar.setMinimumWidth(100)
         self.progress_bar.setMaximumWidth(100)
         self.progress_bar.setValue(0)
+        self.progress_bar.setAlignment(QtCore.Qt.AlignCenter)
 
         self.status_label = QtGui.QLabel("<font>Ready to go</font>")
         self.status_label.setFont(item_font)
-        self.status_label.setStyleSheet("QLabel { color : blue; }")
+        self.status_label.setStyleSheet("QLabel { color : lightblue; }")
         self.status_label.setFont(item_font)
         self.status_label.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
         self.status_label.setMinimumWidth(100)
@@ -124,7 +125,7 @@ class uiItem(QtGui.QGroupBox):
 
     def setStatus(self,text,color):
         self.status_label.setText(text)
-        self.status_label.setStyleSheet("QLabel { color : " + color + "; }")
+        self.status_label.setStyleSheet("QLabel{\n  color : " + color + ";\n}")
 
     def getCurrentEpisode(self):
         return self.episodes.currentText()
@@ -332,7 +333,6 @@ class uiItem(QtGui.QGroupBox):
         self.incrementProgress(25)
         os.remove(compressed)
         self.setStatus("Done","green")
-
         return
 
     def upload_scene(self,root,project_folders,project_data,temp):
@@ -390,7 +390,7 @@ class uiItem(QtGui.QGroupBox):
         self.incrementProgress(20)
         os.remove(output)
         self.incrementProgress(10)
-
+        self.setStatus("Done","green")
         return
 
     def upload(self,root,project_folders,project_data,temp):

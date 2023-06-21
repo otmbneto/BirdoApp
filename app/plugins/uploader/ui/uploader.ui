@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
-    <height>687</height>
+    <width>693</width>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -253,7 +253,7 @@ QProgressBar::chunk {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,1,5,0,1,0,1">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
      <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
@@ -267,11 +267,11 @@ QProgressBar::chunk {
        </property>
       </spacer>
      </item>
-     <item>
+     <item alignment="Qt::AlignLeft">
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
-         <pointsize>19</pointsize>
+         <pointsize>34</pointsize>
         </font>
        </property>
        <property name="text">
@@ -282,10 +282,10 @@ QProgressBar::chunk {
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>v02</string>
+        <string>v2.0</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
        </property>
       </widget>
      </item>
@@ -305,7 +305,7 @@ QProgressBar::chunk {
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,2">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -344,8 +344,8 @@ QProgressBar::chunk {
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>562</width>
-        <height>326</height>
+        <width>667</width>
+        <height>320</height>
        </rect>
       </property>
       <property name="sizePolicy">
