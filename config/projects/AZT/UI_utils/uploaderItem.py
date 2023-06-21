@@ -4,23 +4,24 @@ import shutil
 import re
 from zipfile import ZipFile
 from zipfile import ZIP_DEFLATED
-import subprocess,shlex
+import subprocess, shlex
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
 print birdo_app_root
 
+
 class uiItem(QtGui.QGroupBox):
 
-	def __init__(self,fullpath,episode_list):
-		super(uiItem,self).__init__()
+	def __init__(self,fullpath,episode_list,decimal_scene):
+		super(uiItem, self).__init__()
 
 		self.filename = "ITEM_NAME"
-		self.filetypes = (".mov",".mp4",".zip")
+		self.filetypes = (".mov", ".mp4", ".zip")
+		self.is_decimal = decimal_scene
 		if fullpath is not None:
 			self.filename = fullpath.split("/")[-1]
 			self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
-
 		self.initLayout(episode_list)
 		self.initLogic()
 
@@ -377,7 +378,8 @@ class uiItem(QtGui.QGroupBox):
 			return
 		self.incrementProgress(10)
 		xstage = self.get_xstage_last_version(local_scene)
-		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],"BAT_birdofy.js").replace("/","\\\\")
+		script_name = "BAT_birdofy_decimal.js" if self.is_decimal else "BAT_birdofy_normal.js"
+		script = os.path.join(project_data["paths"]["root"],project_data["paths"]["batch_scripts"],script_name).replace("/","\\\\")
 		print "SCRIPT PATH: " + str(script)
 		self.incrementProgress(5)
 		self.harmony_path = project_data['harmony']['paths']["program"]

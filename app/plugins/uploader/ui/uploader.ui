@@ -14,74 +14,107 @@
    <string>Birdo Uploader v0.01</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget{
-	background: rgb(91, 91, 91);
+   <string notr="true">QWidget{	
+	background-color: #233142;
 }
 
-QMenu {
-	background-color: #666666;
+QLabel{
+	color: #53a8b6;
 }
 
-QMenu::item:hover {
-	color: lightgray;
-	background-color: blue;
+QLabel:disabled {
+	color: #455d7a;
 }
 
-QMenuBar {
-	color: rgb(182, 182, 182);
-	background-color: transparent;
+QGroupBox {
+	color: #53a8b6;
 }
 
-QMenuBar::item {
-	background-color: transparent;
+QGroupBox:disabled {
+	color: #455d7a;
 }
 
-QMenuBar::item:selected { /* when selected using mouse or keyboard */
-    background-color: #666666;
+QTabWidget::pane {
+	border: 2px solid #e3e3e3;
+	border-radius: 5px;
+} 
+
+QTabWidget::tab-bar {
+    left: 15px; /* move to the right by 5px */
 }
 
-QMenuBar::item:hover {
-    background: #777777;
+QTabBar::tab {
+	color: #455d7a;
+	background: transparent; 
+	border: null; 
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-right: 8px;
+	padding-left: 4px;
+
+} 
+
+QTabBar::tab:selected {
+	color: #7c73e6;
+	background: transparent; 
+	padding-left: 4px;
 }
 
-QLabel {
-	color: lightgray;
+QCheckBox {
+	color: #e3e3e3;
+    spacing: 5px;
 }
 
-QLabel:!enabled {
+QCheckBox:unchecked {
+	color: #53a8b6;
+}
+
+QCheckBox:checked {
+	color: #7c73e6;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 1px solid white;
+	border-radius: 2px;
+	background-color:#233142;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 6px;
+	background-color: rgb(56, 186, 255);
+}
+
+QCheckBox:disabled{
 	color: gray;
 }
 
-QLineEdit:!enabled {
-	color: gray;
-	background-color: #555555;
+QCheckBox::indicator:checked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: #233142;
 	border-color: gray;
 }
 
-QLineEdit {
-	color: black;
-    border: 2px solid white;
-    border-radius: 8px;
-    padding: 0 8px;
-    background: lightgray;
-    selection-background-color: darkgray;
-}
-
-QLineEdit:hover{
-    border: 2px solid #05B8CC;
-    color: black;
+QCheckBox::indicator:unchecked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: #233142;
+	border-color: gray;
 }
 
 QComboBox {
-	color: black;
-    border: 2px solid white;
+	color: #233142;
+    border: 2px solid #455d7a;
     border-radius: 6px;
     padding: 1px 18px 1px 3px;
     min-width: 6em;
 }
 
+QComboBox::down-arrow {
+      image: null;
+}
+
 QComboBox:!editable, QComboBox::drop-down:editable {
-     background: lightgray;
+     background: #e3e3e3;
 }
 
 QComboBox:on { /* shift the text when the popup opens */
@@ -90,210 +123,361 @@ QComboBox:on { /* shift the text when the popup opens */
 }
 
 QComboBox::drop-down {
-    width: 20px;
-	background-color: rgb(194, 194, 194);
+    width: 15px;
+	background-color: #e3e3e3;
     border-left-width: 2px;
-    border-left-color: white;
+    border-left-color: #455d7a;
     border-left-style: solid; /* just a single line */
     border-top-right-radius: 3px; /* same radius as the QComboBox */
     border-bottom-right-radius: 3px;
 }
 
 QComboBox:hover{
-    border: 2px solid #05B8CC;
-    color: gray;
+    border: 2px solid white;
+    color: #53a8b6;
 }
 
 QComboBox QAbstractItemView{
     border: 2px solid white;
 	border-radius: 10px;
-    color: gray;
+    color: #233142;
 	background-color: lightgray;
-    selection-background-color: #05B8CC;
+    selection-background-color: rgb(40, 30, 50);
 	selection-color: white;
+	selection-item-border-radius: 2px;
 	padding: 3px 3px ;
 }
 
-QScrollBar {
-	background: none;
-	border: none;
+QComboBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: gray;
+}
+
+QScrollArea{
+	border: 2px solid #455d7a;
+	border-radius: 15px;
 }
 
 QScrollBar::handle {
-	border-radius: 5px;
- 	border: 2px solid #777777;
-	background-color: gray;
+	border-radius: 10px;
+ 	border: none;
+	background-color: #455d7a;
+	width: 5px;
 }
 
 QScrollBar::add-page{ 
 	border: none;
-    background: none;
+    background-color: transparent;
 }
 
 QScrollBar::sub-page {
-    background: none;
+    background-color: transparent;
 	border: none;
-	max-width: 5px;
 }
 
 QScrollBar::add-line {
     border: none;
-    background: none;
+    background-color: transparent;
 }
 
 QScrollBar::sub-line {
     border: none;
-    background: none;
+    background-color: transparent;
 }
 
 QScrollBar:arrow{
 	border: none;
-	background: none;
+	background: transparent;
 	color: none;
-}
-
-QPushButton:hover{
-    border: 2px solid #05B8CC;
-    color: red;
+	image: none;
 }
 
 QPushButton {
-	color: black;
-	background: rgb(91, 91, 91);
-    border: 2px solid rgb(180,180,180);
-	border-radius: 5px;
+	color: #e3e3e3;
+    border: 2px solid #455d7a;
+    border-radius: 6px;
+	background-color: #53a8b6;
 }
 
-QPushButton:disabled {
-	color: black;
-	background-color: gray;
-    border: 2px solid rgb(100,100,100);
-	border-radius: 0px;
+QPushButton:hover{
+    border: 2px solid white;
+    color: white;
 }
 
-QPushButton::menu-indicator {
-	image: null;
+QPushButton:pressed {
+	color: #e3e3e3;
+	border-color: #e3e3e3;
+    background-color: #455d7a;
+}
+
+QPushButton::disabled {
+	border-color: #f95959;
+	background: #455d7a;
+	color: #53a8b6;
+}
+
+QLineEdit {
+	color: #5585b5;
+    border: 2px solid #455d7a;
+    border-radius: 5px;
+    padding: 0 8px;
+    background: #e3e3e3;
+    selection-background-color: darkgray;
+}
+
+QLineEdit:hover{
+    border: 2px solid white;
+    color: black;
+}
+
+QLineEdit:disabled{
+	color: #f95959;
+	background-color: #79c2d0;
+	border-color: rgb(255, 230, 220);
 }</string>
   </property>
-  <widget class="QScrollArea" name="scrollArea">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>90</y>
-     <width>570</width>
-     <height>450</height>
-    </rect>
-   </property>
-   <property name="acceptDrops">
-    <bool>true</bool>
-   </property>
-   <property name="verticalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOn</enum>
-   </property>
-   <property name="widgetResizable">
-    <bool>true</bool>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-   </property>
-   <widget class="QWidget" name="scrollAreaWidgetContents">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>547</width>
-      <height>448</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QPushButton" name="executeBtn">
-   <property name="geometry">
-    <rect>
-     <x>95</x>
-     <y>570</y>
-     <width>131</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>execute</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="cancelBtn">
-   <property name="geometry">
-    <rect>
-     <x>365</x>
-     <y>570</y>
-     <width>131</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>close</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="cleanBtn">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>570</y>
-     <width>131</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>clean</string>
-   </property>
-  </widget>
-  <widget class="QProgressBar" name="progressBar">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>640</y>
-     <width>401</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="value">
-    <number>0</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>50</y>
-     <width>55</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Episode:</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="globalEpisodes">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>50</y>
-     <width>97</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,1,5,0,1,0,1">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2,0">
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>19</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>UPLOADER</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>v02</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,1">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Episode:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="globalEpisodes"/>
+     </item>
+     <item alignment="Qt::AlignHCenter">
+      <widget class="QCheckBox" name="checkDecimal">
+       <property name="text">
+        <string>Force Decilmal</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="acceptDrops">
+      <bool>true</bool>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>562</width>
+        <height>326</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="executeBtn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>EXECUTE</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cleanBtn">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Clean</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelBtn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QProgressBar {
+	color: rgb(0, 255, 255);
+	padding: 2 2px;
+	border: null;
+	border-radius: 10px;
+	min-height: 20px;
+	background-color: rgb(40, 60, 90);	
+}
+
+QProgressBar::chunk {
+	border-top: 3px solid rgb(0, 255, 255);
+	border-bottom: 1px solid white;
+	border-left: 2px solid rgb(0, 255, 255);
+	border-right: 2px solid rgb(0, 255, 255);
+	border-radius: 10px;
+	background: rgb(40, 70, 100);
+}</string>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
