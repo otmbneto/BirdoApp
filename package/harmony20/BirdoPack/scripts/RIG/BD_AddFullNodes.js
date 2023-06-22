@@ -25,6 +25,13 @@ function BD_AddFullNodes(){
 		return;
 	}
 	
+	//checa se current node é o Top 
+	if(current_group == node.root()){
+		MessageBox.warning("Entre em um grupo para funcionar!",0,0);
+		return;
+	}
+	
+	
 	//test if already has FULL
 	var fulls = node.subNodes(current_group).filter(function(item){ return node.getName(item).indexOf("FULL") != -1});
 	if(fulls.length > 0){
