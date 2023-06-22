@@ -162,9 +162,10 @@ function BD_AddFullNodes(){
 	
 	function create_nodes(group_node, names_data){//cria nodes e retorna coordenadas dos nodes do node read do full criado
 		//list all nodes in group
-		var allPegs = node.subNodes(group_node).filter(function(item){ return node.type(item) == "PEG"});
-		var allcomps = node.subNodes(group_node).filter(function(item){ return node.type(item) == "COMPOSITE"});
-		var allreads = node.subNodes(group_node).filter(function(item){ return node.type(item) == "READ"});
+		var allNodes = node.subNodes(group_node);
+		var allPegs = allNodes.filter(function(item){ return node.type(item) == "PEG"});
+		var allcomps = allNodes.filter(function(item){ return node.type(item) == "COMPOSITE"});
+		var allreads = allNodes.filter(function(item){ return node.type(item) == "READ"});
 		
 		//find mp and output comp
 		var mp = allPegs.sort(function(a,b){ return node.coordY(a) - node.coordY(b)})[0];
@@ -174,8 +175,12 @@ function BD_AddFullNodes(){
 
 		//find read full node coord
 		var lastRead = allreads.sort(function(a,b){ return node.coordX(b) - node.coordX(a)})[0];
+		var lastNode= allNodes.sort(function(a,b){ return node.coordX(b) - node.coordX(a)})[0];
+
 		var lastReadCoord = BD2_get_node_coord(lastRead);
-		lastReadCoord["x"] = lastReadCoord.x + lastReadCoord.w + 100;
+		var lastNodeCoord = BD2_get_node_coord(lastNode);
+
+		lastReadCoord["x"] = lastNodeCoord.x + lastNodeCoord.w + 100;
 		
 		//add nodes
 		var fullRead = BD2_addNode("READ", group_node, names_data.complete_name, lastReadCoord);
