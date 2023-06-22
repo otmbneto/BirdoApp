@@ -517,22 +517,25 @@ function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection){
 @type => node type like "BLUR".. "WRITE"...
 @end_connection => se nao houver mais nodes acima do node selecionado
 */
-function BD2_AddNodeUp(nodeSel, nodeName,  type, end_connection){
+function BD2_AddNodeUp(nodeSel, nodeName, type){
 
 	var parentGroup = node.parentNode(nodeSel);
-	var x = node.coordX(nodeSel);
-	var y = node.coordY(nodeSel);
-	var newY = y - 70;
-	var newX = x;
-	
-	var newNode = node.add(parentGroup, nodeName, type, newX, newY, 0);
+	var coord = BD2_get_node_coord(nodeSel);
 
-	if(!end_connection){
-		var up_node = node.srcNode(nodeSel, 0);
-		node.unlink(nodeSel, 0);
-		node.link(newNode, 0, nodeSel, 0);
+	var newY = coord.y - 70;
+	
+	var newNode = node.add(parentGroup, nodeName, type, coord.x, newY, 0);
+	//fix x value
+	var newX = coord.x + ((coord.w - node.width(newNode))/2);
+	node.setCoord(newNode, newX, newY);
+
+	var up_node = node.srcNode(nodeSel, 0);
+	if(up_node){
+		node.unlink(nodeSel, 0);	
+		node.link(up_node, 0, newNode, 0);
 	}
-	node.link(up_node, 0, newNode, 0);
+	node.link(newNode, 0, nodeSel, 0);
+
 	return newNode;
 }
 
