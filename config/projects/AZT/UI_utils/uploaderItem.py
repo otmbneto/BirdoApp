@@ -79,6 +79,7 @@ class uiItem(QtGui.QGroupBox):
     def initLogic(self):
 
         episode = self.getEpisode(self.getFilename())
+        print "TESTE filename : {0}".format(self.getFilename())
         print "EPISODE:" + str(episode)
         if episode is not None:
             self.setEpisode(self.findIndexOf(episode))
@@ -152,7 +153,7 @@ class uiItem(QtGui.QGroupBox):
 
     def getEpisode(self,filename):
         result = []
-        name_split = filename.upper().split("_")
+        name_split = (re.sub(r'(\.\w+)+$', '', filename)).upper().split("_")
         for item in name_split:
             if bool(re.match(self.regex_sc_ep, item)):
                 result.append(int(re.sub(r'\D', "", item)))
@@ -163,7 +164,7 @@ class uiItem(QtGui.QGroupBox):
 
     def getShot(self,filename):
         result = []
-        name_split = filename.upper().split("_")
+        name_split = (re.sub(r'(\.\w+)+$', '', filename)).upper().split("_")
         for item in name_split:
             if bool(re.match(self.regex_sc_ep, item)):
                 result.append(int(re.sub(r'\D', "", item)))
