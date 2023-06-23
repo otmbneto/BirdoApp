@@ -35,7 +35,7 @@ function BirdoProject(entity){
 	};
 	this.resolution_name = {
 		"PRE_COMP": "HDTV_1080p24", 
-		"COMP": "4K_UHD"
+		"COMP": "HDTV_1080p24"
 	};
 	//limpa o prefix da entity para nao ficar com redundancia
 	delete this.entity.prefix;
