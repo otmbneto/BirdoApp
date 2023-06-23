@@ -32,7 +32,15 @@ def create_fazendinha_queue(proj_data, imput_obj, scene_name, version):
     if "COMP" in imput_obj["render_step"]:
         render_type = "COMP"
     else:
-        render_type = "PRE_COMP"
+        if imput_obj["project_index"] == '3' :
+            s = ("Essa cena foi separada em demais arquivos?\n"
+                 "(se sim o render vai incluir canal transparente).")
+            if MessageBox.question(s):
+                render_type = "PRE_COMP_AZT"
+            else :
+                render_type = "PRE_COMP"
+        else:
+            render_type = "PRE_COMP"
 
     render_data = {
         "animator": imput_obj["user_name"],
