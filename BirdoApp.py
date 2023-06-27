@@ -297,7 +297,7 @@ class BirdoApp(QtGui.QMainWindow):
         #ADD LAYOUT LOGO
         self.ui.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
 
-        if not self.project_data["ready"] or self.project_data["user_data"] is None:
+        if not self.project_data["ready"] or not self.project_data["user_data"]:
             self.login_page()
         elif "current_user" in self.project_data["user_data"].keys() and not self.isDiscordName(self.project_data["user_data"]["current_user"]):
             MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
