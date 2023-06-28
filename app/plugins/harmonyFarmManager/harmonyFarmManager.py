@@ -320,7 +320,6 @@ class Dialog(QtGui.QWidget):
 
         return os.path.join(scene_path,versions[-1]) if len(versions) > 0 else None
 
-
     def getVersion(self,filename):
 
         print "VERSION:" + filename
@@ -347,7 +346,7 @@ class Dialog(QtGui.QWidget):
                 "project": self.project_data.prefix, 
                 "queued": datetime.datetime.today().strftime('%d/%m/%Y, %H:%M:%S'),
                 "render_path": self.project_data.paths.get_server_render_file_path(episode,step,scene), 
-                "render_type": "PRE_COMP" if self.ui.radioPreComp.isChecked() else "COMP", 
+                "render_type": self.ui.radioPreComp.text().upper() if self.ui.radioPreComp.isChecked() else self.ui.radioComp.text().upper(), 
                 "scene": self.getShot(filename), 
                 "scene_path": self.project_data.paths.get_publish_folder(scene,step).replace("\\","/"),
                 "status": "waiting", 
@@ -356,7 +355,6 @@ class Dialog(QtGui.QWidget):
                 }
 
         renderfarm = self.project_data.paths.get_render_farm_path()
-        #renderfarm = "X:/teste/"
         request_file = scene + "_" + version + ".json"
         return write_json_file(os.path.join(renderfarm,request_file),request)
 
@@ -373,6 +371,17 @@ class Dialog(QtGui.QWidget):
         shutil.copyfile(file,new_xstage)
         return new_xstage
 
+
+    #TODO: Scripts should come from a dict/json.
+    def select_prerender_script(self,render_type):
+
+        script_path = os.getenv("APPDATA")+"/Toon Boom Animation/Toon Boom Harmony Premium/2000-scripts/packages/BirdoPack/utils/"
+        script_path = os.path.join(script_path,render_type.lower() + "_render.js")
+
+        print "SCRIPT_PATH:" + script_path
+        return script_path
+
+    '''
     #TODO: Scripts should come from a dict/json.
     def select_prerender_script(self,render_type):
 
@@ -383,7 +392,8 @@ class Dialog(QtGui.QWidget):
             script_path = os.path.join(script_path,"comp_render.js")
 
         return script_path
-
+    '''
+    
     def remove_file(self,file):
 
         file_removed = True
@@ -570,6 +580,10 @@ class Dialog(QtGui.QWidget):
         self.ui.close()
 
     def setup_connections(self):
+
+        if self.project_data.prefix == "AZT":
+            self.ui.radioPreComp.setText("Pre_Azt_Comp")
+            print "NAME: " + self.ui.radioPreComp.text().upper()
 
         self.ui.pushClose.clicked.connect(self.on_close)
         self.ui.pushStart.clicked.connect(self.on_start)

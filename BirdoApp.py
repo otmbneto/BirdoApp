@@ -287,31 +287,26 @@ class BirdoApp(QtGui.QMainWindow):
             os.execv(sys.executable, ['python'] + sys.argv)
 
     def splash_page(self):
+
         # change page to splash index 1
         self.ui.stackedWidget.setCurrentIndex(1)
-
         # RESET LOADING LABEL TO DEFAULT COLOR
         self.ui.loading_label.setStyleSheet("color: lightgray;")
         # SETS THE CURRENT HEADER
-        # self.ui.header.setText("LOADING APP...")
         self.ui.loading_label.setText("loading birdoApp...")
         #ADD LAYOUT LOGO
         self.ui.anim_logo_label.setPixmap(QtGui.QPixmap(global_icons["birdo_app"]))
 
-        if "current_user" in self.project_data["user_data"].keys() and not self.isDiscordName(self.project_data["user_data"]["current_user"]):
+        if not self.project_data["ready"] or not self.project_data["user_data"]:
+            self.login_page()
+        elif "current_user" in self.project_data["user_data"].keys() and not self.isDiscordName(self.project_data["user_data"]["current_user"]):
             MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
             self.getDiscordUserName(self.project_data)
             self.login_page()
-        # CHECK IF CONFIG IS READY
-        elif not self.project_data["ready"]:
-            # OPEN LOGIN PAGE
-            self.login_page()
         elif not main_update(self.project_data, self):
             print "check update failed!"
+            self.initProjectPage()
         else:
-            #MessageBox.information("BirdoApp foi Atualizado!")
-            ## ADD FUNCAO AQUI PARA ENTRAR NO MAIN PAGE DOS PLUGINS DO PROJETO
-            #self.close()
             self.initPluginPage()
 
     def isDiscordName(self,current_name):
