@@ -433,16 +433,6 @@ QComboBox:disabled{
            <property name="horizontalSpacing">
             <number>10</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QRadioButton" name="radioPreComp">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="text">
-              <string>PreComp</string>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="0">
             <widget class="QRadioButton" name="radioComp">
              <property name="text">
@@ -450,6 +440,16 @@ QComboBox:disabled{
              </property>
              <property name="checked">
               <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QRadioButton" name="radioPreComp">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Pre_Comp</string>
              </property>
             </widget>
            </item>
