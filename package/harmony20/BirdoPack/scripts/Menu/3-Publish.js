@@ -132,16 +132,15 @@ function Publish(){
 		var start = Process2(pythonPath, pyFile, publish_server_path, publish_local_path, render_path, render_step, step, projectId, hasWDef, output_json);
 		
 		//PRINTA os comandos do script de python q vai rodar
-		var commands = pythonPath + " " + pyFile + " " + publish_server_path + " " + publish_local_path + " " + render_path + " " + render_step + " " + step + " " + projectId + " " + output_json;
 		Print("COMMANDS PYTHON SCRIPT: ##################"); 
-		MessageLog.trace(commands);
+		MessageLog.trace(start.commandLine());
 		Print("##################################");
 		var ret = start.launch();
 		
 		if(ret != 0){
 			Print("Fail to start publish python script!!");
 			MessageBox.warning("ERRO! Fail to start the python file!!!", 0, 0);
-			return false; 
+			return false;
 		}
 		var outputData = BD1_ReadJSONFile(output_json);
 
@@ -162,7 +161,7 @@ function Publish(){
 
 		if(thisScenePath == local_shot_path){//se o folder local do shot, estiver no lugar certo, nao faz nada
 			Print("No need to update shot location!");
-			MessageBox.information(publish_data["status"]);
+			Print(publish_data["status"]);
 			return;
 		}
 		
