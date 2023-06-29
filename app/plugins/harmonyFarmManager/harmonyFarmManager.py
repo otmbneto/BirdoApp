@@ -393,7 +393,7 @@ class Dialog(QtGui.QWidget):
 
         return script_path
     '''
-    
+
     def remove_file(self,file):
 
         file_removed = True
@@ -582,8 +582,8 @@ class Dialog(QtGui.QWidget):
     def setup_connections(self):
 
         if self.project_data.prefix == "AZT":
-            self.ui.radioPreComp.setText("Pre_Azt_Comp")
-            print "NAME: " + self.ui.radioPreComp.text().upper()
+            self.ui.radioComp.setText("Pre_Azt_Comp")
+            print "NAME: " + self.ui.radioComp.text().upper()
 
         self.ui.pushClose.clicked.connect(self.on_close)
         self.ui.pushStart.clicked.connect(self.on_start)
