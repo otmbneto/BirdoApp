@@ -621,6 +621,9 @@ class OpenShot(QtGui.QWidget):
                 MessageBox.warning("Error! Cant find the local scene to open!")
                 return
             else:
+                print "running update setup script..."
+                update_setup_script = os.path.join(birdo_app_root, 'batch', 'BAT_UpdateSETUP.js')
+                self.harmony_manager.compile_script(update_setup_script, local_scene["xstage"])
                 print "opening local scene {0}...".format(local_scene["xstage"])
                 self.open_harmony_file(selected_scene, local_scene["xstage"])
                 return
