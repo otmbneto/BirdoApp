@@ -29,7 +29,6 @@ from app.utils.vpn_server import VPNServer
 from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_string
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.ffmpeg import compress_render
-from app.utils.system import get_short_path_name
 
 
 MessageBox = CreateMessageBox()
@@ -39,14 +38,15 @@ shot_regex = r'\w{3}_EP\d{3}_SC\d{4}'
 mov_reg = r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
 version_reg = r'_v\d{2}.mov'
 
+
 #sinais usados para indicar a thread principal que a janela precisa ser atualizada.
 class CustomSignal(QtCore.QObject):
-
     episode_received = QtCore.Signal(object)
     progress_reseted = QtCore.Signal(object)
     progress_made = QtCore.Signal(object)
     progress_format = QtCore.Signal(object)
     progress_range_set = QtCore.Signal(object)
+
 
 def copy_scene_template(prefix, scene_name, work_dir):
     """Creates a clean scene setup by copying the shot_SETUP template in birdoAPP template folder to the working scene folder"""
@@ -63,6 +63,7 @@ def copy_scene_template(prefix, scene_name, work_dir):
         final_file_name = template_file.replace(placeholder, (scene_name + "_v00"))
         os.rename(template_file, final_file_name)
     return True
+
 
 #TODO:Trazer o loading episodes pra uma thread separada usando signals.
 class OpenShot(QtGui.QWidget):
@@ -123,6 +124,9 @@ class OpenShot(QtGui.QWidget):
         # SHOT VERSIONS
         self.shot_versions = {}
 
+        # BAT SCRIPTS
+        self.update_setup_script = os.path.join(birdo_app_root, 'batch', 'BAT_UpdateSETUP.js')
+        self.import_animatic_script = os.path.join(birdo_app_root, 'batch', 'BAT_ImportAnimatic.js')
 
         # SCENE OBJECT WITH OPENED SCENES (EACH SCENE KEY CONTAIN THE PROCESS OBJECT AS VALUES)
         self.opened_scenes = {}
@@ -431,9 +435,6 @@ class OpenShot(QtGui.QWidget):
             MessageBox.warning("Erro copiando scene template para local da cena! Avise a Direcao Tecnica!")
             return False
 
-        # BATCH IMPORT ANIMATIC PATH
-        import_animatic_script = os.path.join(birdo_app_root, 'batch', 'BAT_ImportAnimatic.js')
-
         self.ui.progress_bar.setFormat("creating SETUP[4/4]")
         self.ui.progress_bar.setValue(5)
         # RUNS THE IMPORT ANIMATIC JS SCRIPT IN CREATED SCENE
@@ -443,8 +444,8 @@ class OpenShot(QtGui.QWidget):
             MessageBox.warning("Erro! Nao foi possivel encontrar o xstage da cena criada! Avise a Direcao Tecnica!")
             return False
         else:
-            if not self.harmony_manager.compile_script(import_animatic_script, xstage_file):
-                print "error running import animatic js script: {0} on scene {1}".format(import_animatic_script, scene_name)
+            if not self.harmony_manager.compile_script(self.import_animatic_script, xstage_file):
+                print "error running import animatic js script: {0} on scene {1}".format(self.import_animatic_script, scene_name)
                 MessageBox.warning("Erro rodando o Script que importa o Animatic para cena. Use o Update Animatic para importar, e caso continue dando erro, avise a Direcao Tecnica!")
 
         # CLEANS THE TEMP MOV FILE
@@ -622,8 +623,7 @@ class OpenShot(QtGui.QWidget):
                 return
             else:
                 print "running update setup script..."
-                update_setup_script = os.path.join(birdo_app_root, 'batch', 'BAT_UpdateSETUP.js')
-                self.harmony_manager.compile_script(update_setup_script, local_scene["xstage"])
+                self.harmony_manager.compile_script(self.update_setup_script, local_scene["xstage"])
                 print "opening local scene {0}...".format(local_scene["xstage"])
                 self.open_harmony_file(selected_scene, local_scene["xstage"])
                 return
@@ -635,11 +635,13 @@ class OpenShot(QtGui.QWidget):
 
         selected_version = self.ui.listVersions.currentItem().text()
 
+        # IF NO SETUP FOUND
         if selected_version == "SETUP_NOT_FOUND" or not selected_version:
             # IN CASE THIS OPTION IS SELECTED (SHOULD BE DISABLED!)
             print "Error selection! Cant find scene setup!!!"
             return
 
+        # IF CREATE SETUP
         if selected_version == "CREATE_SETUP" and not self.ui.checkBox_open_local.isChecked():
             # IF THE SETUP IS NOT CREATED YET, CREATES LOCAL BASIC SETUP FOR THE SELECTED SCENE
             self.ui.progress_bar.setFormat("creating SETUP[0/3]")
@@ -728,6 +730,8 @@ class OpenShot(QtGui.QWidget):
             print "fail to find xstage file to scene: {0}".format(local_scene['path'])
             return
         else:
+            print "running update setup script..."
+            self.harmony_manager.compile_script(self.update_setup_script, xstage_file)
             print "opening scene: {0}".format(xstage_file)
             self.open_harmony_file(selected_scene, xstage_file)
         print "scene opened: {0}".format(xstage_file)
