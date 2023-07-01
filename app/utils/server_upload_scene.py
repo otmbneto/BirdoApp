@@ -244,7 +244,12 @@ def main(imput_obj, proj_data):
     sendToFarm = True
     #adicionar pergunta se comp.
     user_file = read_json_file(proj_data["user_json"])
-    if user_file[user_file["current_user"]][proj_data["prefix"]]["user_type"] in ["COMP","DT"]:
+
+    # if AZT SETUP do not create queue
+    if imput_obj["project_index"] == '3' and imput_obj["step"] == "SETUP":
+        sendToFarm = False
+
+    if user_file[user_file["current_user"]][proj_data["prefix"]]["user_type"] in ["COMP","DT"] and sendToFarm:
         sendToFarm = MessageBox.question("Voce deseja enviar a cena para a fazenda de renders?")
 
     if sendToFarm:
