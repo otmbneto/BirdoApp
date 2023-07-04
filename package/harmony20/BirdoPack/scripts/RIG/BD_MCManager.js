@@ -338,6 +338,9 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 		
 		//altera o node turn com as definicoes 
 		var valid_colors = Boolean(curr_mc["slider"]["color1"]) && Boolean(curr_mc["slider"]["color2"]);
+		if(curr_mc.widgets.action.text == "Update"){
+			valid_colors = true;	
+		}
 		if(!utils.modify_turn_node(turn_data, rig_data.turn_node)){
 			MessageBox.warning("Algo deu errado ao setar o node turn!",0,0);
 			curr_mc.widgets.action.enabled = false;
@@ -484,16 +487,6 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	//quando muda a tab
 	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
 
-	/*
-	this.ui.groupFilter.addTagButton.clicked.connect(this, this.addTagItem);
-	this.ui.groupFilter.removeTagButton.clicked.connect(this, this.removeTagItem);
-	this.ui.cancelButton.clicked.connect(this, this.close);
-	this.ui.applyButton.clicked.connect(this, this.applyButton);
-	this.ui.groupFilter.comboType["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
-	this.ui.groupFilter.comboStatus["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
-	this.ui.groupAdvanced.spinStart["valueChanged(int)"].connect(this, this.updateSpinStart);
-	this.ui.groupAdvanced.spinEnd["valueChanged(int)"].connect(this, this.updateSpinEnd);
-	*/
 //////////////#################################
 
 	function Print(msg){		

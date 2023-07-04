@@ -87,8 +87,8 @@ function get_slider_specs(horizontal, label, font, framecolor, slidercolor, labe
 function getUiCheckBoxScriptValue(master_count){
 	var script_ui_CheckBox = 'function onCheckboxValueChanged(params, checkedVal){\n  var master_count = params.targetNodes.length - ' + master_count + '; //index of master MCs\n' + 
 	'  //loop to show MCs\n  for(var i=0; i<params.targetNodes.length; i++){\n    var mc = params.targetNodes[i];\n    ' + 
-	'if(i >= master_count) {//if master\n      node.showControls(mc, !checkedVal);\n    } else {\n      node.showControls(mc, checkedVal);\n    }\n  }\n  ' + 
-	'MessageLog.trace("Check box value is: " + !checkedVal);\n}\n\n' + 
+	'if(i >= master_count) {//if master\n      node.showControls(mc, checkedVal);\n    } else {\n      node.showControls(mc, !checkedVal);\n    }\n  }\n  ' + 
+	'MessageLog.trace("Check box value is: " + checkedVal);\n}\n\n' + 
 	'include(fileMapper.toNativePath(specialFolders.resource+"/scripts/utilities/ui/functionWizard/mcs/mcCheckboxFunction.js"))';
 	return script_ui_CheckBox;
 }
