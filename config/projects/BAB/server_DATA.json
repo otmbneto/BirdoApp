@@ -69,26 +69,26 @@
 					],
 		"assets_digits": 3,
 		"boards": {
-				"filter": null,
+				"filter": "BB",
 				"Character": {
-					"name": null,
-					"subgroup": null,
-					"prefix": null
+					"name": "BB | ARTE-RIG",
+					"subgroup": "TRAILER",
+					"prefix": "CH"
 				},
 				"Misc": {
-					"name": null,
-					"subgroup": null,
-					"prefix": null
+					"name": "BB | ARTE-RIG",
+					"subgroup": "TRAILER",
+					"prefix": "MI"
 				},
 				"Prop": {
-					"name": null,
-					"subgroup": null,
-					"prefix": null
+					"name": "BB | ARTE-RIG",
+					"subgroup": "TRAILER",
+					"prefix": "PR"
 				},
 				"FX": {
-					"name": null,
-					"subgroup": null,
-					"prefix": null
+					"name": "BB | ARTE-RIG",
+					"subgroup": "TRAILER",
+					"prefix": "FX"
 				}
 		},
 		"scriptName": "pipelineScript",
