@@ -411,6 +411,13 @@ class OpenShot(QtGui.QWidget):
             MessageBox.warning("Erro baixando o animatic para montar a cena! Avise a Direcao Tecnica!")
             return False
 
+        # CREATES FOLDER SCHEME
+        local_scene_path = self.project_folders.create_local_scene_scheme(scene_name, step)
+        if not local_scene_path:
+            print "error creating scene folder scheeme!"
+            MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
+            return False
+
         self.ui.progress_bar.setFormat("creating SETUP[2/4]")
         self.ui.progress_bar.setValue(3)
         # COMPRESSING MOV FILE TO FINAL PATH
@@ -419,14 +426,7 @@ class OpenShot(QtGui.QWidget):
             MessageBox.warning("Erro ao processar mov do animatic para compressao adequada! Avise a Direcao Tecnica!")
             return False
 
-        # CREATES FOLDER SCHEME
-        local_scene_path = self.project_folders.create_local_scene_scheme(scene_name, step)
-        if not local_scene_path:
-            print "error creating scene folder scheeme!"
-            MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
-            return False
-        else:
-            work_dir = os.path.join(local_scene_path, 'WORK', scene_name)
+         work_dir = os.path.join(local_scene_path, 'WORK', scene_name)
 
         self.ui.progress_bar.setFormat("creating SETUP[3/4]")
         self.ui.progress_bar.setValue(4)

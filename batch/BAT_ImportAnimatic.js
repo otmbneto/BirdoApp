@@ -249,7 +249,12 @@ function getAnimaticMovie(projectDATA){//retorna o caminho pro animatic da cena
 	}
 	var ep = cena.split("_")[1];
 	var moviePath = projectDATA.getRenderAnimaticLocalFolder();
-
+	
+	if(!moviePath){
+		Print("Local animatic folder not found!");
+		return false;
+	}
+	
 	var all_movs = BD1_ListFiles(moviePath, "*.mov");
 
 	var scene_acnimatics = all_movs.filter(function(x) { return x.indexOf(cena) != -1}); 
