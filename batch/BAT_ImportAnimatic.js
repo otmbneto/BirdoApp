@@ -256,6 +256,9 @@ function getAnimaticMovie(projectDATA){//retorna o caminho pro animatic da cena
 	}
 	
 	var all_movs = BD1_ListFiles(moviePath, "*.mov");
+	if(all_movs.length == 0){
+		return false;
+	}
 
 	var scene_acnimatics = all_movs.filter(function(x) { return x.indexOf(cena) != -1}); 
 	if(scene_acnimatics.length == 0){
