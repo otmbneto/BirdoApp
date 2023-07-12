@@ -425,8 +425,7 @@ class OpenShot(QtGui.QWidget):
             print "error compressing file with ffmpeg do final path!"
             MessageBox.warning("Erro ao processar mov do animatic para compressao adequada! Avise a Direcao Tecnica!")
             return False
-
-         work_dir = os.path.join(local_scene_path, 'WORK', scene_name)
+        work_dir = os.path.join(local_scene_path, 'WORK', scene_name)
 
         self.ui.progress_bar.setFormat("creating SETUP[3/4]")
         self.ui.progress_bar.setValue(4)
