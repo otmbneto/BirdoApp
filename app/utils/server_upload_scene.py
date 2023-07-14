@@ -32,10 +32,7 @@ def create_fazendinha_queue(proj_data, imput_obj, scene_name, version):
     if "COMP" in imput_obj["render_step"]:
         render_type = "COMP"
     else:
-        if imput_obj["project_index"] == '3' and int(scene_number) % 10 != 0 and ep != '020':
-            render_type = "PRE_COMP_AZT"
-        else:
-            render_type = "PRE_COMP"
+        render_type = "PRE_COMP"
 
     render_data = {
         "animator": imput_obj["user_name"],
