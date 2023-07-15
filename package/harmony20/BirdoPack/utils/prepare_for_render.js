@@ -86,32 +86,10 @@ function prepare_for_render(projData, render_step, use_extra_writenodes, is_farm
 		Print("RENDER STEP: " + render_step);
 		Print("Seting WriteFinal: ");
 		//SET THE FINALWRITE ALWAYS FOR PRE_COMP
-		var updateWriteFinal = BD2_changeWriteNodeAtt(projData, finalWrite, mov_name, "PRE_COMP");
+		var updateWriteFinal = BD2_changeWriteNodeAtt(projData, finalWrite, mov_name, render_step);
 		Print("WriteFINAL set: ");
 		Print(updateWriteFinal);
-		
-		
-		//Valida o WriteFINAL em caso de COMP:
-			//SE SOMENTE TIVER O WRITE FINAL NA CENA, MUDA O WRITEFINAL PARA COMP
-			//SE TIVER MAIS DE UM WRITENODE, IGNORA O WRITEFINAL
-		if(render_step == "COMP"){
-			if(writes.length == 1){
-				Print("Seting writeFinal for comp");
-				updateWriteFinal = BD2_changeWriteNodeAtt(projData, finalWrite, render_name, "COMP");
-				Print("WriteFINAL set: ");
-				Print(updateWriteFinal);
-				//if write node is NOT a matte treatment, add color fix
-				Print("####Add color fix: " + finalWrite);
-				Print("####>> " + BD2_add_proj_CO_correction(projData, finalWrite));
-				info_list.push(updateWriteFinal);
-			} else {
-				Print("Disabled WriteFINAL for COMP!");	
-				node.setEnable(finalWrite, false);
-			}
-		} else {
-			//atualiza as infos do writeFINAL na lista
-			info_list.push(updateWriteFinal);
-		}
+		info_list.push(updateWriteFinal);
 		
 		for(var i=0; i<writes.length; i++){
 			
