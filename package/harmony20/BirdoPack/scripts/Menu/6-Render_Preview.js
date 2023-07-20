@@ -261,9 +261,16 @@ function RenderPreview(){
 			loadingScreen.terminate();
 		}
 		
+		/*
 		if(MessageBox.information("Shot Renderizado com sucesso! Deseja abrir o arquivo com o QuickTime?", 3, 4) == 3){
 			open_with_QuickTime(local_mov);
 		}
+		*/
+
+		//agora abre o explorer com o arquivo selecionado.
+		var explorer =Process2("explorer.exe","/select,","\"" + local_mov.replace(/\//g, "\\") + "\"");
+		MessageLog.trace(explorer.commandLine());
+		explorer.launchAndDetach();
 
 	}
 	
