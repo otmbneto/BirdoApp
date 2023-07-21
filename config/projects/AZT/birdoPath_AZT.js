@@ -281,13 +281,19 @@ function BirdoProject(entity){
 	
 	this.checkToonBoom = function(){//checa se a versao aberta do toon boom e compativel com o projeto
 		var versionSplit = this.harmony.version.split(".");
-		if(versionSplit[0] != about.majorVersion){
+		var min_version = versionSplit[0] + versionSplit[1] + versionSplit[2];
+		var version = String(about.majorVersion) + String(about.minorVersion) + String(about.patchVersion);//formato 2000,2100,2200,etc...
+
+		if(version < min_version){
 			MessageBox.warning("A versao do toon boom aberta nao e compativel com a versao que deve ser usada neste projeto!\nAvise a producao e providencie a versao " + this.harmony.version, 0, 0, 0);
 			MessageLog.trace("[WARNING!] Versao de ToonBoom aberta nao compativel com projeto " + this.project_name);	
 			return false;
-		} else if(parseFloat(versionSplit[2]) > parseFloat(about.patchVersion)){
+		} 
+		/*
+		else if(parseFloat(versionSplit[2]) > parseFloat(about.patchVersion)){
 			MessageLog.trace("[WARNING]: Este versao aberta do Tooon Boom pode apresentar falhas em alguns scripts neste projeto! Atualize par a versao " + this.harmony.version + " para completa compatibilidade!");
-		}	
+		}*/
+
 		MessageLog.trace("[BIRDO PATHS] version check toon boom for project OK!");
 		return true;
 	}
