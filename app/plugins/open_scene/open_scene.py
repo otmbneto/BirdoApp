@@ -4,7 +4,7 @@ import sys
 import time
 import subprocess
 from distutils.dir_util import copy_tree
-from PySide import QtGui,QtCore
+from PySide import QtGui,QtCore,QtUiTools
 from threading import Thread
 import shutil
 
@@ -72,6 +72,15 @@ class OpenShot(QtGui.QWidget):
         super(OpenShot, self).__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        
+        '''
+        self.app_root = os.path.dirname(os.path.realpath(__file__))
+        ui_path = os.path.join(self.app_root, "ui/dialog.ui").replace("\\", "/")
+        self.ui = self.loadPage(ui_path)
+        w = self.ui.frameGeometry().width()
+        h = self.ui.frameGeometry().height()
+        '''
+
         self.project_data = project_data
         self.episodes_data = {}
         self.harmony_manager = HarmonyManager(project_data)
@@ -82,6 +91,11 @@ class OpenShot(QtGui.QWidget):
 
         # SET PROJECT LOGO
         self.ui.logoProj.setPixmap(QtGui.QPixmap(global_icons["proj_logo"].format(self.project_data["prefix"])))
+
+        self.ui.explorer_path.setReadOnly(True)
+        f = self.ui.explorer_path.font()
+        f.setPointSize(8) # sets the size to 27
+        self.ui.explorer_path.setFont(f)
 
         self.setupConnections()
 
@@ -104,6 +118,8 @@ class OpenShot(QtGui.QWidget):
             self.root = self.project_data['paths']["root"] + self.project_data['paths']["projRoot"]
         else:
             self.root = ""
+
+        self.current_path = ""
 
         # GET FOLDER SCHEME CLASS
         self.project_folders = FolderManager(project_data)
@@ -140,6 +156,14 @@ class OpenShot(QtGui.QWidget):
             shutil.rmtree(self.temp_open_scene, ignore_errors=True)
         os.makedirs(self.temp_open_scene)
 
+    def loadPage(self, page):
+
+        ui_file = QtCore.QFile(page)
+        ui_file.open(QtCore.QFile.ReadOnly)
+        loader = QtUiTools.QUiLoader()
+
+        return loader.load(ui_file)
+
     def setupConnections(self):
 
         # WIDGET CONNECTIONS
@@ -151,6 +175,7 @@ class OpenShot(QtGui.QWidget):
         self.ui.checkBox_all_versions.stateChanged.connect(self.on_check_all_versions)
         self.ui.checkBox_open_local.stateChanged.connect(self.on_check_open_local)
         self.ui.comboStep.currentIndexChanged.connect(self.on_change_step)
+        self.ui.explorer_btn.clicked.connect(self.open_local_folder)
         
         # SIGNAL CONNECTIONS
         self.signals = CustomSignal()
@@ -367,11 +392,16 @@ class OpenShot(QtGui.QWidget):
         self.ui.listScenes.setEnabled(True)
         self.ui.listVersions.setEnabled(True)
 
+
     def on_select_ep(self, item):
+
         """callback function when select ep item"""
         self.ui.listScenes.clear()
         self.ui.listVersions.clear()
         self.ui.checkBox_open_local.setEnabled(False)
+        path = self.project_folders.get_episode_scenes_path(item.text(),self.ui.comboStep.currentText())
+        self.ui.explorer_path.setText(path)
+
         shot_list = self.episodes_data[item.text()].keys()
         shot_list.sort()
         row = 0
@@ -464,6 +494,9 @@ class OpenShot(QtGui.QWidget):
         }
         current_step = self.ui.comboStep.currentText()
 
+        path = self.project_folders.get_scene_path(shot_name,self.ui.comboStep.currentText())
+        self.ui.explorer_path.setText(path)
+
         # CHECKS IF SCENE IS ALREADY OPENED
         if shot_name in self.opened_scenes:
             # CHECKS IF SCENE OPENED PROCESS IS STILL RUNNING OR SCENE WAS OPEN BEFORE STARTED OPEN SHOT
@@ -542,6 +575,11 @@ class OpenShot(QtGui.QWidget):
     def on_select_version(self, item):
         selected_version = item.text()
 
+        print "ROOT:" + self.root
+        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(self.project_folders.get_local_root(),"")
+        print path
+        self.ui.explorer_path.setText(path)
+
         if selected_version == "SETUP_NOT_FOUND" or selected_version == "SCENE_IS_OPEN":
             # IF VERSION IS NOT AVAILABLE
             print "version not available..."
@@ -572,6 +610,16 @@ class OpenShot(QtGui.QWidget):
         else:
             self.ui.checkBox_all_versions.setEnabled(False)
 
+    def open_local_folder(self):
+
+        path = os.path.join(self.project_folders.get_local_root(),self.ui.explorer_path.text())
+        if os.path.exists(path):
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
+        else:
+            MessageBox.warning("Folder does not exist yet!")
+
+        return
+
     def on_check_open_local(self):
         show_check_all = not self.ui.checkBox_open_local.isChecked()
         self.ui.checkBox_all_versions.setEnabled(show_check_all)
@@ -593,6 +641,11 @@ class OpenShot(QtGui.QWidget):
         self.ui.checkBox_open_local.setEnabled(False)
         self.ui.checkBox_all_versions.setEnabled(False)
         self.ui.open_button.setEnabled(False)
+
+        shot = self.ui.listScenes.currentItem()
+        if shot is not None:
+            path = self.project_folders.get_scene_path(shot.text(),self.ui.comboStep.currentText())
+            self.ui.explorer_path.setText(path)
         print "reset widgets with version shot info..."
 
     def on_open_scene(self):
