@@ -1381,7 +1381,10 @@ function BD2_getUniqueColumnName(column_prefix){
 	faz pergunta com Yes or No de opcao de resposta! Retorna true or false;
 */	
 function BD2_AskQuestion(msg){
-	return MessageBox.information(msg , 3, 4) == 3;
+
+	var value = MessageBox.information(msg , 3, 4);
+
+	return value == 3 || value == 1;//fix for weird bug in harmony 22 where the buttons are not properly shown.
 }
 
 /*
