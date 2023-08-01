@@ -50,14 +50,14 @@ class RigsUploader(QtGui.QMainWindow):
         self.setLogic()
         self.setAcceptDrops(True)
 
-    def getTemplateItem(self, path, episodes):
+    def getTemplateItem(self, path):
 
         template_item = None
-        ui_utils = os.path.join(birdo_proj_utils,self.project_data["prefix"],"UI_utils")
+        ui_utils = os.path.join(birdo_proj_utils,self.project_data.prefix,"UI_utils")
         if os.path.exists(ui_utils):
             sys.path.append(ui_utils)
             import rigItem as rig
-            template_item = rig.uiItem(path, episodes)
+            template_item = rig.uiItem(path)
 
         return template_item
 
