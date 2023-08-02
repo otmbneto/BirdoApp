@@ -320,7 +320,6 @@ class uiItem(QtGui.QGroupBox):
         #if len(thumbnails) == 0:
         #    self.setError()
         #    return
-        
         print "A total of {0} thumbnails found!".format(len(thumbnails))
         self.incrementProgress(20)
         ######################################################################################################
@@ -331,9 +330,9 @@ class uiItem(QtGui.QGroupBox):
 
         if not os.path.exists(server_path):
             os.makedirs(server_path)
-        output = self.birdoZipFile(new_scene,saveAs = asset_name.split("_")[-1] + ".v" + str(self.version).zfill(2))
+        output = self.birdoZipFile(local_scene,saveAs = asset_name.split("_")[-1] + ".v" + str(self.version).zfill(2))
         self.incrementProgress(10)
-        shutil.rmtree(new_scene)
+        shutil.rmtree(local_scene)
         if os.path.exists(output):
             server_file = os.path.join(server_path,os.path.basename(output)).replace("\\","/")
             print server_file
