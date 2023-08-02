@@ -316,11 +316,11 @@ class uiItem(QtGui.QGroupBox):
         print "SCRIPT PATH: " + str(script)
         self.incrementProgress(5)
         result = self.compile_script(script,xstage)
-
-        if result != 0:
-            self.setError("Compile failed!")
-            return
         thumbnails = self.getThumbnails(local_scene)
+        #if len(thumbnails) == 0:
+        #    self.setError()
+        #    return
+        
         print "A total of {0} thumbnails found!".format(len(thumbnails))
         self.incrementProgress(20)
         ######################################################################################################
