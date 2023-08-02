@@ -332,7 +332,6 @@ class uiItem(QtGui.QGroupBox):
             os.makedirs(server_path)
         output = self.birdoZipFile(local_scene,saveAs = asset_name.split("_")[-1] + ".v" + str(self.version).zfill(2))
         self.incrementProgress(10)
-        shutil.rmtree(local_scene)
         if os.path.exists(output):
             server_file = os.path.join(server_path,os.path.basename(output)).replace("\\","/")
             print server_file
@@ -344,6 +343,7 @@ class uiItem(QtGui.QGroupBox):
         for thumbnail in thumbnails:
             server_thumb = os.path.join(server_path,os.path.basename(thumbnail))
             shutil.copyfile(thumbnail,server_thumb)
+        shutil.rmtree(local_scene)
         self.incrementProgress(10)
         os.remove(output)
         self.incrementProgress(10)
