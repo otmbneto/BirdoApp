@@ -251,6 +251,37 @@ class uiItem(QtGui.QGroupBox):
     def getMondayName(self,asset_name):
 
         monday_names = {"AZTC_Acatzin":"CH000_Acatzin","AZTC_ForestIvy":"CH001_ForestIvy"} #mudar isso aqui
+
+        monday_names = {'AZTC_YokaPriestMakeup': 'CH012_YokaPriestMakeup', 
+                        'AZTC_JaguarWoman': 'CH003_JaguarWoman', 
+                        'AZTC_MoctezumaWithPenacho': 'CH004_MoctezumaWithPenacho', 
+                        'AZTC_Moctezuma': 'CH004_Moctezuma', 
+                        'AZTC_PedroDeAlvaradoHood': 'CH006_PedroDeAlvaradoHood', 
+                        'AZTC_Tzinacan': 'CH009_Tzinacan', 
+                        'AZTC_Totelcatzin': 'CH008_Totelcatzin', 
+                        'AZTC_YokaPriest': 'CH012_YokaPriest', 
+                        'AZTC_YoungYohu': 'CH014_YoungYohu', 
+                        'AZTC_JaguarWomanNoHat': 'CH003_JaguarWomanNoHat', 
+                        'AZTC_Selenia': 'CH007_Selenia', 
+                        'AZTC_Acatzin': 'CH000_Acatzin', 
+                        'AZTC_YohuPipiltin': 'CH010_YohuPipiltin', 
+                        'AZTC_YohuNoMakeupLongHair': 'CH010_YohuNoMakeupLongHair', 
+                        'AZTC_PedroDeAlvarado': 'CH006_PedroDeAlvarado', 
+                        'AZTC_YokaHairCutMakeup': 'CH012_YokaHairCutMakeup', 
+                        'AZTC_YohusMother': 'CH011_YohusMother', 
+                        'AZTC_Ocelotl': 'CH005_Ocelotl', 
+                        'AZTC_YokasBrother': 'CH013_YokasBrother', 
+                        'AZTC_YoungYohuPipiltin': 'CH014_YoungYohuPipiltin', 
+                        'AZTC_YohuTransition': 'CH010_YohuTransition', 
+                        'AZTC_HernanCortesFullArmy': 'CH002_HernanCortesFullArmy', 
+                        'AZTC_YohuWarrior': 'CH010_YohuWarrior', 
+                        'AZTC_HernanCortes': 'CH002_HernanCortes', 
+                        'AZTC_ForestIvy': 'CH001_ForestIvy', 
+                        'AZTC_YohuNoMakeup': 'CH010_YohuNoMakeup', 
+                        'AZTC_HernanCortesFormal': 'CH002_HernanCortesFormal', 
+                        'AZTC_YohuWarriorLongHair': 'CH010_YohuWarriorLongHair'
+                        }
+
         return monday_names[asset_name] if asset_name in monday_names.keys() else None
 
     def getRiggName(self,rigg):
