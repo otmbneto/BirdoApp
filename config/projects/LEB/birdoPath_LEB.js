@@ -169,12 +169,12 @@ function BirdoProject(entity){
 	
 	this.modifyScenePreRender = function(step, is_farm){
 		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
-		var add_matteLines = this.paths.birdoPackage + "utils/addMatteLine_LEB.js";
-
+		//var add_writeSombras = this.paths.birdoPackage + "utils/addWriteSombra_LEB.js";
+		
 		if(step == "COMP"){
 			//exporta info dos psd
 			require(get_psd_data_script).get_psd_anim_data(true);
-			require(add_matteLines).addMatteLine_LEB();
+			//require(add_writeSombras).add_writeSombras();
 		} else {
 			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
 		}
