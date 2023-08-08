@@ -173,7 +173,7 @@ function BirdoProject(entity){
 		
 		if(step == "COMP"){
 			require(get_psd_data_script).get_psd_anim_data(true);//exporta info dos psd
-			require(add_writeSombras).add_writeSombras();
+			require(add_writeSombras).addWriteSombra_LEB();
 		} else {
 			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
 		}
