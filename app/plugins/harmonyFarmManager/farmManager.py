@@ -340,7 +340,6 @@ class Dialog(QtGui.QWidget):
                 }
 
         renderfarm = self.project_data.paths.get_render_farm_path()
-        renderfarm = "X:/teste"
         request_file = scene + "_" + version + ".json"
         return write_json_file(os.path.join(renderfarm,request_file),request)
 
