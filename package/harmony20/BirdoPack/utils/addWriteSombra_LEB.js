@@ -15,53 +15,132 @@ Created:	julho, 2023;
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
+ - Procura os nodes de sombra dentro dos rigs na cena e testa se estao sendo usados
+   - se estiverem sendo usados, add esquema de exportar sombras separas!
 */
+
+
+//regex node (colors) shadow name
+var sh_regex = /^(SHADOW|SOMBRA)$/;
+
 
 function addWriteSombra_LEB(){
 
+	//shadow nodes in scene
+	var sh_nodes = findShadowNodes();
+	if(sh_nodes.length == 0){
+		Print("No shadow nodes in the scene! No need to separete!");
+		return;
+	}
+	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return;
 	}
+	
 	//add matte lines
 	add_write_sombra(projectDATA);
 }
 exports.addWriteSombra_LEB = addWriteSombra_LEB;
 
 
-function add_write_sombra(proj_data){//add matte line e um write node para cada write node existente
-	var writes = node.getNodes(["WRITE"]).filter(function(n){ return node.getEnable(n)});
-	writes.forEach(function(n){ 
-		add_matte_line(proj_data, n)
+function add_write_sombra(proj_data, write_node){
+	
+	//find list of shadow colors
+	var shadow_color_list = [];
+	var plist = PaletteObjectManager.getScenePaletteList();
+	
+	//cloned pallet
+	var clone_pallet_path = scene.currentProjectPath() + "/palette-library/_cloneSHADOW";
+	var clone_pallet = plist.createPalette(clone_pallet_path);
+	//clean defalt color created with palette
+	var defaltColor = clone_pallet.getColorByIndex(0);
+	clone_pallet.removeColor(defaltColor.id);
+	Print("new matte pallete created: " + clone_pallet.getName());
+	
+	for(var i=0; i<plist.numPalettes; i++){
+		var palette = plist.getPaletteByIndex(i);
+		for(var y=0; y<palette.nColors; y++){
+			var cor = palette.getColorByIndex(y);
+			if(!cor.isValid || !cor.name || cor.colorType == undefined){
+				Print("Color not valid: " + cor.name);
+				continue;		
+			}
+			if(sh_regex.test(cor.name.toUpperCase()) && shadow_color_list.indexOf(cor) == -1){
+				shadow_color_list.push(cor);
+			}
+		}
+	}
+	
+	Print(shadow_color_list.length + " cores de shadow encontradas...");
+		
+	shadow_color_list.forEach(function(item){
+		cloneToPallet(item);
 	});
-}
-
-function add_matte_line(proj_data, write_node){
 	
-	//creates matte class
-	var matte_object = new MattePalletData();
-	matte_object.create_new_pallet();
+	//att to pu in cs color list
+	var colors_formated = shadow_color_list.map(function(item){ return get_color_cs_object(item.id)});
 	
-	//connected node
-	var up_node = node.srcNode(write_node, 0);
+	var finalComp = "Top/SETUP/FINAL";
+	if(node.getName(finalComp) == ""){
+		Print("ERROR! Cant find FINAL comp in SETUP Group!");
+		return false;
+	}
+	
+	//add remove color shadow to writeFinal
+	addColourOverride(clone_pallet);
 	
 	//add color override
-	var co = addColourOverride(up_node, matte_object.matte_pallete);
+	var cs = addCSNode(finalComp, colors_formated);
 	
-	//add line matte write
-	var render_path = "frames/" + scene.currentScene() + (node.getName(write_node).replace(/Write_(FINAL?)/, "") +"_mttline");
-	var write_mttline = BD2_AddNodeUnder(co, (node.getName(write_node) + "_MATTEline"), "WRITE", true);
-	BD2_changeWriteNodeAtt(proj_data, write_mttline, render_path, "COMP");
+	//add write
+	var write_node = BD2_AddNodeUnder(cs, "Write_SH", "WRITE", true);
+	var render_path = "frames/" + scene.currentScene() + (node.getName(write_node).replace(/Write/, ""));
+	BD2_changeWriteNodeAtt(proj_data, write_node, render_path, "COMP");
 
-	Print("Added matte line to write node : " + write_node);	
+	Print("Added shadow write node : " + write_node);	
+	
+	
+	//EXTRA FUNCIONTS
+	function cloneToPallet(color){
+		var clonedColor = clone_pallet.cloneColor(color);
+		if(!clonedColor){
+			Print("Error cloning color: " + color.name);
+			return false;
+		}
+		clonedColor.setColorData(convertColor(new QColor(255,255,255,0)));
+		return true;
+	}
+	
+	function get_color_cs_object(id){//find color and convert object to formated string for color selector attr
+		var pal = plist.findPaletteOfColor(id);
+		var colorObj = pal.getColorById(id);
+		var obj = colorObj["colorData"];
+		obj["colorId"] = colorObj.id;
+		obj["name"] = colorObj.name;
+		return obj;
+	}
+	function convertColor(colorObj){//retorna objeto de cor formatado como a,r,g,b num objeto
+		return {"a": colorObj.alpha(), "r": colorObj.red(), "g": colorObj.green(), "b": colorObj.blue()};	
+	}
 }
 
-function addColourOverride(origin_node, palette){//
+function addCSNode(origin_node, color_list){//add cs node to parent node
+	var cs = BD2_AddNodeUnder(origin_node, "CS_Shadow", "TbdColorSelector", true);
+	if(!cs){
+		Print("Fail to add color selector node!");
+		return false;
+	}
+	var att_colors = node.getAttr(cs, 1, "selectedColors");
+	att_colors.setValue(JSON.stringify(color_list));
+	return cs;
+}
 
-	var palettePath = palette.getPath() + "/" + palette.getName() + ".plt";
-	
-	var co = BD2_AddNodeUnder(origin_node, "CO_MATTEline", "COLOR_OVERRIDE_TVG", true);
+function addColourOverride(clone_pallet){//add color override para eliminar as cores da sombra no render final
+	var writeFinal = "Top/SETUP/Write_FINAL";
+	var palettePath = clone_pallet.getPath() + "/" + clone_pallet.getName() + ".plt";
+	var co = BD2_AddNodeUp(writeFinal, "_removeSHADOW", "COLOR_OVERRIDE_TVG");
 	if(!co){
 		Print("Fail to add color override node!");
 		return false;
@@ -72,99 +151,30 @@ function addColourOverride(origin_node, palette){//
 	return co;
 }
 
-function MattePalletData(){//cria objeto com infos das matte pallets da cena e com metodos para pegar as palettes
-	this.folder = scene.currentProjectPath() + "/palette-library/";
-	this.prefix = "_mtt";
-	var regex = /(_?mtt|_?matte)/;
-	var palets_list = BD1_ListFiles(this.folder, "*.plt").filter(function(x){ 
-		return regex.test(x);
-	});
-	this.prefix_regex = regex;
-	this.mattes_list = palets_list.map(function(item){ return item.split(".")[0]});
-	this.mattes_list.sort();
-	this.has_mattes = this.mattes_list.length > 0;
-	this.mattes_list.unshift("");//cria item vazio pra ser o index 0 no combo
-	this.pl = PaletteObjectManager.getScenePaletteList();
-	
-	this.ignore_name_regex = /(LINHA|Linha|LINE|Line)/;
-	
-	this.matte_pallete = null;
-	
-	//callback methods
-	this.get_matte_palette = function(index){
-		if(this.mattes_list[index] == "" || index == 0){
-			MessageLog.trace("Pallet path nao existe para o index selecionado!");
-			return false;
-		}
-		var pal_path = this.folder + this.mattes_list[index];
-		return this.pl.addPalette(pal_path);
-	}
-	
-	this.addPalleteColorsToMatteOverride = function(){//adiciona as cores da pelette dada para o MatteOverridePalette
-		
-		var errorCounter = 0;
-		var counter = 0;
-		var counterIgnored = 0;
-		for(var i=0; i<this.pl.numPalettes; i++){
-			var palette = this.pl.getPaletteByIndex(i);
-			MessageLog.trace("--cloning palette: " + palette.getName());
-			for(var y=0; y<palette.nColors; y++){
-				var cor = palette.getColorByIndex(y);
-				if(!cor.isValid || !cor.name || cor.colorType == undefined){
-					Print("Color not valid: " + cor.name);
-					errorCounter++;
-					continue;		
-				}
-				
-				if(isColorInMattePallete(this.matte_pallete, cor) || is_black_color(cor)){
-					MessageLog.trace("Ignoring color: " + cor.name);
-					counterIgnored++;
-					continue;
-				}
-				var cloneColor = this.matte_pallete.cloneColor(cor);
-				if(!cloneColor){
-					Print("Error cloning color: " + cor.name);
-					errorCounter++;
-					continue;
-				}
-				cloneColor.setColorData(convertColor(new QColor(255,255,255,255)));
-				counter++;
+
+function findShadowNodes(){//lista nodes de sombra da cena
+	var sh_nodes = []
+	var reads = node.getNodes(["READ"]);
+	reads.forEach(function(item){
+		var underNode = node.dstNode(item, 0, 0);
+		if(sh_regex.test(node.getName(item).toUpperCase()) && node.type(underNode) == "BLEND_MODE_MODULE"){
+			if(testIfNodeIsUsed(item)){
+				sh_nodes.push(item);
 			}
+			node.setEnable(underNode, false);
 		}
-		MessageLog.trace("add palettes: " + this.pl.numPalettes + "\n-erros: " + errorCounter + "\n-cloned: " + counter + "\n-ignored: " + counterIgnored);
-	}
+	});
+	return sh_nodes;
+}
 
-	this.create_new_pallet = function(){//cria a proxima palette
-		var new_plt_name = "__mtteLineReder";
-		if(!new_plt_name){
-			Print("Canceled..");
-			return false;
+function testIfNodeIsUsed(nodeP){//testa se o node esta sendo usado na cena
+	var col = node.linkedColumn(nodeP, "DRAWING.ELEMENT");
+	var exp_list = [];
+	for(var i=0; i<frame.numberOf(); i++){
+		var exp = column.getEntry(col, 1, i);
+		if(exp_list.indexOf(exp) == -1 && exp != "" && exp != "Zzero"){
+			exp_list.push(exp);
 		}
-		var new_mattePal_path = this.folder + new_plt_name;
-		var newMattePalette = this.pl.createPalette(new_mattePal_path);
-		//clean defalt color created with palette
-		var defaltColor = newMattePalette.getColorByIndex(0);
-		newMattePalette.removeColor(defaltColor.id);
-		MessageLog.trace("new matte pallete created: " + newMattePalette.getName());
-		scene.saveAll();
-		this.mattes_list.push(newMattePalette.getName());
-		//update has_mattes flag
-		this.has_mattes = true;
-		//define matte pallet
-		this.matte_pallete = newMattePalette;
-		//add cloned colours to matte pallet
-		this.addPalleteColorsToMatteOverride();
 	}
-
-	//extras functions
-	function isColorInMattePallete(mattePalette, color){//checa se a cor ja esta na mattePalette
-		return mattePalette.getColorById(color.id).isValid;
-	}
-	function convertColor(colorObj){//retorna objeto de cor formatado como a,r,g,b num objeto
-		return {"a": colorObj.alpha(), "r": colorObj.red(), "g": colorObj.green(), "b": colorObj.blue()};	
-	}
-	function is_black_color(color){
-		var corData = color.colorData;
-		return corData.r == 0 && corData.g == 0 && corData.b == 0 && corData.a == 255;
-	}
+	return node.getEnable(nodeP) && exp_list.length > 0;
 }
