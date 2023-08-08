@@ -135,8 +135,7 @@ class Dialog(QtGui.QWidget):
         self.ui.labelVersion.setText(version)
         if not self.load_scripts():
             self.ui.groupBoxScript.setEnabled(False)
-            self.ui.groupBoxRender.setCheckable(False)
-        
+
         self.ui.radioRenderLocal.setEnabled(os.path.exists(self.executable_path))
         self.load_episodes()
 
