@@ -49,7 +49,7 @@ def clean_temp_folder(temp):
 
 def define_sequence_type(scene_list):
     """define se a sequencia de cenas e 'DECIMAL' ou 'NORMAL'"""
-    last_index_num = [int(item[-1]) for item in scenes_list]
+    last_index_num = [int(item[-1]) for item in scene_list]
     if last_index_num.count(0) > len(filter(lambda x: x != 0, last_index_num)):
         return "DECIMAL"
     else:
@@ -100,6 +100,9 @@ def main(proj_index, version, output_folder):
     ep_folder = os.path.join(p_data.server.root, p_data.paths.get_episode_scenes_path(chosen_ep, chosen_step))
     scenes_list = filter(lambda x: bool(re.match(r'\w{3}_EP\d{3}_SC\d{4}', x)),  os.listdir(ep_folder))
     print "... {0} scenes found in episode {1}".format(len(scenes_list), chosen_ep)
+    if len(scenes_list) == 0:
+        print "ERROR! Cant find any scenes at folder: {0}".format(ep_folder)
+        return
 
     # define delivery type : decimal or normal
     delivery_type = define_sequence_type(scenes_list)
