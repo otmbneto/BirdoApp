@@ -250,38 +250,100 @@ class uiItem(QtGui.QGroupBox):
 
     def getMondayName(self,asset_name):
 
-        monday_names = {"AZTC_Acatzin":"CH000_Acatzin","AZTC_ForestIvy":"CH001_ForestIvy"} #mudar isso aqui
+        #monday_names = {"AZTC_Acatzin":"CH000_Acatzin","AZTC_ForestIvy":"CH001_ForestIvy"} #mudar isso aqui
 
-        monday_names = {'AZTC_YokaPriestMakeup': 'CH012_YokaPriestMakeup', 
-                        'AZTC_JaguarWoman': 'CH003_JaguarWoman', 
-                        'AZTC_MoctezumaWithPenacho': 'CH004_MoctezumaWithPenacho', 
-                        'AZTC_Moctezuma': 'CH004_Moctezuma', 
-                        'AZTC_PedroDeAlvaradoHood': 'CH006_PedroDeAlvaradoHood', 
-                        'AZTC_Tzinacan': 'CH009_Tzinacan', 
-                        'AZTC_Totelcatzin': 'CH008_Totelcatzin', 
-                        'AZTC_YokaPriest': 'CH012_YokaPriest', 
-                        'AZTC_YoungYohu': 'CH014_YoungYohu', 
-                        'AZTC_JaguarWomanNoHat': 'CH003_JaguarWomanNoHat', 
-                        'AZTC_Selenia': 'CH007_Selenia', 
-                        'AZTC_Acatzin': 'CH000_Acatzin', 
-                        'AZTC_YohuPipiltin': 'CH010_YohuPipiltin', 
-                        'AZTC_YohuNoMakeupLongHair': 'CH010_YohuNoMakeupLongHair', 
-                        'AZTC_PedroDeAlvarado': 'CH006_PedroDeAlvarado', 
-                        'AZTC_YokaHairCutMakeup': 'CH012_YokaHairCutMakeup', 
-                        'AZTC_YohusMother': 'CH011_YohusMother', 
-                        'AZTC_Ocelotl': 'CH005_Ocelotl', 
-                        'AZTC_YokasBrother': 'CH013_YokasBrother', 
-                        'AZTC_YoungYohuPipiltin': 'CH014_YoungYohuPipiltin', 
-                        'AZTC_YohuTransition': 'CH010_YohuTransition', 
-                        'AZTC_HernanCortesFullArmy': 'CH002_HernanCortesFullArmy', 
-                        'AZTC_YohuWarrior': 'CH010_YohuWarrior', 
-                        'AZTC_HernanCortes': 'CH002_HernanCortes', 
-                        'AZTC_ForestIvy': 'CH001_ForestIvy', 
-                        'AZTC_YohuNoMakeup': 'CH010_YohuNoMakeup', 
-                        'AZTC_HernanCortesFormal': 'CH002_HernanCortesFormal', 
-                        'AZTC_YohuWarriorLongHair': 'CH010_YohuWarriorLongHair'
-                        }
-
+        monday_names = {'AZTC_GenericSpanishSoldier9Army': 'CH210_GenericSpanishSoldier9Army',
+                         'AZTC_NobleWoman': 'CH215_NobleWoman',
+                         'AZTC_DeathBull': 'CH209_DeathBull',
+                         'AZTC_PedroDeAlvaradoHood': 'CH006_PedroDeAlvaradoHood',
+                         'AZTC_Totelcatzin': 'CH008_Totelcatzin',
+                         'AZTC_GenericSpanishSoldier8Army': 'CH210_GenericSpanishSoldier8Army',
+                         'AZTC_YoungYohu': 'CH014_YoungYohu',
+                         'AZTC_AztecGirlA2': 'CH201_AztecGirlA2',
+                         'AZTC_GenericSpanishSoldier6Army': 'CH210_GenericSpanishSoldier6Army',
+                         'AZTC_AztecWomanCityA': 'CH206_AztecWomanCityA',
+                         'AZTC_AztecWomanCityB': 'CH206_AztecWomanCityB',
+                         'AZTC_GenericSpanishSoldier2Army': 'CH210_GenericSpanishSoldier2Army',
+                         'AZTC_Acatzin': 'CH000_Acatzin',
+                         'AZTC_YohuPipiltin': 'CH010_YohuPipiltin',
+                         'AZTC_OldWarrior': 'CH216_OldWarrior',
+                         'AZTC_YohuNoMakeupLongHair': 'CH010_YohuNoMakeupLongHair',
+                         'AZTC_PedroDeAlvarado': 'CH006_PedroDeAlvarado',
+                         'AZTC_GenericSpanishSoldier3Army': 'CH210_GenericSpanishSoldier3Army',
+                         'AZTC_YoungAztecWarrior3B': 'CH221_YoungAztecWarrior3B',
+                         'AZTC_AztecBatmanCape': 'CH223_AztecBatmanCape',
+                         'AZTC_HernanCortesFullArmy': 'CH002_HernanCortesFullArmy',
+                         'AZTC_AztecWarrior1': 'CH205_AztecWarrior1',
+                         'AZTC_AztecWarrior2': 'CH205_AztecWarrior2',
+                         'AZTC_AztecWarrior3': 'CH205_AztecWarrior3',
+                         'AZTC_AztecWomanCityB2': 'CH206_AztecWomanCityB2',
+                         'AZTC_GenericSpanishSoldier3Work3.1': 'CH210_GenericSpanishSoldier3Work3.1',
+                         'AZTC_NobleMan2': 'CH214_NobleMan2',
+                         'AZTC_YokaPriest': 'CH012_YokaPriest',
+                         'AZTC_GenericSpanishSoldier7Army': 'CH210_GenericSpanishSoldier7Army',
+                         'AZTC_JaguarWomanNoHat': 'CH003_JaguarWomanNoHat',
+                         'AZTC_Selenia': 'CH007_Selenia',
+                         'AZTC_VillageDancer3': 'CH220_VillageDancer3',
+                         'AZTC_VillageDancer2': 'CH220_VillageDancer2',
+                         'AZTC_GenericSpanishSoldier4Army': 'CH210_GenericSpanishSoldier4Army',
+                         'AZTC_AztecMaleCityA2': 'CH202_AztecMaleCityA2',
+                         'AZTC_YokaHairCutMakeup': 'CH012_YokaHairCutMakeup',
+                         'AZTC_YohusMother': 'CH011_YohusMother',
+                         'AZTC_NobleElderlyMan': 'CH213_NobleElderlyMan',
+                         'AZTC_YohuTransition': 'CH010_YohuTransition',
+                         'AZTC_TlaxcaltecaWarrior1A': 'CH219_TlaxcaltecaWarrior1A',
+                         'AZTC_AlonsoArmy': 'CH222_AlonsoArmy',
+                         'AZTC_HernanCortes': 'CH002_HernanCortes',
+                         'AZTC_AztecWomanVillageB3': 'CH207_AztecWomanVillageB3',
+                         'AZTC_MoctezumasGuard3': 'CH212_MoctezumasGuard3',
+                         'AZTC_MoctezumasGuard2': 'CH212_MoctezumasGuard2',
+                         'AZTC_MoctezumasGuard1': 'CH212_MoctezumasGuard1',
+                         'AZTC_CristobalArmy': 'CH208_CristobalArmy',
+                         'AZTC_HernanCortesFormal': 'CH002_HernanCortesFormal',
+                         'AZTC_YohuWarriorLongHair': 'CH010_YohuWarriorLongHair',
+                         'AZTC_PoorMan': 'CH217_PoorMan',
+                         'AZTC_GenericSpanishSoldier1Army': 'CH210_GenericSpanishSoldier1Army',
+                         'AZTC_JaguarWoman': 'CH003_JaguarWoman',
+                         'AZTC_TlaxcaltecaWarrior2A': 'CH219_TlaxcaltecaWarrior2A',
+                         'AZTC_TlaxcaltecaWarrior2B': 'CH219_TlaxcaltecaWarrior2B',
+                         'AZTC_Moctezuma': 'CH004_Moctezuma',
+                         'AZTC_Tzinacan': 'CH009_Tzinacan',
+                         'AZTC_GonzaloArmy': 'CH211_GonzaloArmy',
+                         'AZTC_AztecBoyA': 'CH200_AztecBoyA',
+                         'AZTC_AztecBoyB': 'CH200_AztecBoyB',
+                         'AZTC_TlaxcaltecaWarrior1': 'CH219_TlaxcaltecaWarrior1',
+                         'AZTC_GenericSpanishSoldier6Work': 'CH210_GenericSpanishSoldier6Work',
+                         'AZTC_GenericSpanishSoldier5Army': 'CH210_GenericSpanishSoldier5Army',
+                         'AZTC_GenericSpanishSoldier10Army': 'CH210_GenericSpanishSoldier10Army',
+                         'AZTC_GenericSpanishSoldier9Work': 'CH210_GenericSpanishSoldier9Work',
+                         'AZTC_AztecMaleCityA': 'CH202_AztecMaleCityA',
+                         'AZTC_YohuNoMakeup': 'CH010_YohuNoMakeup',
+                         'AZTC_VillageDancer1': 'CH220_VillageDancer1',
+                         'AZTC_GenericSpanishSoldier3Work': 'CH210_GenericSpanishSoldier3Work',
+                         'AZTC_AztecMaleVillageB2': 'CH203_AztecMaleVillageB2',
+                         'AZTC_AztecMaleVillageB3': 'CH203_AztecMaleVillageB3',
+                         'AZTC_YoungAztecWarrior3': 'CH221_YoungAztecWarrior3',
+                         'AZTC_YoungAztecWarrior2': 'CH221_YoungAztecWarrior2',
+                         'AZTC_YoungAztecWarrior4': 'CH221_YoungAztecWarrior4',
+                         'AZTC_YokaPriestMakeup': 'CH012_YokaPriestMakeup',
+                         'AZTC_MoctezumaWithPenacho': 'CH004_MoctezumaWithPenacho',
+                         'AZTC_YoungAztecWarrior2B': 'CH221_YoungAztecWarrior2B',
+                         'AZTC_Priest1': 'CH218_Priest1',
+                         'AZTC_AztecMaleVillageA': 'CH203_AztecMaleVillageA',
+                         'AZTC_AztecWomanVillageA3': 'CH207_AztecWomanVillageA3',
+                         'AZTC_AztecMaleVillageB': 'CH203_AztecMaleVillageB',
+                         'AZTC_AztecMaleVillageA3': 'CH203_AztecMaleVillageA3',
+                         'AZTC_AztecMaleVillageA2': 'CH203_AztecMaleVillageA2',
+                         'AZTC_AztecPriest2': 'CH204_AztecPriest2',
+                         'AZTC_AztecGirlA': 'CH201_AztecGirlA',
+                         'AZTC_YokasBrother': 'CH013_YokasBrother',
+                         'AZTC_YoungYohuPipiltin': 'CH014_YoungYohuPipiltin',
+                         'AZTC_YohuWarrior': 'CH010_YohuWarrior',
+                         'AZTC_ForestIvy': 'CH001_ForestIvy',
+                         'AZTC_Ocelotl': 'CH005_Ocelotl',
+                         'AZTC_AztecWomanVillageA': 'CH207_AztecWomanVillageA',
+                         'AZTC_AztecWomanVillageB': 'CH207_AztecWomanVillageB'
+                    }
         return monday_names[asset_name] if asset_name in monday_names.keys() else None
 
     def getRiggName(self,rigg):
@@ -347,10 +409,20 @@ class uiItem(QtGui.QGroupBox):
         print "SCRIPT PATH: " + str(script)
         self.incrementProgress(5)
         result = self.compile_script(script,xstage)
+
+        saveTPL = os.path.join(local_scene,"saveTPL.JSON")
+        if os.path.exists(saveTPL):
+            server_data = os.path.join(server_path,"DATA")
+            if not os.path.exists(server_data):
+                os.makedirs(server_data)
+            shutil.copyfile(saveTPL,os.path.join(server_data,os.path.basename(saveTPL)))
+            os.remove(saveTPL)
+        else:
+            print "[ERROR] saveTPL.json was not found! Rig won't show up in the import assets without it."
+            self.setStatus("saveTPL not found","red")
+            return
+
         thumbnails = self.getThumbnails(local_scene)
-        #if len(thumbnails) == 0:
-        #    self.setError()
-        #    return
         print "A total of {0} thumbnails found!".format(len(thumbnails))
         self.incrementProgress(20)
         ######################################################################################################

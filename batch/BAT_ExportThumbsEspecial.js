@@ -18,6 +18,31 @@ Copyright:   leobazao_@Birdo
 */
 //call function
 BAT_ExportThumbsEspecial();
+create_tpl_metadata();
+
+function save_metadata_to_JSON(assetInfo){//salva json com metadata do tpl salvo
+	var jsonFile = scene.currentProjectPath() + "/saveTPL.JSON";
+	var metadata = {"user": "OttoniBastos#0366",
+					"info" : assetInfo,
+					"original_file" : scene.currentProjectPath() + "/" + scene.currentVersionName() + ".xstage",
+					"date" : new Date(),
+					"toon_boom_version" : about.getVersionInfoStr()
+					};
+	BD1_WriteJsonFile(metadata, jsonFile);
+}
+
+function create_tpl_metadata(){
+
+	var scene_name = scene.currentScene().split(".")[0];
+	var assetInfo = {
+    	"code": scene_name,
+    	"type": "Asset",
+    	"id": "-1",
+    	"shots": [],
+    	"sg_version_template": scene_name
+  	}
+  	save_metadata_to_JSON(assetInfo);
+}
 
 function BAT_ExportThumbsEspecial(){
 	
@@ -88,7 +113,7 @@ function BAT_ExportThumbsEspecial(){
 		render.frameReady.connect(frameReady);
 		render.setRenderDisplay(display);
 		render.setWriteEnabled(false);
-		render.setAutoThumbnailCropping(true);	
+		render.setAutoThumbnailCropping(true);
 		render.setResolution(320, 240);
 		render.setWhiteBackground(true);
 		//render scene
