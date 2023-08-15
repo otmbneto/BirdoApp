@@ -10,19 +10,34 @@ function get_psd_anim_data(disable_psd_nodes){
 	var reads = node.getNodes(["READ"]);
 	var counter = 1;
 	var psd_files_data = {};
-
+	var bg_groups_data = {};
+	
+	//lista de todos grupos de bg no root
+	var bg_groups_list = node.subNodes(node.root()).filter(function(x){ return node.isGroup(x) && /BG/.test(node.getName(x))});
+	
+	
 	//disconecta o bg caso precise
 	if(disable_psd_nodes){
 		disable_bg();
 	}
 	
 	for(var i=0; i<reads.length; i++){
+		var nodeName = node.getName(reads[i]);
 		var elementId = node.getElementId(reads[i]);
 		//if node drawing has no valid drawings in the library
 		if(Drawing.numberOf(elementId) == 0){
 			continue;
 		}
-
+		
+		//test if is a bg node
+		var is_bg_node = false;	
+		bg_groups_list.forEach(function(item){
+			if(reads[i].indexOf(item + "/") != -1){
+				is_bg_node = true;
+				Print(" -- bg node found: " + reads[i]);
+			}
+		});
+		
 		var filePath = Drawing.filename(elementId, Drawing.name(elementId, 0));
 		if(BD1_file_extension(filePath) == "psd"){
 			
@@ -33,15 +48,36 @@ function get_psd_anim_data(disable_psd_nodes){
 					"layers": {}
 				};
 			}
-			psd_files_data[psd_name]["layers"][node.getName(reads[i])] = get_node_anim_data(reads[i], isNodeVisible(reads[i]));
-			
+			psd_files_data[psd_name]["layers"][nodeName] = get_node_anim_data(reads[i], isNodeVisible(reads[i]));
+			continue;
+		} 
+		
+		if(is_bg_node){//if not psd, test if is a BG node
+			var tvg_name = BD1_fileBasename(filePath).split(".")[0];
+			var bg_name = tvg_name.replace(nodeName + "-", "");
+			if(!(bg_name in bg_groups_data)){
+				bg_groups_data[bg_name] = {
+					"psd_file": "possible PSD name: " + bg_name + ".psd",
+					"layers": {}
+				};
+			}
+			bg_groups_data[bg_name]["layers"][nodeName] = get_node_anim_data(reads[i], isNodeVisible(reads[i]));
 		}
 	}
-
+	
+	//write psd data jsons
 	Print("PSD file(s) found in the scene: " + Object.keys(psd_files_data).length);
 	for(psd in psd_files_data){
 		var jsonFile = output_folder + psd + ".json";
 		BD1_WriteJsonFile(psd_files_data[psd], jsonFile);
+		counter++;
+	}
+
+	//write bg files jsons
+	Print("BG file(s) found in the scene: " + Object.keys(bg_groups_data).length);
+	for(bg in bg_groups_data){
+		var jsonFile = output_folder + bg + ".json";
+		BD1_WriteJsonFile(bg_groups_data[bg], jsonFile);
 		counter++;
 	}
 

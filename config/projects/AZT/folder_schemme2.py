@@ -116,11 +116,9 @@ class FolderManager(object):
         ----------
         RETURN: string
         """
-        print "STEPS:" + str(self.step.keys())
         if step not in self.step:
             print "[get_scene_path]ERROR! Parametro 'step nao aceito para cenas!"
             return False
-        print scene_name
         ep = scene_name.split('_')[1]
         step_folder = self.step[step]["folder_name"]
         return os.path.join(self.get_episodes(),
@@ -128,7 +126,6 @@ class FolderManager(object):
                             "05_CENAS",
                             step_folder,
                             scene_name).replace("\\", "/")
-
 
     def get_publish_folder(self,ep,step,filesystem="server"):
 

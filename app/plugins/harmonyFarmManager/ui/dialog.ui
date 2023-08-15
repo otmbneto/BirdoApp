@@ -214,6 +214,65 @@ QRadioButton::indicator::checked::disabled {
 QRadioButton::indicator::unchecked::disabled {
 	border: 2px solid gray;
 	background-color: rgb(150, 150, 150);
+}
+
+QComboBox {
+	color: black;
+    border: 2px solid white;
+    border-radius: 6px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: lightgray;
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    width: 20px;
+	background-color: rgb(194, 194, 194);
+    border-left-width: 2px;
+    border-left-color: white;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox:hover{
+    border: 2px solid #05B8CC;
+    color: gray;
+}
+
+QComboBox QAbstractItemView{
+    border: 2px solid white;
+	border-radius: 10px;
+    color: gray;
+	background-color: lightgray;
+    selection-background-color: #05B8CC;
+	selection-color: white;
+	padding: 3px 3px ;
+}
+
+QComboBox:disabled{
+	color: rgb(250, 150, 120);
+	background-color: rgb(220, 190, 190);
+    border-color: lightgray;
+}
+
+QComboBox::drop-down:disabled {
+	background-color: gray;
+    border-left-color: rgb(150, 150, 150);
+}
+
+QComboBox:disabled{
+	color: rgb(100, 100, 100);
+	background-color: gray;
+    border: 2px solid rgb(100, 100, 100);
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
@@ -316,64 +375,7 @@ QRadioButton::indicator::unchecked::disabled {
         <item row="0" column="1">
          <widget class="QComboBox" name="comboScript">
           <property name="styleSheet">
-           <string notr="true">QComboBox {
-	color: black;
-    border: 2px solid white;
-    border-radius: 6px;
-    padding: 1px 18px 1px 3px;
-    min-width: 6em;
-}
-
-QComboBox:!editable, QComboBox::drop-down:editable {
-     background: lightgray;
-}
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 3px;
-    padding-left: 4px;
-}
-
-QComboBox::drop-down {
-    width: 20px;
-	background-color: rgb(194, 194, 194);
-    border-left-width: 2px;
-    border-left-color: white;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox:hover{
-    border: 2px solid #05B8CC;
-    color: gray;
-}
-
-QComboBox QAbstractItemView{
-    border: 2px solid white;
-	border-radius: 10px;
-    color: gray;
-	background-color: lightgray;
-    selection-background-color: #05B8CC;
-	selection-color: white;
-	padding: 3px 3px ;
-}
-
-QComboBox:disabled{
-	color: rgb(250, 150, 120);
-	background-color: rgb(220, 190, 190);
-    border-color: lightgray;
-}
-
-QComboBox::drop-down:disabled {
-	background-color: gray;
-    border-left-color: rgb(150, 150, 150);
-}
-
-QComboBox:disabled{
-	color: rgb(100, 100, 100);
-	background-color: gray;
-    border: 2px solid rgb(100, 100, 100);
-}</string>
+           <string notr="true"/>
           </property>
          </widget>
         </item>
