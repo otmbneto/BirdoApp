@@ -409,7 +409,7 @@ class uiItem(QtGui.QGroupBox):
         print "SCRIPT PATH: " + str(script)
         self.incrementProgress(5)
         result = self.compile_script(script,xstage)
-
+        server_path = self.getAssetLibPath(asset_name,project_data) #MUDAR ESSA LINHA PRA PEGAR O CAMINHO DO ASSET LIB
         saveTPL = os.path.join(local_scene,"saveTPL.JSON")
         if os.path.exists(saveTPL):
             server_data = os.path.join(server_path,"DATA")
@@ -426,7 +426,6 @@ class uiItem(QtGui.QGroupBox):
         print "A total of {0} thumbnails found!".format(len(thumbnails))
         self.incrementProgress(20)
         ######################################################################################################
-        server_path = self.getAssetLibPath(asset_name,project_data) #MUDAR ESSA LINHA PRA PEGAR O CAMINHO DO ASSET LIB
         print "SERVER PATH: " + server_path
         print "THUMBS: " + os.path.join(server_path,"THUMBS")
         self.incrementProgress(10)
