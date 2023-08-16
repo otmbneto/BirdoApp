@@ -476,6 +476,39 @@ function BD2_copyAtributes(node1, node2, only_columns){
 	Print(" -- att copied " + counter);
 }
 
+
+/*conecta o node dado, abaixo do node selecionado.
+@selectedNode => selected Node
+@nodeToConnect => node a ser conectado
+@ports => obejto no formato {i:0, o:0} sendo i = input e o = output
+*/
+function BD2_ConnectNodeUnder(selectedNode, nodeToConnect, ports){
+	//ports to connect
+	if(!ports){
+		ports = {"i" : 0, "o": 0};
+	}
+	// getCoordinates
+	var nodeRect = BD2_createRectCoord(selectedNode);
+	var compInfo = node.dstNodeInfo(selectedNode, 0, 0);
+	if(!compInfo){
+		var coordX =  nodeRect.center().x() - (node.width(nodeToConnect)/2);
+		var coordY = nodeRect.y() + 50;
+	} else {
+		var compRect = BD2_createRectCoord(compInfo.node);
+		var finalRect = nodeRect.united(compRect);
+		var coordX =  finalRect.center().x() - (node.width(nodeToConnect)/2);
+		var coordY = finalRect.center().y();
+		//unlink selected to original comp
+		node.unlink(compInfo.node, compInfo.port);
+		//link node to comp
+		node.link(nodeToConnect, ports.o, compInfo.node, compInfo.port, false, true);
+	}
+	//link selected node
+	node.link(selectedNode, 0, nodeToConnect, ports.i, false, false);
+	//update node coordinates
+	node.setCoord(nodeToConnect, coordX, coordY, 1);
+}
+
 /*Adiciona um node embaixo ao node selecionado 
 @nodeSel => selected Node
 @nodeName => new node name
