@@ -59,10 +59,10 @@ function RectObject(box){
 	}
 	
 	this.toOGL = function(){
-		if(this.current_state != 'fields'){
-			MessageLog.trace("State must be 'fields' to convert to OGL!");
-			return;
-		}
+		//if(this.current_state != 'fields'){
+		//	MessageLog.trace("State must be 'fields' to convert to OGL!");
+		//	return;
+		//}
 		if(this.ogl){
 			MessageLog.trace("already is OGL!");
 			return;
@@ -75,10 +75,10 @@ function RectObject(box){
 	}
 
 	this.fromOGL = function(){
-		if(this.current_state != 'fields'){
-			MessageLog.trace("State must be 'fields' to convert to OGL!");
-			return;
-		}
+		//if(this.current_state != 'fields'){
+		//	MessageLog.trace("State must be 'fields' to convert to OGL!");
+		//	return;
+		//}
 		if(!this.ogl){
 			MessageLog.trace("already is not OGL!");
 			return;
@@ -141,7 +141,7 @@ function RectObject(box){
 		this.y1 += y;
 	}
 	
-	this.scale = function(x, y, pivot){
+	this.scale = function(x, y, pivot){//TODO: checar se essa funcao é correta
 		var new_w = this.width() * x;
 		var new_h = this.height() * y;
 		var x0Distance = ((pivot.x - this.x0)/this.width());
@@ -155,6 +155,20 @@ function RectObject(box){
 		this.y1 = this.y1 + ((new_h - this.height())*y1Distance);
 	}
 	
+	this.isEqual = function(rect2){
+		if(this.current_state == "fields"){
+			rect2.toFields();
+		} else {
+			rect2.toDrawing();	
+		}
+		if(this.ogl){
+			rect2.toOGL();
+		} else {
+			rect2.fromOGL();	
+		}
+		return this.x0 == rect2.x0 && this.x1 == rect2.x1 && this.y0 == rect2.y0 && this.y1 == rect2.y1;		
+	}
+	
 	this.unite = function(rect2){
 		this.x0 = (this.x0 > rect2.x0) ? rect2.x0 : this.x0;
 		this.x1 = (this.x1 < rect2.x1) ? rect2.x1 : this.x1;		
@@ -163,13 +177,15 @@ function RectObject(box){
 	}
 	
 	this.multiplyMatrix = function(matrix){
+		//change to ogl
+		this.toOGL();
 		var top0 = matrix.multiply(this.topLeftCorner());
 		var bottom1 = matrix.multiply(this.bottomRigthCorner());
 		this.x0 = top0.x;
 		this.x1 = bottom1.x;
 		this.y0 = bottom1.y;
 		this.y1 = top0.y;
+		this.fromOGL();
 	}
-
 }
 exports.RectObject = RectObject;
