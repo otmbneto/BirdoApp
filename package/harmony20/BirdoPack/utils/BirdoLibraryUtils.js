@@ -492,6 +492,7 @@ function edit_item(self, lib_path, item_data, user_data){
 	}
 	
 	function get_deleted_copy_name(){//returns the name of the backup zip to create
+		var item_name = BD1_fileBasename(item_tpl).replace(".zip", "");
 		var deleted_folder = BD1_dirname(item_tpl) + "/.deleted/";
 		if(!BD1_DirExist(deleted_folder)){//cretates .deleted folder for backup
 			if(!BD1_createDirectoryREDE(deleted_folder)){
@@ -499,8 +500,8 @@ function edit_item(self, lib_path, item_data, user_data){
 				return false;
 			}
 		}
-		var list_files = BD1_ListFiles(deleted_folder, "*.zip").filter(function(x){ return x.replace(/_\d\.zip$/, "") == item});
-		return deleted_folder + item + "_" + (list_files.length + 1);
+		var list_files = BD1_ListFiles(deleted_folder, "*.zip").filter(function(x){ return x.replace(/_\d\.zip$/, "") == item_name});
+		return deleted_folder + item_name + "_" + (list_files.length + 1) + ".zip";
 	}
 }
 exports.edit_item = edit_item;
