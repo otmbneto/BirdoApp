@@ -348,7 +348,7 @@ QPushButton:pressed {
           <string notr="true">color: gray;</string>
          </property>
          <property name="text">
-          <string>v.1.0</string>
+          <string>v.1.1</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>

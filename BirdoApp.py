@@ -163,7 +163,6 @@ class BirdoApp(QtGui.QMainWindow):
             username = next(iter(user_data))
         user_type = user_data[username][self.project_data["prefix"]]["user_type"]
         print user_type
-
         icon = os.path.join(os.path.dirname(path),"plugin.ico").replace("\\","/")
         print os.path.exists(path) and os.path.exists(icon)
         return os.path.exists(path) and os.path.exists(icon) and user_type in permissions
