@@ -1,0 +1,937 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>368</width>
+    <height>561</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Birdo Line Control</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{	
+	background-color: gray;
+}
+
+QLabel{
+	color: white;
+}
+
+QLabel:disabled {
+	color: lightgray;
+}
+
+QGroupBox {
+	color: white;
+}
+
+QGroupBox:disabled {
+	color: lightgray;
+}
+
+QRadioButton {
+	color: white;
+    spacing: 5px;
+}
+
+QRadioButton::indicator::unchecked{ 
+	border: 2px solid white;
+	border-radius: 6px;
+	background-color: white;
+	width: 10px;
+	height: 10px;
+}
+
+QRadioButton::indicator::checked{
+	border: 2px solid lightgray;
+	border-radius: 6px;
+	background-color: rgb(68, 68, 68);
+	width: 12px;
+	height: 12px;
+}
+
+QRadioButton:disabled{
+	color: rgb(250, 150, 120);
+}
+
+QRadioButton::indicator:disabled{
+	background-color: rgb(214, 214, 214);
+}
+
+QSpinBox {
+	color: black;
+    border: 2px solid white;
+	border-radius: 6px;
+	background-color: lightgray;
+}
+
+QSpinBox::up-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-bottom: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QSpinBox::down-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-up: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QSpinBox:hover{
+    border: 2px solid #05B8CC;
+    color: white;
+}
+
+QSpinBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QCheckBox {
+	color: white;
+    spacing: 5px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid white;
+	border-radius: 2px;
+	background-color: lightgray;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 1px;
+	background-color: rgb(68, 68, 68);
+}
+
+QCheckBox:disabled{
+	color: rgb(250, 150, 120);
+}
+
+QCheckBox::indicator:checked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QDoubleSpinBox {
+	color: black;
+    border: 2px solid white;
+	border-radius: 6px;
+	background-color: lightgray;
+}
+
+QDoubleSpinBox::up-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-bottom: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QDoubleSpinBox::down-button {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left: 2px solid darkgray;
+	border-up: 2px solid darkgray;
+    border-top-right-radius: 3px; /* same radius as the QSpinBox */
+    border-bottom-right-radius: 3px;
+}
+
+QDoubleSpinBox:hover{
+    border: 2px solid #05B8CC;
+    color: white;
+}
+
+QDoubleSpinBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QComboBox {
+	color: black;
+    border: 2px solid white;
+    border-radius: 6px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}
+
+QComboBox::down-arrow {
+      image: null;
+}
+
+QComboBox:editable{
+	background: rgb(212, 210, 229);
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: lightgray;
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    width: 15px;
+	background-color: rgb(194, 194, 194);
+    border-left-width: 2px;
+    border-left-color: white;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox:hover{
+    border: 2px solid #05B8CC;
+    color: gray;
+}
+
+QComboBox QAbstractItemView{
+    border: 2px solid white;
+	border-radius: 10px;
+    color: gray;
+	background-color: lightgray;
+    selection-background-color: #05B8CC;
+	selection-color: white;
+	selection-item-border-radius: 2px;
+	padding: 3px 3px ;
+}
+
+QComboBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: gray;
+}
+
+QScrollArea{
+	border-radius: 5px;
+	border: none;
+}
+
+QScrollBar::handle {
+	border-radius: 10px;
+ 	border: none;
+	background-color: #05B8CC;
+	width: 5px;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-page {
+    background-color: transparent;
+	border: none;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: transparent;
+	color: none;
+	image: none;
+}
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controla as linhas da selecao. Escolha RIG ou SELECTED NODE para afetar o rig inteiro do node selecionado, ou somente ele.&lt;/p&gt;&lt;p&gt;OBS: Somente sera possivel ver as mudancas nos valores aqui escolhidos no RenderView mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Birdo Line Control</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_version">
+       <property name="text">
+        <string>v.0.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checEnable">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ativa e desativa o controle de linha. Se esta opcao for DESATIVADA, os nodes selecionados NAO iram controlar a linha, e usaram as espessuras de linha de origem de cada desenho.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Enable Line Control</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gb_node">
+     <property name="title">
+      <string>Apply to...</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="1" column="0" colspan="2">
+       <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,2,0">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Rig:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLabel" name="labelRigGroup">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Caminho do node de destino</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+	color: rgb(80, 80, 80);
+	background-color: lightgray;
+	padding-left: 5px;
+	border-radius: 3px;
+	border: null;
+}
+
+QLabel::hover {
+	border: 2px solid #05B8CC;
+    color: white;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>Top/RigPath</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Selected:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="labelSelection">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Caminho do node de destino</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+	color: rgb(80, 80, 80);
+	background-color: lightgray;
+	padding-left: 5px;
+	border-radius: 3px;
+	border: null;
+}
+
+QLabel::hover {
+	border: 2px solid #05B8CC;
+    color: white;
+}</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>[0] Nodes Selected</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="radioRig">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Se a selecao de nodes estiver dentro de um grupo, ele reconhece todos nodes de drawings desse grupo (Rig)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Rig Group</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="radioSelection">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Afeta somente os nodes selecionados e seus subnodes se houver grupos nessa selecao.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Only Selected Nodes</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gb_options">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Options...</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="toolTip">
+           <string>Opcoes para controle de linha dos nodes com deform</string>
+          </property>
+          <property name="text">
+           <string>Deformation:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,2,1">
+        <item row="0" column="0" rowspan="3">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>68</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QCheckBox" name="checkDefLine">
+          <property name="toolTip">
+           <string>Usar a opcao de melhorar a qualidade de linha nos desenhos com defomation</string>
+          </property>
+          <property name="text">
+           <string>Use Fix Defformation Lines</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Smoothing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QSpinBox" name="spinSmooth">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Smooth value do controle de linha com deformation</string>
+          </property>
+          <property name="maximum">
+           <number>10</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Fix Value</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QDoubleSpinBox" name="doubleSpinFix">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>valor ca correcao das linhas com Deformation</string>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>3.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,1">
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Line Control:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="radioDefault">
+          <property name="toolTip">
+           <string>Usar valor calculado para cena</string>
+          </property>
+          <property name="text">
+           <string>Use Defalt</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="3">
+         <widget class="QSlider" name="slidesLineValue">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Value slider para escolher valor da linha</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: rgb(220, 220, 220);
+}
+
+QSlider::handle:horizontal {
+    background: rgb(150, 160, 160);
+    border: 1px solid #5c5c5c;
+    width: 18px;
+    margin: -4px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 3px;
+}
+
+QSlider::groove:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QSlider::handle:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}</string>
+          </property>
+          <property name="maximum">
+           <number>99</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+          <property name="pageStep">
+           <number>10</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="tickPosition">
+           <enum>QSlider::NoTicks</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QRadioButton" name="radioChoose">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Escolher valor</string>
+          </property>
+          <property name="text">
+           <string>Choose</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" rowspan="2">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>17</width>
+            <height>71</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_Value">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Line value to apply</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+	color: rgb(49, 49, 49);
+	background-color: darkgray;
+	border-radius: 3px;
+	border: solid rgb(200,200,200) 2px;
+}
+
+QLabel:disabled {
+	color: rgb(250, 149, 149);
+	background-color: rgb(250, 200, 200);;
+
+}</string>
+          </property>
+          <property name="text">
+           <string>0.5</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <widget class="QComboBox" name="comboScale"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Scale Style:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="3">
+         <widget class="QCheckBox" name="checkBAnimLine">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;this option create keyframes over the timeline, adapting the line value based on the camera and rig scale values.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Change Line Over Time</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,2">
+     <item>
+      <widget class="QCheckBox" name="checkPreview">
+       <property name="text">
+        <string>Close After Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="previewLine">
+       <property name="toolTip">
+        <string>preview de espessura da linha (meramente ilustrativo)</string>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QProgressBar {
+	color: white;
+	padding: 2 2px;
+	border: null;
+}
+
+QProgressBar::chunk {
+	background-color: #05B8CC;
+	border-radius: 3px;
+}</string>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="format">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>@leobazao - Birdo 2022</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="applyButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Apply values to selected nodes</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+}
+
+QPushButton:pressed {
+	color: white;
+	border-color: white;
+    background-color: #05B8CC;
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}
+
+QPushButton::disabled {
+	border-color: darkgray;
+	color: gray;
+}</string>
+         </property>
+         <property name="text">
+          <string>Apply</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cancelButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Cancel</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+}
+
+QPushButton:pressed {
+	color: red;
+    background-color: rgb(255, 196, 197);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}</string>
+         </property>
+         <property name="text">
+          <string>Close</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <zorder>gb_options</zorder>
+  <zorder>checEnable</zorder>
+  <zorder>gb_node</zorder>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

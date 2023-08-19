@@ -18,6 +18,7 @@ from birdo_json import read_json_file, write_json_file
 from birdo_zip import extract_zipfile
 from MessageBox import CreateMessageBox
 from nextcloud_server import NextcloudServer
+from harmony_utils import ToonBoomHarmony
 
 app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.append(app_root)
@@ -46,20 +47,37 @@ def get_most_recent_pack(server_packages_list):
 
 def install_harmony_package_config(proj_data):
     """instala o pacote de scripts para o harmony e copia o menu.xml para a pasta correspondente!"""
+    
+    discord_name = proj_data["user_data"]["current_user"]
     # GAMBS PARA EVITAR PERDER ALTERACEOS NO PACKAGE DO LEO
-    if proj_data["user_data"]["current_user"] == "LeoBazilio#2873":
+    if discord_name == "LeoBazilio#2873":
         print "gambs Leo para nao perder scripts.."
         return
 
+    project_prefix = proj_data["prefix"]
+    user_installation = proj_data["user_data"][discord_name][project_prefix]["harmony_installation"]
+
+    print "USER_INSTALLATION: " + user_installation
+
     # HARMONY PATHS
-    harmony_script_path = proj_data["harmony"]["paths"]["scripts"]
-    harmony_version = str(proj_data["harmony"]["version"].split(".")[0])
+
+    if "harmony_installation" in proj_data["user_data"][discord_name][project_prefix].keys():
+        harmony = ToonBoomHarmony(proj_data["user_data"][discord_name][project_prefix]["harmony_installation"])
+        harmony_script_path = harmony.getScriptsPath()
+        harmony_version = harmony.getVersion()
+    else:
+        harmony_script_path = proj_data["harmony"]["paths"]["scripts"]
+        harmony_version = str(proj_data["harmony"]["version"].split(".")[0])
 
     # HARMONY BIRDOPACK PATH
     harmony_script_package_path = os.path.join(harmony_script_path, "packages", "BirdoPack")
 
     # PACKAGE BIRDOAPP PATH
     birdo_app_package_root = os.path.join(app_root, 'package', ('harmony' + harmony_version))
+    if not os.path.exists(birdo_app_package_root):
+        print "[ERROR] Package for this harmony version doesn't exist: " + harmony_version
+        return
+        
     birdo_app_package = os.path.join(birdo_app_package_root, 'BirdoPack')
     birdo_app_includes = os.path.join(birdo_app_package_root, 'includes')
 
@@ -83,7 +101,6 @@ def install_harmony_package_config(proj_data):
     if not os.path.exists(harmony_script_path):
         os.makedirs(harmony_script_path)
         print "script folder created: {0}".format(harmony_script_path)
-
 
     # UPDATE DO PACKAGE
     if os.path.exists(harmony_script_package_path):
@@ -176,6 +193,7 @@ def main_update(proj_data, main_app=None):
     print "main_update"
     main_app.ui.progressBar.setValue(1)
     result = pull_remote_repo(main_app = main_app)
+
     main_app.ui.progressBar.setValue(2)
     if result != 0:
         print "something went wrong with update"
