@@ -74,6 +74,10 @@ def install_harmony_package_config(proj_data):
 
     # PACKAGE BIRDOAPP PATH
     birdo_app_package_root = os.path.join(app_root, 'package', ('harmony' + harmony_version))
+    if not os.path.exists(birdo_app_package_root):
+        print "[ERROR] Package for this harmony version doesn't exist: " + harmony_version
+        return
+        
     birdo_app_package = os.path.join(birdo_app_package_root, 'BirdoPack')
     birdo_app_includes = os.path.join(birdo_app_package_root, 'includes')
 
@@ -97,7 +101,6 @@ def install_harmony_package_config(proj_data):
     if not os.path.exists(harmony_script_path):
         os.makedirs(harmony_script_path)
         print "script folder created: {0}".format(harmony_script_path)
-
 
     # UPDATE DO PACKAGE
     if os.path.exists(harmony_script_package_path):

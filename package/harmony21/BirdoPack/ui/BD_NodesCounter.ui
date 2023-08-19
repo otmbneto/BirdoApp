@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>387</width>
+    <height>381</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Nodes Counter</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLabel {
+	color: lightgray;
+	border: 1px solid darkgray;
+	border-radius: 5px;
+}
+
+QLabel::disabled {
+	color: darkgray;
+}
+
+QWidget{
+	background-color: gray;
+}
+
+QGroupBox {
+	color: lightgray;
+	border: null;
+}
+
+QGroupBox::indicator:unchecked {
+    border: 2px solid white;
+	border-radius: 2px;
+	background-color: lightgray;
+}
+
+QGroupBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 1px;
+	background-color: rgb(68, 68, 68);
+}
+
+
+QGroupBox::disabled{
+	color: lightgray;
+}
+
+QGroupBox::indicator:unchecked:disabled {
+    border: 2px solid darkgray;
+	background-color: darkgray;
+}
+
+QScrollBar::handle {
+	border-radius: 5px;
+ 	border: 2px solid lightgray;
+	background-color: gray;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar::sub-page {
+    background-color: rgb(86, 86, 86);
+	border: none;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: none;
+	color: none;
+}
+
+QTreeWidget {
+    color: lightgray;
+    background-color: rgb(100, 100, 100);
+	border-radius: 10px;
+	padding: 5px;
+}
+
+QTreeWidget::disabled {
+    background-color: rgb(120, 110, 110);
+}
+
+QTreeWidget::item:hover {
+	color: rgb(80, 64, 44);
+    background: #05B8CC;
+    border: white;
+}
+
+QTreeWidget::item:selected {
+	color: rgb(80, 25, 44);
+	border: none;
+	background-color: rgb(79, 255, 52);
+}
+
+QTreeWidget::item:selected:active{
+	color: rgb(80, 64, 44);
+    background-color: rgb(187, 240, 255);
+	border: gray;
+	padding-left: 5px;
+}
+
+QTreeWidget::item:selected:!active {
+    background: rgb(91, 174, 181);
+	border: none;
+}
+
+QHeaderView::section {
+    background-color: lightgray;
+    color: gray;
+    padding-left: 4px;
+    border: none;
+	border-radius: 3px;
+}
+
+QHeaderView::section:checked{
+    background-color: red;
+}
+
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border: null;</string>
+       </property>
+       <property name="text">
+        <string>Nodes Counter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelVersion">
+       <property name="styleSheet">
+        <string notr="true">border: null;</string>
+       </property>
+       <property name="text">
+        <string>v2.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout" columnstretch="0,2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <property name="text">
+        <string> GROUP NODE:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="labelGroupNode">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <property name="text">
+        <string> TOTAL NODES: </string>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <property name="indent">
+        <number>-1</number>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="labelTotal">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Types Counter</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="topMargin">
+       <number>20</number>
+      </property>
+      <item>
+       <widget class="QTreeWidget" name="treeWidget">
+        <property name="indentation">
+         <number>10</number>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <attribute name="headerDefaultSectionSize">
+         <number>200</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Count</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="styleSheet">
+      <string notr="true">border: null;</string>
+     </property>
+     <property name="text">
+      <string>@leobazao 2022</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="buttonClose">
+     <property name="minimumSize">
+      <size>
+       <width>84</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+	color: rgb(72, 72, 72);
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: lightgray;
+    min-width: 80px;
+}
+
+QPushButton:pressed {
+	color: red;
+    background-color: rgb(255, 196, 197);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: black;
+}</string>
+     </property>
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

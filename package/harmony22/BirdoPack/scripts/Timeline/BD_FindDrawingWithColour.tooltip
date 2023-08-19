@@ -1,0 +1,5 @@
+BD_FindDrawingWithColour
+Use este Script para achar quais desenhos na cena
+contem a cor selecionada na janela Colour
+OBS:. faca a operacao em um frame vazio!
+Pois ele vai mudar a exposicao desses desenhos 
