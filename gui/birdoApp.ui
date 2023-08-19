@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
+    <width>440</width>
     <height>752</height>
    </rect>
   </property>
@@ -605,7 +605,7 @@ QScrollBar:arrow{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -665,6 +665,9 @@ QScrollBar:arrow{
             </rect>
            </property>
            <layout class="QFormLayout" name="formLayout">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="username_title">
               <property name="sizePolicy">
@@ -1002,103 +1005,14 @@ QPushButton:pressed {
               </property>
              </widget>
             </item>
-            <item row="10" column="0">
-             <widget class="QLabel" name="harmony_label">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
+            <item row="11" column="0">
+             <widget class="QLabel" name="harmony_versions_lbl">
               <property name="text">
-               <string>Harmony folder:</string>
+               <string>Harmony Versions:</string>
               </property>
              </widget>
             </item>
-            <item row="10" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QLineEdit" name="harmony_folder_line">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="toolTip">
-                 <string>Ecolha o folder da instalacao NAO padrao do HARMONY:
-EX: Escolha a pasta com o nome de:
-'Toon Boom Harmony 20 Premium' para a versao 20</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="placeholderText">
-                 <string>Harmony Installation Folder...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="harmony_folder_button">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>40</width>
-                  <height>40</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Caso o Harmony esteja instalado num folder NAO padrao, informe o folder da instalacao!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-	background: none;
-	border: 2px solid #666666;
-	border-radius: 5px;	
-}
-
-QPushButton:hover {
-	background-color: #777777;
-	border: none;
-}
-
-QPushButton:pressed {
-	background-color: rgb(90, 90, 90);
-	border-top: 2px solid #444444;
-	border-left: 2px solid #444444;
-	border-bottom: none;
-	border-right: none;
-}</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="11" column="1">
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>130</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="12" column="1">
+            <item row="14" column="1">
              <widget class="QPushButton" name="update_button">
               <property name="enabled">
                <bool>false</bool>
@@ -1255,6 +1169,108 @@ QScrollBar:arrow{
               </property>
              </widget>
             </item>
+            <item row="11" column="1">
+             <widget class="QComboBox" name="harmony_versions"/>
+            </item>
+            <item row="12" column="0">
+             <widget class="QLabel" name="harmony_label">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Harmony folder:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLineEdit" name="harmony_folder_line">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Ecolha o folder da instalacao NAO padrao do HARMONY:
+EX: Escolha a pasta com o nome de:
+'Toon Boom Harmony 20 Premium' para a versao 20</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="placeholderText">
+                 <string>Harmony Installation Folder...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="harmony_folder_button">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>30</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Caso o Harmony esteja instalado num folder NAO padrao, informe o folder da instalacao!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QPushButton {
+	background: none;
+	border: 2px solid #666666;
+	border-radius: 5px;	
+}
+
+QPushButton:hover {
+	background-color: #777777;
+	border: none;
+}
+
+QPushButton:pressed {
+	background-color: rgb(90, 90, 90);
+	border-top: 2px solid #444444;
+	border-left: 2px solid #444444;
+	border-bottom: none;
+	border-right: none;
+}</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="13" column="0" colspan="2">
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>100</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
           </widget>
          </widget>
@@ -1351,7 +1367,7 @@ QProgressBar::chunk{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>420</width>
+     <width>440</width>
      <height>26</height>
     </rect>
    </property>

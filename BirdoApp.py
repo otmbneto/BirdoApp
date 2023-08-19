@@ -7,6 +7,7 @@ from app.utils.birdo_json import read_json_file
 from app.utils.birdo_json import write_json_file,write_json_file_from_string
 from app.utils.check_updates import main_update,first_update,rev_parse,fix_old_repos
 from app.utils.system import SystemFolders, get_short_path_name
+from app.utils.harmony_utils import *
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import sys
@@ -128,6 +129,7 @@ class BirdoApp(QtGui.QMainWindow):
         print self.project_data
         if not self.project_data:
             MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
+            self.initProjectPage()
         self.setUI()
         self.fill_login_page()      
         self.splash_page()
@@ -220,17 +222,28 @@ class BirdoApp(QtGui.QMainWindow):
         loader = QtUiTools.QUiLoader()
         return loader.load(ui_file)
 
+    def getHarmonyInstallations(self):
+
+        installations = [ToonBoomHarmony(h) for h in getAvailableHarmonyVersions() if ToonBoomHarmony(h).isInstalled()]
+        return installations
+
+
     def setUI(self):
 
         roles_list = []
         harmony_installation = False
         if self.project_data:
-
             if "server" in self.project_data.keys():
                 self.isCloudProject =  self.project_data["server"]["type"] == "nextcloud" if "type" in self.project_data["server"].keys() else False
             roles_list = self.project_data["roles"] if "roles" in self.project_data.keys() else []
             roles_list.insert(0, "")
             harmony_installation = not self.project_data["harmony"]["installation_default"]
+
+
+        harmony_installations = self.getHarmonyInstallations()
+        for harmony in harmony_installations:
+            self.ui.harmony_versions.addItem(harmony.getName(),harmony)
+            harmony_installation = False
 
         print "Is cloud project:" + str(self.isCloudProject)
         # SETS FOLDERS BUTTON ICON
@@ -448,6 +461,10 @@ class BirdoApp(QtGui.QMainWindow):
         # ADDSS HARMONY ALTERNATIVE INSTALLATION PATH IF NECESSARY
         if not self.project_data["harmony"]["installation_default"]:
             new_user[self.project_data["prefix"]]["harmony_installation"] = str(self.ui.harmony_folder_line.text())
+        else:
+            print self.ui.harmony_versions.itemData(self.ui.harmony_versions.currentIndex()).getFullpath()
+            new_user[self.project_data["prefix"]]["harmony_installation"] = str(self.ui.harmony_versions.itemData(self.ui.harmony_versions.currentIndex()).getFullpath())
+
         return new_user
 
     def getUserData(self):
