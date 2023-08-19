@@ -39,7 +39,7 @@ function RectObject(box){
 			MessageLog.trace("Current state is already 'drawing'!");
 			return;
 		}
-		this.x0 = this.x0 *this.factor_convert.x;
+		this.x0 = this.x0 * this.factor_convert.x;
 		this.x1 = this.x1 * this.factor_convert.x;
 		this.y0 = this.y0 * this.factor_convert.y;
 		this.y1 = this.y1 * this.factor_convert.y;
@@ -134,14 +134,14 @@ function RectObject(box){
 		return new Point3d(this.x1, this.y0, 0);
 	}
 
-	this.translate = function(x, y){
+	this.translate = function(x, y){//unused (but works)
 		this.x0 += x;
 		this.x1 += x;
 		this.y0 += y;
 		this.y1 += y;
 	}
 	
-	this.scale = function(x, y, pivot){//TODO: checar se essa funcao é correta
+	this.scale = function(x, y, pivot){//UNUSED
 		var new_w = this.width() * x;
 		var new_h = this.height() * y;
 		var x0Distance = ((pivot.x - this.x0)/this.width());
@@ -155,16 +155,24 @@ function RectObject(box){
 		this.y1 = this.y1 + ((new_h - this.height())*y1Distance);
 	}
 	
-	this.isEqual = function(rect2){
-		if(this.current_state == "fields"){
+	this.changeState = function(stateName){//change current state to state name
+		if(stateName == "fields"){
 			rect2.toFields();
-		} else {
+		} else if(stateName == "drawing"){
 			rect2.toDrawing();	
 		}
-		if(this.ogl){
-			rect2.toOGL();
-		} else {
-			rect2.fromOGL();	
+	}	
+	
+	this.isEqual = function(rect2){//compare two rect objects
+		if(this.current_state != rect2.current_state){
+			rect2.changeState(this.current_state);	
+		}
+		if(this.ogl != rect2.ogl){
+			if(this.ogl){
+				rect2.toOGL();
+			} else {
+				rect2.fromOGL();	
+			}
 		}
 		return this.x0 == rect2.x0 && this.x1 == rect2.x1 && this.y0 == rect2.y0 && this.y1 == rect2.y1;		
 	}
@@ -176,15 +184,25 @@ function RectObject(box){
 		this.y1 = (this.y1 < rect2.y1) ? rect2.y1 : this.y1;
 	}
 	
-	this.multiplyMatrix = function(matrix){
+	this.multiplyMatrix = function(matrix){//multiply matrix and give rect new outside box
 		//change to ogl
 		this.toOGL();
+		//multiply matrix to get points values
 		var top0 = matrix.multiply(this.topLeftCorner());
+		var top1 = matrix.multiply(this.topRigthCorner());
+		var bottom0 = matrix.multiply(this.bottomLeftCorner());
 		var bottom1 = matrix.multiply(this.bottomRigthCorner());
-		this.x0 = top0.x;
-		this.x1 = bottom1.x;
-		this.y0 = bottom1.y;
-		this.y1 = top0.y;
+		//create array of values to sort each value
+		var arrayX = [top0.x, top1.x, bottom0.x, bottom1.x];
+		arrayX.sort();
+		var arrayY = [top0.y, top1.y, bottom0.y, bottom1.y];
+		arrayY.sort();
+		//set values
+		this.x0 = arrayX[0];
+		this.x1 = arrayX[arrayX.length-1];
+		this.y0 = arrayY[0];
+		this.y1 = arrayY[arrayY.length-1];
+		//change back to NOT ogl
 		this.fromOGL();
 	}
 }

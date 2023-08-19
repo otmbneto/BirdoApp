@@ -15,15 +15,11 @@ Created:	agosto, 2023;
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
-
-	TODO: Adicionar Progress bar na funcao getTimelineRectPosition()
-
-
 */
 
 
 //cria objeto com info de posicao (rect) para cada frame
-function getTimelineRectPosition(read_list, draw_util){
+function getTimelineRectPosition(read_list, draw_util, useProgressBar){
 	var timeline_data = {
 		is_valid: false,
 		rect_list: []	
@@ -34,8 +30,26 @@ function getTimelineRectPosition(read_list, draw_util){
 		timeline_data["is_valid"] = true;
 		timeline_data["rect_list"].push(rect1);		
 	}
+	
+	//progress bar
+	if(useProgressBar){
+		var progressDlg = new QProgressDialog();
+		progressDlg.setStyleSheet(progressDlg_style);
+		progressDlg.modal = true;
+		progressDlg.open();
+		progressDlg.setRange(2, frame.numberOf());
+	}
+	
 	//loop in frames
 	for(var i=2; i<=frame.numberOf(); i++){
+		if(useProgressBar){
+			progressDlg.setValue(i);			
+			progressDlg.setLabelText("Analizando frame : " + i);
+			if(progressDlg.wasCanceled){
+				MessageBox.information("Cancelado!");
+				return false;
+			}
+		}
 		var rect = getRigCordinatesSelection(read_list, i, draw_util);
 		if(!rect){
 			continue;
@@ -47,7 +61,10 @@ function getTimelineRectPosition(read_list, draw_util){
 			timeline_data["rect_list"].push(rect);		
 		}
 	}
-	return timeline_data;	
+	if(useProgressBar){
+		progressDlg.close();
+	}
+	return timeline_data;
 }
 exports.getTimelineRectPosition = getTimelineRectPosition;
 
@@ -57,14 +74,38 @@ function addPatchFX(selectedNode){
 	var fx_group = node.add(node.root(), "FX_Grad","GROUP", 0, 0, 1);
 	var multiIn = node.getGroupInputModule(fx_group, "Multi-Port-In", 0, -124, 1);
 	var multiOut = node.getGroupOutputModule(fx_group, "Multi-Port-Out", 0, 156, 1);
-	var grad = node.add(fx_group, "Grad", "GRADIENT-PLUGIN", -53, -24, 1);	
+	var grad = node.add(fx_group, "Grad", "GRADIENT-PLUGIN", 73, -48, 1);	
 	var cutter = node.add(fx_group, "Cutter", "CUTTER", 18, 48, 2);
 
 	//link sub nodes
-	node.link(grad, 0, cutter, 1);
-	node.link(multiIn, 0, cutter, 0, true, false);
+	node.link(grad, 0, cutter, 0);
+	node.link(multiIn, 0, cutter, 1, true, false);
 	node.link(multiIn, 1, grad, 0, true, false);
 	node.link(cutter, 0, multiOut, 0, false, true);
+	
+	//invert cutter
+	node.setTextAttr(cutter, "INVERTED", 1, true);
+	
+	//set basic attributes to grad node
+	node.setTextAttr(grad, "Color0.RED", 1, 0);
+	node.setTextAttr(grad, "Color0.GREEN", 1, 0);
+	node.setTextAttr(grad, "Color0.BLUE", 1, 0);
+	//add column to points attributes
+	var col_x0 = column.generateAnonymousName();
+	column.add(col_x0, "BEZIER");
+	node.linkAttr(grad, "0.X", col_x0);
+	
+	var col_y0 = column.generateAnonymousName();
+	column.add(col_y0, "BEZIER");
+	node.linkAttr(grad, "0.Y", col_y0);
+
+	var col_x1 = column.generateAnonymousName();
+	column.add(col_x1, "BEZIER");
+	node.linkAttr(grad, "1.X", col_x1);
+	
+	var col_y1 = column.generateAnonymousName();
+	column.add(col_y1, "BEZIER");
+	node.linkAttr(grad, "1.Y", col_y1);
 	
 	//connect fx group
 	BD2_ConnectNodeUnder(selectedNode, fx_group);
@@ -87,26 +128,32 @@ exports.applyTransformToGradPoints = applyTransformToGradPoints;
 
 //aplicao os valores do rect de selecao ao node gradient no FRAME
 function applyValuesToGradientAtFrame(rect, frame, grad){
-	var att0X = node.getAttr(grad, frame, "0.X");
-	var att0Y = node.getAttr(grad, frame, "0.Y");
+	var column0X = node.linkedColumn(grad, "0.X");
+	column.setKeyFrame(column0X, frame);
+	var column0Y = node.linkedColumn(grad, "0.Y");
+	column.setKeyFrame(column0Y, frame);	
 
-	var att1X = node.getAttr(grad, frame, "1.X");
-	var att1Y = node.getAttr(grad, frame, "1.Y");
-
-	att0X.setValue(rect.center().x);
-	att1X.setValue(rect.center().x);
+	var column1X = node.linkedColumn(grad, "1.X");
+	column.setKeyFrame(column1X, frame);
 	
-	att0Y.setValue(rect.top());
-	att1Y.setValue(rect.bottom());
+	var column1Y = node.linkedColumn(grad, "1.Y");
+	column.setKeyFrame(column1Y, frame);	
+
+	column.setEntry(column0X, 1, frame, rect.center().x);
+	column.setEntry(column1X, 1, frame, rect.center().x);
+
+	column.setEntry(column0Y, 1, frame, rect.top());
+	column.setEntry(column1Y, 1, frame, rect.bottom());
+
 }
 
 //retorna rect de selecao do todos nodes do rig (ou node read) selecionado no frame
 function getRigCordinatesSelection(read_list, atframe, draw_util){
 
 	var rect = null;
-	read_list.forEach(function(item){
+	read_list.forEach(function(item, index){
 		var node_rect = generateDrawingRectPosition(item, atframe, draw_util);
-		if(!rect){
+		if(index == 0){
 			rect = node_rect; 
 			return;
 		}
@@ -121,7 +168,8 @@ function getRigCordinatesSelection(read_list, atframe, draw_util){
 //cria rect do node individual no frame
 function generateDrawingRectPosition(node_path, atframe, draw_util){
 	
-	var general_matrix = node.getMatrix(sel, atframe).multiply(scene.getCameraMatrix(atframe));
+	var node_matrix = node.getMatrix(node_path, atframe);
+
 	var box = getNodeBox(node_path, atframe);
 	if(!box){
 		Print("No drawing box found in node: " + node_path);
@@ -129,10 +177,12 @@ function generateDrawingRectPosition(node_path, atframe, draw_util){
 	}
 	var dRect = new draw_util.RectObject(box);
 	dRect.toFields();
+
+	dRect.multiplyMatrix(node_matrix);
 	
-	dRect.multiplyMatrix(general_matrix);
 	return dRect;
 }
+exports.generateDrawingRectPosition = generateDrawingRectPosition;
 
 function getNodeBox(node_path, atframe){
 	var currentDrawing = Drawing.Key({node : node_path, frame : atframe});
@@ -141,8 +191,10 @@ function getNodeBox(node_path, atframe){
 	};
 	var data = Drawing.query.getData(config); 
 	var box = data.box;
+
 	if(!box || box.hasOwnProperty("empty")){
 		return false;
 	}
-	return box;
+	var is_empty = Object.keys(box).every(function(item){ return box[item] == 0});
+	return is_empty ? false : box;
 }

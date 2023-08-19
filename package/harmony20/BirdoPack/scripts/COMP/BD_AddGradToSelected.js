@@ -14,6 +14,9 @@ Created:	Janeiro, 2022;
 
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
+TODO : 
+ - melhorar a selecao pra aplicar  (achar rigs e jogar grupo dentro do rig com saida nova pra nao pegar a sombra)
+ - fazer funcao pra listar os drawings pra considerar (ignorar drawings mascarados por cutter)
 */
 
 function BD_AddGradToSelected(){
@@ -49,12 +52,13 @@ function BD_AddGradToSelected(){
 	}
 	
 	//get transformation data
-	var transform_data = utils.getTimelineRectPosition(read_list, drawing_util);
+	var transform_data = utils.getTimelineRectPosition(read_list, drawing_util, true);
 	if(!transform_data.is_valid){
 		MessageBox.warning("Nenhuma informação de drawings na seleção!",0,0);
 		Print("No valid transformation!");
 		return;
-	}
+	} 
+	Print(transform_data);
 	
 	//the action!
 	scene.beginUndoRedoAccum("Add Gradient to Selection");
