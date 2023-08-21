@@ -55,9 +55,6 @@ def install_harmony_package_config(proj_data):
         return
 
     project_prefix = proj_data["prefix"]
-    user_installation = proj_data["user_data"][discord_name][project_prefix]["harmony_installation"]
-
-    print "USER_INSTALLATION: " + user_installation
 
     # HARMONY PATHS
 
