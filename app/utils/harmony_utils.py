@@ -55,7 +55,7 @@ class ToonBoomHarmony:
 
 	def findScriptsPath(self):
 
-		appdata = get_short_path_name(os.getenv('APPDATA')) if sys.platform == 'win32' else os.getenv('APPDATA')
+		appdata = self.get_short_path_name(os.getenv('APPDATA')) if sys.platform == 'win32' else os.getenv('APPDATA')
 		version_code = self.version + self.subversion + "0"
 		return os.path.join(appdata,"Toon Boom Animation","Toon Boom Harmony " + self.edition,version_code + "-scripts")
 
