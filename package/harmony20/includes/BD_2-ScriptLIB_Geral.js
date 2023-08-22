@@ -481,8 +481,9 @@ function BD2_copyAtributes(node1, node2, only_columns){
 @selectedNode => selected Node
 @nodeToConnect => node a ser conectado
 @ports => obejto no formato {i:0, o:0} sendo i = input e o = output
+@connect_btween => bool pra determinar se conecta o node entre o node de destino e o selectedNode
 */
-function BD2_ConnectNodeUnder(selectedNode, nodeToConnect, ports){
+function BD2_ConnectNodeUnder(selectedNode, nodeToConnect, ports, connect_btween){
 	//ports to connect
 	if(!ports){
 		ports = {"i" : 0, "o": 0};
@@ -490,7 +491,7 @@ function BD2_ConnectNodeUnder(selectedNode, nodeToConnect, ports){
 	// getCoordinates
 	var nodeRect = BD2_createRectCoord(selectedNode);
 	var compInfo = node.dstNodeInfo(selectedNode, 0, 0);
-	if(!compInfo){
+	if(!compInfo || !connect_btween){
 		var coordX =  nodeRect.center().x() - (node.width(nodeToConnect)/2);
 		var coordY = nodeRect.y() + 50;
 	} else {

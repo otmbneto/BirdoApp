@@ -15,7 +15,8 @@ Created:	Janeiro, 2022;
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 TODO : 
- - melhorar a selecao pra aplicar  (achar rigs e jogar grupo dentro do rig com saida nova pra nao pegar a sombra)
+ - testar matrix de rotacao com quartenion 
+ - testar matrix de deformation
  - fazer funcao pra listar os drawings pra considerar (ignorar drawings mascarados por cutter)
 */
 
@@ -33,40 +34,36 @@ function BD_AddGradToSelected(){
 	var drawing_util_script = projData.paths.birdoPackage + "utils/drawing_api.js";
 	var drawing_util = require(drawing_util_script);
 	
-	
 	var sel = selection.selectedNode(0);
 	if(!sel){
 		MessageBox.warning("Select a node!", 0, 0);
 		return;
 	}
 	
-	//converte selecao pra array
-	if(node.type(sel) == "READ"){
-		var read_list = [sel];
-	} else if(node.isGroup(sel)){
-		var read_list = BD2_ListNodesInGroup(sel, ["READ"], true);
-	} else {
-		MessageBox.warning("Tipo de node invalido!",0,0);
-		Print("Invalid node type!");
-		return false;
-	}
+	//the action!
+	scene.beginUndoRedoAccum("Add Gradient to Selection");
 	
+	//add patch node
+	var patch = utils.add_gradient_patch(sel);
+	if(!patch){
+		scene.cancelUndoRedoAccum();
+		MessageBox.warning("Erro ao adicionar patch!",0,0);
+		return;
+	}
+
 	//get transformation data
-	var transform_data = utils.getTimelineRectPosition(read_list, drawing_util, true);
+	var transform_data = utils.getTimelineRectPosition(patch["read_list"], drawing_util, true);
 	if(!transform_data.is_valid){
+		scene.cancelUndoRedoAccum();
 		MessageBox.warning("Nenhuma informação de drawings na seleção!",0,0);
 		Print("No valid transformation!");
 		return;
 	} 
-	Print(transform_data);
 	
-	//the action!
-	scene.beginUndoRedoAccum("Add Gradient to Selection");
-	
-	var gradient = utils.addPatchFX(sel);
+	var gradient = patch.gradient_node;
 	if(!gradient){
-		MessageBox.warning("ERROR adding gradient node!",0,0);
 		scene.cancelUndoRedoAccum();
+		MessageBox.warning("ERROR! Can't find added gradient node!",0,0);
 		return;
 	}
 	

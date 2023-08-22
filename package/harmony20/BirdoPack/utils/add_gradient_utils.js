@@ -47,6 +47,7 @@ function getTimelineRectPosition(read_list, draw_util, useProgressBar){
 			progressDlg.setLabelText("Analizando frame : " + i);
 			if(progressDlg.wasCanceled){
 				MessageBox.information("Cancelado!");
+				Print("canceled!");
 				return false;
 			}
 		}
@@ -68,10 +69,73 @@ function getTimelineRectPosition(read_list, draw_util, useProgressBar){
 }
 exports.getTimelineRectPosition = getTimelineRectPosition;
 
-//create patch fx with gradient and cutter
-function addPatchFX(selectedNode){
+
+//add fx grad patch group to rig selection return object with nodes data from patch
+function add_gradient_patch(node_selected){
+	
+	//patch data
+	var patch = {
+		is_rig: null,
+		rig_node: node_selected,
+		full_node: null,
+		patch_node: null,
+		gradient_node: null,
+		read_list: []
+	}
+	var add_patch = null;
+	//test node type and add patch acording
+	if(node.type(node_selected) == "READ"){
+		//add patch node 
+		add_patch = addFxGroup(patch["rig_node"]);
+		Print("Selecion is READ node!");
+	} else if(node.isGroup(node_selected)){
+		patch["is_rig"] = true;
+		Print("Selection is group node RIG");
+		//test is is full rig
+		var is_full = /(_v\d+)$/.test(node_selected);
+		
+		if(!is_full){
+			var multiOut = node.getGroupOutputModule(node_selected, "Multi-Port-Out", 0, 0, 0);
+			var connections = node.numberOfInputPorts(multiOut);
+
+			var filter_full = node.subNodes(node_selected).filter(function(item){ return /\w{3}\..+-v\d{2}/.test(node.getName(item));});
+			if(filter_full.length == 0){
+				Print("Can't find full node!");
+				return false;
+			}
+			patch["full_node"] = filter_full[0];
+
+			//add patch node 
+			add_patch = addFxGroup(patch["full_node"]);
+			node.link(add_patch[0], 0, multiOut, connections, true, true);
+		} else {
+			add_patch = addFxGroup(patch["rig_node"]);
+		}
+	} else {
+		Print("Invalid node type selection!");
+		return false;
+	}
+	
+	//update patch object values
+	if(!add_patch){
+		Print("Something went wrong!");
+		return false;
+	}
+	patch["patch_node"] = add_patch[0];
+	patch["gradient_node"] = add_patch[1];
+	if(patch["is_rig"]){
+		patch["read_list"] = patch["full_node"] ? BD2_ListNodesInGroup(patch["full_node"], ["READ"], true) : BD2_ListNodesInGroup(patch["rig_node"], ["READ"], true);
+	} else {
+		patch["read_list"] = [patch.rig_node];
+	}
+	return patch;
+}
+exports.add_gradient_patch = add_gradient_patch;
+
+//create patch fx with gradient and cutter return [0] = patch group [1] = grad node
+function addFxGroup(selectedNode){
 	//add nodes
-	var fx_group = node.add(node.root(), "FX_Grad","GROUP", 0, 0, 1);
+	var fx_group = node.add(node.parentNode(selectedNode), "FX_Grad","GROUP", 0, 0, 1);
 	var multiIn = node.getGroupInputModule(fx_group, "Multi-Port-In", 0, -124, 1);
 	var multiOut = node.getGroupOutputModule(fx_group, "Multi-Port-Out", 0, 156, 1);
 	var grad = node.add(fx_group, "Grad", "GRADIENT-PLUGIN", 73, -48, 1);	
@@ -108,11 +172,10 @@ function addPatchFX(selectedNode){
 	node.linkAttr(grad, "1.Y", col_y1);
 	
 	//connect fx group
-	BD2_ConnectNodeUnder(selectedNode, fx_group);
+	BD2_ConnectNodeUnder(selectedNode, fx_group, false);
 	
-	return grad;
+	return [fx_group, grad];
 }
-exports.addPatchFX = addPatchFX;
 
 //aplica informacao de transformacao em todos frames da timeline_data
 function applyTransformToGradPoints(transform_data, grad_node){
