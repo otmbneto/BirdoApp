@@ -16,7 +16,11 @@ class ToonBoomHarmony:
 
 		self.regex = r'Toon Boom Harmony (\d{2})(\.\d)* (Essentials|Advanced|Premium)'
 		self.installation_path = installation_path
+		print "INSTALLATION PATH:" + installation_path
 		self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith("/") or installation_path.endswith("\\") else os.path.basename(installation_path)
+		
+		print "NAME: " + self.name
+		print re.findall(self.regex,self.name)
 		self.version = re.findall(self.regex,self.name)[0][0]
 		self.subversion = re.findall(self.regex,self.name)[0][1].replace(".","") if len(re.findall(self.regex,self.name)[0][1]) > 0 else "0"
 		self.edition = re.findall(self.regex,self.name)[0][2]
