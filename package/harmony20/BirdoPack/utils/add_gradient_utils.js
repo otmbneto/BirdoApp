@@ -176,6 +176,7 @@ function addFxGroup(selectedNode){
 	
 	return [fx_group, grad];
 }
+exports.addFxGroup = addFxGroup;
 
 //aplica informacao de transformacao em todos frames da timeline_data
 function applyTransformToGradPoints(transform_data, grad_node){
@@ -232,7 +233,7 @@ function getRigCordinatesSelection(read_list, atframe, draw_util){
 function generateDrawingRectPosition(node_path, atframe, draw_util){
 	
 	var node_matrix = node.getMatrix(node_path, atframe);
-
+	var def_matrix_list = getDeformationMatrixList(node_path, atframe);
 	var box = getNodeBox(node_path, atframe);
 	if(!box){
 		Print("No drawing box found in node: " + node_path);
@@ -241,8 +242,13 @@ function generateDrawingRectPosition(node_path, atframe, draw_util){
 	var dRect = new draw_util.RectObject(box);
 	dRect.toFields();
 
-	dRect.multiplyMatrix(node_matrix);
+	//apply deformation matrix to drawing
+	if(def_matrix_list){
+		dRect.applyDeformation(def_matrix_list);
+	}
 	
+	dRect.multiplyMatrix(node_matrix);
+
 	return dRect;
 }
 exports.generateDrawingRectPosition = generateDrawingRectPosition;
@@ -260,4 +266,22 @@ function getNodeBox(node_path, atframe){
 	}
 	var is_empty = Object.keys(box).every(function(item){ return box[item] == 0});
 	return is_empty ? false : box;
+}
+exports.getNodeBox = getNodeBox;
+
+//retorna lista de matrices do deform do drawing (false se nao tiver deform);
+function getDeformationMatrixList(readNode, atFrame){
+	var upnode = node.srcNode(readNode, 0);
+	if(node.isGroup(upnode) && /^(Def)/.test(node.getName(upnode))){
+		var matrices_list = new Array();
+		var multiport = node.getGroupOutputModule(upnode, "Multi-Port-Out", 0, 0, 0);
+		upnode = node.srcNode(multiport, 0);
+		while(node.type(upnode) == "CurveModule" || node.type(upnode) == "OffsetModule"){
+			var def_matrix = deformation.nextDeformMatrix(upnode, atFrame);
+			matrices_list.push(def_matrix);
+			upnode = node.srcNode(upnode, 0);
+		}
+		return matrices_list;
+	}
+	return false;		
 }

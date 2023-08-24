@@ -183,7 +183,34 @@ function RectObject(box){
 		this.y0 = (this.y0 > rect2.y0) ? rect2.y0 : this.y0;
 		this.y1 = (this.y1 < rect2.y1) ? rect2.y1 : this.y1;
 	}
-	
+	//aplica a deformacao do deform no box do drawing (ignora curvas e retorna a posicao dos pontos de deform)
+	this.applyDeformation = function(def_matrix_list){
+		//change to ogl
+		this.toOGL();
+		var deformation_points = [];
+		def_matrix_list.forEach(function(item){
+			deformation_points.push(item.extractPosition());	
+		});
+		//rect corners points
+		var rect_points = [this.topLeftCorner(), this.topRigthCorner(), this.bottomLeftCorner(), this.bottomRigthCorner()];
+		//merged points arrays
+		var points_list = rect_points.concat(deformation_points);
+		
+		//x values array
+		var arrayX = points_list.map(function(item){ return item.x;});
+		//y values array
+		var arrayY = points_list.map(function(item){ return item.y;});
+		arrayX.sort(function(a, b){ return a-b});
+		arrayY.sort(function(a, b){ return a-b});
+		//set values
+		this.x0 = arrayX[0];
+		this.x1 = arrayX[arrayX.length-1];
+		this.y0 = arrayY[0];
+		this.y1 = arrayY[arrayY.length-1];
+		//change back to NOT ogl
+		this.fromOGL();
+	}
+		
 	this.multiplyMatrix = function(matrix){//multiply matrix and give rect new outside box
 		//change to ogl
 		this.toOGL();
@@ -194,9 +221,9 @@ function RectObject(box){
 		var bottom1 = matrix.multiply(this.bottomRigthCorner());
 		//create array of values to sort each value
 		var arrayX = [top0.x, top1.x, bottom0.x, bottom1.x];
-		arrayX.sort();
+		arrayX.sort(function(a, b){ return a-b});
 		var arrayY = [top0.y, top1.y, bottom0.y, bottom1.y];
-		arrayY.sort();
+		arrayY.sort(function(a, b){ return a-b});
 		//set values
 		this.x0 = arrayX[0];
 		this.x1 = arrayX[arrayX.length-1];
