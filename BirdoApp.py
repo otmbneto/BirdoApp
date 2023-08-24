@@ -458,7 +458,7 @@ class BirdoApp(QtGui.QMainWindow):
             new_user[self.project_data["prefix"]]["server_login"] = {"user": str(self.ui.server_login_line.text()),"pw": encdec.enc(self.ui.server_pw_line.text())}
 
         # ADDSS HARMONY ALTERNATIVE INSTALLATION PATH IF NECESSARY
-        if not self.project_data["harmony"]["installation_default"]:
+        if not self.project_data["harmony"]["installation_default"] and self.ui.harmony_versions.count() == 0:
             new_user[self.project_data["prefix"]]["harmony_installation"] = str(self.ui.harmony_folder_line.text())
         else:
             print self.ui.harmony_versions.itemData(self.ui.harmony_versions.currentIndex()).getFullpath()
@@ -524,6 +524,7 @@ def try_to_delete_shortcut(shortcut_name):
 
 
 # main script
+#todo: set this command  git config --global --add safe.directory C:/Users/<username>/AppData/Roaming/BirdoApp
 if __name__ == "__main__":
 
     args = sys.argv
