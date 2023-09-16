@@ -21,7 +21,7 @@ Copyright:   leobazao_@Birdo
 
 
 //regex node (colors) shadow name
-var sh_regex = /^(SHADOW|SOMBRA)$/;
+var sh_regex = /^(.+_)?(SHADOW|SOMBRA)$/;
 
 
 function addWriteSombra_LEB(){
