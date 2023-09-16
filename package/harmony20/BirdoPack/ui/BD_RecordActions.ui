@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>359</width>
+    <height>436</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TesteUI</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{	
+	background-color: #233142;
+}
+
+QLabel{
+	color: #53a8b6;
+}
+
+QLabel:disabled {
+	color: #455d7a;
+}
+
+QGroupBox {
+	color: #53a8b6;
+}
+
+QGroupBox:disabled {
+	color: #455d7a;
+}
+
+QTabWidget::pane {
+	border: 2px solid #e3e3e3;
+	border-radius: 5px;
+} 
+
+QTabWidget::tab-bar {
+    left: 15px; /* move to the right by 5px */
+}
+
+QTabBar::tab {
+	color: #455d7a;
+	background: transparent; 
+	border: null; 
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-right: 8px;
+	padding-left: 4px;
+
+} 
+
+QTabBar::tab:selected {
+	color: #7c73e6;
+	background: transparent; 
+	padding-left: 4px;
+}
+
+QCheckBox {
+	color: #e3e3e3;
+    spacing: 5px;
+}
+
+QCheckBox:unchecked {
+	color: #53a8b6;
+}
+
+QCheckBox:checked {
+	color: #7c73e6;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 1px solid white;
+	border-radius: 2px;
+	background-color:#233142;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 6px;
+	background-color: rgb(56, 186, 255);
+}
+
+QCheckBox:disabled{
+	color: gray;
+}
+
+QCheckBox::indicator:checked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: #233142;
+	border-color: gray;
+}
+
+QCheckBox::indicator:unchecked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: #233142;
+	border-color: gray;
+}
+
+QComboBox {
+	color: #233142;
+    border: 2px solid #455d7a;
+    border-radius: 6px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}
+
+QComboBox::down-arrow {
+      image: null;
+}
+
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: #e3e3e3;
+}
+
+QComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    width: 15px;
+	background-color: #e3e3e3;
+    border-left-width: 2px;
+    border-left-color: #455d7a;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox:hover{
+    border: 2px solid white;
+    color: #53a8b6;
+}
+
+QComboBox QAbstractItemView{
+    border: 2px solid white;
+	border-radius: 10px;
+    color: #233142;
+	background-color: lightgray;
+    selection-background-color: rgb(40, 30, 50);
+	selection-color: white;
+	selection-item-border-radius: 2px;
+	padding: 3px 3px ;
+}
+
+QComboBox:disabled{
+	color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: gray;
+}
+
+QScrollArea{
+	border-radius: 5px;
+	border: none;
+}
+
+QScrollBar::handle {
+	border-radius: 10px;
+ 	border: none;
+	background-color: #455d7a;
+	width: 5px;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-page {
+    background-color: transparent;
+	border: none;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background-color: transparent;
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: transparent;
+	color: none;
+	image: none;
+}
+
+QPushButton {
+	color: #e3e3e3;
+    border: 2px solid #455d7a;
+    border-radius: 6px;
+	background-color: #53a8b6;
+}
+
+QPushButton:hover{
+    border: 2px solid white;
+    color: white;
+}
+
+QPushButton:pressed {
+	color: #e3e3e3;
+	border-color: #e3e3e3;
+    background-color: #455d7a;
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton::disabled {
+	border-color: #f95959;
+	background: #455d7a;
+	color: #53a8b6;
+}
+
+QLineEdit {
+	color: #5585b5;
+    border: 2px solid #455d7a;
+    border-radius: 5px;
+    padding: 0 8px;
+    background: #e3e3e3;
+    selection-background-color: darkgray;
+}
+
+QLineEdit:hover{
+    border: 2px solid white;
+    color: black;
+}
+
+QLineEdit:disabled{
+	color: #f95959;
+	background-color: #79c2d0;
+	border-color: rgb(255, 230, 220);
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,3,1">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Record Actions</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonClose">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+	color: red;
+    border: 2px solid white;
+    border-radius: 6px;
+	background-color: #233142;
+}
+
+QPushButton:pressed {
+	color: red;
+    background-color: rgb(255, 196, 197);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}
+
+QPushButton:hover{
+    border: 2px solid #05B8CC;
+    color: darkred;
+}</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupRec">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="title">
+      <string>Record New Action</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLabel" name="labelRec">
+            <property name="text">
+             <string>Action Name</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushREC">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    border: 3px solid red;
+    border-radius: 25px;
+	background-color: rgb(200, 150, 150);
+}
+
+
+QPushButton:pressed {
+    border: 3px solid rgb(200, 100, 70);
+    background-color: rgb(255, 50, 50);
+}
+
+QPushButton::checked:on{
+	border: pink;
+    background-color: rgb(255, 0, 0);
+}
+</string>
+          </property>
+          <property name="text">
+           <string>REC</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupLog">
+        <property name="title">
+         <string>Log</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="margin">
+          <number>5</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>301</width>
+              <height>144</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4"/>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupPlay">
+     <property name="title">
+      <string>Play Actions</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0" rowminimumheight="0,0">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Choose Action</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="pushButtonPlay">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>PLAY</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
