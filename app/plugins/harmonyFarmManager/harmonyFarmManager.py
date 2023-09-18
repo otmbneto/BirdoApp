@@ -254,7 +254,7 @@ class Dialog(QtGui.QWidget):
     def update_info(self):
         """atualiza o estado das infos"""
         # script
-        
+
         curr_script = self.ui.comboScript.currentText()
         print "Update Script: {0}".format(curr_script)
         text = curr_script if bool(curr_script) and self.ui.groupBoxScript.isChecked() else "NONE"
@@ -320,7 +320,6 @@ class Dialog(QtGui.QWidget):
         return os.path.join(scene_path,versions[-1]) if len(versions) > 0 else None
 
     def getVersion(self,filename):
-
         print "VERSION:" + filename
         m = re.search('.*(v\d{2}).*', filename)
         return m.group(1) if m is not None else m
@@ -341,15 +340,15 @@ class Dialog(QtGui.QWidget):
         filename = os.path.basename(file)
         version = self.getVersion(filename)
         request ={"animator": self.project_data.user_data.name,
-                "episode": self.getEpisode(filename), 
-                "project": self.project_data.prefix, 
+                "episode": self.getEpisode(filename),
+                "project": self.project_data.prefix,
                 "queued": datetime.datetime.today().strftime('%d/%m/%Y, %H:%M:%S'),
-                "render_path": self.project_data.paths.get_server_render_file_path(episode,step,scene), 
-                "render_type": self.ui.radioPreComp.text().upper() if self.ui.radioPreComp.isChecked() else self.ui.radioComp.text().upper(), 
-                "scene": self.getShot(filename), 
+                "render_path": self.project_data.paths.get_server_render_file_path(episode,step,scene),
+                "render_type": self.ui.radioPreComp.text().upper() if self.ui.radioPreComp.isChecked() else self.ui.radioComp.text().upper(),
+                "scene": self.getShot(filename),
                 "scene_path": self.project_data.paths.get_publish_folder(scene,step).replace("\\","/"),
-                "status": "waiting", 
-                "step": step, 
+                "status": "waiting",
+                "step": step,
                 "version": version
                 }
 
@@ -364,9 +363,12 @@ class Dialog(QtGui.QWidget):
     def new_version(self,file):
 
         old_version = self.getVersion(os.path.basename(file))
+        if not old_version:
+            print "old version not found in scene file: {0}".format(file)
+            return False
         new_version = self.increment_version(old_version)
-        new_name = os.path.basename(file).replace(old_version,new_version)
-        new_xstage = os.path.join(os.path.dirname(file),new_name).replace("\\","/")
+        new_name = os.path.basename(file).replace(old_version, new_version)
+        new_xstage = os.path.join(os.path.dirname(file), new_name).replace("\\","/")
         shutil.copyfile(file,new_xstage)
         return new_xstage
 
@@ -405,7 +407,7 @@ class Dialog(QtGui.QWidget):
         return file_removed
 
     def create_folder(self,folder_path):
-        
+
         folder_created = True
         try:
             if not os.path.exists(folder_path):
@@ -437,7 +439,7 @@ class Dialog(QtGui.QWidget):
                 self.copy_file_to(f,vpn_path)
         else:
             sucess = False
-        
+
         return sucess
 
     def getPSD(self,psd_file):
@@ -506,18 +508,14 @@ class Dialog(QtGui.QWidget):
                 print "Warning! No version found at server: " + scene
                 continue
             self.incrementProgress(10)
-            #TODO: pegar a pasta publish
-            # - copiar local - done
-            # - descompactar - done
-            # - pegar versao recente xstage - done
-            # - compilar - done
+            
             if self.ui.groupBoxScript.isChecked():
 
                 local_folder = os.path.join(self.project_data.paths.create_local_scene_scheme(scene,step), self.project_data.paths.step[step]["local"][-1])
                 local_file = os.path.join(local_folder,os.path.basename(harmony_file))
                 if not os.path.exists(local_file):
                     shutil.copyfile(harmony_file,os.path.join(local_folder,local_file))
-                
+
                 extract_zipfile(local_file,local_folder)
                 local_scene = [os.path.join(local_folder,f) for f in os.listdir(local_folder) if not f.endswith(".zip")]
                 local_scene = local_scene[0] if len(local_scene) > 0 else None
@@ -525,8 +523,10 @@ class Dialog(QtGui.QWidget):
 
                     xstage = self.project_data.harmony.get_xstage_last_version(local_scene)
                     if self.project_data.harmony.compile_script(script,xstage) != 0:
-                        
-                        new_version = self.new_version(xstage)
+
+                        new_version = self.new_version(harmony_file)
+                        if not new_version:
+                            continue
                         new_zip = os.path.join(os.path.dirname(local_scene),os.path.basename(new_version).replace(".xstage",".zip"))
                         compact_folder(local_scene,new_zip)
                         server_zip = os.path.join(os.path.dirname(harmony_file),os.path.basename(new_zip))
