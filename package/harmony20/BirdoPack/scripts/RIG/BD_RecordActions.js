@@ -64,8 +64,6 @@ function Interface(uifile, utils){
 	//DELETE
 	this.listTest = []
 	
-	//logs scroll area
-	this.logsSroll = null;
 	
 	//callbacks
 	this.onClose = function(){
@@ -118,15 +116,20 @@ function Interface(uifile, utils){
 		MessageLog.trace("PLAY!");
 		var currGroup = utils.getCurrentGroupNV();
 		this.listTest.push(utils.getNodeViewGroupSnapShop(currGroup));
-		
+		//Print(this.listTest[this.listTest.length-1]);
 		if(this.listTest.length == 2){
+			
 			var mod = utils.getModifications(this.listTest[0], this.listTest[1]);
 			try{
-				this.addLogInfo(mod);
+				if(!mod){
+					this.addLogInfo("> No changes to Nodeview!");
+				} else {
+					this.addLogInfo("> Changes to the Nodeview!");
+					Print(mod);
+				}
 			} catch(e){
-				MessageLog.trace(JSON.stringify(e));
+				Print(e);
 			}
-			
 			this.listTest = [];
 		}
 	}
@@ -137,6 +140,15 @@ function Interface(uifile, utils){
 	this.ui.groupPlay.pushButtonPlay.clicked.connect(this, this.onPlay);
 
 	this.timer.timeout.connect(this, this.recordingLoop);
+	
+	//
+	function Print(msg){
+		if(typeof msg == "object"){
+			var msg = JSON.stringify(msg, null, 2);
+		}
+		MessageLog.trace(msg);
+		System.println(msg);
+	}
 
 }
 	
