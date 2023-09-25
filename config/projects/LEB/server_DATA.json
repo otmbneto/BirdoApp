@@ -46,7 +46,7 @@
 		"tblib": "_tbLib/",
 		"batch_scripts": "_tbLib/batch_scripts",
 		"fazendinha": "_tbLib/_Fazendinha/",
-		"render_comp": "//192.168.10.100/projects/127_Lupi_Baduki/01_EPISODIOS/{EP}/03_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"render_comp": "//192.168.10.101/projects/127_Lupi_Baduki/01_EPISODIOS/{EP}/03_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
 		"packUpdate": "_tbLib/_birdoApp/"
 		},
 	"server": {
