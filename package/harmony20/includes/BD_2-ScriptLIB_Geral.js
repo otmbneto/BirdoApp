@@ -204,13 +204,17 @@ function BD2_get_node_connections_data(node_path){
 	};
 	for(var i=0; i< node.numberOfInputPorts(node_path); i++){
 			var upnode = node.srcNodeInfo(node_path, i);
-			c_data["input"].push(upnode);	
+			if(Boolean(upnode)){
+				c_data["input"].push(upnode);	
+			}
 	}
 	for(var i=0; i<node.numberOfOutputPorts(node_path); i++){
 		var links = [];
 		for(var y=0; y<node.numberOfOutputLinks(node_path, i); y++){
 			var downNode = node.dstNodeInfo(node_path, i, y);
-			links.push(downNode);
+			if(Boolean(downNode)){
+				links.push(downNode);
+			}
 		}	
 		c_data["output"].push(links);	
 	}
