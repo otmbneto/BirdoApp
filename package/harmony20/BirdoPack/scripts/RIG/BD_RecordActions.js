@@ -116,7 +116,7 @@ function Interface(uifile, utils){
 		MessageLog.trace("PLAY!");
 		var currGroup = utils.getCurrentGroupNV();
 		this.listTest.push(utils.getNodeViewGroupSnapShop(currGroup));
-		//Print(this.listTest[this.listTest.length-1]);
+
 		if(this.listTest.length == 2){
 			
 			var mod = utils.getModifications(this.listTest[0], this.listTest[1]);
@@ -125,7 +125,14 @@ function Interface(uifile, utils){
 					this.addLogInfo("> No changes to Nodeview!");
 				} else {
 					this.addLogInfo("> Changes to the Nodeview!");
+					for(i in mod){
+						if(mod[i].length > 0){
+							Print("change registered: " + i);
+						}
+					}
 					Print(mod);
+					var script = new utils.JSScript([mod], "ActionTeste");
+					Print(script.getScriptString());
 				}
 			} catch(e){
 				Print(e);
