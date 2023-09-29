@@ -15,6 +15,11 @@ Created:	setembro, 2023;
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
+	TODO: 
+	- add messageBOx no scrit das actions (botar counter de ações true);
+	- add start e stop recording no log
+	- descobrir pq nao esta registrando no log a maioria das ações;
+
 */
 
 function BD_RecordActions(){
@@ -37,8 +42,20 @@ function BD_RecordActions(){
 	
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_RecordActions.ui";
 
+	//get temporary folder
+	var tempfolder = projectDATA.systemTempFolder + "/BirdoApp/actions/";
+	if(!BD1_DirExist(tempfolder)){
+		BD1_createDirectoryREDE(tempfolder);
+	}
+	
+	//get scripts data
+	var actions_data = {
+		rootDir: tempfolder,
+		scripts: BD1_ListFiles(tempfolder, "*.js")
+	}
+	
 	try{
-		var d = new Interface(ui_path, utils);
+		var d = new Interface(ui_path, utils, actions_data);
 		d.ui.show();
 		Print("End");
 	} catch(e){
@@ -46,7 +63,7 @@ function BD_RecordActions(){
 	}
 }
 
-function Interface(uifile, utils){
+function Interface(uifile, utils, actions_data){
 	this.ui = UiLoader.load(uifile);
 	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
 	this.ui.activateWindow();
@@ -59,47 +76,114 @@ function Interface(uifile, utils){
 	this.timer.interval = 1500;	
 	
 	//current group in nodeview
-	this.nodeViewGroup = null;
+	this.current_nv_group = null;
 	
-	//DELETE
-	this.listTest = []
+	//snap list
+	this.snap_shop_list = [];
 	
+	//modification list
+	this.modification_list = [];
+	
+	//list actions
+	this.scripts = ["SELECT_SCRIPT"].concat(actions_data.scripts);
+	this.temp_folder = actions_data.rootDir;
+	//set play area
+	this.ui.groupPlay.comboBox.enabled = this.scripts.length > 0;
+	this.ui.groupPlay.comboBox.addItems(this.scripts);
 	
 	//callbacks
 	this.onClose = function(){
+		
 		MessageLog.trace("CLOSED! Timer stoped!");
 		this.timer.stop()
 		this.ui.close();
+		
+	}
+	
+	this.resetVariables = function(){
+		
+		this.modification_list = [];
+		this.snap_shop_list = [];
+		this.current_nv_group = null;
+		
+	}
+	
+	this.updateModifications = function(){
+		Print("TESSSSTE NTES");
+		var curr_snap = utils.getNodeViewGroupSnapShop(this.current_nv_group);
+		Print("TESTE  >>>> getNodeViewGroupSnapShop");
+		Print(this.snap_shop_list.length);
+		var mod = utils.getModifications(this, this.snap_shop_list[this.snap_shop_list.length -1], curr_snap);
+		if(mod){
+			this.snap_shop_list.push(curr_snap);
+			this.modification_list.push(mod);
+			Print("modification list updated!");
+		}
+		
 	}
 	
 	this.recordingLoop = function(){
 		
 		if(scene.isDirty()){
-			MessageLog.trace("Scene Changed!");
+			MessageLog.trace(" -- Scene Changed!");
 			scene.saveAll();
-			MessageLog.trace("Changes saved!");
-		}	
+			MessageLog.trace("!!Changes saved!!");
+			try{
+				this.updateModifications();
+			}catch(e){
+				Print(e);
+			}
+		}
 		
 	}
 	
 	this.updateWidgets = function(){
-		this.ui.groupRec.pushREC.text = this.recording ? "■" : "REC";
+		
+		this.ui.groupRec.pushREC.text = this.recording ? "STOP" : "REC";
 		this.ui.groupPlay.enabled = this.recording;
-		this.ui.groupRec.lineEdit.enabled = this.recording;
 		this.ui.groupRec.styleSheet = this.recording ? "QGroupBox {\n	border: 1px solid red;\n}" : "";
+	
+	}
+	
+	this.registerAction = function(){
+		
+		if(this.modification_list.length == 0){
+			MessageBox.information("Insuficient Modifications! Canceled");
+			Print("insuficient modifications!");
+			return;
+		}
+		var actionName = utils.chooseActionName(this);
+		if(!actionName){
+			Print("Canceled");
+			return;
+		}
+			
+		var scriptObj = new utils.JSScript(this.modification_list, actionName);
+		//write script
+		var script_path = this.temp_folder + actionName + ".js";
+		if(scriptObj.createScript(script_path)){
+			this.ui.groupPlay.comboBox.addItem(actionName + ".js");
+			this.ui.groupPlay.enabled = true;
+		}
+		
 	}
 	
 	this.onRec = function(){
+		
 		if(!this.recording){
 			MessageLog.trace("Recording stated...");
-			this.nodeViewGroup = utils.getCurrentGroupNV();
+			this.current_nv_group = utils.getCurrentGroupNV();
+			this.snap_shop_list = [utils.getNodeViewGroupSnapShop(this.current_nv_group)];
 			this.timer.start();
 		} else {
 			MessageLog.trace("Recording stoped!");
 			this.timer.stop();
+			this.registerAction();
+			this.resetVariables();
 		}
 		this.recording = !this.recording;
 		this.updateWidgets();
+		
 	}
 	
 	this.addLogInfo = function(text){
@@ -109,42 +193,39 @@ function Interface(uifile, utils){
 
 		var label = new QLabel(text);
 		label.setParent(scroll_wid);
-		log_layout.addWidget(label, 0, Qt.AlignTop);			
+		log_layout.addWidget(label, 0, Qt.AlignTop);	
+		
 	}
 	
 	this.onPlay = function(){
-		MessageLog.trace("PLAY!");
-		var currGroup = utils.getCurrentGroupNV();
-		this.listTest.push(utils.getNodeViewGroupSnapShop(currGroup));
-
-		if(this.listTest.length == 2){
-			
-			var mod = utils.getModifications(this.listTest[0], this.listTest[1]);
-			try{
-				if(!mod){
-					this.addLogInfo("> No changes to Nodeview!");
-				} else {
-					this.addLogInfo("> Changes to the Nodeview!");
-					for(i in mod){
-						if(mod[i].length > 0){
-							Print("change registered: " + i);
-						}
-					}
-					Print(mod);
-					var script = new utils.JSScript([mod], "ActionTeste");
-					Print(script.getScriptString());
-				}
-			} catch(e){
-				Print(e);
-			}
-			this.listTest = [];
+		
+		Print("Create function");
+		var scriptName = this.ui.groupPlay.comboBox.currentText;
+		var chosen_script = this.temp_folder + scriptName;
+		Print("chosen scritp : " + chosen_script);
+		
+		//command script require
+		var cmd = "require(chosen_script)." + scriptName.replace(".js", "") + "()";
+		Print("action script command: " + cmd);
+		try{
+			eval(cmd);
+		}catch(e){
+			Print(e);
 		}
+		
+	}
+	
+	this.onChangeCombo = function(){
+		
+		this.ui.groupPlay.pushButtonPlay.enabled = this.ui.groupPlay.comboBox.currentIndex != 0;
+		
 	}
 	
 	//connections
 	this.ui.pushButtonClose.clicked.connect(this, this.onClose);
 	this.ui.groupRec.pushREC.clicked.connect(this, this.onRec);
 	this.ui.groupPlay.pushButtonPlay.clicked.connect(this, this.onPlay);
+	this.ui.groupPlay.comboBox["currentIndexChanged(QString)"].connect(this, this.onChangeCombo);
 
 	this.timer.timeout.connect(this, this.recordingLoop);
 	

@@ -89,7 +89,7 @@ function compareObjects(obj1, obj2){
 }
 
 
-function getNodesModification(parent_node, nodes1, nodes2){
+function getNodesModification(self, parent_node, nodes1, nodes2){
 	var diff_data = {
 		parent_node: parent_node,
 		deleted: [],
@@ -98,7 +98,8 @@ function getNodesModification(parent_node, nodes1, nodes2){
 		change_attr: [],
 		move_coord: [],
 		link_nodes: [],
-		unlink_nodes: []
+		unlink_nodes: [],
+		set_enabled: []
 	};
 	
 	//dif lists
@@ -154,6 +155,11 @@ function getNodesModification(parent_node, nodes1, nodes2){
 					}
 				});
 			}
+			
+			//set enabled
+			if(nodes1[item].state != nodes2[item].state){
+				diff_data["set_enabled"].push({node: nodes2[item].node, state: nodes2[item].state});
+			}
 		}
 	}
 
@@ -169,6 +175,8 @@ function getNodesModification(parent_node, nodes1, nodes2){
 		diff_data["deleted"] = diff_old.map(function(item){ return item.node});				
 		diff_old.forEach(function(node_item){
 			Print(" > node deleted: " + node_item);
+			self.addLogInfo("> node deleted: " + node_item);
+
 		});
 		//reset wrong data connections (just renamed nodes, no reconection!)
 		diff_data["link_nodes"] = [];
@@ -179,6 +187,7 @@ function getNodesModification(parent_node, nodes1, nodes2){
 		diff_data["created"] = diff_new;
 		diff_new.forEach(function(node_item){
 			Print(" > node created: " + node_item);
+			self.addLogInfo(" > node created: " + node_item);
 		});
 		
 	//define renamed nodes
@@ -193,6 +202,8 @@ function getNodesModification(parent_node, nodes1, nodes2){
 				return;
 			} else {
 				Print("can't find renmaed node: " + item.node);
+				self.addLogInfo("> ERROR: can't find renmaed node: " + item.node);
+
 			}
 			
 		});
@@ -226,17 +237,19 @@ function is_renamed_node(node_data1, node_data2){
 }
 
 
-function getModifications(snap1, snap2){
+function getModifications(self, snap1, snap2){
 	if(compareObjects(snap1, snap2)){
 		Print("No changes to nodeview!");
+		self.addLogInfo("> No changes to nodeview!");
 		return false;
 	} else {
 		if(snap1.parentGroup != snap2.parentGroup){
 			Print("Error! Nodeview Group Changed! Will only work on same group!");
+			self.addLogInfo("> ERROR! Group changed!");
 			return false;
 		}
 		Print("nodes changed!");
-		return getNodesModification(snap1.parentGroup, snap1.nodes, snap2.nodes);
+		return getNodesModification(self, snap1.parentGroup, snap1.nodes, snap2.nodes);
 	}
 }
 exports.getModifications = getModifications;
@@ -271,9 +284,10 @@ function JSScript(modifications_data_list, action_name){
 		change_attr: '    var action = node.setTextAttr(curr_nv + "{NODE_PATH}", "{ATTR_NAME}", {FRAME}, {ATTR_VALUE});\n    ',
 		move_coord: '    var action = node.setCoord(curr_nv + "{NODE_PATH}", {COORD_X}, {COORD_Y});\n    ',
 		link_nodes: '    var action = node.link(curr_nv + "{SRC_NODE}", {PORT1}, curr_nv + "{DST_NODE}", {PORT2}, {CREATE_PORT_SCR}, {CREATE_PORT_DST});\n    ',
-		unlink_nodes: '    var action = node.unlink(curr_nv + "{NODE_PATH}", {PORT});\n    '
+		unlink_nodes: '    var action = node.unlink(curr_nv + "{NODE_PATH}", {PORT});\n    ',
+		set_enabled: '    var action = node.setEnable(curr_nv + "{NODE_PATH}", {STATE});\n    '
 	}
-
+	
 
 	//callbacks
 	this.create_action_functions = function(mod_data, mod_index){
@@ -375,11 +389,23 @@ function JSScript(modifications_data_list, action_name){
 			}
 			function_string += this.end_try;
 		}
+		//set_enabled
+		if(mod_data.set_enabled.length > 0){
+			function_string += "//Action: {ACTION_NUMBER} => set node enable:\n".replace("{ACTION_NUMBER}", mod_index);
+			for(var i=0; i< mod_data.set_enabled.length; i++){
+				var relativendePath = getRelativePath(mod_data.set_enabled[i].node);
+				var nodeState = mod_data.set_enabled[i].state;
+				var create_func =  this.functions_data["set_enabled"].replace("{NODE_PATH}", relativendePath);
+				create_func = create_func.replace("{STATE}", nodeState);				
+				function_string += create_func;
+				function_string += ('Print("Node set enable: " + curr_nv + "' + relativendePath + ' state : ' + nodeState + ' => " + action);\n    ');							
+			}
+		}
 		return function_string;
 	}
 	
 	
-	this.getScriptString = function(){
+	this.createScript = function(scriptPath){
 		var final_script = this.header;
 		final_script += this.includes_lib;
 		final_script += this.main_func_line;
@@ -392,7 +418,7 @@ function JSScript(modifications_data_list, action_name){
 		final_script += this.end_undo;
 		final_script += this.exports_func;
 		final_script += this.helper_function;
-		return final_script;
+		return writeScript(final_script, scriptPath);
 	}	
 
 	//helper function
@@ -401,10 +427,36 @@ function JSScript(modifications_data_list, action_name){
 		var namearr = nodeP.split("/");
 		return "/" + namearr[namearr.length - 1];
 	}
-
+	//create js file
+	function writeScript(scriptString, scriptPath){
+		var file = new File(scriptPath);
+		try {
+			file.open(FileAccess.WriteOnly);
+			file.write(scriptString);
+			file.close();
+			MessageLog.trace("JS File created! " + scriptPath);
+			return true;
+		} catch (err){
+			MessageLog.trace(err.message);
+			return false;
+		}
+	}
+	
+	
 }
 exports.JSScript = JSScript;
 
+
+//choose valid action name
+function chooseActionName(self){
+	var actionName = Input.getText("Save action as: ", "", "Save Action", self);
+	if(!/^(\w|\d)+$/.test(actionName)){
+		MessageBox.warning("Invalid Action name! Dont use space or invalid characters!",0,0);
+		return chooseActionName(self);
+	}
+	return actionName;
+}
+exports.chooseActionName = chooseActionName;
 
 
 
