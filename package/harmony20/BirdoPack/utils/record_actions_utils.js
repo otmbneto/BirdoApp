@@ -127,6 +127,8 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 					
 				}
 				diff_data["change_attr"].push(attDiffData);
+				self.addLogInfo("> node attribute changed: " + nodes2[item].node);
+
 			}
 			
 			//coordinates
@@ -136,6 +138,7 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 			delete coord2.z;
 			if(!compareObjects(coord1, coord2)){
 				diff_data["move_coord"].push({node_path: nodes2[item].node, coord: nodes2[item].coordinate});
+				self.addLogInfo("> node attribute changed: " + nodes2[item].node);
 			}
 			
 			//network connection (connect)
@@ -146,12 +149,14 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 						var srcData = connectionItem;
 						srcData["create_port"] = getNeedToAddPortSrc(item, nodes1, nodes2);
 						diff_data["link_nodes"].push({source: srcData, destiny: {node: nodes2[item].node, create_port: getNeedToAddPortDst(item, nodes1, nodes2), port: port_index}});
+						self.addLogInfo("> node linked: " + nodes2[item].node);
 					}
 				});
 				//check unlink
 				nodes1[item]["connection"]["input"].forEach(function(connectionItem, port_index){
 					if(JSON.stringify(nodes2[item].connection.input).indexOf(JSON.stringify(connectionItem)) == -1){
 						diff_data["unlink_nodes"].push({node: nodes2[item].node, port: port_index});
+						self.addLogInfo("> node unlinked: " + nodes2[item].node);
 					}
 				});
 			}
@@ -159,6 +164,7 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 			//set enabled
 			if(nodes1[item].state != nodes2[item].state){
 				diff_data["set_enabled"].push({node: nodes2[item].node, state: nodes2[item].state});
+				self.addLogInfo("> node enable change: " + nodes2[item].node);
 			}
 		}
 	}
@@ -175,7 +181,7 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 		diff_data["deleted"] = diff_old.map(function(item){ return item.node});				
 		diff_old.forEach(function(node_item){
 			Print(" > node deleted: " + node_item);
-			self.addLogInfo("> node deleted: " + node_item);
+			self.addLogInfo("> node deleted: " + node_item.node);
 
 		});
 		//reset wrong data connections (just renamed nodes, no reconection!)
@@ -187,7 +193,7 @@ function getNodesModification(self, parent_node, nodes1, nodes2){
 		diff_data["created"] = diff_new;
 		diff_new.forEach(function(node_item){
 			Print(" > node created: " + node_item);
-			self.addLogInfo(" > node created: " + node_item);
+			self.addLogInfo(" > node created: " + node_item.node);
 		});
 		
 	//define renamed nodes
@@ -227,7 +233,10 @@ function getNeedToAddPortSrc(nodeName, oldSnap, newSnap){
 //return if DST node need to add port in connect action
 function getNeedToAddPortDst(nodeName, oldSnap, newSnap){
 	var oldNode = oldSnap[nodeName].node;
-	var test_type = (node.type(oldNode) == "COMPOSITE" || node.type(oldNode) == "MULTIPORT_OUT");
+	if(node.type(oldNode) == "COMPOSITE"){
+		return true;
+	}
+	var test_type = node.type(oldNode) == "MULTIPORT_OUT";
 	var test_outputs_number = oldSnap[nodeName].connection.input.length < newSnap[nodeName].connection.input.length;
 	return test_type && test_outputs_number;
 }
@@ -263,11 +272,17 @@ function JSScript(modifications_data_list, action_name){
 	this.header = '/*\n    Script created automatically using RecordActions tool.\n    created date: ' + new Date() + '\n*/\n';
 	this.includes_lib = 'include("BD_1-ScriptLIB_File.js");\ninclude("BD_2-ScriptLIB_Geral.js");\n\n';
 	
-	this.main_func_line = 'function ' + action_name + '(){\n    ';
+	this.main_func_line = 'function ' + action_name + '(){\n    \n    var counter = 0;';
 	this.curr_nv_group_var = '\n    //current node view group\n    var curr_nv = getCurrentGroupNV();\n\n    ';
 	this.start_undo = 'scene.beginUndoRedoAccum("Script Action : ' + action_name + '");\n\n    Print("Start action : ' + action_name + '");\n\n    ';
 	this.end_undo = '\n    scene.endUndoRedoAccum()\n\n';
 	this.exports_func = '}\nexports.' + action_name + ' = ' + action_name + ';\n';
+	
+	//check counter
+	this.checkCounter = 'if(action){\n        counter++;\n    }\n    ';
+	
+	//return
+	this.returnValue = '    return counter;';
 	
 	//extra functions
 	this.helper_function = '\n//return current group in node view\nfunction getCurrentGroupNV(){\n    var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});\n    return view.group(nodeview[0]);\n}\n';
@@ -300,6 +315,7 @@ function JSScript(modifications_data_list, action_name){
 				var relativendePath = getRelativePath(mod_data.deleted[i]);
 				function_string += this.functions_data["deleted"].replace("{NODE_PATH}", relativendePath);
 				function_string += ('Print("Node deleted: " + curr_nv + "' + relativendePath + ' => " + action);\n    ');
+				function_string += this.checkCounter;
 			}
 		}
 		//created 
@@ -313,6 +329,7 @@ function JSScript(modifications_data_list, action_name){
 				create_func = create_func.replace("{COORD_Y}", mod_data.created[i].coordinate.y);
 				function_string += create_func;
 				function_string += ('Print("Node created: ' + nodeName + ' => " + action);\n    ');
+				function_string += this.checkCounter;
 			}
 		}
 		//renamed
@@ -323,7 +340,8 @@ function JSScript(modifications_data_list, action_name){
 				var create_func = this.functions_data["renamed"].replace("{NODE_PATH}", relativendePath);
 				create_func = create_func.replace("{NODE_NAME}", mod_data.renamed[i].to);
 				function_string += create_func;
-				function_string += ('Print("Node renamed from: " + curr_nv + "' + relativendePath + ' : to : " + action);\n    ');				
+				function_string += ('Print("Node renamed from: " + curr_nv + "' + relativendePath + ' : to : " + action);\n    ');
+				function_string += this.checkCounter;				
 			}
 		}
 		//change attr
@@ -339,6 +357,7 @@ function JSScript(modifications_data_list, action_name){
 					create_func = create_func.replace("{ATTR_VALUE}", value); // non column attributes
 					function_string += create_func;
 					function_string += ('Print("Node change attr: " + curr_nv + "' + relativendePath + ' : att : ' + att + ' : value : ' + value + ' => " + action);\n    ');					
+					function_string += this.checkCounter;
 				}
 			}
 		}
@@ -351,12 +370,13 @@ function JSScript(modifications_data_list, action_name){
 				create_func = create_func.replace("{COORD_X}", mod_data.move_coord[i].coord.x);
 				create_func = create_func.replace("{COORD_Y}", mod_data.move_coord[i].coord.y);
 				function_string += create_func;
-				function_string += ('Print("Node move coord: " + curr_nv + "' + relativendePath + ' => " + action);\n    ');				
+				function_string += ('Print("Node move coord: " + curr_nv + "' + relativendePath + ' => " + action);\n    ');
+				function_string += this.checkCounter;				
 			}
 		}
 		//unlink nodes
 		if(mod_data.unlink_nodes.length > 0){
-			function_string += "//Action: {ACTION_NUMBER} => link node\n    ".replace("{ACTION_NUMBER}", mod_index);
+			function_string += "//Action: {ACTION_NUMBER} => unlink node\n    ".replace("{ACTION_NUMBER}", mod_index);
 			function_string += this.start_try;
 			for(var i=0; i< mod_data.unlink_nodes.length; i++){
 				var relativendePath = getRelativePath(mod_data.unlink_nodes[i].node);
@@ -364,7 +384,8 @@ function JSScript(modifications_data_list, action_name){
 				var create_func = this.functions_data["unlink_nodes"].replace("{NODE_PATH}", relativendePath);
 				create_func = create_func.replace("{PORT}", unlinkPort);
 				function_string += create_func;
-				function_string += ('    Print("Node unlink: " + curr_nv + "' + relativendePath + ' port : ' + unlinkPort + ' => " + action);\n    ');							
+				function_string += ('    Print("Node unlink: " + curr_nv + "' + relativendePath + ' port : ' + unlinkPort + ' => " + action);\n    ');
+				function_string += this.checkCounter;				
 			}
 			function_string += this.end_try;
 		}
@@ -385,7 +406,7 @@ function JSScript(modifications_data_list, action_name){
 				create_func = create_func.replace("{CREATE_PORT_DST}", mod_data.link_nodes[i].destiny.create_port);
 				function_string += create_func;
 				function_string += ('    Print("Node link: " + curr_nv + "' + relativeSrcNodePath + ' port > ' + srcPort + ' to node : " + curr_nv + "' + relativeDstNodePath + ' port > ' + dstPort + ' => " + action);\n    ');							
-
+				function_string += this.checkCounter;
 			}
 			function_string += this.end_try;
 		}
@@ -399,6 +420,7 @@ function JSScript(modifications_data_list, action_name){
 				create_func = create_func.replace("{STATE}", nodeState);				
 				function_string += create_func;
 				function_string += ('Print("Node set enable: " + curr_nv + "' + relativendePath + ' state : ' + nodeState + ' => " + action);\n    ');							
+				function_string += this.checkCounter;
 			}
 		}
 		return function_string;
@@ -416,6 +438,7 @@ function JSScript(modifications_data_list, action_name){
 			final_script += this.create_action_functions(this.modification_list[i], i);
 		}
 		final_script += this.end_undo;
+		final_script += this.returnValue;
 		final_script += this.exports_func;
 		final_script += this.helper_function;
 		return writeScript(final_script, scriptPath);
@@ -448,11 +471,15 @@ exports.JSScript = JSScript;
 
 
 //choose valid action name
-function chooseActionName(self){
+function chooseActionName(self, scripts_folder){
 	var actionName = Input.getText("Save action as: ", "", "Save Action", self);
 	if(!/^(\w|\d)+$/.test(actionName)){
 		MessageBox.warning("Invalid Action name! Dont use space or invalid characters!",0,0);
 		return chooseActionName(self);
+	}
+	if(BD1_FileExists(scripts_folder + actionName + ".js")){
+		MessageBox.warning("Action already exists! Pick another name!",0,0);
+		return chooseActionName(self, scripts_folder);		
 	}
 	return actionName;
 }

@@ -16,10 +16,9 @@ Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
 	TODO: 
-	- add messageBOx no scrit das actions (botar counter de ações true);
-	- add start e stop recording no log
-	- descobrir pq nao esta registrando no log a maioria das ações;
-
+	- descobrir erro de duplicar a acao link que rolou no ACtionTeste2(descobrir se é na hora de escrever)
+	- add action de backdrop
+	- add action de waypoint 
 */
 
 function BD_RecordActions(){
@@ -91,6 +90,32 @@ function Interface(uifile, utils, actions_data){
 	this.ui.groupPlay.comboBox.enabled = this.scripts.length > 0;
 	this.ui.groupPlay.comboBox.addItems(this.scripts);
 	
+	
+	//set drag ui
+	var dragPosition;
+	var mainwindow = this.ui;
+	var drag_w = new QWidget();
+	drag_w.setParent(this.ui.title);
+	drag_w.setWindowFlags(Qt.FramelessWindowHint);
+	drag_w.setAttribute(Qt.WA_TranslucentBackground);
+	
+	drag_w.mousePressEvent = function(event) {
+		if (event.button() == Qt.LeftButton) {
+			var p = event.globalPos();
+			var corner = mainwindow.frameGeometry.topLeft();
+			dragPosition = new QPoint(p.x() - corner.x(), p.y() - corner.y());
+			event.accept();
+		}
+	}
+	drag_w.mouseMoveEvent = function(event) {
+		if (event.buttons() & Qt.LeftButton) {
+			var p = event.globalPos();
+			mainwindow.move(p.x() - dragPosition.x(), p.y() - dragPosition.y());
+			event.accept();
+		}
+	}
+		
+	
 	//callbacks
 	this.onClose = function(){
 		
@@ -109,10 +134,8 @@ function Interface(uifile, utils, actions_data){
 	}
 	
 	this.updateModifications = function(){
-		Print("TESSSSTE NTES");
+		
 		var curr_snap = utils.getNodeViewGroupSnapShop(this.current_nv_group);
-		Print("TESTE  >>>> getNodeViewGroupSnapShop");
-		Print(this.snap_shop_list.length);
 		var mod = utils.getModifications(this, this.snap_shop_list[this.snap_shop_list.length -1], curr_snap);
 		if(mod){
 			this.snap_shop_list.push(curr_snap);
@@ -140,7 +163,7 @@ function Interface(uifile, utils, actions_data){
 	this.updateWidgets = function(){
 		
 		this.ui.groupRec.pushREC.text = this.recording ? "STOP" : "REC";
-		this.ui.groupPlay.enabled = this.recording;
+		this.ui.groupPlay.enabled = !this.recording;
 		this.ui.groupRec.styleSheet = this.recording ? "QGroupBox {\n	border: 1px solid red;\n}" : "";
 	
 	}
@@ -152,7 +175,7 @@ function Interface(uifile, utils, actions_data){
 			Print("insuficient modifications!");
 			return;
 		}
-		var actionName = utils.chooseActionName(this);
+		var actionName = utils.chooseActionName(this, this.temp_folder);
 		if(!actionName){
 			Print("Canceled");
 			return;
@@ -163,7 +186,7 @@ function Interface(uifile, utils, actions_data){
 		var script_path = this.temp_folder + actionName + ".js";
 		if(scriptObj.createScript(script_path)){
 			this.ui.groupPlay.comboBox.addItem(actionName + ".js");
-			this.ui.groupPlay.enabled = true;
+			this.ui.groupPlay.comboBox.enabled = true;
 		}
 		
 	}
@@ -175,11 +198,13 @@ function Interface(uifile, utils, actions_data){
 			this.current_nv_group = utils.getCurrentGroupNV();
 			this.snap_shop_list = [utils.getNodeViewGroupSnapShop(this.current_nv_group)];
 			this.timer.start();
+			this.addLogInfo(">REC start at group: " + this.current_nv_group);
 		} else {
 			MessageLog.trace("Recording stoped!");
 			this.timer.stop();
 			this.registerAction();
 			this.resetVariables();
+			this.addLogInfo(">REC Stop!");
 		}
 		this.recording = !this.recording;
 		this.updateWidgets();
@@ -203,12 +228,14 @@ function Interface(uifile, utils, actions_data){
 		var scriptName = this.ui.groupPlay.comboBox.currentText;
 		var chosen_script = this.temp_folder + scriptName;
 		Print("chosen scritp : " + chosen_script);
-		
+		this.addLogInfo(">Play action: " + scriptName);
 		//command script require
 		var cmd = "require(chosen_script)." + scriptName.replace(".js", "") + "()";
 		Print("action script command: " + cmd);
 		try{
-			eval(cmd);
+			var output = eval(cmd);
+			MessageBox.information("Script Action ended with " + output + " modifications on group " + utils.getCurrentGroupNV() + "!");
+			Print("Action modifications: " + output);
 		}catch(e){
 			Print(e);
 		}

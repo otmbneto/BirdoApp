@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>448</width>
-    <height>279</height>
+    <height>338</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -245,39 +245,85 @@ QLineEdit:disabled{
 	border-color: rgb(255, 230, 220);
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,3,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QWidget" name="title" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>30</height>
+         <height>50</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
        </property>
-       <property name="text">
-        <string>Record Actions</string>
+       <property name="cursor">
+        <cursorShape>SizeAllCursor</cursorShape>
        </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Record Actions</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>leobazaoo@hotamail.com
+https://www.linkedin.com/in/leonardobazilio/</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+	color: rgb(200, 80, 80);
+}</string>
+          </property>
+          <property name="text">
+           <string>leobazao@2023</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButtonClose">
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>30</width>
          <height>30</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
-         <height>16777215</height>
+         <width>30</width>
+         <height>30</height>
         </size>
        </property>
        <property name="font">
@@ -296,7 +342,7 @@ QLineEdit:disabled{
 
 QPushButton:pressed {
 	color: red;
-    background-color: rgb(255, 196, 197);
+    background-color: black;
 }
 
 QPushButton:flat {
@@ -321,6 +367,12 @@ QPushButton:hover{
    </item>
    <item>
     <widget class="QGroupBox" name="groupRec">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
@@ -328,10 +380,28 @@ QPushButton:hover{
       <string>Record New Action</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
       <item>
        <widget class="QGroupBox" name="groupLog">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
         <property name="title">
          <string>Log</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <property name="margin">
@@ -347,8 +417,8 @@ QPushButton:hover{
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>333</width>
-              <height>62</height>
+              <width>345</width>
+              <height>118</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4"/>
