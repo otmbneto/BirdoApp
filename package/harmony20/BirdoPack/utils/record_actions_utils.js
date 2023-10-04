@@ -6,7 +6,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 //TODO: 
- // - refatorar funcao de getModifications (tentar incluir a parte do check do rename e do delete create nos primeiros dois loops)
+ // - refatorar funcao de getModifications (tentar incluir a parte do check do rename e do delete create nos primeiros dois loops) ?? 
  // - testar funcoes criadas pra saber se precisa do try catch em mais funcoes (esta somente no link e unlink)
 
 
@@ -17,7 +17,8 @@ function getNodeViewGroupSnapShop(parent_group){
 	var nv_snapshot = {
 		parentGroup : parent_group,
 		frame: frame.current(),
-		nodes: {}
+		nodes: {},
+		backdrops: Backdrop.backdrops(parent_group)
 	}
 	all_nodes.forEach(function(item){
 		var node_data = new NodeAttData(item, frame.current());
@@ -249,7 +250,7 @@ function is_renamed_node(node_data1, node_data2){
 function getModifications(self, snap1, snap2){
 	if(compareObjects(snap1, snap2)){
 		Print("No changes to nodeview!");
-		self.addLogInfo("> No changes to nodeview!");
+		self.addLogInfo("> No changes in the nodeview!");
 		return false;
 	} else {
 		if(snap1.parentGroup != snap2.parentGroup){
@@ -258,7 +259,9 @@ function getModifications(self, snap1, snap2){
 			return false;
 		}
 		Print("nodes changed!");
-		return getNodesModification(self, snap1.parentGroup, snap1.nodes, snap2.nodes);
+		var mod_data = getNodesModification(self, snap1.parentGroup, snap1.nodes, snap2.nodes);
+		mod_data["backdrops"] = null ? compareObjects(snap1.backdrops, snap2.backdrops) : snap2.backdrops; 
+		return mod_data;
 	}
 }
 exports.getModifications = getModifications;
@@ -293,6 +296,7 @@ function JSScript(modifications_data_list, action_name){
 	this.end_try = '}catch(e){\n        Print(e);\n    }\n    ';
 	
 	this.functions_data = {
+		update_backdrop: '    var action = Backdrop.setBackdrops(curr_nv, {BACKDROPS});\n    ',
 		deleted: '    var action = node.deleteNode(curr_nv + "{NODE_PATH}", true, true);\n    ',
 		created: '    var action = node.add(curr_nv, "{NODE_NAME}", "{NODE_TYPE}", {COORD_X}, {COORD_Y}, 0);\n    ',
 		renamed: '    var action = BD2_renameNode(curr_nv + "{NODE_PATH}", "{NODE_NAME}");\n    ',
@@ -308,6 +312,14 @@ function JSScript(modifications_data_list, action_name){
 	this.create_action_functions = function(mod_data, mod_index){
 
 		var function_string = "";
+		//backdrops changed
+		if(mod_data.backdrops){
+			function_string += '//Action: {ACTION_NUMBER} => create node\n'.replace("{ACTION_NUMBER}", mod_index);
+			var newBackdrops = mod_data.backdrops;
+			function_string += this.functions_data["update_backdrop"].replace("{BACKDROPS}", newBackdrops);
+			function_string += ('Print("Node created: ' + nodeName + ' => " + action);\n    ');
+			function_string += this.checkCounter;
+		}
 		//deleted
 		if(mod_data.deleted.length > 0){
 			function_string += "//Action: {ACTION_NUMBER} => delete node:\n".replace("{ACTION_NUMBER}", mod_index);

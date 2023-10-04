@@ -16,9 +16,9 @@ Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
 	TODO: 
-	- descobrir erro de duplicar a acao link que rolou no ACtionTeste2(descobrir se é na hora de escrever)
-	- add action de backdrop
-	- add action de waypoint 
+	- descobrir erro de duplicar a acao link que rolou no ACtionTeste2(descobrir se é na hora de escrever);
+	- add action de backdrop;
+	- add action de waypoint;
 */
 
 function BD_RecordActions(){
