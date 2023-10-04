@@ -1724,3 +1724,11 @@ function BD2_connectWithWaypoint(nodeA, nodeB, createPort){
 	Print("connect with comp: " + waypoint.linkWaypointToInport(wp, nodeB, 0, createPort));
 	return wp;
 }
+
+/*
+	return the current NV group
+*/
+function BD2_getCurrentGroupNV(){
+    var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});
+    return view.group(nodeview[0]);
+}
