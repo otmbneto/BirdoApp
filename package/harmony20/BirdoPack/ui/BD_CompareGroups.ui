@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>774</width>
-    <height>640</height>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -261,6 +261,20 @@ QProgressBar::chunk {
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushCopyCoordA">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Copy all node positions in Nodeview from the other group.
+(only works if its a full match!)</string>
+       </property>
+       <property name="text">
+        <string>Copy Coordinates from B</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="labelInfoA">
        <property name="enabled">
         <bool>false</bool>
@@ -398,6 +412,20 @@ QLabel::disabled {
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushCopyCoordB">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Copy all node positions in Nodeview from the other group.
+(only works if its a full match!)</string>
+       </property>
+       <property name="text">
+        <string>Copy Coordinates from A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="labelInfoB">
        <property name="enabled">
         <bool>false</bool>
@@ -444,7 +472,7 @@ QLabel::disabled {
      </item>
     </layout>
    </item>
-   <item row="5" column="0" colspan="3">
+   <item row="6" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
      <item>
       <widget class="QProgressBar" name="progressBar">
@@ -627,7 +655,7 @@ QCheckBox::indicator:unchecked:disabled {
      </layout>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="5" column="0" colspan="3">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

@@ -28,14 +28,15 @@ function BD_CompareGroups(){
 	}
 		
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_CompareGroups.ui";
+	var nv_utils = require(projectDATA["paths"]["birdoPackage"] + "utils/nodeview_utils.js");
 
-	var d = new createInrterface(ui_path);
+	var d = new createInrterface(ui_path, nv_utils);
 	d.ui.show();
 	
 }
 
 
-function createInrterface(uifile){
+function createInrterface(uifile, nv_utils){
 
 	this.ui = UiLoader.load(uifile); 
 	
@@ -179,9 +180,13 @@ function createInrterface(uifile){
 				Print("Its a full match!");
 				this.ui.progressBar.format = "it's a full match! Groups are identicals!";
 				this.ui.progressBar.styleSheet = "QProgressBar {\ncolor: rgb(50,255,50);\n}";
+				this.ui.pushCopyCoordA.enabled = true;
+				this.ui.pushCopyCoordB.enabled = true;
 			} else {
 				this.ui.progressBar.format = "Groups are different! Check Info for details...";
 				this.ui.progressBar.styleSheet = "QProgressBar {\ncolor: rgb(240, 50, 50);\n}";
+				this.ui.pushCopyCoordA.enabled = false;
+				this.ui.pushCopyCoordB.enabled = false;
 			}
 			
 		} else {//se ja existe ele funciona como clear button
@@ -223,6 +228,26 @@ function createInrterface(uifile){
 		this.ui.progressBar.format = "[" + this.ui.progressBar.value + " of " + this.ui.progressBar.maximum + "]";
 	}
 	
+	this.onCopyCoordA = function(){
+		scene.beginUndoRedoAccum("Copy Coordinates from group B");
+		try{
+			nv_utils.copyGroupsNodeviewCoords(this.ui.labelB.text, this.ui.labelA.text);
+		}catch(e){
+			Print(e);
+		}
+		scene.endUndoRedoAccum();
+	}
+	
+	this.onCopyCoordB = function(){
+		scene.beginUndoRedoAccum("Copy Coordinates from group A");
+		try{
+			nv_utils.copyGroupsNodeviewCoords(this.ui.labelA.text, this.ui.labelB.text);
+		}catch(e){
+			Print(e);
+		}
+		scene.endUndoRedoAccum();		
+	}
+	
 	this.ui.activateWindow();
 	this.ui.raise();
 	
@@ -234,6 +259,8 @@ function createInrterface(uifile){
 	this.ui.groupBox.checkFilters.toggled.connect(this, this.onCheckFilters);
 	this.ui.buttonFindA.clicked.connect(this, this.onFindNodeA);
 	this.ui.buttonFindB.clicked.connect(this, this.onFindNodeB);
+	this.ui.pushCopyCoordA.clicked.connect(this, this.onCopyCoordA);
+	this.ui.pushCopyCoordB.clicked.connect(this, this.onCopyCoordB);
 	this.ui.groupBox.comboType["currentIndexChanged(QString)"].connect(this, this.updateFilters);
 	this.ui.groupBox.comboFilter["currentIndexChanged(QString)"].connect(this, this.updateFilters);
 
