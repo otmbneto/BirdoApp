@@ -105,6 +105,8 @@ function createInrterface(uifile, nv_utils){
 		this.ui.listWidgetA.enabled = enable;
 		this.ui.buttonFindA.enabled = enable;
 		this.ui.labelInfoA.enabled = enable;
+		this.ui.pushCopyCoordA.enabled = enable;
+		this.ui.pushCopyCoordB.enabled = enable;
 	}
 	
 	this.enableWidgetsB = function(enable){//habilita/desabilita os widgets do node B
