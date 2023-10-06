@@ -161,6 +161,16 @@ def rev_parse(repo):
 
     return subprocess.check_output(['git', 'rev-parse', repo], stdin=None, stderr=None,shell=False, universal_newlines=False).replace("\n","")
 
+def install_requirements(main_app=None):
+
+    python = sys.executable
+    requirements = os.path.join(main_app.app_root,"requirement.txt")
+    cmd = "{0} -m pip install -r {1}".format(python,requirements)
+    print cmd
+    os.system(cmd) if main_app is not None else 0
+
+    return
+
 def pull_remote_repo(main_app = None):
 
     return os.system(os.path.join(main_app.app_root,"update.bat")) if main_app is not None else 0
@@ -180,6 +190,7 @@ def first_update(main_app = None):
         main_app.ui.progressBar.setValue(0)
         return False
 
+    install_requirements(main_app=main_app)
     main_app.ui.progressBar.setValue(3)
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
 
