@@ -292,6 +292,7 @@ class BirdoApp(QtGui.QMainWindow):
     def on_init(self):
 
         fix_old_repos()
+        install_requirements(main_app=self)
         print "is updated: " + str(self.isRepoUpdated())
         if not self.isRepoUpdated():
             self.ui.stackedWidget.setCurrentIndex(1)
