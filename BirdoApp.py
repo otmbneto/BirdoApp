@@ -5,7 +5,7 @@ from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
 from app.utils.birdo_json import write_json_file,write_json_file_from_string
-from app.utils.check_updates import main_update,first_update,rev_parse,fix_old_repos
+from app.utils.check_updates import main_update,first_update,rev_parse,fix_old_repos,install_requirements
 from app.utils.system import SystemFolders, get_short_path_name
 from app.utils.harmony_utils import *
 from PySide import QtCore, QtGui, QtUiTools
@@ -292,6 +292,7 @@ class BirdoApp(QtGui.QMainWindow):
     def on_init(self):
 
         fix_old_repos()
+        install_requirements(main_app=self)
         print "is updated: " + str(self.isRepoUpdated())
         if not self.isRepoUpdated():
             self.ui.stackedWidget.setCurrentIndex(1)
