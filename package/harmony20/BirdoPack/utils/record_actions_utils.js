@@ -497,8 +497,24 @@ function chooseActionName(self, scripts_folder){
 }
 exports.chooseActionName = chooseActionName;
 
-
-
+//get backdrop modifications
+function getModBackdrops(initialBds, currentBds){
+	var bd_data = {
+		update_list: [],
+		remove_list: []
+	}
+	currentBds.forEach(function(item, index){
+		if(JSON.stringify(initialBds).indexOf(JSON.stringify(item)) == -1){
+			bd_data["update_list"].push(item);
+		}
+	});
+	initialBds.forEach(function(item, index){
+		if(!currentBds.some(function(x){ return x.title.text == item.title.text;})){
+			bd_data["remove_list"].push(item.title.text);
+		}
+	});
+	return bd_data;
+}
 /*
 //replace all matches in string
 function replaceAll(string, search, rep){
