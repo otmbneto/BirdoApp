@@ -14,6 +14,16 @@ sys.path.append(birdo_app_root)
 from app.config_project2 import config_project
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.birdo_json import write_json_file
+from app.utils.copy_file_pb import copy_file_pb
+
+
+def read_scenes_file(file):
+    """read scenes list files, and return scene names list"""
+    data = []
+    with open(file, "r") as f:
+        lines = f.read()
+        [[data.append(re.sub(r'(^\s|\s$)', "", item)) for item in re.sub(r'(\s|,)$', "", line).split(",")] for line in lines.split("\n")]
+    return data
 
 
 def get_input_list_item(title, list):
@@ -61,7 +71,7 @@ def filter_decimal_episode(scenes):
     return filter(lambda x: int(x[-1]) == 0, scenes)
 
 
-def main(proj_index, version, output_folder):
+def main(proj_index, version, output_folder, scenes_file):
     p_data = config_project(proj_index)
 
     # temp folder
@@ -95,13 +105,17 @@ def main(proj_index, version, output_folder):
     if not chosen_ep:
         return
     print 'chosen ep is : {0}'.format(chosen_ep)
+    ep_folder = os.path.join(p_data.server.root, p_data.paths.get_episode_scenes_path(chosen_ep, chosen_step))
 
     # list scenes in episode folder
-    ep_folder = os.path.join(p_data.server.root, p_data.paths.get_episode_scenes_path(chosen_ep, chosen_step))
-    scenes_list = filter(lambda x: bool(re.match(r'\w{3}_EP\d{3}_SC\d{4}', x)),  os.listdir(ep_folder))
-    print "... {0} scenes found in episode {1}".format(len(scenes_list), chosen_ep)
+    if bool(scenes_file):
+        scenes_list = read_scenes_file(scenes_file)
+        print "... {0} scenes found in scenes files {1}".format(len(scenes_list), scenes_file)
+    else:
+        scenes_list = filter(lambda x: bool(re.match(r'\w{3}_EP\d{3}_SC\d{4}', x)),  os.listdir(ep_folder))
+        print "... {0} scenes found in episode {1}".format(len(scenes_list), chosen_ep)
     if len(scenes_list) == 0:
-        print "ERROR! Cant find any scenes at folder: {0}".format(ep_folder)
+        print "ERROR! Cant find any scenes!"
         return
 
     # define delivery type : decimal or normal
@@ -142,7 +156,7 @@ def main(proj_index, version, output_folder):
             write_json_file(log_file, log_dict)
             continue
         temp_zip = os.path.join(temp_folder, os.path.basename(publish_zip))
-        if not p_data.server.download_file(publish_zip, temp_zip):
+        if not copy_file_pb(publish_zip, temp_zip):
             log_dict["status"] = '[ERROR!] Fail downloading temp zip file!'
             print log_dict["status"]
             counter_errors += 1
@@ -195,8 +209,7 @@ def main(proj_index, version, output_folder):
         compact_folder(converted_scene, converted_scene_zip)
 
         # send zip file to destiny
-        shutil.copy(converted_scene_zip, output_folder)
-        if not os.path.exists(os.path.join(output_folder, os.path.basename(converted_scene_zip))):
+        if not copy_file_pb(converted_scene_zip, os.path.join(output_folder, zip_name)):
             log_dict["status"] = '[ERROR!] Fail copying file to destiny: {0}'.format(converted_scene_zip)
             print log_dict["status"]
             counter_errors += 1
@@ -217,6 +230,7 @@ def main(proj_index, version, output_folder):
 if __name__ == "__main__":
     args = sys.argv
     proj = args[1]
+    scenes_f = args[2]
     print "proj index is: {0}".format(proj)
 
     # choose output folder
@@ -233,6 +247,6 @@ if __name__ == "__main__":
         print "ERROR! Invalid version! Choose version in format 'v01'".format(ver)
         sys.exit("ERROR! Invalid version!")
 
-    main(proj, ver, output_f)
+    main(proj, ver, output_f, scenes_f)
     os.system('pause')
     sys.exit('end of script!')
