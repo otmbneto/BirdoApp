@@ -21,21 +21,21 @@ Copyright:   leobazao_@Birdo
 
 
 //regex node (colors) shadow name
-var sh_regex = /^(.+_)?(SHADOW|SOMBRA)$/;
+var sh_regex = /^(SHADOW|SOMBRA)$/;
 
 
 function addWriteSombra_LEB(){
-
-	//shadow nodes in scene
-	var sh_nodes = findShadowNodes();
-	if(sh_nodes.length == 0){
-		Print("No shadow nodes in the scene! No need to separete!");
-		return;
-	}
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		return;
+	}
+	
+	//shadow nodes in scene
+	var sh_nodes = findShadowNodes(projectDATA);
+	if(sh_nodes.length == 0){
+		Print("No shadow nodes in the scene! No need to separete!");
 		return;
 	}
 	
@@ -152,13 +152,13 @@ function addColourOverride(clone_pallet){//add color override para eliminar as c
 }
 
 
-function findShadowNodes(){//lista nodes de sombra da cena
+function findShadowNodes(projData){//lista nodes de sombra da cena
 	var sh_nodes = []
 	var reads = node.getNodes(["READ"]);
 	reads.forEach(function(item){
 		var underNode = node.dstNode(item, 0, 0);
 		if(sh_regex.test(node.getName(item).toUpperCase()) && node.type(underNode) == "BLEND_MODE_MODULE"){
-			if(testIfNodeIsUsed(item)){
+			if(testIfNodeIsUsed(projData, item)){
 				sh_nodes.push(item);
 			}
 			node.setEnable(underNode, false);
@@ -167,14 +167,20 @@ function findShadowNodes(){//lista nodes de sombra da cena
 	return sh_nodes;
 }
 
-function testIfNodeIsUsed(nodeP){//testa se o node esta sendo usado na cena
+function testIfNodeIsUsed(pdata, nodeP){//testa se o node esta sendo usado na cena
+	
+	if(!node.getEnable(nodeP)){
+		return false;
+	}
+	
 	var col = node.linkedColumn(nodeP, "DRAWING.ELEMENT");
-	var exp_list = [];
 	for(var i=0; i<frame.numberOf(); i++){
 		var exp = column.getEntry(col, 1, i);
-		if(exp_list.indexOf(exp) == -1 && exp != "" && exp != "Zzero"){
-			exp_list.push(exp);
+		if(exp != "" && exp != "Zzero"){
+			if(BD2_isInCameraFrame(pdata, i, nodeP)){
+				return true;
+			}
 		}
 	}
-	return node.getEnable(nodeP) && exp_list.length > 0;
+	return false;
 }
