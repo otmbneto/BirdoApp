@@ -719,6 +719,26 @@ function BD2_getCameraFrameValue(atFrame){
 	return parseFloat((camScaleXY * cameraZfactor).toFixed(2));
 }
 
+/*Retorna se o node drawing está sendo usado no frame (se está enquadrado na camera - area de render)
+@projData => objeto de info dos projetos
+@atframe => frame para testar
+@node_path => path do node a ser testado
+*/
+function BD2_isInCameraFrame(projData, atframe, node_path){
+	
+	//get require utils files
+	var utils_script = projData.paths.birdoPackage + "utils/add_gradient_utils.js";
+	var utils = require(utils_script);
+	
+	var drawing_util_script = projData.paths.birdoPackage + "utils/drawing_api.js";
+	var drawing_util = require(drawing_util_script);
+	
+	//create rects
+	var nodeRect = utils.generateDrawingRectPosition(node_path, atframe, drawing_util);
+	var camRect = utils.getCameraRectPosition(atframe, drawing_util);
+	return camRect.intersects(nodeRect);
+	
+}
 
 //################BATCH#########################//
 /*Roda o script dado na cena dada
