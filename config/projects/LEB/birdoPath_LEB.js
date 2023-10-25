@@ -175,19 +175,19 @@ function BirdoProject(entity){
 			try{
 				require(get_psd_data_script).get_psd_anim_data(true);//exporta info dos psd
 			} catch(e){
-				MessageLog.trace(e.messsage);
+				MessageLog.trace(e.message);
 				MessageLog.trace("Error creating PSD files data!");
 			}
 			try{
 				require(add_writeSombras).addWriteSombra_LEB();
 			} catch(e){
-				MessageLog.trace(e.messsage);
+				MessageLog.trace(e.message);
 				MessageLog.trace("Error creating sombra layer!");
 			}				
 		} else {
 			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
 		}
-	}	
+	}
 	
 	this.getRenderComp = function(scene_name){//caminho do render da comp (direto na rede da birdo)
 		var name_arr = scene_name.split("_");
