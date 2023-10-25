@@ -30,8 +30,8 @@ function RectObject(box){
 	this.factor_convert = new Point2d(208.3, 156.25);
 	
 	//convert flag
-	this.current_state = 'drawing';//possibles as 'drawing' and 'fields'
-	this.ogl  = false;
+	this.current_state = 'drawing';//possibles are 'drawing' and 'fields'
+	this.ogl = false;
 	
 	//Methods
 	this.toDrawing = function(){//convert points do drawing coordinate
@@ -175,6 +175,18 @@ function RectObject(box){
 			}
 		}
 		return this.x0 == rect2.x0 && this.x1 == rect2.x1 && this.y0 == rect2.y0 && this.y1 == rect2.y1;		
+	}
+	
+	this.intersectsPoint = function(p3d){
+		return (p3d.x >= this.x0 &&  p3d.x <= this.x1) && (p3d.y >= this.y0 &&  p3d.y <= this.y1);	
+	}
+	
+	this.intersects = function(rect2){
+		var check1 = this.intersectsPoint(rect2.topLeftCorner());	
+		var check2 = this.intersectsPoint(rect2.topRigthCorner());
+		var check3 = this.intersectsPoint(rect2.bottomLeftCorner());
+		var check4 = this.intersectsPoint(rect2.bottomRigthCorner());
+		return check1 || check2 || check3 || check4;
 	}
 	
 	this.unite = function(rect2){

@@ -229,6 +229,24 @@ function getRigCordinatesSelection(read_list, atframe, draw_util){
 	return rect;
 }
 
+//return camera box rect
+function getCameraRectPosition(atframe, draw_util){
+	
+	var cam_matrix = scene.getCameraMatrix(atframe);
+	var cam_box =  {
+		"x0": -3333,
+		"x1": 3333,
+		"y0": -1875,
+		"y1": 1875
+	}
+	var dRect = new draw_util.RectObject(cam_box);
+	dRect.toFields();
+	dRect.multiplyMatrix(cam_matrix);
+	return dRect;
+	
+}	
+exports.getCameraRectPosition = getCameraRectPosition;
+
 //cria rect do node individual no frame
 function generateDrawingRectPosition(node_path, atframe, draw_util){
 	
