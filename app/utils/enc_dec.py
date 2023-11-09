@@ -1,10 +1,11 @@
 import string
+import re
 
 
 class PswEncDec:
     """decodificador e enc de strings"""
     def __init__(self):
-        self.allChars = string.ascii_letters + " " + str(string.digits) + string.punctuation
+        self.allChars = string.ascii_letters + " " + str(string.digits) + re.sub(r'(\"|\')', "", string.punctuation)
 
     def enc(self, toenc):
         enc = ""
