@@ -23,6 +23,8 @@ Copyright:   leobazao_@Birdo
 //regex node (colors) shadow name
 var sh_regex = /^(SHADOW|SOMBRA)$/;
 
+var sh_node_regex = /(SHADOW|SOMBRA)/;
+
 
 function addWriteSombra_LEB(){
 	
@@ -157,7 +159,7 @@ function findShadowNodes(projData){//lista nodes de sombra da cena
 	var reads = node.getNodes(["READ"]);
 	reads.forEach(function(item){
 		var underNode = node.dstNode(item, 0, 0);
-		if(sh_regex.test(node.getName(item).toUpperCase()) && node.type(underNode) == "BLEND_MODE_MODULE"){
+		if(sh_node_regex.test(node.getName(item).toUpperCase()) && node.type(underNode) == "BLEND_MODE_MODULE"){
 			if(testIfNodeIsUsed(projData, item)){
 				sh_nodes.push(item);
 			}
