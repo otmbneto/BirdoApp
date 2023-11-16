@@ -114,6 +114,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 5,
+			"prefix": "PPY",
+			"name": "Papaya",
+			"harmony" : {
+					"version" : "20.0.0",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_PPY.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }

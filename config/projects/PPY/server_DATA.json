@@ -1,0 +1,99 @@
+{
+	"paths": {
+		"root": "//192.168.10.101/projects/195_Papaya/",
+		"projRoot": "",
+		"assetLib": {
+				"bg": "02_BG/",
+				"character": "02_CHARACTER/",
+				"prop": "03_PROP/"
+				},
+		"episodes": "01_EPISODIOS/",
+		"step": {
+			"ANIM": {
+				"folder_name": "02_ANIM",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				},
+			"RENDER": [
+				"00_ANIMATIC",
+				"01_SETUP",
+				"02_ANIMATION",
+				"03_COMP"
+				],
+			"SETUP": {
+				"folder_name": "01_SETUP",
+				"server": [
+					"PUBLISH",
+					"REVIEW"
+					],
+				"local": [
+					"BG",
+					"PUBLISH",
+					"REVIEW",
+					"WORK"
+					]					
+				}
+			},
+		"library": "00_BIBLIOTECA/",
+		"roteiros": "04_ROTEIROS/",
+		"tblib": "_tbLib/",
+		"batch_scripts": "_tbLib/batch_scripts",
+		"fazendinha": "_tbLib/_Fazendinha/",
+		"render_comp": "//192.168.10.101/projects/195_Papaya/01_EPISODIOS/{EP}/03_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"packUpdate": "_tbLib/_birdoApp/"
+		},
+	"server": {
+		"type": "vpn",
+		"url" : null,
+		"login": false
+	},
+	"pipeline": {
+		"type": "monday",
+		"login": "suporte@birdo.com.br",
+		"projectName": "PAPAYA",
+		"projectId": 195,
+		"assetsTypes": [
+					"Character", 
+					"Prop", 
+					"BG", 
+					"FX",
+					"Misc",
+					"Ilustra"
+					],
+		"assets_digits": 3,
+		"boards": {
+				"filter": "PPY",
+				"Character": {
+					"name": "PPY | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
+					"prefix": "CH"
+				},
+				"Misc": {
+					"name": "PPY | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
+					"prefix": "MI"
+				},
+				"Prop": {
+					"name": "PPY | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
+					"prefix": "PR"
+				},
+				"FX": {
+					"name": "PPY | INVENTARIO DE ARTE",
+					"subgroup": "INVENTARIO DE ARTE",
+					"prefix": "FX"
+				}
+		},
+		"scriptName": "pipelineScript",
+		"url": "https://api.monday.com/v2",
+		"apiKey": "DZ\"MI%NV=Z<=a.]ob%bEU)}lF-EA_C~A JRI2QpkIZ5MA((2P9NU4,>9YV~67\\!(>e{t_muxeu\\h`@NyfFiplRqJJZN(Q6%:X':-5/@2%?*!,|;t@fnj%i;a?;qHmybie~WW!j\"TBrW\"C6 8J<^/Z_&.i\\}..|gf?fn^.*@/br_b|_QIiLTM%?\"&+P-4EB[$3)IQWg9f?3\\pn#xv%idkoZ%sAG~ECR'U6" 
+	},
+	"project_font": "Arial"
+}
