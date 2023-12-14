@@ -25,6 +25,8 @@ var sh_regex = /^(SHADOW|SOMBRA)$/;
 
 var sh_node_regex = /(SHADOW|SOMBRA)/;
 
+var asset_regex = /^[A-Z]{2}\d{3}_\w+(_v\d+)?(_\d+)?$/;
+
 
 function addWriteSombra_LEB(){
 	
@@ -42,15 +44,15 @@ function addWriteSombra_LEB(){
 	}
 	
 	//add matte lines
-	add_write_sombra(projectDATA);
+	add_write_sombra(projectDATA, sh_nodes);
 }
 exports.addWriteSombra_LEB = addWriteSombra_LEB;
 
 
-function add_write_sombra(proj_data, write_node){
+function add_write_sombra(proj_data, sombra_nodes){
 	
 	//find list of shadow colors
-	var shadow_color_list = [];
+	var shadow_color_list = getNodesUsedColors(sombra_nodes);
 	var plist = PaletteObjectManager.getScenePaletteList();
 	
 	//cloned pallet
@@ -60,20 +62,6 @@ function add_write_sombra(proj_data, write_node){
 	var defaltColor = clone_pallet.getColorByIndex(0);
 	clone_pallet.removeColor(defaltColor.id);
 	Print("new matte pallete created: " + clone_pallet.getName());
-	
-	for(var i=0; i<plist.numPalettes; i++){
-		var palette = plist.getPaletteByIndex(i);
-		for(var y=0; y<palette.nColors; y++){
-			var cor = palette.getColorByIndex(y);
-			if(!cor.isValid || !cor.name || cor.colorType == undefined){
-				Print("Color not valid: " + cor.name);
-				continue;		
-			}
-			if(sh_regex.test(cor.name.toUpperCase()) && shadow_color_list.indexOf(cor) == -1){
-				shadow_color_list.push(cor);
-			}
-		}
-	}
 	
 	Print(shadow_color_list.length + " cores de shadow encontradas...");
 		
@@ -167,6 +155,29 @@ function findShadowNodes(projData){//lista nodes de sombra da cena
 		}
 	});
 	return sh_nodes;
+}
+
+function getNodesUsedColors(nodes){
+	//return list of used colors in given nodes
+	var used_colors = new Array();
+	var idCheckList = new Array();
+	nodes.forEach(function(item){
+		var elementId = node.getElementId(item);
+		var elementPaletteList = PaletteObjectManager.getPaletteListByElementId(elementId);
+		for(var j=0; j<Drawing.numberOf(elementId); j++){
+			var drawingId = Drawing.name(elementId, j);
+			var colorArray = DrawingTools.getDrawingUsedColors({elementId: elementId, exposure: drawingId});
+			colorArray.forEach(function(colorID){
+				var palettID = elementPaletteList.findPaletteOfColor(colorID);
+				var cor = palettID.getColorById(colorID);
+				if(idCheckList.indexOf(cor.id) == -1){
+					used_colors.push(cor);
+					idCheckList.push(cor.id);
+				}	
+			});
+		}
+	});	
+	return used_colors;
 }
 
 function testIfNodeIsUsed(pdata, nodeP){//testa se o node esta sendo usado na cena
