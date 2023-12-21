@@ -20,12 +20,15 @@ Copyright:   leobazao_@Birdo
 
 //cria objeto com info de posicao (rect) para cada frame
 function getTimelineRectPosition(read_list, draw_util, useProgressBar){
+
 	var timeline_data = {
 		is_valid: false,
 		rect_list: []	
 	}
+
 	//frame 1 rect 
 	var rect1 = getRigCordinatesSelection(read_list, 1, draw_util);
+
 	if(Boolean(rect1)){
 		timeline_data["is_valid"] = true;
 		timeline_data["rect_list"].push(rect1);		
@@ -51,6 +54,7 @@ function getTimelineRectPosition(read_list, draw_util, useProgressBar){
 				return false;
 			}
 		}
+
 		var rect = getRigCordinatesSelection(read_list, i, draw_util);
 		if(!rect){
 			continue;
@@ -251,7 +255,7 @@ exports.getCameraRectPosition = getCameraRectPosition;
 function generateDrawingRectPosition(node_path, atframe, draw_util){
 	
 	var node_matrix = node.getMatrix(node_path, atframe);
-	var def_matrix_list = getDeformationMatrixList(node_path, atframe);
+	//var def_matrix_list = getDeformationMatrixList(node_path, atframe);
 	var box = getNodeBox(node_path, atframe);
 	if(!box){
 		Print("No drawing box found in node: " + node_path);
@@ -260,10 +264,10 @@ function generateDrawingRectPosition(node_path, atframe, draw_util){
 	var dRect = new draw_util.RectObject(box);
 	dRect.toFields();
 
-	//apply deformation matrix to drawing
+	/*/apply deformation matrix to drawing
 	if(def_matrix_list){
 		dRect.applyDeformation(def_matrix_list);
-	}
+	}*/
 	
 	dRect.multiplyMatrix(node_matrix);
 

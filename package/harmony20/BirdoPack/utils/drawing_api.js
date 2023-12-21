@@ -157,9 +157,9 @@ function RectObject(box){
 	
 	this.changeState = function(stateName){//change current state to state name
 		if(stateName == "fields"){
-			rect2.toFields();
+			this.toFields();
 		} else if(stateName == "drawing"){
-			rect2.toDrawing();	
+			this.toDrawing();	
 		}
 	}	
 	
