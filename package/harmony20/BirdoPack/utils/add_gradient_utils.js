@@ -221,7 +221,11 @@ function getRigCordinatesSelection(read_list, atframe, draw_util){
 	var rect = null;
 	read_list.forEach(function(item, index){
 		var node_rect = generateDrawingRectPosition(item, atframe, draw_util);
-		if(index == 0){
+		if(!node_rect){
+			Print("No rect for node : " + item + " at frame: "+ atframe);
+			return;
+		}
+		if(!rect){
 			rect = node_rect; 
 			return;
 		}
@@ -229,6 +233,9 @@ function getRigCordinatesSelection(read_list, atframe, draw_util){
 			rect.unite(node_rect);
 		}
 	});
+	if(!rect){
+		return false;
+	}
 	rect["frame"] = atframe;
 	return rect;
 }
@@ -258,7 +265,7 @@ function generateDrawingRectPosition(node_path, atframe, draw_util){
 	//var def_matrix_list = getDeformationMatrixList(node_path, atframe);
 	var box = getNodeBox(node_path, atframe);
 	if(!box){
-		Print("No drawing box found in node: " + node_path);
+		//Print("No drawing box found in node: " + node_path);
 		return false;
 	}
 	var dRect = new draw_util.RectObject(box);
