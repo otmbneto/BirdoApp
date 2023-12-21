@@ -520,7 +520,7 @@ function BD2_ConnectNodeUnder(selectedNode, nodeToConnect, ports, connect_btween
 @type => node type like "BLUR".. "WRITE"...
 @end_connection => if its a end type node like Display or Write (bool)
 */
-function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection){
+function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection, nodePort){
 
 	var parentGroup = node.parentNode(nodeSel);
 	var x = node.coordX(nodeSel);
@@ -533,9 +533,9 @@ function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection){
 	} else {
 		newX = x;
 	}
-
-	var nodePort = node.numberOfOutputPorts(nodeSel) -1;
-	
+	if(nodePort == undefined){
+		var nodePort = node.numberOfOutputPorts(nodeSel) -1;
+	}	
 	var newNode = node.add(parentGroup, nodeName, type, newX, newY, 0);
 
 	if(!end_connection){
