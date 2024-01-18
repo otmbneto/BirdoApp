@@ -141,7 +141,7 @@
       <pt constSeg="true" x="1" yLocal="0" y="0"/>
      </points>
     </column>
-    <column type="0" name="ATV-0ACA463400A0184F" color="#FFFFFFFF" displayOrder="3" width="100" anonymous="true" id="4">
+    <column type="0" name="ATV-0ACA463400A0184F" color="#FFFFFFFF" displayOrder="4" width="100" anonymous="true" id="4">
      <elementSeq exposures="1-500" val="1" id="4"/>
     </column>
     <column type="3" name="ATV-0ACA463400A01851" color="#C7C6BBFF" displayOrder="23" width="100" anonymous="true">
@@ -435,7 +435,7 @@
      <collapsed val="false"/>
     </options>
     <nodeslist>
-     <group name="REF_ANIM-G" pos="308,438,3">
+     <group name="REF_ANIM-G" pos="308,438,5">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -778,7 +778,7 @@
        <link out="LINEUP" in="Composite" inport="1"/>
       </linkedlist>
      </group>
-     <group name="SETUP" pos="719,491,2">
+     <group name="SETUP" pos="719,491,1">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -786,7 +786,7 @@
       </options>
       <attrs/>
       <nodeslist>
-       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="118,127,10">
+       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="103,127,1">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -801,7 +801,7 @@
          <port type="PEG" idx="6"/>
         </ports>
        </module>
-       <module type="COMPOSITE" name="PREVIEW" pos="110,507,17" publishUnderTab="Composite_1">
+       <module type="COMPOSITE" name="PREVIEW" pos="134,514,2" publishUnderTab="Composite_1">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -820,19 +820,19 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,16" publishUnderTab="Display_1">
+       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,17" publishUnderTab="Display_1">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="DISPLAY" name="_FINAL" pos="562,585,11" publishUnderTab="Display_PREVIEW">
+       <module type="DISPLAY" name="_FINAL" pos="562,585,14" publishUnderTab="Display_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="COMPOSITE" name="FINAL" pos="565,459,9" publishUnderTab="PREVIEW">
+       <module type="COMPOSITE" name="FINAL" pos="565,459,13" publishUnderTab="PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -851,7 +851,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="WRITE" name="Write_FINAL" pos="655,518,3" publishUnderTab="Write_PREVIEW">
+       <module type="WRITE" name="Write_FINAL" pos="655,518,7" publishUnderTab="Write_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -888,7 +888,7 @@
          <cleanUpPartitionFolders val="true"/>
         </attrs>
        </module>
-       <module type="FADE" name="Transparency" pos="-25,461,13" publishUnderTab="Transparency">
+       <module type="FADE" name="Transparency" pos="-12,568,3" publishUnderTab="Transparency">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -897,7 +897,7 @@
          <transparency val="50" defaultValue="50" col="ATV-0ACA463400A01841"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility" pos="-26,330,15" publishUnderTab="Visibility">
+       <module type="VISIBILITY" name="Visibility" pos="-26,330,16" publishUnderTab="Visibility">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -907,7 +907,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="SAFE_AREA" pos="-230,268,1" publishUnderTab="SAFE_AREA">
+       <module type="READ" name="SAFE_AREA" pos="-230,268,6" publishUnderTab="SAFE_AREA">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -1020,7 +1020,7 @@
          <tileVertical val="false"/>
         </attrs>
        </module>
-       <module type="COMPOSITE" name="PREVIEW_ANIMATIC" pos="-41,625,14" publishUnderTab="PREVIEW_ANIMATIC">
+       <module type="COMPOSITE" name="PREVIEW_ANIMATIC" pos="-41,625,4" publishUnderTab="PREVIEW_ANIMATIC">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -1039,7 +1039,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="PEG" name="Burn-In-P" pos="-26,217,8" publishUnderTab="Burn-In-P">
+       <module type="PEG" name="Burn-In-P" pos="-26,217,12" publishUnderTab="Burn-In-P">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -1101,7 +1101,7 @@
          <addCompositeToGroup val="true"/>
         </attrs>
        </module>
-       <module type="BurnIn" name="Burn-In" pos="-28,268,6" publishUnderTab="Burn-In">
+       <module type="BurnIn" name="Burn-In" pos="-28,268,10" publishUnderTab="Burn-In">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -1131,7 +1131,7 @@
          <font val="arial"/>
         </attrs>
        </module>
-       <module type="NOTE" name="SETUP_INFO" pos="120,78,4" publishUnderTab="Note">
+       <module type="NOTE" name="SETUP_INFO" pos="105,78,8" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1142,7 +1142,7 @@
 data: 16/11/2023"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,12" publishUnderTab="Visibility_1">
+       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,15" publishUnderTab="Visibility_1">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -1153,7 +1153,7 @@ data: 16/11/2023"/>
          <softrender val="false"/>
         </attrs>
        </module>
-       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="114,31,7" publishUnderTab="NAO_DELETAR">
+       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="99,31,11" publishUnderTab="NAO_DELETAR">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1213,7 +1213,7 @@ data: 16/11/2023"/>
          <files/>
         </attrs>
        </module>
-       <module type="NOTE" name="proj" pos="134,-3,5" publishUnderTab="Note">
+       <module type="NOTE" name="proj" pos="119,-3,9" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1230,14 +1230,14 @@ data: 16/11/2023"/>
        <link out="Multi-Port-In" outport="1" in="FINAL" inport="1"/>
        <link out="Multi-Port-In" outport="2" in="PREVIEW" inport="2"/>
        <link out="Multi-Port-In" outport="2" in="FINAL" inport="2"/>
-       <link out="Multi-Port-In" outport="3" in="PREVIEW_ANIMATIC" inport="2"/>
+       <link out="Multi-Port-In" outport="3" in="PREVIEW_ANIMATIC" inport="1"/>
        <link out="Multi-Port-In" outport="4" in="Transparency"/>
-       <link out="Multi-Port-In" outport="5" in="PREVIEW_ANIMATIC" inport="1"/>
+       <link out="Multi-Port-In" outport="5" in="PREVIEW_ANIMATIC" inport="3"/>
        <link out="Multi-Port-In" outport="6" in="SAFE_AREA" inport="0"/>
        <link out="PREVIEW" in="PREVIEW_ANIMATIC" inport="0"/>
        <link out="FINAL" in="_FINAL"/>
        <link out="FINAL" in="Write_FINAL"/>
-       <link out="Transparency" in="PREVIEW_ANIMATIC" inport="3"/>
+       <link out="Transparency" in="PREVIEW_ANIMATIC" inport="2"/>
        <link out="Visibility" in="PREVIEW" inport="3"/>
        <link out="Visibility" in="PREVIEW_ANIMATIC" inport="4"/>
        <link out="SAFE_AREA" in="Visibility_1"/>
@@ -1248,7 +1248,7 @@ data: 16/11/2023"/>
        <link out="Visibility_1" in="PREVIEW_ANIMATIC" inport="5"/>
       </linkedlist>
      </group>
-     <group name="ANIMATIC_" pos="306,181,5">
+     <group name="ANIMATIC_" pos="306,181,2">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -1256,7 +1256,7 @@ data: 16/11/2023"/>
       </options>
       <attrs/>
       <nodeslist>
-       <module type="COMPOSITE" name="Comp_Animatic" pos="7,104,2" publishUnderTab="Composite">
+       <module type="COMPOSITE" name="Comp_Animatic" pos="7,104,1" publishUnderTab="Composite">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1275,7 +1275,7 @@ data: 16/11/2023"/>
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="18,-126,1">
+       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="18,-126,2">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1298,7 +1298,7 @@ data: 16/11/2023"/>
        <link out="Comp_Animatic" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="_NOTES" pos="605,224,4">
+     <group name="_NOTES" pos="605,224,3">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -1695,7 +1695,7 @@ data: 16/11/2023"/>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <group name="BG-G" pos="1099,221,1">
+     <group name="BG-G" pos="1099,221,4">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -1953,6 +1953,11 @@ data: 16/11/2023"/>
      <link out="BG-G-P" in="BG-G"/>
     </linkedlist>
     <backdrops>
+     <backdrop topLeft="563,114" bottomRight="754,292">
+      <background color="#DCAA32FF"/>
+      <title text="NOTES" color="#000000FF" size="14" font="Arial"/>
+      <description text="" color="#000000FF" size="14" font="Arial"/>
+     </backdrop>
      <backdrop topLeft="1034,125" bottomRight="1267,285">
       <background color="#077F04FF"/>
       <title text="BG" color="#000000FF" size="14" font="Arial"/>
@@ -1984,11 +1989,6 @@ data: 16/11/2023"/>
       <title text="NUNCA USE DISPLAY ALL" color="#000000FF" size="14" font="Arial"/>
       <description text="USE DISPLAY PREVIEW
 " color="#000000FF" size="14" font="Arial"/>
-     </backdrop>
-     <backdrop topLeft="563,114" bottomRight="754,292">
-      <background color="#DCAA32FF"/>
-      <title text="NOTES" color="#000000FF" size="14" font="Arial"/>
-      <description text="" color="#000000FF" size="14" font="Arial"/>
      </backdrop>
      <backdrop topLeft="21,-43" bottomRight="518,286">
       <background color="#E30F69FF"/>
