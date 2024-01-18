@@ -225,27 +225,30 @@ function BD2_get_node_connections_data(node_path){
 	copia as conexoes do nodeConnections data object da funcao get_node_connections_data
 	para o node dado
 */
-function BD2_connect_node(connections_data, node_path){
+function BD2_connect_node(connections_data, node_path, connection){
 	//connect inputs
 	Print(">> Connect nodes (SOURCE NODE): " + node_path.source_node);
 	Print("reconnect inputs: ");
-	connections_data.input.forEach(function(node_info, p){
-		if(node_info && !node.isLinked(node_info, p)){
-			Print(node.link(node_info.node, node_info.port, node_path, p));
-		}
-	});	
-
+	if(!connection || connection == "input"){
+		connections_data.input.forEach(function(node_info, p){
+			if(node_info){
+				Print(node.link(node_info.node, node_info.port, node_path, p, !node.isLinked(node_info.node, node_info.port), true));
+			}
+		});
+	}
 	//connect outputs
 	Print("reconnect outputs: ");
-	connections_data.output.forEach(function(links, p){
-		if(links.length != 0){
-			links.forEach(function(node_info, link){
-				if(!node.dstNodeInfo(node_path, p, link)){
-					Print(node.link(node_path, p, node_info.node, node_info.port));
-				}
-			});
-		}
-	});	
+	if(!connection || connection == "output"){
+		connections_data.output.forEach(function(links, p){
+			if(links.length != 0){
+				links.forEach(function(node_info, link){
+					if(!node.dstNodeInfo(node_path, p, link)){
+						Print(node.link(node_path, p, node_info.node, node_info.port));
+					}
+				});
+			}
+		});
+	}	
 }
 
 
