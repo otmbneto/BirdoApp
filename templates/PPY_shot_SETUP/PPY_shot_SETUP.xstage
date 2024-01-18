@@ -21,13 +21,13 @@
  </elements>
  <options>
   <metrics unitAspectRatioX="4" unitAspectRatioY="3" numberOfUnitsX="24" numberOfUnitsY="24" numberOfUnitsZ="12"/>
-  <resolution size="2560,1384" fovFit="VerticalFitFov" fov="41.112090439166927" projection="PerspectiveProjection"/>
+  <resolution name="HDTV_1080p24" size="1920,1080" fovFit="VerticalFitFov" fov="41.112090439166927" projection="PerspectiveProjection"/>
   <framerate val="24"/>
   <zdragging val="true"/>
   <zOrderCompatibilityWith7_3 val="false"/>
-  <pixelPerModelUnitForVectorLayers val="0.36906666666666677"/>
-  <pixelPerModelUnitForBitmapLayers val="0.36906666666666677"/>
-  <canvasForBitmapLayers size="5120,2768"/>
+  <pixelPerModelUnitForVectorLayers val="0.28800000000000009"/>
+  <pixelPerModelUnitForBitmapLayers val="0.28800000000000009"/>
+  <canvasForBitmapLayers size="3840,2160"/>
   <cameraInSymbols val="true"/>
   <scaleFactor val="1"/>
  </options>
@@ -117,14 +117,14 @@
      <step val="1" start="1" stop="1"/>
      <noFrames/>
      <points version="2">
-      <pt constSeg="true" x="1" yLocal="9.651214599609375" y="9.651214599609375"/>
+      <pt constSeg="true" x="1" yLocal="10.112432423841408" y="10.112432423841408"/>
      </points>
     </column>
     <column type="3" name="ATV-0ACA463400A01849" color="#C7C6BBFF" displayOrder="20" width="100" anonymous="true">
      <step val="1" start="1" stop="1"/>
      <noFrames/>
      <points version="2">
-      <pt constSeg="true" x="1" yLocal="0.26133576042771267" y="0.26133576042771267"/>
+      <pt constSeg="true" x="1" yLocal="0.2078075679692496" y="0.2078075679692496"/>
      </points>
     </column>
     <column type="3" name="ATV-0ACA463400A0184B" color="#C7C6BBFF" displayOrder="21" width="100" anonymous="true">
@@ -435,7 +435,7 @@
      <collapsed val="false"/>
     </options>
     <nodeslist>
-     <group name="REF_ANIM-G" pos="308,438,5">
+     <group name="REF_ANIM-G" pos="308,438,7">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -544,7 +544,6 @@
        </module>
        <module type="READ" name="REF_ANIM" pos="234,455,3" publishUnderTab="LEMBRETES">
         <options>
-         <locked val="true"/>
          <collapsed val="true"/>
          <version val="1"/>
         </options>
@@ -778,7 +777,7 @@
        <link out="LINEUP" in="Composite" inport="1"/>
       </linkedlist>
      </group>
-     <group name="SETUP" pos="719,491,1">
+     <group name="SETUP" pos="719,491,3">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -820,19 +819,19 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,17" publishUnderTab="Display_1">
+       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,16" publishUnderTab="Display_1">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="DISPLAY" name="_FINAL" pos="562,585,14" publishUnderTab="Display_PREVIEW">
+       <module type="DISPLAY" name="_FINAL" pos="562,585,13" publishUnderTab="Display_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="COMPOSITE" name="FINAL" pos="565,459,13" publishUnderTab="PREVIEW">
+       <module type="COMPOSITE" name="FINAL" pos="565,459,12" publishUnderTab="PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -851,7 +850,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="WRITE" name="Write_FINAL" pos="655,518,7" publishUnderTab="Write_PREVIEW">
+       <module type="WRITE" name="Write_FINAL" pos="655,518,6" publishUnderTab="Write_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -897,7 +896,7 @@
          <transparency val="50" defaultValue="50" col="ATV-0ACA463400A01841"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility" pos="-26,330,16" publishUnderTab="Visibility">
+       <module type="VISIBILITY" name="Visibility" pos="-26,330,15" publishUnderTab="Visibility">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -907,7 +906,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="SAFE_AREA" pos="-230,268,6" publishUnderTab="SAFE_AREA">
+       <module type="READ" name="SAFE_AREA" pos="-230,268,5" publishUnderTab="SAFE_AREA">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -1039,7 +1038,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="PEG" name="Burn-In-P" pos="-26,217,12" publishUnderTab="Burn-In-P">
+       <module type="PEG" name="Burn-In-P" pos="-26,217,11" publishUnderTab="Burn-In-P">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -1101,7 +1100,7 @@
          <addCompositeToGroup val="true"/>
         </attrs>
        </module>
-       <module type="BurnIn" name="Burn-In" pos="-28,268,10" publishUnderTab="Burn-In">
+       <module type="BurnIn" name="Burn-In" pos="-28,268,9" publishUnderTab="Burn-In">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -1131,7 +1130,7 @@
          <font val="arial"/>
         </attrs>
        </module>
-       <module type="NOTE" name="SETUP_INFO" pos="105,78,8" publishUnderTab="Note">
+       <module type="NOTE" name="SETUP_INFO" pos="105,78,7" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1142,7 +1141,7 @@
 data: 16/11/2023"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,15" publishUnderTab="Visibility_1">
+       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,14" publishUnderTab="Visibility_1">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -1153,7 +1152,7 @@ data: 16/11/2023"/>
          <softrender val="false"/>
         </attrs>
        </module>
-       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="99,31,11" publishUnderTab="NAO_DELETAR">
+       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="99,31,10" publishUnderTab="NAO_DELETAR">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1213,7 +1212,7 @@ data: 16/11/2023"/>
          <files/>
         </attrs>
        </module>
-       <module type="NOTE" name="proj" pos="119,-3,9" publishUnderTab="Note">
+       <module type="NOTE" name="proj" pos="119,-3,8" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -1248,7 +1247,7 @@ data: 16/11/2023"/>
        <link out="Visibility_1" in="PREVIEW_ANIMATIC" inport="5"/>
       </linkedlist>
      </group>
-     <group name="ANIMATIC_" pos="306,181,2">
+     <group name="ANIMATIC_" pos="306,181,4">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -1298,7 +1297,7 @@ data: 16/11/2023"/>
        <link out="Comp_Animatic" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="_NOTES" pos="605,224,3">
+     <group name="_NOTES" pos="605,224,5">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -1348,7 +1347,7 @@ data: 16/11/2023"/>
        <link out="Composite" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <module type="PEG" name="Camera-P" pos="78,2,7" publishUnderTab="Camera-P">
+     <module type="PEG" name="Camera-P" pos="78,2,9" publishUnderTab="Camera-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1410,7 +1409,7 @@ data: 16/11/2023"/>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="BG" pos="1110,275,8" publishUnderTab="BG">
+     <module type="COMPOSITE" name="BG" pos="1110,275,10" publishUnderTab="BG">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1429,7 +1428,7 @@ data: 16/11/2023"/>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="NOTES" pos="614,279,11" publishUnderTab="NOTES">
+     <module type="COMPOSITE" name="NOTES" pos="614,279,1" publishUnderTab="NOTES">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1448,7 +1447,7 @@ data: 16/11/2023"/>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="CAMERA" name="Camera" pos="44,132,12" publishUnderTab="Camera">
+     <module type="CAMERA" name="Camera" pos="44,132,13" publishUnderTab="Camera">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1470,7 +1469,7 @@ data: 16/11/2023"/>
        <farPlane val="1000" defaultValue="1000"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,13" publishUnderTab="ANIMATIC-P-P">
+     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,14" publishUnderTab="ANIMATIC-P-P">
       <options>
        <disabled val="true"/>
        <collapsed val="true"/>
@@ -1533,7 +1532,7 @@ data: 16/11/2023"/>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="CHAR" pos="739,31,9" publishUnderTab="CHAR">
+     <module type="COMPOSITE" name="CHAR" pos="739,31,11" publishUnderTab="CHAR">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1552,7 +1551,7 @@ data: 16/11/2023"/>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P" pos="315,132,14" publishUnderTab="ANIMATIC-P">
+     <module type="PEG" name="ANIMATIC-P" pos="315,132,15" publishUnderTab="ANIMATIC-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1614,7 +1613,7 @@ data: 16/11/2023"/>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="PEG" name="_NOTES-P" pos="613,173,10" publishUnderTab="_NOTES-P">
+     <module type="PEG" name="_NOTES-P" pos="613,173,12" publishUnderTab="_NOTES-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1676,7 +1675,7 @@ data: 16/11/2023"/>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="FX" pos="863,283,15" publishUnderTab="FX">
+     <module type="COMPOSITE" name="FX" pos="863,283,16" publishUnderTab="FX">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1695,7 +1694,7 @@ data: 16/11/2023"/>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <group name="BG-G" pos="1099,221,4">
+     <group name="BG-G" pos="1099,221,6">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -1871,7 +1870,7 @@ data: 16/11/2023"/>
        <link out="MASTER-BG" in="CAMERA"/>
       </linkedlist>
      </group>
-     <module type="PEG" name="BG-G-P" pos="1107,170,6" publishUnderTab="BG-G-P">
+     <module type="PEG" name="BG-G-P" pos="1107,170,8" publishUnderTab="BG-G-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1953,6 +1952,12 @@ data: 16/11/2023"/>
      <link out="BG-G-P" in="BG-G"/>
     </linkedlist>
     <backdrops>
+     <backdrop topLeft="262,369" bottomRight="476,473">
+      <background color="#9A0707FF"/>
+      <title text="REF ANIM" color="#000000FF" size="14" font="Arial"/>
+      <description text="Turn ON and OFF conforme necessario
+" color="#000000FF" size="14" font="Arial"/>
+     </backdrop>
      <backdrop topLeft="563,114" bottomRight="754,292">
       <background color="#DCAA32FF"/>
       <title text="NOTES" color="#000000FF" size="14" font="Arial"/>
@@ -1962,12 +1967,6 @@ data: 16/11/2023"/>
       <background color="#077F04FF"/>
       <title text="BG" color="#000000FF" size="14" font="Arial"/>
       <description text="" color="#000000FF" size="14" font="Arial"/>
-     </backdrop>
-     <backdrop topLeft="262,369" bottomRight="476,473">
-      <background color="#9A0707FF"/>
-      <title text="REF ANIM" color="#000000FF" size="14" font="Arial"/>
-      <description text="Turn ON and OFF conforme necessario
-" color="#000000FF" size="14" font="Arial"/>
      </backdrop>
      <backdrop topLeft="268,97" bottomRight="453,228">
       <background color="#E30FA0FF"/>
