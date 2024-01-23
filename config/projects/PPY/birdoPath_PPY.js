@@ -34,7 +34,7 @@ function BirdoProject(entity){
 		"COMP": "NO_COLOUR_SPACE"
 	};
 	this.resolution_name = {
-		"PRE_COMP": [2560, 1384], 
+		"PRE_COMP": [1920, 1080], 
 		"COMP": [2560, 1384]
 	};
 	//limpa o prefix da entity para nao ficar com redundancia
