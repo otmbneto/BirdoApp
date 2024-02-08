@@ -17,6 +17,9 @@ function BAT_ImportAnimatic(){
 		Print("[PUBLISH] Error! Script de publish por enquanto somente funciona para shot!");
 		return false;
 	}
+	
+	//update scene resolution at creation
+	projectDATA.setProjectResolution("PRE_COMP");
 
 	var update_animatic = false;
 	var movie_file = getAnimaticMovie(projectDATA);
