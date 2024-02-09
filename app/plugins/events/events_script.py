@@ -269,9 +269,9 @@ def do_event_loop(project_data, events_data):
 
         if not server.get_file_info(folder_path):
             print "[ERROR] Folder not found!"
-            return False
+            continue
 
-        file_list = filter(lambda x: x.get_name().endswith(".zip") or x.get_name().endswith(".rar"), server.list_folder(folder_path))
+        file_list = filter(lambda x: x.get_name().endswith((".zip",".rar")), server.list_folder(folder_path))
         if not file_list:
             print "---Error listing files in folder: {0}".format(folder_path)
             continue
