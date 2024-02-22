@@ -482,7 +482,29 @@ class OpenShot(QtGui.QWidget):
 
         return xstage_file
 
+    def check_if_scene_is_opened(self,scene_name):
+
+        # CHECKS IF SCENE IS ALREADY OPENED
+        if scene_name in self.opened_scenes:
+            # CHECKS IF SCENE OPENED PROCESS IS STILL RUNNING OR SCENE WAS OPEN BEFORE STARTED OPEN SHOT
+            scene_process = self.opened_scenes[scene_name]
+            if not scene_process:
+                print "this scene was open when started the 'open scene'"
+                self.set_scene_opened()
+            elif scene_process.poll() is None:
+                # IF SCENE IS STILL OPENED
+                print "scene is still open"
+                self.set_scene_opened()
+            else:
+                print "scene process is finished: {0}".format(scene_process)
+                del self.opened_scenes[shot_name]
+        else:
+            self.ui.listVersions.setEnabled(True)
+
+        return
+
     def on_select_scene(self, item):
+        
         """callback function when select scene"""
         self.ui.listVersions.clear()
         self.ui.open_button.setEnabled(False)
@@ -497,24 +519,7 @@ class OpenShot(QtGui.QWidget):
         path = self.project_folders.get_scene_path(shot_name,self.ui.comboStep.currentText())
         self.ui.explorer_path.setText(path)
 
-        # CHECKS IF SCENE IS ALREADY OPENED
-        if shot_name in self.opened_scenes:
-            # CHECKS IF SCENE OPENED PROCESS IS STILL RUNNING OR SCENE WAS OPEN BEFORE STARTED OPEN SHOT
-            scene_process = self.opened_scenes[shot_name]
-            if not scene_process:
-                print "this scene was open when started the 'open scene'"
-                self.set_scene_opened()
-                return
-            if scene_process.poll() is None:
-                # IF SCENE IS STILL OPENED
-                print "scene is still open"
-                self.set_scene_opened()
-                return
-            else:
-                print "scene process is finished: {0}".format(scene_process)
-                del self.opened_scenes[shot_name]
-        else:
-            self.ui.listVersions.setEnabled(True)
+        self.check_if_scene_is_opened(shot_name)
 
         # UPDATES MAIN KEY VERSION OBJECT VALUE WITH CURRENT SCENE SELECTED
         self.shot_versions = self.list_scene_versions(shot_name)
@@ -531,6 +536,7 @@ class OpenShot(QtGui.QWidget):
         # IF STEP IS ANIM, CHECK IN ANIM FOLDER, IF DONT FIND FILES, LOOK IN SETUP AND SO ON...
         i = new_step_list.index(current_step)
         while i < len(new_step_list):
+            
             print "creating step {0} data...".format(new_step_list[i])
             # IF THE STEP IS USED
             if self.shot_versions[new_step_list[i]]["is_used"]:
@@ -649,6 +655,7 @@ class OpenShot(QtGui.QWidget):
         print "reset widgets with version shot info..."
 
     def on_open_scene(self):
+
         print '*******************--OPEN FILE--********************'
         current_step = self.ui.comboStep.currentText()
         selected_scene = self.ui.listScenes.currentItem().text()
