@@ -124,7 +124,7 @@ def get_items_map(_url, boards, board, group):
 		"Authorization": boards['token']
 	}
 	query = ("{{boards(ids:{}){{name id groups(ids:\"{}\")"
-			"{{title id items{{name id}}}} columns{{title id}}}}}}").format(
+			"{{title id items_page {{items{{name id}}}}}} columns{{title id}}}}}}").format(
 				boards[board]['id'],
 				boards[board]["groups"][group]
 			)
@@ -139,7 +139,7 @@ def get_items_map(_url, boards, board, group):
 		"columns": {}
 	}
 
-	for item in j["data"]["boards"][0]["groups"][0]["items"]:
+	for item in j["data"]["boards"][0]["groups"][0]["items_page"]["items"]:
 		m["items"][item["name"]] = item["id"]
 	m["board"] = {"name": board, "id": boards[board]["id"]}
 	m["board"]["groups"] = boards[board]["groups"]
@@ -258,23 +258,16 @@ def get_value(_url, mmap, item, column):
 	headers = {
 		"Authorization": mmap['token']
 	}
-	query = ("{{items(ids:{}){{name id column_values(ids:{})"
-			 "{{title id type value additional_info}}}}}}").format(
-				mmap["items"][item],
-				mmap["columns"][column])
+	query = "{{items(ids:{}){{name id column_values(ids:\"{}\"){{id type value text}}}}}}".format(mmap["items"][item], mmap["columns"][column])
 	data = {
 		'query': query
 	}
 	r = requests.post(url=_url, json=data, headers=headers)
 	j = r.json()
-	v = j["data"]["items"][0]["column_values"][0]["value"]
+	v = j["data"]["items"][0]["column_values"][0]
 
-	if (
-		j["data"]["items"][0]["column_values"][0]["type"] == "color" and
-		v != None
-	   ):
-		v = eval(j["data"]["items"][0]["column_values"][0]["additional_info"])
-		return v["label"]
+	if v["type"] == "status" :
+		return v["text"]
 	return v
 
 get_value.__doc__ = ("[ get_value(url, map, item, column) ]"
