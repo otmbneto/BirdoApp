@@ -124,7 +124,7 @@ def get_items_map(_url, boards, board, group):
 		"Authorization": boards['token']
 	}
 	query = ("{{boards(ids:{}){{name id groups(ids:\"{}\")"
-			"{{title id items_page {{items{{name id}}}}}} columns{{title id}}}}}}").format(
+			"{{title id items_page(limit: 300){{items{{name id}}}}}} columns{{title id}}}}}}").format(
 				boards[board]['id'],
 				boards[board]["groups"][group]
 			)
