@@ -197,7 +197,7 @@ class FolderManager(object):
         return os.path.join(self.get_episodes(),
                             ep_no_prefix,
                             "05_CENAS",
-                            "_RENDER").replace("\\", "/")
+                            "00_RENDER").replace("\\", "/")
 
     def get_server_render_path(self,ep):
 
