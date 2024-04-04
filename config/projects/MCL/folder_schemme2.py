@@ -1,6 +1,6 @@
 import os
 import re
-# FolderManager 2.0 para o projeto LUPI & BADUKI
+# FolderManager 2.0 para o projeto ASTRONAUTA
 
 
 class FolderManager(object):
@@ -91,7 +91,7 @@ class FolderManager(object):
         step_folder = self.step[step]["folder_name"]
         return os.path.join(self.get_episodes(),
                             ep_no_prefix,
-                            "03_CENAS",
+                            "05_CENAS",
                             step_folder).replace("\\", "/")
 
     def get_scenes(self,ep,step):
@@ -116,19 +116,16 @@ class FolderManager(object):
         ----------
         RETURN: string
         """
-        print "STEPS:" + str(self.step.keys())
         if step not in self.step:
             print "[get_scene_path]ERROR! Parametro 'step nao aceito para cenas!"
             return False
-        print scene_name
         ep = scene_name.split('_')[1]
         step_folder = self.step[step]["folder_name"]
         return os.path.join(self.get_episodes(),
                             ep,
-                            "03_CENAS",
+                            "05_CENAS",
                             step_folder,
                             scene_name).replace("\\", "/")
-
 
     def get_publish_folder(self,ep,step,filesystem="server"):
 
@@ -199,8 +196,8 @@ class FolderManager(object):
         ep_no_prefix = ep.replace(self.prefix + "_", "")
         return os.path.join(self.get_episodes(),
                             ep_no_prefix,
-                            "03_CENAS",
-                            "00_RENDER").replace("\\", "/")
+                            "05_CENAS",
+                            "_RENDER").replace("\\", "/")
 
     def get_server_render_path(self,ep):
 

@@ -44,7 +44,7 @@ class FolderManager:
         step_folder = self.paths["step"][step]["folder_name"]
         return os.path.join(self.paths["episodes"],
                             ep_no_prefix,
-                            "03_CENAS",
+                            "05_CENAS",
                             step_folder).replace("\\", "/")
 
     def get_scene_path(self, scene_name, step):
@@ -56,7 +56,7 @@ class FolderManager:
         step_folder = self.paths["step"][step]["folder_name"]
         return os.path.join(self.paths["episodes"],
                             ep,
-                            "03_CENAS",
+                            "05_CENAS",
                             step_folder,
                             scene_name).replace("\\", "/")
 
@@ -65,8 +65,8 @@ class FolderManager:
         ep_no_prefix = ep.replace(self.prefix + "_", "") # retira o prefixo do projeto do nome (para os casos q o projeto usa esse tipo de nome no ep)
         return os.path.join(self.paths["episodes"],
                             ep_no_prefix,
-                            "03_CENAS",
-                            "00_RENDER").replace("\\", "/")
+                            "05_CENAS",
+                            "_RENDER").replace("\\", "/")
 
     def get_animatic_folder(self):
         """retorna o nome do folder do animatic"""
@@ -113,8 +113,8 @@ class FolderManager:
         render_folder = os.path.join(root,
                                    self.paths["episodes"],
                                    ep_no_prefix,
-                                   "03_CENAS",
-                                   "00_RENDER")
+                                   "05_CENAS",
+                                   "_RENDER")
         render_subs = self.paths["step"]["RENDER"]
         for folder in render_subs:
             sub_folder = os.path.join(render_folder, folder)
