@@ -137,6 +137,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 6,
+			"prefix": "MCL",
+			"name": "Moncler",
+			"harmony" : {
+					"version" : "20.0.0",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_MCL.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }
