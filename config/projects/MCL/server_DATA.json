@@ -22,10 +22,10 @@
 					]					
 				},
 			"RENDER": [
-				"00_ANIMATIC",
-				"01_SETUP",
-				"02_ANIMATION",
-				"03_COMP"
+				"01_ANIMATIC",
+				"02_SETUP",
+				"03_ANIMATION",
+				"04_COMP"
 				],
 			"SETUP": {
 				"folder_name": "01_SETUP",
@@ -46,7 +46,7 @@
 		"tblib": "_tbLib/",
 		"batch_scripts": "_tbLib/batch_scripts",
 		"fazendinha": "_tbLib/_Fazendinha/",
-		"render_comp": "//192.168.10.101/projects/200_Moncler/01_EPISODIOS/{EP}/03_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"render_comp": "//192.168.10.101/projects/200_Moncler/01_EPISODIOS/{EP}/05_CENAS/_RENDER/04_COMP/",
 		"packUpdate": "_tbLib/_birdoApp/"
 		},
 	"server": {
