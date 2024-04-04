@@ -46,7 +46,7 @@
 		"tblib": "_tbLib/",
 		"batch_scripts": "_tbLib/batch_scripts",
 		"fazendinha": "_tbLib/_Fazendinha/",
-		"render_comp": "//192.168.10.101/projects/200_Moncler/01_EPISODIOS/{EP}/05_CENAS/_RENDER/04_COMP/",
+		"render_comp": "//192.168.10.101/projects/200_Moncler/01_EPISODIOS/{EP}/05_CENAS/00_RENDER/04_COMP/",
 		"packUpdate": "_tbLib/_birdoApp/"
 		},
 	"server": {

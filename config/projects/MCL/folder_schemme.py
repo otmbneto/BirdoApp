@@ -60,7 +60,7 @@ class FolderManager:
                             step_folder,
                             scene_name).replace("\\", "/")
 
-    def get_RENDER_path(self, ep):
+    def get_render_path(self, ep):
         """retorna o path do render do ep"""
         ep_no_prefix = ep.replace(self.prefix + "_", "") # retira o prefixo do projeto do nome (para os casos q o projeto usa esse tipo de nome no ep)
         return os.path.join(self.paths["episodes"],
@@ -74,17 +74,17 @@ class FolderManager:
 
     def get_animatic_folder_path(self, ep):
         """retorna o path do folder do animatic"""
-        return os.path.join(self.get_RENDER_path(ep), self.paths["step"]["RENDER"][0])
+        return os.path.join(self.get_render_path(ep), self.paths["step"]["RENDER"][0])
 
-    def get_setup_RENDER_folder(self):
+    def get_setup_render_folder(self):
         """retorna o nome do folder de render anim"""
         return self.paths["step"]["RENDER"][1]
 
-    def get_anim_RENDER_folder(self):
+    def get_anim_render_folder(self):
         """retorna o nome do folder de render anim"""
         return self.paths["step"]["RENDER"][2]
 
-    def get_comp_RENDER_folder(self):
+    def get_comp_render_folder(self):
         """retorna o nome do folder de render anim"""
         return self.paths["step"]["RENDER"][3]
 
@@ -106,7 +106,7 @@ class FolderManager:
                 return False
         return scene_path
 
-    def create_local_RENDER_scheme(self, ep):
+    def create_local_render_scheme(self, ep):
         """cria o esquema local de pastas do render do ep"""
         ep_no_prefix = ep.replace(self.prefix + "_", "") # retira o prefixo do projeto do nome (para os casos q o projeto usa esse tipo de nome no ep)
         root = self.get_local_root()
