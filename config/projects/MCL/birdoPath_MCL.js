@@ -34,18 +34,18 @@ function BirdoProject(entity){
 		"COMP": "NO_COLOUR_SPACE"
 	};
 	this.resolution_name = {
-		"PRE_COMP": [1998, 1080], 
-		"COMP": [3840, 2160]
+		"PRE_COMP": "HDTV_1080p24", 
+		"COMP": "4K_UHD"
 	};
 	//limpa o prefix da entity para nao ficar com redundancia
 	delete this.entity.prefix;
 	
 	//Methods Functions//
-	this.getServerRoot = function(){//retorna root do projeto na rede
+	this.getServerRoot = function(){//OK
 		return this.paths["root"] + this.paths["projRoot"];
 	}
 	
-	this.getLocalRoot = function(){//retorna root do projeto local
+	this.getLocalRoot = function(){//retorna root do projeto local -OK
 		return this.paths["local_folder"] + this.paths["projRoot"];
 	}
 	
@@ -158,7 +158,7 @@ function BirdoProject(entity){
 			return false;
 		}
 		var res = this.resolution_name[step];
-		if(scene.setDefaultResolution(res[0], res[1], 41.112)){
+		if(scene.setDefaultResolutionName(res)){
 			MessageLog.trace("Scene resolution updated to: " + res);
 			return true;
 		} else {
@@ -168,9 +168,15 @@ function BirdoProject(entity){
 	}
 	
 	this.modifyScenePreRender = function(step, is_farm){
-				
+		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
+		
 		if(step == "COMP"){
-			MessageLog.trace("Nenhuma acao de modify scene para comp!");
+			try{
+				require(get_psd_data_script).get_psd_anim_data(true);//exporta info dos psd
+			} catch(e){
+				MessageLog.trace(e.message);
+				MessageLog.trace("Error creating PSD files data!");
+			}	
 		} else {
 			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
 		}
@@ -193,7 +199,7 @@ function BirdoProject(entity){
 		var sceneName = this.entity["name"];
 		var publish = null;
 		
-		publish = this.paths["episodes"] + ep + "/03_CENAS/" + this.get_scene_step_folder(step) + "/" + this.entity["name"];
+		publish = this.paths["episodes"] + ep + "/05_CENAS/" + this.get_scene_step_folder(step) + "/" + this.entity["name"];
 		return publish;
 	}
 	
@@ -251,7 +257,7 @@ function BirdoProject(entity){
 			MessageLog.trace("[GETRENDERPATH] Step nao encontrado para este nome de step!");
 			return false;
 		}
-		return tb_root + this.paths["episodes"] + ep + "/03_CENAS/00_RENDER/" + step_folder + "/";
+		return tb_root + this.paths["episodes"] + ep + "/05_CENAS/00_RENDER/" + step_folder + "/";
 	}
 	
 	this.getRenderAnimaticLocalFolder = function(){//retorna o folder local dos renders do animatic
