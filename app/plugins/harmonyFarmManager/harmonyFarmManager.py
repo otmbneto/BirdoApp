@@ -13,7 +13,7 @@ import os
 import re
 import sys
 import shutil
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from PySide import QtCore, QtGui, QtUiTools
 import re
 import datetime
@@ -23,6 +23,7 @@ curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
 sys.path.append(birdo_app_root)
 from app.config_project2 import config_project
+
 version = 'v.0.1'
 
 from app.utils.birdo_zip import *
@@ -31,7 +32,7 @@ from app.utils.ffmpeg import compress_render
 from app.utils.MessageBox import CreateMessageBox
 
 # carrega os env falsos do arquivo dotenv
-#load_dotenv()
+# load_dotenv()
 
 '''
 def get_batch_scripts_data():
@@ -110,19 +111,22 @@ def get_episodes():
     return final_obj
 '''
 
+
 class Dialog(QtGui.QWidget):
     """
         Main OpenShot interface
     """
-    def __init__(self,project_data):
+
+    def __init__(self, project_data):
         super(Dialog, self).__init__()
         ui_path = os.path.join(curr_dir, 'ui', 'dialog.ui')
         self.ui = self.load_page(ui_path)
 
         # self variables
         self.project_data = project_data
-        self.episodes_data = self.project_data.paths.list_episodes()#TODO: melhorar isso aqui.
-        self.batch_scripts_path = os.path.join(self.project_data.paths.root,self.project_data.paths.batch_scripts).replace("\\","/")
+        self.episodes_data = self.project_data.paths.list_episodes()  # TODO: melhorar isso aqui.
+        self.batch_scripts_path = os.path.join(self.project_data.paths.root,
+                                               self.project_data.paths.batch_scripts).replace("\\", "/")
         self.selected_files = []
         self.is_running = False
         self.executable_path = project_data.harmony.harmony_path
@@ -160,14 +164,12 @@ class Dialog(QtGui.QWidget):
         self.ui.comboScript.addItems(scripts)
         return len(scripts) > 0
 
-
-    def load_episode(self,episode):
+    def load_episode(self, episode):
 
         item = QtGui.QListWidgetItem(os.path.basename(episode))
-        item.setData(1,episode) #salva o caminho da pasta do episodio no proprio o list item.
+        item.setData(1, episode)  # salva o caminho da pasta do episodio no proprio o list item.
         row = self.ui.listEpisodes.count()
         self.ui.listEpisodes.insertItem(row, item)
-
 
     def load_episodes(self):
         """
@@ -177,10 +179,10 @@ class Dialog(QtGui.QWidget):
         for ep in self.episodes_data:
             self.load_episode(ep)
 
-    def load_scene(self,scene):
+    def load_scene(self, scene):
 
         it = QtGui.QListWidgetItem(os.path.basename(scene))
-        it.setData(1,scene)
+        it.setData(1, scene)
         it.setFlags(it.flags() | QtCore.Qt.ItemIsUserCheckable)
         it.setFlags(it.flags() & ~QtCore.Qt.ItemIsSelectable)
         it.setCheckState(QtCore.Qt.Unchecked)
@@ -191,7 +193,7 @@ class Dialog(QtGui.QWidget):
 
         return
 
-    def load_scenes(self,scenes):
+    def load_scenes(self, scenes):
 
         for scene in scenes:
             self.load_scene(scene)
@@ -213,8 +215,8 @@ class Dialog(QtGui.QWidget):
             return
 
         self.ui.labelInfoEp.setText(sel_ep)
-        step = self.ui.stepBox.currentText() #"SETUP" if self.ui.radioStepSETUP.isChecked() else "ANIM"
-        scenes = self.project_data.paths.get_scenes(sel_ep,step)
+        step = self.ui.stepBox.currentText()  # "SETUP" if self.ui.radioStepSETUP.isChecked() else "ANIM"
+        scenes = self.project_data.paths.get_scenes(sel_ep, step)
         scenes.sort()
         self.load_scenes(scenes)
 
@@ -228,28 +230,25 @@ class Dialog(QtGui.QWidget):
         self.ui.progressBar.setEnabled(False)
         self.ui.progressBar.reset()
 
-    def incrementProgress(self,inc):
+    def incrementProgress(self, inc):
 
         value = self.ui.progressBar.value()
-        self.ui.progressBar.setValue(value+inc)
+        self.ui.progressBar.setValue(value + inc)
 
-    def set_item_state(self,item,state):
+    def set_item_state(self, item, state):
 
         item.setCheckState(state)
-        self.on_select_scene(item,state=state)
-
-    def set_items_state(self,item_list,state):
-
-        for i in range(0, item_list.count()):
-            item = item_list.item(i)
-            self.set_item_state(item,state)
+        self.on_select_scene(item)
 
     def on_check_all(self):
         """
             funcao q atualiza a lista de import
         """
         state = self.ui.checkSelectAll.checkState()
-        self.set_items_state(self.ui.listScenes,state)
+        item_list = self.ui.listScenes
+        for i in range(0, item_list.count()):
+            item = item_list.item(i)
+            self.set_item_state(item, state)
 
     def update_info(self):
         """atualiza o estado das infos"""
@@ -269,22 +268,19 @@ class Dialog(QtGui.QWidget):
             text = "NONE"
         self.ui.labelInfoRender.setText(text)
 
-    def on_select_scene(self, item,state = None):
+    def on_select_scene(self, item):
         """
             callback do select scene
         """
-        current_episode = self.ui.listEpisodes.currentItem()
         scene_file = item.data(1)
         if not scene_file in self.selected_files:
             self.selected_files.append(scene_file)
         else:
             self.selected_files.remove(scene_file)
+        print "TESTE ((((selected_files)))", self.selected_files
 
         notState = QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked else QtCore.Qt.Checked
-        if state is None:
-            item.setCheckState(notState)
-        else:
-            item.setCheckState(state)
+        item.setCheckState(notState)
 
         self.ui.pushStart.setEnabled(len(self.selected_files) > 0)
         self.update_info()
@@ -298,69 +294,69 @@ class Dialog(QtGui.QWidget):
             self.ui.groupBoxRender.setChecked(True)
         self.update_info()
 
-    def onRenderTypeToggle(self,status):
+    def onRenderTypeToggle(self, status):
 
-        #item = self.ui.listEpisodes.currentItem()
-        #self.on_select_ep(item)
+        # item = self.ui.listEpisodes.currentItem()
+        # self.on_select_ep(item)
 
         return
 
-    def onStepChange(self,item):
+    def onStepChange(self, item):
 
         item = self.ui.listEpisodes.currentItem()
         self.on_select_ep(item)
 
         return
 
-    def get_last_version(self,scene,step):
+    def get_last_version(self, scene, step):
 
-        scene_path = os.path.join(self.project_data.paths.root,self.project_data.paths.projRoot,self.project_data.paths.get_publish_folder(scene,step)).replace("\\","/")
+        scene_path = os.path.join(self.project_data.paths.root, self.project_data.paths.projRoot,
+                                  self.project_data.paths.get_publish_folder(scene, step)).replace("\\", "/")
         versions = [f for f in sorted(os.listdir(scene_path)) if f.endswith(".zip")]
 
-        return os.path.join(scene_path,versions[-1]) if len(versions) > 0 else None
+        return os.path.join(scene_path, versions[-1]) if len(versions) > 0 else None
 
-    def getVersion(self,filename):
+    def getVersion(self, filename):
         print "VERSION:" + filename
         m = re.search('.*(v\d{2}).*', filename)
         return m.group(1) if m is not None else m
 
-    def getEpisode(self,filename):
+    def getEpisode(self, filename):
 
         m = re.search('.*EP(\d{3}).*', filename)
         return m.group(1) if m is not None else m
 
-    def getShot(self,filename):
+    def getShot(self, filename):
 
         m = re.search('.*SC(\d{4}).*', filename)
         return m.group(1) if m is not None else m
 
-
-    def sendToRenderFarm(self,file,scene,episode,step):
+    def sendToRenderFarm(self, file, scene, episode, step):
 
         filename = os.path.basename(file)
         version = self.getVersion(filename)
-        request ={"animator": self.project_data.user_data.name,
-                "episode": self.getEpisode(filename),
-                "project": self.project_data.prefix,
-                "queued": datetime.datetime.today().strftime('%d/%m/%Y, %H:%M:%S'),
-                "render_path": self.project_data.paths.get_server_render_file_path(episode,step,scene),
-                "render_type": self.ui.radioPreComp.text().upper() if self.ui.radioPreComp.isChecked() else self.ui.radioComp.text().upper(),
-                "scene": self.getShot(filename),
-                "scene_path": self.project_data.paths.get_publish_folder(scene,step).replace("\\","/"),
-                "status": "waiting",
-                "step": step,
-                "version": version
-                }
+        request = {"animator": self.project_data.user_data.name,
+                   "episode": self.getEpisode(filename),
+                   "project": self.project_data.prefix,
+                   "queued": datetime.datetime.today().strftime('%d/%m/%Y, %H:%M:%S'),
+                   "render_path": self.project_data.paths.get_server_render_file_path(episode, step, scene),
+                   "render_type": self.ui.radioPreComp.text().upper() if self.ui.radioPreComp.isChecked() else self.ui.radioComp.text().upper(),
+                   "scene": self.getShot(filename),
+                   "scene_path": self.project_data.paths.get_publish_folder(scene, step).replace("\\", "/"),
+                   "status": "waiting",
+                   "step": step,
+                   "version": version
+                   }
 
         renderfarm = self.project_data.paths.get_render_farm_path()
         request_file = scene + "_" + version + ".json"
-        return write_json_file(os.path.join(renderfarm,request_file),request)
+        return write_json_file(os.path.join(renderfarm, request_file), request)
 
-    def increment_version(self,version):
+    def increment_version(self, version):
 
-        return "v" + str(int(version.replace("v","")) + 1).zfill(2)
+        return "v" + str(int(version.replace("v", "")) + 1).zfill(2)
 
-    def new_version(self,file):
+    def new_version(self, file):
 
         old_version = self.getVersion(os.path.basename(file))
         if not old_version:
@@ -368,16 +364,16 @@ class Dialog(QtGui.QWidget):
             return False
         new_version = self.increment_version(old_version)
         new_name = os.path.basename(file).replace(old_version, new_version)
-        new_xstage = os.path.join(os.path.dirname(file), new_name).replace("\\","/")
-        shutil.copyfile(file,new_xstage)
+        new_xstage = os.path.join(os.path.dirname(file), new_name).replace("\\", "/")
+        shutil.copyfile(file, new_xstage)
         return new_xstage
 
+    # TODO: Scripts should come from a dict/json.
+    def select_prerender_script(self, render_type):
 
-    #TODO: Scripts should come from a dict/json.
-    def select_prerender_script(self,render_type):
-
-        script_path = os.getenv("APPDATA")+"/Toon Boom Animation/Toon Boom Harmony Premium/2000-scripts/packages/BirdoPack/utils/"
-        script_path = os.path.join(script_path,render_type.lower() + "_render.js")
+        script_path = os.getenv(
+            "APPDATA") + "/Toon Boom Animation/Toon Boom Harmony Premium/2000-scripts/packages/BirdoPack/utils/"
+        script_path = os.path.join(script_path, render_type.lower() + "_render.js")
 
         print "SCRIPT_PATH:" + script_path
         return script_path
@@ -395,7 +391,7 @@ class Dialog(QtGui.QWidget):
         return script_path
     '''
 
-    def remove_file(self,file):
+    def remove_file(self, file):
 
         file_removed = True
         try:
@@ -406,7 +402,7 @@ class Dialog(QtGui.QWidget):
 
         return file_removed
 
-    def create_folder(self,folder_path):
+    def create_folder(self, folder_path):
 
         folder_created = True
         try:
@@ -417,18 +413,18 @@ class Dialog(QtGui.QWidget):
 
         return folder_created
 
-    def copy_file_to(self,file,to,as_=None):
+    def copy_file_to(self, file, to, as_=None):
 
-        dst = os.path.join(to,as_ if as_ is not None else os.path.basename(file))
-        print "Copying {0} to {1}".format(file,dst)
+        dst = os.path.join(to, as_ if as_ is not None else os.path.basename(file))
+        print "Copying {0} to {1}".format(file, dst)
         if self.remove_file(dst):
-            shutil.copyfile(file,dst)
+            shutil.copyfile(file, dst)
         else:
             return False
 
         return True
 
-    def sendToVPN(self,files,vpn_path,clean_dst=False):
+    def sendToVPN(self, files, vpn_path, clean_dst=False):
 
         sucess = True
         if not self.create_folder(vpn_path):
@@ -436,24 +432,25 @@ class Dialog(QtGui.QWidget):
 
         if os.path.exists(vpn_path):
             for f in files:
-                self.copy_file_to(f,vpn_path)
+                self.copy_file_to(f, vpn_path)
         else:
             sucess = False
 
         return sucess
 
-    def getPSD(self,psd_file):
+    def getPSD(self, psd_file):
 
         data = read_json_file(psd_file)
         return [data["psd_file"]] if "psd_file" in data.keys() else []
 
-    def getOutputBG(self,frames_folder):
+    def getOutputBG(self, frames_folder):
 
         outputBG = []
-        export_data_folder = os.path.join(frames_folder,"EXPORT_DATA").replace("\\","/")
+        export_data_folder = os.path.join(frames_folder, "EXPORT_DATA").replace("\\", "/")
         if os.path.exists(export_data_folder):
 
-            files = [os.path.join(export_data_folder,f).replace("\\","/") for f in os.listdir(export_data_folder) if f.endswith(".json")]
+            files = [os.path.join(export_data_folder, f).replace("\\", "/") for f in os.listdir(export_data_folder) if
+                     f.endswith(".json")]
             for file in files:
 
                 outputBG.append(file)
@@ -462,31 +459,32 @@ class Dialog(QtGui.QWidget):
 
         return outputBG
 
-    def getOutputList(self,d):
+    def getOutputList(self, d):
 
-      output_list = []
-      if "folder" in d.keys() and "file_list" in d.keys():
-        output = d["folder"]
-        for fl in d["file_list"]:
-          if fl["render_type"] == "movie":
-            output_list.append(os.path.join(output, fl["file_name"] + "." + fl["format"]).replace("\\","/"))
-          else:
-            output_list += ["{0}{1}{2:05d}.{3}".format(output, fl["file_name"], i, fl["format"]) for i in range(1, d["frames_number"]+1)]
+        output_list = []
+        if "folder" in d.keys() and "file_list" in d.keys():
+            output = d["folder"]
+            for fl in d["file_list"]:
+                if fl["render_type"] == "movie":
+                    output_list.append(os.path.join(output, fl["file_name"] + "." + fl["format"]).replace("\\", "/"))
+                else:
+                    output_list += ["{0}{1}{2:05d}.{3}".format(output, fl["file_name"], i, fl["format"]) for i in
+                                    range(1, d["frames_number"] + 1)]
 
-      return output_list
+        return output_list
 
-    def sendCompToServer(self,episode,scene,render_data):
+    def sendCompToServer(self, episode, scene, render_data):
 
         if os.path.exists(render_data):
             output_content = read_json_file(render_data)
-            files = self.getOutputList(output_content) #pega o caminho dos outputs
-            server_path = self.project_data.paths.get_server_render_comp(episode,scene)
-            self.sendToVPN(files,server_path)
-            #pegas os psds do BG
+            files = self.getOutputList(output_content)  # pega o caminho dos outputs
+            server_path = self.project_data.paths.get_server_render_comp(episode, scene)
+            self.sendToVPN(files, server_path)
+            # pegas os psds do BG
             server_path = os.path.dirname(server_path)
-            server_path = os.path.join(os.path.dirname(server_path),"03_BG")
+            server_path = os.path.join(os.path.dirname(server_path), "03_BG")
             files = self.getOutputBG(output_content["folder"] if "folder" in output_content.keys() else "")
-            self.sendToVPN(files,server_path)
+            self.sendToVPN(files, server_path)
 
         return
 
@@ -497,77 +495,88 @@ class Dialog(QtGui.QWidget):
         self.progressBarStart()
 
         episode = self.ui.listEpisodes.currentItem().data(0)
-        script = os.path.join(self.batch_scripts_path,self.ui.comboScript.currentText())
-        step = self.ui.stepBox.currentText() #"SETUP" if self.ui.radioStepSETUP.isChecked() else "ANIM"
+        script = os.path.join(self.batch_scripts_path, self.ui.comboScript.currentText())
+        step = self.ui.stepBox.currentText()  # "SETUP" if self.ui.radioStepSETUP.isChecked() else "ANIM"
         render_type = "PRE_COMP" if self.ui.radioPreComp.isChecked() else "COMP"
         for file in self.selected_files:
             scene = os.path.basename(file)
-            harmony_file = self.get_last_version(scene,step)
+            harmony_file = self.get_last_version(scene, step)
             print harmony_file
             if harmony_file is None:
                 print "Warning! No version found at server: " + scene
                 continue
             self.incrementProgress(10)
-            
+
             if self.ui.groupBoxScript.isChecked():
 
-                local_folder = os.path.join(self.project_data.paths.create_local_scene_scheme(scene,step), self.project_data.paths.step[step]["local"][-1])
-                local_file = os.path.join(local_folder,os.path.basename(harmony_file))
+                local_folder = os.path.join(self.project_data.paths.create_local_scene_scheme(scene, step),
+                                            self.project_data.paths.step[step]["local"][-1])
+                local_file = os.path.join(local_folder, os.path.basename(harmony_file))
                 if not os.path.exists(local_file):
-                    shutil.copyfile(harmony_file,os.path.join(local_folder,local_file))
+                    shutil.copyfile(harmony_file, os.path.join(local_folder, local_file))
 
-                extract_zipfile(local_file,local_folder)
-                local_scene = [os.path.join(local_folder,f) for f in os.listdir(local_folder) if not f.endswith(".zip")]
+                extract_zipfile(local_file, local_folder)
+                local_scene = [os.path.join(local_folder, f) for f in os.listdir(local_folder) if
+                               not f.endswith(".zip")]
                 local_scene = local_scene[0] if len(local_scene) > 0 else None
                 if local_scene is not None:
 
                     xstage = self.project_data.harmony.get_xstage_last_version(local_scene)
-                    if self.project_data.harmony.compile_script(script,xstage) != 0:
+                    if self.project_data.harmony.compile_script(script, xstage) != 0:
 
                         new_version = self.new_version(harmony_file)
                         if not new_version:
                             continue
-                        new_zip = os.path.join(os.path.dirname(local_scene),os.path.basename(new_version).replace(".xstage",".zip"))
-                        compact_folder(local_scene,new_zip)
-                        server_zip = os.path.join(os.path.dirname(harmony_file),os.path.basename(new_zip))
+                        new_zip = os.path.join(os.path.dirname(local_scene),
+                                               os.path.basename(new_version).replace(".xstage", ".zip"))
+                        compact_folder(local_scene, new_zip)
+                        server_zip = os.path.join(os.path.dirname(harmony_file), os.path.basename(new_zip))
                         print "Sending to server:" + server_zip
-                        shutil.copyfile(new_zip,server_zip)
+                        shutil.copyfile(new_zip, server_zip)
                         shutil.rmtree(local_scene)
 
-                    #Perguntas:
-                    #criar novo versao e enviar para o servidor? - Done
+                    # Perguntas:
+                    # criar novo versao e enviar para o servidor? - Done
             self.incrementProgress(45)
             if self.ui.groupBoxRender.isChecked():
                 print "do render"
                 if self.ui.radioRenderLocal.isChecked():
                     print "locally"
-                    local_folder = os.path.join(self.project_data.paths.create_local_scene_scheme(scene,step), self.project_data.paths.step[step]["local"][-1])
+                    local_folder = os.path.join(self.project_data.paths.create_local_scene_scheme(scene, step),
+                                                self.project_data.paths.step[step]["local"][-1])
                     print local_folder
-                    local_file = os.path.join(local_folder,os.path.basename(harmony_file))
+                    local_file = os.path.join(local_folder, os.path.basename(harmony_file))
                     if not os.path.exists(local_file):
-                        shutil.copyfile(harmony_file,os.path.join(local_folder,local_file))
-                    extract_zipfile(local_file,local_folder)
-                    local_scene = [os.path.join(local_folder,f) for f in os.listdir(local_folder) if not f.endswith(".zip")]
+                        shutil.copyfile(harmony_file, os.path.join(local_folder, local_file))
+                    extract_zipfile(local_file, local_folder)
+                    local_scene = [os.path.join(local_folder, f) for f in os.listdir(local_folder) if
+                                   not f.endswith(".zip")]
                     local_scene = local_scene[0] if len(local_scene) > 0 else None
                     if local_scene is not None:
                         xstage = self.project_data.harmony.get_xstage_last_version(local_scene)
-                        if self.project_data.harmony.compile_script(script,xstage) != 0:
+                        if self.project_data.harmony.compile_script(script, xstage) != 0:
 
-                            self.project_data.harmony.render_scene(xstage, pre_render_script=self.select_prerender_script(render_type))
+                            self.project_data.harmony.render_scene(xstage,
+                                                                   pre_render_script=self.select_prerender_script(
+                                                                       render_type))
                             if render_type == "PRE_COMP":
-                                input_scene = os.path.join(local_scene, "frames/exportFINAL.mov").replace("\\","/")
+                                input_scene = os.path.join(local_scene, "frames/exportFINAL.mov").replace("\\", "/")
                                 if os.path.exists(input_scene):
-                                    compressed = os.path.join(os.path.dirname(input_scene),scene + ".mov").replace("\\","/")
+                                    compressed = os.path.join(os.path.dirname(input_scene), scene + ".mov").replace(
+                                        "\\", "/")
                                     print compressed
-                                    compress_render(input_scene,compressed)
+                                    compress_render(input_scene, compressed)
                                     if os.path.exists(compressed):
-                                        shutil.copyfile(compressed,self.project_data.paths.get_server_render_file_path(episode,step,scene))
+                                        shutil.copyfile(compressed,
+                                                        self.project_data.paths.get_server_render_file_path(episode,
+                                                                                                            step,
+                                                                                                            scene))
                             else:
-                                render_data = os.path.join(local_folder,"_renderData.json").replace("\\","/")
-                                self.sendCompToServer(episode,scene,render_data)
+                                render_data = os.path.join(local_folder, "_renderData.json").replace("\\", "/")
+                                self.sendCompToServer(episode, scene, render_data)
                 else:
                     print "sending to render farm: " + scene
-                    self.sendToRenderFarm(harmony_file,scene,episode,step)
+                    self.sendToRenderFarm(harmony_file, scene, episode, step)
             self.incrementProgress(45)
 
         CreateMessageBox().information("Batch Finished!")
@@ -614,7 +623,7 @@ if __name__ == "__main__":
         sys.exit(app.exec_())
     else:
 
-        #project_data = config_project(project_index)
+        # project_data = config_project(project_index)
         episodes = project_data.paths.list_episodes()
         args = sys.argv
         app = QtGui.QApplication.instance()
