@@ -48,8 +48,6 @@ function BD_AddWriteNode(){
 		return;
 	}
 
-	scene.beginUndoRedoAccum("Add Write Node");
-
 	////cria a pasta de render na rede caso ainda nao exista
 	if(!BD1_DirExist(renderPath)){
 		Print("Foi preciso criar a pasta da cena na rede");
@@ -72,6 +70,9 @@ function BD_AddWriteNode(){
 		Print("invalid name... canceling!");
 		return;
 	}
+	
+	//begin undo
+	scene.beginUndoRedoAccum("Add Write Node");
 
 	renderPath = renderPath + "_" + writeName;
 
