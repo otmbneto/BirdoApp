@@ -341,7 +341,7 @@
      <collapsed val="false"/>
     </options>
     <nodeslist>
-     <group name="REF_ANIM-G" pos="308,438,1">
+     <group name="REF_ANIM-G" pos="308,438,2">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -391,7 +391,7 @@
        <link out="Composite" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="SETUP" pos="719,491,2">
+     <group name="SETUP" pos="719,491,1">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -399,7 +399,7 @@
       </options>
       <attrs/>
       <nodeslist>
-       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="118,127,10">
+       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="118,127,9">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -414,7 +414,7 @@
          <port type="PEG" idx="6"/>
         </ports>
        </module>
-       <module type="COMPOSITE" name="PREVIEW" pos="110,507,17" publishUnderTab="Composite_1">
+       <module type="COMPOSITE" name="PREVIEW" pos="110,507,16" publishUnderTab="Composite_1">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -433,19 +433,19 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,16" publishUnderTab="Display_1">
+       <module type="DISPLAY" name="_PREVIEW" pos="-16,703,15" publishUnderTab="Display_1">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="DISPLAY" name="_FINAL" pos="562,585,11" publishUnderTab="Display_PREVIEW">
+       <module type="DISPLAY" name="_FINAL" pos="562,585,10" publishUnderTab="Display_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="COMPOSITE" name="FINAL" pos="565,459,9" publishUnderTab="PREVIEW">
+       <module type="COMPOSITE" name="FINAL" pos="565,459,8" publishUnderTab="PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -464,7 +464,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="WRITE" name="Write_FINAL" pos="655,518,8" publishUnderTab="Write_PREVIEW">
+       <module type="WRITE" name="Write_FINAL" pos="655,518,7" publishUnderTab="Write_PREVIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -501,7 +501,7 @@
          <cleanUpPartitionFolders val="true"/>
         </attrs>
        </module>
-       <module type="FADE" name="Transparency" pos="-25,461,13" publishUnderTab="Transparency">
+       <module type="FADE" name="Transparency" pos="-25,461,12" publishUnderTab="Transparency">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -510,7 +510,7 @@
          <transparency val="50" defaultValue="50" col="ATV-0ACA463400A01841"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility" pos="-26,330,15" publishUnderTab="Visibility">
+       <module type="VISIBILITY" name="Visibility" pos="-26,330,14" publishUnderTab="Visibility">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -520,7 +520,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="SAFE_AREA" pos="-230,268,7" publishUnderTab="SAFE_AREA">
+       <module type="READ" name="SAFE_AREA" pos="-230,268,6" publishUnderTab="SAFE_AREA">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -633,7 +633,7 @@
          <tileVertical val="false"/>
         </attrs>
        </module>
-       <module type="COMPOSITE" name="PREVIEW_ANIMATIC" pos="-41,625,14" publishUnderTab="PREVIEW_ANIMATIC">
+       <module type="COMPOSITE" name="PREVIEW_ANIMATIC" pos="-41,625,13" publishUnderTab="PREVIEW_ANIMATIC">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -652,7 +652,7 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="PEG" name="Burn-In-P" pos="-26,217,6" publishUnderTab="Burn-In-P">
+       <module type="PEG" name="Burn-In-P" pos="-26,217,5" publishUnderTab="Burn-In-P">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -714,7 +714,7 @@
          <addCompositeToGroup val="true"/>
         </attrs>
        </module>
-       <module type="BurnIn" name="Burn-In" pos="-28,268,4" publishUnderTab="Burn-In">
+       <module type="BurnIn" name="Burn-In" pos="-28,268,3" publishUnderTab="Burn-In">
         <options>
          <collapsed val="true"/>
          <version val="1"/>
@@ -744,7 +744,7 @@
          <font val="arial"/>
         </attrs>
        </module>
-       <module type="NOTE" name="SETUP_INFO" pos="120,78,3" publishUnderTab="Note">
+       <module type="NOTE" name="SETUP_INFO" pos="120,78,2" publishUnderTab="Note">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -759,7 +759,7 @@ data: 12/04/2023]]>
          </text>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,12" publishUnderTab="Visibility_1">
+       <module type="VISIBILITY" name="Visibility_1" pos="-211,316,11" publishUnderTab="Visibility_1">
         <options>
          <locked val="true"/>
          <collapsed val="true"/>
@@ -770,7 +770,7 @@ data: 12/04/2023]]>
          <softrender val="false"/>
         </attrs>
        </module>
-       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="114,31,5" publishUnderTab="NAO_DELETAR">
+       <module type="SCRIPT_MODULE" name="NAO_DELETAR" pos="114,31,4" publishUnderTab="NAO_DELETAR">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -836,7 +836,7 @@ data: 12/04/2023]]>
          <version val="1"/>
         </options>
         <attrs>
-         <text val="MCL"/>
+         <text val="BYU"/>
         </attrs>
        </module>
       </nodeslist>
@@ -865,7 +865,7 @@ data: 12/04/2023]]>
        <link out="Visibility_1" in="PREVIEW_ANIMATIC" inport="5"/>
       </linkedlist>
      </group>
-     <group name="ANIMATIC_" pos="306,181,3">
+     <group name="ANIMATIC_" pos="306,181,4">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -915,7 +915,7 @@ data: 12/04/2023]]>
        <link out="Comp_Animatic" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="_NOTES" pos="605,224,8">
+     <group name="_NOTES" pos="605,224,9">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -965,7 +965,7 @@ data: 12/04/2023]]>
        <link out="Composite" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <module type="PEG" name="Camera-P" pos="78,2,4" publishUnderTab="Camera-P">
+     <module type="PEG" name="Camera-P" pos="78,2,5" publishUnderTab="Camera-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1027,7 +1027,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="BG" pos="1110,275,5" publishUnderTab="BG">
+     <module type="COMPOSITE" name="BG" pos="1110,275,6" publishUnderTab="BG">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1046,7 +1046,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="NOTES" pos="614,279,9" publishUnderTab="NOTES">
+     <module type="COMPOSITE" name="NOTES" pos="614,279,10" publishUnderTab="NOTES">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1065,7 +1065,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="CAMERA" name="Camera" pos="44,132,10" publishUnderTab="Camera">
+     <module type="CAMERA" name="Camera" pos="44,132,11" publishUnderTab="Camera">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1087,7 +1087,7 @@ data: 12/04/2023]]>
        <farPlane val="1000" defaultValue="1000"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,11" publishUnderTab="ANIMATIC-P-P">
+     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,12" publishUnderTab="ANIMATIC-P-P">
       <options>
        <disabled val="true"/>
        <collapsed val="true"/>
@@ -1150,7 +1150,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="CHAR" pos="739,31,6" publishUnderTab="CHAR">
+     <module type="COMPOSITE" name="CHAR" pos="739,31,7" publishUnderTab="CHAR">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1169,7 +1169,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P" pos="315,132,12" publishUnderTab="ANIMATIC-P">
+     <module type="PEG" name="ANIMATIC-P" pos="315,132,13" publishUnderTab="ANIMATIC-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1231,7 +1231,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="PEG" name="_NOTES-P" pos="613,173,7" publishUnderTab="_NOTES-P">
+     <module type="PEG" name="_NOTES-P" pos="613,173,8" publishUnderTab="_NOTES-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1293,7 +1293,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="FX" pos="863,283,13" publishUnderTab="FX">
+     <module type="COMPOSITE" name="FX" pos="863,283,14" publishUnderTab="FX">
       <options>
        <collapsed val="true"/>
        <version val="1"/>

@@ -153,7 +153,7 @@
       </options>
       <attrs/>
       <nodeslist>
-       <module type="COMPOSITE" name="Comp_VIEW" pos="780,413,11" publishUnderTab="Composite">
+       <module type="COMPOSITE" name="Comp_VIEW" pos="780,413,10" publishUnderTab="Composite">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -172,13 +172,13 @@
          <mergeVector val="false"/>
         </attrs>
        </module>
-       <module type="DISPLAY" name="ASSET_VIEW" pos="846,497,12" publishUnderTab="PROP_VIEW">
+       <module type="DISPLAY" name="ASSET_VIEW" pos="846,497,11" publishUnderTab="PROP_VIEW">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
         </options>
        </module>
-       <module type="WRITE" name="EXPORT" pos="719,497,7" publishUnderTab="EXPORT">
+       <module type="WRITE" name="EXPORT" pos="719,497,6" publishUnderTab="EXPORT">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -215,7 +215,7 @@
          <cleanUpPartitionFolders val="true"/>
         </attrs>
        </module>
-       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="742,-35,13">
+       <module type="MULTIPORT_IN" name="Multi-Port-In" pos="742,-35,12">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -225,7 +225,7 @@
          <port type="IMAGE" idx="1"/>
         </ports>
        </module>
-       <module type="PEG" name="Camera-P" pos="605,-225,6" publishUnderTab="Camera-P">
+       <module type="PEG" name="Camera-P" pos="605,-225,5" publishUnderTab="Camera-P">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -287,7 +287,7 @@
          <addCompositeToGroup val="true"/>
         </attrs>
        </module>
-       <module type="CAMERA" name="Camera" pos="610,-135,14" publishUnderTab="Camera">
+       <module type="CAMERA" name="Camera" pos="610,-135,13" publishUnderTab="Camera">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -309,7 +309,7 @@
          <farPlane val="1000" defaultValue="1000"/>
         </attrs>
        </module>
-       <module type="COLOR_CARD" name="Colour-Card" pos="1024,99,8" publishUnderTab="Colour-Card">
+       <module type="COLOR_CARD" name="Colour-Card" pos="1024,99,7" publishUnderTab="Colour-Card">
         <options>
          <locked val="true"/>
          <collapsed val="false"/>
@@ -327,7 +327,7 @@
          </color>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_Ref" pos="584,98,10" publishUnderTab="Visibility">
+       <module type="VISIBILITY" name="Visibility_Ref" pos="584,98,9" publishUnderTab="Visibility">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -343,10 +343,10 @@
          <version val="1"/>
         </options>
         <attrs>
-         <text val="MCL"/>
+         <text val="BYU"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_LineUp" pos="851,178,4" publishUnderTab="Visibility_Ref">
+       <module type="VISIBILITY" name="Visibility_LineUp" pos="851,178,3" publishUnderTab="Visibility_Ref">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -356,7 +356,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="VISIBILITY" name="Visibility_ColourCard" pos="1006,178,9" publishUnderTab="Visibility_Ref">
+       <module type="VISIBILITY" name="Visibility_ColourCard" pos="1006,178,8" publishUnderTab="Visibility_Ref">
         <options>
          <locked val="true"/>
          <collapsed val="false"/>
@@ -367,7 +367,7 @@
          <softrender val="true"/>
         </attrs>
        </module>
-       <module type="READ" name="LineUp" pos="857,99,5" publishUnderTab="lineUpNew">
+       <module type="READ" name="LineUp" pos="857,99,4" publishUnderTab="lineUpNew">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
@@ -479,7 +479,7 @@
          <tileVertical val="false"/>
         </attrs>
        </module>
-       <module type="READ" name="tips" pos="815,-156,3" publishUnderTab="tips">
+       <module type="READ" name="tips" pos="815,-156,2" publishUnderTab="tips">
         <options>
          <collapsed val="false"/>
          <version val="1"/>
