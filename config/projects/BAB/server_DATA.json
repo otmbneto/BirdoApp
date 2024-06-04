@@ -1,6 +1,6 @@
 {
 	"paths": {
-		"root": "//192.168.10.100/projects/185_Bia_and_the_Beats/",
+		"root": "//BIRDOFS01.birdo.local/Projetos/185_Bia_and_the_Beats/",
 		"projRoot": "",
 		"assetLib": {
 				"bg": "01_BG/",
@@ -46,7 +46,7 @@
 		"tblib": "_tbLib/",
 		"batch_scripts": "_tbLib/batch_scripts",
 		"fazendinha": "_tbLib/_Fazendinha/",
-		"render_comp": "///192.168.10.100/projects/185_Bia_and_the_Beats/02_EPISODIOS/{EP}/05_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
+		"render_comp": "//BIRDOFS01.birdo.local/Projetos/185_Bia_and_the_Beats/02_EPISODIOS/{EP}/05_CENAS/03_COMP/{SCENE}/02_RENDER_TB/",
 		"packUpdate": "_tbLib/_birdoApp/"
 		},
 	"server": {
