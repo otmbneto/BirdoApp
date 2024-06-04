@@ -160,6 +160,29 @@
 					"COMP",
 					"DT"
 					]
+		},
+		{
+			"id": 7,
+			"prefix": "BYU",
+			"name": "Tianas's Bayou Adventure",
+			"harmony" : {
+					"version" : "20.0.0",
+					"build" : 16641
+					},
+			"sboard" : {
+					"version" : null,
+					"build" : null
+					},
+			"icon" : "app/icons/logo_BYU.png",
+			"roles": [
+					"RIG",
+					"DESIGN",
+					"SETUP",
+					"ANIMATOR",
+					"ANIM_LEAD",
+					"COMP",
+					"DT"
+					]
 		}
 	]
 }
