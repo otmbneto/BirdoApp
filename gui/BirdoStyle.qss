@@ -29,14 +29,16 @@ QProgressBar::chunk {
 QPushButton{
 	border: 2px solid white;
 	border-radius: 6px;
-	background-color: ligthgray;
+	background-color: darkgray;
 	width: 110px;
 	height: 23px;
+	font-weight: bold; 
+	color: white;
 }
 
 QPushButton:pressed {
-	color: black;
-	background-color: #05B8CC;
+	color: darkgray;
+	background-color: gray;
 }
 
 QPushButton:flat {
