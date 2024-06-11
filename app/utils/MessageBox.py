@@ -22,6 +22,7 @@ class CreateMessageBox:
         print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Information)
+        self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
         if not self.loop:
             self.app.exec_()
@@ -30,6 +31,7 @@ class CreateMessageBox:
         print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Warning)
+        self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
         if not self.loop:
             self.app.exec_()
@@ -46,6 +48,7 @@ class CreateMessageBox:
         print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Critical)
+        self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
         if not self.loop:
             self.app.exec_()
