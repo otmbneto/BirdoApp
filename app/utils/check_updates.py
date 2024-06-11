@@ -208,6 +208,7 @@ def main_update(proj_data, main_app=None):
         main_app.ui.progressBar.setValue(0)
         return False
 
+    print "update toon boom package"
     # UPDATE TOON BOOM PACKAGE
     main_app.ui.progressBar.setValue(3)
     main_app.ui.loading_label.setText("updating harmony package...")
