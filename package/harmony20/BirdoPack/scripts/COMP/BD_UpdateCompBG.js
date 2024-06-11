@@ -35,7 +35,7 @@ function BD_UpdateCompBG(){
 	var elementId = node.getElementId(sel);
 	var element_folder = element.completeFolder(elementId);
 	if(!element_folder){
-		MessageBox.warning("No PSD found for selected Node!", 0, 0);
+		MessageBox.warning("No Element folder found for selected Node!", 0, 0);
 		return;
 	}
 	
@@ -46,7 +46,7 @@ function BD_UpdateCompBG(){
 	}
 	scene_psd = element_folder + "/" + scene_psd;
 	Print("Coping psd files...");
-	if(!copy_file_with_pb(comp_psd, scene_psd)){
+	if(!copy_file_with_pb(projData, comp_psd, scene_psd)){
 		MessageBox.warning("ERROR copying files!",0,0);
 		return;
 	}
@@ -64,5 +64,5 @@ function copy_file_with_pb(proj_data, src_file, dst_file){
 	var pyFile = "app/utils/copy_file_with_pb.py";
 	var start = Process2(python, pyFile, src_file, dst_file, "override");
 	var ret = start.launch();
-	return ret != 0;
+	return ret == 0;
 }
