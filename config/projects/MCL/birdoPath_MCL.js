@@ -30,8 +30,8 @@ function BirdoProject(entity){
 		"shot": new RegExp("\\w{3}_EP\\d{3}_SC\\d{4}")
 	};
 	this.colour_spaces = {
-		"PRE_COMP": "NO_COLOUR_SPACE", 
-		"COMP": "NO_COLOUR_SPACE"
+		"PRE_COMP": [2160, 3840], 
+		"COMP": [2160, 3840]
 	};
 	this.resolution_name = {
 		"PRE_COMP": "HDTV_1080p24", 
@@ -158,7 +158,7 @@ function BirdoProject(entity){
 			return false;
 		}
 		var res = this.resolution_name[step];
-		if(scene.setDefaultResolutionName(res)){
+		if(scene.setDefaultResolution(res[0], res[1], 41.112)){
 			MessageLog.trace("Scene resolution updated to: " + res);
 			return true;
 		} else {
