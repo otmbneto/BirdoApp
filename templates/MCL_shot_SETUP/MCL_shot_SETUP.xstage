@@ -15,13 +15,13 @@
  </elements>
  <options>
   <metrics unitAspectRatioX="4" unitAspectRatioY="3" numberOfUnitsX="24" numberOfUnitsY="24" numberOfUnitsZ="12"/>
-  <resolution name="HDTV_1080p24" size="1920,1080" fovFit="VerticalFitFov" fov="41.112090439166927" projection="PerspectiveProjection"/>
+  <resolution size="2160,3840" fovFit="VerticalFitFov" fov="41.112090439166927" projection="PerspectiveProjection"/>
   <framerate val="24"/>
   <zdragging val="true"/>
   <zOrderCompatibilityWith7_3 val="false"/>
-  <pixelPerModelUnitForVectorLayers val="0.28800000000000009"/>
-  <pixelPerModelUnitForBitmapLayers val="0.28800000000000009"/>
-  <canvasForBitmapLayers size="3840,2160"/>
+  <pixelPerModelUnitForVectorLayers val="1.0240000000000002"/>
+  <pixelPerModelUnitForBitmapLayers val="1.0240000000000002"/>
+  <canvasForBitmapLayers size="4320,7680"/>
   <cameraInSymbols val="true"/>
   <scaleFactor val="1"/>
  </options>
@@ -341,7 +341,7 @@
      <collapsed val="false"/>
     </options>
     <nodeslist>
-     <group name="REF_ANIM-G" pos="308,438,1">
+     <group name="REF_ANIM-G" pos="308,438,2">
       <options>
        <collapsed val="false"/>
        <subnodeCollapsed val="false"/>
@@ -391,7 +391,7 @@
        <link out="Composite" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="SETUP" pos="719,491,2">
+     <group name="SETUP" pos="719,491,1">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -522,7 +522,6 @@
        </module>
        <module type="READ" name="SAFE_AREA" pos="-230,268,7" publishUnderTab="SAFE_AREA">
         <options>
-         <locked val="true"/>
          <collapsed val="true"/>
          <version val="1"/>
         </options>
@@ -750,18 +749,13 @@
          <version val="1"/>
         </options>
         <attrs>
-         <text>
-          <val>
-           <![CDATA[SETUP LEB - S01 v01
+         <text val="SETUP MCL - S01 v02 -vertical
 
-data: 12/04/2023]]>
-          </val>
-         </text>
+data: 12/06/2024"/>
         </attrs>
        </module>
        <module type="VISIBILITY" name="Visibility_1" pos="-211,316,12" publishUnderTab="Visibility_1">
         <options>
-         <locked val="true"/>
          <collapsed val="true"/>
          <version val="1"/>
         </options>
@@ -865,7 +859,7 @@ data: 12/04/2023]]>
        <link out="Visibility_1" in="PREVIEW_ANIMATIC" inport="5"/>
       </linkedlist>
      </group>
-     <group name="ANIMATIC_" pos="306,181,3">
+     <group name="ANIMATIC_" pos="306,181,4">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -915,7 +909,7 @@ data: 12/04/2023]]>
        <link out="Comp_Animatic" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <group name="_NOTES" pos="605,224,8">
+     <group name="_NOTES" pos="605,224,9">
       <options>
        <collapsed val="true"/>
        <subnodeCollapsed val="true"/>
@@ -965,7 +959,7 @@ data: 12/04/2023]]>
        <link out="Composite" in="Multi-Port-Out"/>
       </linkedlist>
      </group>
-     <module type="PEG" name="Camera-P" pos="78,2,4" publishUnderTab="Camera-P">
+     <module type="PEG" name="Camera-P" pos="78,2,5" publishUnderTab="Camera-P">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1027,7 +1021,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="BG" pos="1110,275,5" publishUnderTab="BG">
+     <module type="COMPOSITE" name="BG" pos="1110,275,6" publishUnderTab="BG">
       <options>
        <collapsed val="false"/>
        <version val="1"/>
@@ -1046,7 +1040,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="NOTES" pos="614,279,9" publishUnderTab="NOTES">
+     <module type="COMPOSITE" name="NOTES" pos="614,279,10" publishUnderTab="NOTES">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1065,7 +1059,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="CAMERA" name="Camera" pos="44,132,10" publishUnderTab="Camera">
+     <module type="CAMERA" name="Camera" pos="44,132,11" publishUnderTab="Camera">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1087,7 +1081,7 @@ data: 12/04/2023]]>
        <farPlane val="1000" defaultValue="1000"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,11" publishUnderTab="ANIMATIC-P-P">
+     <module type="PEG" name="ANIMATIC-P-P" pos="310,36,12" publishUnderTab="ANIMATIC-P-P">
       <options>
        <disabled val="true"/>
        <collapsed val="true"/>
@@ -1150,7 +1144,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="CHAR" pos="739,31,6" publishUnderTab="CHAR">
+     <module type="COMPOSITE" name="CHAR" pos="739,31,7" publishUnderTab="CHAR">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1169,7 +1163,7 @@ data: 12/04/2023]]>
        <mergeVector val="false"/>
       </attrs>
      </module>
-     <module type="PEG" name="ANIMATIC-P" pos="315,132,12" publishUnderTab="ANIMATIC-P">
+     <module type="PEG" name="ANIMATIC-P" pos="315,132,13" publishUnderTab="ANIMATIC-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1231,7 +1225,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="PEG" name="_NOTES-P" pos="613,173,7" publishUnderTab="_NOTES-P">
+     <module type="PEG" name="_NOTES-P" pos="613,173,8" publishUnderTab="_NOTES-P">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
@@ -1293,7 +1287,7 @@ data: 12/04/2023]]>
        <addCompositeToGroup val="true"/>
       </attrs>
      </module>
-     <module type="COMPOSITE" name="FX" pos="863,283,13" publishUnderTab="FX">
+     <module type="COMPOSITE" name="FX" pos="863,283,14" publishUnderTab="FX">
       <options>
        <collapsed val="true"/>
        <version val="1"/>
