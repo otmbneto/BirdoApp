@@ -30,12 +30,12 @@ function BirdoProject(entity){
 		"shot": new RegExp("\\w{3}_EP\\d{3}_SC\\d{4}")
 	};
 	this.colour_spaces = {
-		"PRE_COMP": [2160, 3840], 
-		"COMP": [2160, 3840]
+		"PRE_COMP": "NO_COLOUR_SPACE", 
+		"COMP": "NO_COLOUR_SPACE"
 	};
 	this.resolution_name = {
-		"PRE_COMP": "HDTV_1080p24", 
-		"COMP": "4K_UHD"
+		"PRE_COMP": [2160, 3840], 
+		"COMP": [2160, 3840]
 	};
 	//limpa o prefix da entity para nao ficar com redundancia
 	delete this.entity.prefix;
