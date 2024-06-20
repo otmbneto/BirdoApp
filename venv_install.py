@@ -27,15 +27,23 @@ def get_default_shell():
 if get_default_shell() == "CMD":
     print("It is cmd")
     command_seperator = "&"
+    activate = ""
 else:
     print("it is powershell")
     command_seperator = ";"
+    activate = ".\\"
 
 
 # Retorna 0 se tiver uma versao instalada do virtualenv.
 # Retorna 1 se der erro
 def virtualenv_installed():
-    return os.system("virtualenv --version") == 0
+
+    try:
+        import virtualenv
+    except:
+        return 0
+
+    return 1
 
 
 # Gambiarra: checa se ja existe um arquivo cfg desse env.
@@ -47,13 +55,13 @@ def venv_exists(venv_name):
 # atualiza o env com os requirements
 def update_virtualenv(venv_name):
     path = os.path.dirname(os.path.abspath(__file__))
-    cmd = "cd {0}/{1}/Scripts{2} activate {2} pip install -r \"{0}/requirement.txt\"".format(path,venv_name,command_seperator).replace("\\", "/")
+    cmd = "cd {0}/{1}/Scripts{2} {3}activate {2} pip install -r \"{0}/requirement.txt\"".format(path,venv_name,command_seperator,activate).replace("\\", "/")
     return os.system(cmd) == 0
 
 
 def init_virtual_env(venv_name):
     if not virtualenv_installed():
-        if not os.system("pip install virtualenv") == 0:
+        if not os.system("python -m pip install virtualenv") == 0:
             print "falha ao instalar o virtualenv!"
             return False
 
