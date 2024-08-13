@@ -660,4 +660,20 @@ function BD1_ForceMakeDir(dirPath){
 	}
 	return false;
 }
+
+//run python script to copy file to destiny with progressbar (copy bytes per bytes);
+function BD1_copy_file_with_pb(proj_data, src_file, dst_file, file_index, files_length, ask_override){
+	if(!ask_override){
+		ask_override = "override";
+	}
+	if(!file_index || !files_length){
+		file_index = 1;
+		files_length = 1;
+	}
+	var python = proj_data.birdoApp + "venv/Scripts/python.exe";
+	var pyFile = "app/utils/copy_file_with_pb.py";
+	var start = Process2(python, pyFile, src_file, dst_file, file_index, files_length, ask_override);
+	var ret = start.launch();
+	return ret == 0;
+}
 	
