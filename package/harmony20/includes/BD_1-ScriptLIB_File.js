@@ -503,7 +503,14 @@ Copyright:  leobazao_@Birdo
 		var images = outPutFolder + "f-%04d." + extension;
 		System.processOneEvent();
 
-		var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), "-r", 24, "-s", "480x270", images);
+		//get reduced size of image based on scene size
+		var scene_x = scene.defaultResolutionX();
+		var scene_y = scene.defaultResolutionY();
+		var y = 270;
+		var x = Math.round(scene_x/(scene_y/y));
+		var res = [x, y].join("x");
+
+		var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), "-r", 24, "-s", res, images);
 		var ret = process.launch();// let's home this worked.
 
 		if(ret != 0){
