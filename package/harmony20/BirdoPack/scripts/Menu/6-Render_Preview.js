@@ -187,9 +187,6 @@ function RenderPreview(){
 			}
 		}
 		
-		//hides progress bar
-		progressDlg.hide();
-		
 		MessageBox.information("As midias exportadas foram copiadas para rede!\nCom " + erros_count + " errors!");
 
 	}
