@@ -96,7 +96,7 @@ function RenderPreview(){
 			return;
 		}
 		//copia midias para o servidor
-		copy_comp_media_to_server(output_data["folder"], output_data["render_comp"]);
+		copy_comp_media_to_server(projectDATA, output_data["folder"], output_data["render_comp"], currScene);
 		
 	} else {
 		copy_temprender_to_renderlocal(render_data.render_files[0], render_step);
@@ -171,54 +171,26 @@ function RenderPreview(){
 		return render_check;
 	}
 	
-	function copy_comp_media_to_server(local_folder_render, server_render_path){//copia as midias de comp pro server
+	function copy_comp_media_to_server(projectDATA, local_folder_render, server_render_path, scene_name){//copia as midias de comp pro server
 		
-		var progressDlg; 
-		progressDlg = new QProgressDialog();
-		progressDlg.modal = true;
-		progressDlg.open();
-		progressDlg.setRange(0, 5);
+		//movies render
+		var movs  = BD1_ListFiles(local_folder_render, "*.mov");
+		var erros_count = 0;
 		
-		progressDlg.setLabelText("cleaning temp folder...");
-		progressDlg.setValue(1);
-		var temp_folder = specialFolders.temp + "/BirdoApp/Render_preview/";
-		if(!BD1_CleanFolder(temp_folder)){
-			progressDlg.hide();
-			MessageBox.warning("Error cleaning temp folder to copy files",0,0);
-			Print("Error creating temp folder!");
-			return false;
+		for(var i=0; i< movs.length; i++){
+			var file_name = movs[i];
+			var file_path = local_folder_render + "/" + file_name;
+			var dst_file = server_render_path + "/" + file_name.replace("exportFINAL", scene_name);
+			if(!BD1_copy_file_with_pb(projectDATA, file_path, dst_file, (i + 1), movs.length)){
+				erros_count++;	
+				Print("Error copying file: " file);
+			}
 		}
 		
-		progressDlg.setLabelText("ziping temp files...");
-		progressDlg.setValue(2);
-		var temp_zip = BD2_ZipFilesInFolder(local_folder_render, "_tempCopyMedias.zip", temp_folder);
-		if(!temp_zip){
-			progressDlg.hide();
-			MessageBox.warning("Fail to compact temp files!",0,0);
-		}
-		
-		progressDlg.setLabelText("cleaning server destiny folder...");
-		progressDlg.setValue(3);
-		if(!BD1_CleanFolder(server_render_path)){
-			progressDlg.hide();
-			MessageBox.warning("Error cleaning server destiny folder",0,0);
-			Print("Error cleaning server destiny folder!");
-			return false;
-		}
-		
-		progressDlg.setLabelText("unpacking media in server...");
-		progressDlg.setValue(4);
-		if(!BD1_UnzipFile(temp_zip, server_render_path)){
-			progressDlg.hide();
-			MessageBox.warning("Error unpacking media files in server!",0,0);
-			Print("Error unpacking media files in server!");
-			return false;
-		}
-		
-		progressDlg.setValue(5);
+		//hides progress bar
 		progressDlg.hide();
 		
-		MessageBox.information("As midias exportadas foram copiadas para rede!");
+		MessageBox.information("As midias exportadas foram copiadas para rede!\nCom " + erros_count + " errors!");
 
 	}
 	
