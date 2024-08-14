@@ -65,7 +65,7 @@ class Copier(QDialog):
 
     """Class With ProgressDialog to request copy file"""
 
-    def __init__(self, src_file, dst_file, file_index=1, files_length=1):
+    def __init__(self, src_file, dst_file):
         super(Copier, self).__init__()
         print("Progress Dialog Created.")
 
@@ -87,9 +87,7 @@ class Copier(QDialog):
         # create widgets
         self.v_layout = QVBoxLayout(self)
         self.anim_label = QLabel(self)
-        self.label = QLabel("Copying file [{0}/{1}]: ...{2}\nTo: .../{3}".format(
-            file_index,
-            files_length,
+        self.label = QLabel("Copying file: ...{0}\nTo: .../{1}".format(
             os.path.basename(self.src_file),
             os.path.basename(os.path.dirname(self.dst_file))
         ))
@@ -167,18 +165,16 @@ class Copier(QDialog):
 # loads the interface
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) > 6:
+    if len(args) != 4:
         print("Numero de argumentos invalidos!")
         sys.exit("error: wrong number of arguments!")
 
     src_file = str(args[1])
     dst_file = str(args[2])
-    file_index = int(args[3])
-    files_length = int(args[4])
     ask_override = "ask" in args
 
     app = QApplication([])
-    d = Copier(src_file, dst_file, file_index=file_index, files_length=files_length)
+    d = Copier(src_file, dst_file)
     if os.path.exists(dst_file):
         if ask_override:
             ask = d.message.question("Destiny file already exists. Want to replace it?")

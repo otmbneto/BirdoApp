@@ -46,12 +46,25 @@ function BD_UpdateCompBG(){
 	}
 	scene_psd = element_folder + "/" + scene_psd;
 	Print("Coping psd files...");
-	if(!BD1_copy_file_with_pb(projData, comp_psd, scene_psd)){
-		MessageBox.warning("ERROR copying files!",0,0);
-		return;
+	try{
+	if(!copy_file_with_pb(projData, comp_psd, scene_psd)){
+			MessageBox.warning("ERROR copying files!",0,0);
+			return;
+		}
+	} catch(e){
+		Print(e);
 	}
-	
 	var msg = "Scene Background updated!";
 	Print(msg);
 	MessageBox.information(msg);
+}
+
+//run python script to copy file to destiny with progressbar (copy bytes per bytes);
+function copy_file_with_pb(proj_data, src_file, dst_file){
+
+	var python = proj_data.birdoApp + "venv/Scripts/python.exe";
+	var pyFile = "app/utils/copy_file_with_pb.py";
+	var start = Process2(python, pyFile, src_file, dst_file, "override");
+	var ret = start.launch();
+	return ret == 0;
 }
