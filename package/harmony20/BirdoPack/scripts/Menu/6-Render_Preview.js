@@ -181,7 +181,7 @@ function RenderPreview(){
 			var file_name = movs[i];
 			var file_path = local_folder_render + "/" + file_name;
 			var dst_file = server_render_path + "/" + file_name.replace("exportFINAL", scene_name);
-			if(!BD1_copy_file_with_pb(projectDATA, file_path, dst_file, (i + 1), movs.length)){
+			if(!BD1_copy_file_with_pb(projectDATA, file_path, dst_file)){
 				erros_count++;	
 				Print("Error copying file: " + file);
 			}
