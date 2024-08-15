@@ -168,18 +168,7 @@ function BirdoProject(entity){
 	}
 	
 	this.modifyScenePreRender = function(step, is_farm){
-		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
-		
-		if(step == "COMP"){
-			try{
-				require(get_psd_data_script).get_psd_anim_data(true);//exporta info dos psd
-			} catch(e){
-				MessageLog.trace(e.message);
-				MessageLog.trace("Error creating PSD files data!");
-			}	
-		} else {
-			MessageLog.trace("Nenhuma acao de modify scene para o pre_comp!");
-		}
+		MessageLog.trace("no prerender comp action...!");
 	}
 	
 	this.getRenderComp = function(scene_name){//caminho do render da comp (direto na rede da birdo)
