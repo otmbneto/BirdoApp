@@ -1755,3 +1755,17 @@ function BD2_getCurrentGroupNV(){
     var nodeview = view.viewList().filter(function(item){ return view.type(item) == "Node View"});
     return view.group(nodeview[0]);
 }
+
+/*
+	retorna a proxima porta output NAO conectada do node
+*/
+function BD2_GetNextOuputPort(node_path){
+	var port = node.numberOfOutputPorts(node_path) - 1;
+	while(port > 0){
+		if(!node.dstNode(node_path, port, 0)){
+			break;
+		}
+		port--; 
+	}
+	return port;
+}

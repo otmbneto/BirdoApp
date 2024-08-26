@@ -76,7 +76,7 @@ function BD_AddWriteNode(){
 
 	renderPath = renderPath + "_" + writeName;
 
-	var writeNew = BD2_AddNodeUnder(sel, "Write_" + writeName, "WRITE", true);
+	var writeNew = BD2_AddNodeUnder(sel, "Write_" + writeName, "WRITE", true, BD2_GetNextOuputPort(sel));
 
 	var setAtt = BD2_changeWriteNodeAtt(projData, writeNew, renderPath, "COMP");
 
