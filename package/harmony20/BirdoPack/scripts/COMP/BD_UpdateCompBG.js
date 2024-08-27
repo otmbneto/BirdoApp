@@ -141,7 +141,7 @@ function createInrterface(projectDATA, psd_data){
 		Print("Updating background psds...");
 		
 		//check if server psd is identical to local psd
-		var size_compare = BD1_CompareFileSize(this.psds_data.server.file, this.psds_data.main.file);
+		var size_compare = compareFileSize(this.psds_data.server.file, this.psds_data.main.file);
 		if(this.psds_data.main.raw_data.layers.toString() == this.psds_data.server.raw_data.layers.toString() && size_compare){
 			if(!askQuestion("Aparentemente o PSD da cena já foi atualizado.\nDeseja importar mesmo assim?")){
 				Print("Canceled!!!");
@@ -218,6 +218,12 @@ function createInrterface(projectDATA, psd_data){
 		var start = Process2(python, pyFile, src_file, dst_file, "override");
 		var ret = start.launch();
 		return ret == 0;
+	}
+	
+	function compareFileSize(filePath1, filePath2){
+		var size1 = new QFileInfo(filePath1).size();
+		var size2 = new QFileInfo(filePath2).size();
+		return size1 == size2;
 	}
 }
 
