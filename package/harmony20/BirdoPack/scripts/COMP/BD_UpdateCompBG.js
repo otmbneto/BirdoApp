@@ -17,6 +17,7 @@ function BD_UpdateCompBG(){
 		Print("invalid psd scene selection!");
 		return;
 	}
+	
 	var d = new createInrterface(projectDATA, psds_data);
 	d.ui.show();
 	d.ui.activateWindow();
@@ -45,7 +46,7 @@ function createInrterface(projectDATA, psd_data){
 	try{
 		//update selected psd widget name
 		this.ui.groupBoxFiles.labelSelected.text = this.psds_data["main"].name;
-		
+		this.ui.groupBoxFiles.labelServer.text = this.psds_data["server"].name;
 		var layoutCopies = new QVBoxLayout();
 		var groupCopies = this.ui.groupBoxFiles.scrollAreaFiles.widget().widgetCopies;
 		groupCopies.setLayout(layoutCopies);
@@ -138,6 +139,16 @@ function createInrterface(projectDATA, psd_data){
 	
 	this.onUpdate = function(){
 		Print("Updating background psds...");
+		
+		//check if server psd is identical to local psd
+		var size_compare = BD1_CompareFileSize(this.psds_data.server.file, this.psds_data.main.file);
+		if(this.psds_data.main.raw_data.layers.toString() == this.psds_data.server.raw_data.layers.toString() && size_compare){
+			if(!askQuestion("Aparentemente o PSD da cena já foi atualizado.\nDeseja importar mesmo assim?")){
+				Print("Canceled!!!");
+				this.ui.close();
+				return;
+			}
+		}
 		
 		//warning that the psd is invalid
 		if(!this.is_valid){

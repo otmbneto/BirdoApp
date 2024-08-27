@@ -229,418 +229,412 @@ Copyright:  leobazao_@Birdo
 	}
 
 //#####################GENERAL files#####################//
-	function BD1_fileBasename(filePath){//retorna o nome do arquivo com extensao
-		var file = new File(filePath);
-		if(file.extension){
-			return file.baseName + "." + file.extension;
+function BD1_fileBasename(filePath){//retorna o nome do arquivo com extensao
+	var file = new File(filePath);
+	if(file.extension){
+		return file.baseName + "." + file.extension;
+	} else {
+		return file.baseName;
+	}
+}	
+
+function BD1_file_extension(filePath){//retorna a extensao do arquivo
+	var file = new File(filePath);
+	return file.extension;
+}
+
+function BD1_dirname(path){//retorna o parent folder do arquivo
+	var file = new File(path);
+	return file.path;
+}	
+
+function BD1_fileParentFolder(filePath){//(obsoleto - rever os scripts q usam pra mudar pra outro nome : dirname)
+	var file = new File(filePath);
+	return file.path;
+}
+/*Le o arquivo dado como parametro e retorna seu conteudo em texto
+@file => arquivo de texto
+*/
+function BD1_ReadFile(file){
+	var f = new File(file);
+	f.open(FileAccess.ReadOnly);
+	var text = f.read();
+	f.close();
+	return text;
+}
+
+/*checa se o caminho e de um arquivo (se for dir ou nao existir, retorna false)
+@fileToCheck => caminho do arquivo a ser checado
+*/
+function BD1_is_file(fileToCheck) { 
+	var tempFile = new QFileInfo(fileToCheck);
+	return tempFile.isFile();
+}
+
+/*checha se o arquivo dado existe
+@filePath => arquivo a ser verificado
+*/
+function BD1_FileExists(filePath){
+var f = new File(filePath);
+return f.exists;
+}
+
+/*deleta o Arquivo dado
+@filePath => arquivo a ser deletado
+*/
+function BD1_RemoveFile(filePath) {
+	var f = new PermanentFile(filePath);
+	var remove = f.remove();
+	if(!remove){
+		MessageLog.trace("Fail to remove file: " + filePath);
+	} else {
+		MessageLog.trace("File removed: " + filePath);
+	}
+	return remove ;
+}
+
+/*Copia um arquivo para o caminho especificado
+@copyPath => arquivo a ser copiado => Origem;
+@pastePath => destino do arquivo => destino;	
+*/
+function BD1_CopyFile(copyPath, pastePath){//Copia um Arquivo para o caminho dado
+	var fileToCopy = new PermanentFile(copyPath);
+	var copyOfFile = new PermanentFile(pastePath);
+	try {
+		var copy = fileToCopy.copy(copyOfFile);
+		if(!copy){
+			Print("[COPYFILE][ERROR] Fail to copy the file: \n from: " + copyPath + "\n to: " + pastePath);
 		} else {
-			return file.baseName;
-		}
-	}	
-
-	function BD1_file_extension(filePath){//retorna a extensao do arquivo
-		var file = new File(filePath);
-		return file.extension;
-	}
-
-	function BD1_dirname(path){//retorna o parent folder do arquivo
-		var file = new File(path);
-		return file.path;
-	}	
-
-	function BD1_fileParentFolder(filePath){//(obsoleto - rever os scripts q usam pra mudar pra outro nome : dirname)
-		var file = new File(filePath);
-		return file.path;
-	}
-	/*Le o arquivo dado como parametro e retorna seu conteudo em texto
-	@file => arquivo de texto
-	*/
-	function BD1_ReadFile(file){
-		var f = new File(file);
-		f.open(FileAccess.ReadOnly);
-		var text = f.read();
-		f.close();
-		return text;
-	}
-	
-	/*checa se o caminho e de um arquivo (se for dir ou nao existir, retorna false)
-	@fileToCheck => caminho do arquivo a ser checado
-	*/
-	function BD1_is_file(fileToCheck) { 
-		var tempFile = new QFileInfo(fileToCheck);
-		return tempFile.isFile();
-	}
-	
-	/*checha se o arquivo dado existe
-	@filePath => arquivo a ser verificado
-	*/
-	function BD1_FileExists(filePath){
-	var f = new File(filePath);
-	return f.exists;
-	}
-
-  	/*deleta o Arquivo dado
-	@filePath => arquivo a ser deletado
-	*/
-	function BD1_RemoveFile(filePath) {
-		var f = new PermanentFile(filePath);
-		var remove = f.remove();
-		if(!remove){
-			MessageLog.trace("Fail to remove file: " + filePath);
-		} else {
-			MessageLog.trace("File removed: " + filePath);
-		}
-		return remove ;
-	}
-
-	/*Copia um arquivo para o caminho especificado
-	@copyPath => arquivo a ser copiado => Origem;
-	@pastePath => destino do arquivo => destino;	
-	*/
-	function BD1_CopyFile(copyPath, pastePath){//Copia um Arquivo para o caminho dado
-		var fileToCopy = new PermanentFile(copyPath);
-		var copyOfFile = new PermanentFile(pastePath);
-		try {
-			var copy = fileToCopy.copy(copyOfFile);
-			if(!copy){
-				Print("[COPYFILE][ERROR] Fail to copy the file: \n from: " + copyPath + "\n to: " + pastePath);
-			} else {
-	 			if(!BD1_CompareFileSize(copyPath, pastePath)){
-					Print("[COPYFILE][ERROR] Copy fail! Size is not the same of origin: " + pastePath);
-					return false;
-				}
-				Print("[COPYFILE] File: '" + pastePath + "' Copied!");
-			}
-		} catch (e) {
-			Print(e);
-		}
-		return copy;
-	}
- 
-	function BD1_CompareFileSize(filePath1, filePath2){
-		var file1 = new File(filePath1);
-		file1.open(FileAccess.ReadOnly);
-		var size1 = file1.size;
-		file1.close();
-		var file2 = new File(filePath2);
-		file2.open(FileAccess.ReadOnly);
-		var size2 = file2.size;
-		file2.close();
-		return size1 == size2;
-	}
-
-	/*Lista os arquivos no folder dado
-	@path => folder pra listar os arquivos
-	@filter => filtro do tipo de arquivo ("*") para listar todos... ex ("*.psd");
-	*/	
-	function BD1_ListFiles(path, filter){
-		if(!BD1_FileExists(path)){
-			Print("[LISTFILES] ERROR! Path does not exist: " + path);
-			return false;
-		}
-		var dir = new Dir(path);
-		var files = dir.entryList(filter).sort();
-		return files.filter(function isTrash(value) {return value != "." && value != ".."});
-	}
-
-	/*importa audio para cena
-	@filename => audio file para ser importado na cena
-	*/	
-	function BD1_Import_sound(filename, column_name){
-		column.add(column_name, "SOUND");
-		result = column.importSound(column_name, 1, filename);
-		if(!result){
-			MessageLog.trace("fail to import sound.. " + filename);
-		} else {
-			MessageLog.trace("Sound importated: " + filename);
-		}
-		return result;
-	}
-
-	/*retorna data de modificacao do arquivo
-		@filePath
-	*/
-	function BD1_get_last_modified(file){
-		var file = new File(file);
-		file.open(FileAccess.ReadOnly);
-		var lmodified = file.lastModified;
-		file.close();
-		return lmodified;
-	}
-	/*renomeia o arquivo para new_name
-		@filePath
-	*/
-	function BD1_rename_file(filePath, new_name){
-		var file = new QFile(filePath);
-		if(file.rename(new_name)){
-			Print("File : " + filePath + " renamed to : " + new_name);
-			return true;
-		} else {
-			Print("Error renaming file : " + filePath + " to : " + new_name);
-			return false;
-		}
-	}
-//#####################ZIP files#####################//
-	/*Cria um zip do arquivo dado no caminho de destino dado
-	@src_file => arquivo para ser compactado
-	@zipName => nome do arquivo zip a ser gerado
-	@dstPath => folder de destino a ser salvo o zip (nao use "/" no fim da string)
-	*/	
-	function BD1_ZipFile(src_file, zipName, dstPath){
-		if(!BD1_DirExist(src_file)){
-			MessageBox.information("ZipFile: Falha ao encontrar arquivo de Origem: " + src_file);
-			return false;
-		}
-
-		if(!BD1_DirExist(dstPath)){
-			MessageBox.information("ZipFile: Falha ao encontrar diretorio de destino: " + dstPath);
-			return false;
-		}
-
-		var zipper = BD1_Find7Zip();
-		var zipFile = dstPath + "/" + zipName + ".zip";
-
-		System.processOneEvent();
-
-		var process = new Process2(zipper, "a", "-tzip", BD1_addScapeForMac(zipFile), BD1_addScapeForMac(src_file));
-		var ret = process.launch();// let's home this worked.
-		if(ret != 0){
-			MessageBox.information("Erro ao comprimir arquivo: " + zipFile);
-			return false;
-		} else {
-			return zipFile;
-		}
-	}
-
-	/*Cria um zip de todos arquivos e folders dentro do folder dado
-	@src_folder => folder para ter os arquivos dentro zipados
-	@zipName => nome do arquivo zip a ser gerado
-	@dstPath => folder de destino a ser salvo o zip (nao use "/" no fim da string)
-	*/	
-	function BD2_ZipFilesInFolder(src_folder, zipName, dstPath){
-		MessageLog.trace("Zipping files in folder..." + src_folder);
-
-		src_folder += "/*";  //*/ 
-		var zip_to = dstPath +"/" + zipName +".zip";
-
-		var cmd = BD1_Find7Zip();
-		var cmd_args = [cmd, "a", zip_to, src_folder];	
-
-		try{
-			Process.execute(cmd_args);
-		}
-		catch(e){
-			MessageLog.trace(e);
-			return false;
-		}
-
-		return zip_to;
-	}
-
-
-	/*UNZip arquivo no caminho dado
-	@zipFile => arquivo zip para ser descompactado
-	@destiny => destino dos arquivos descompatados do zip
-	*/	
-	function BD1_UnzipFile(zipFile, destiny){
-		var command = BD1_Find7Zip();
-		var commandArguments = [command, "x", zipFile, "-o" + destiny, "-aoa"];
-		try {
-			Process.execute(commandArguments);
-		} catch (err){
-			MessageBox.warning( "Error while unziping File: " + zipFile, 1, 0, 0);
-			return false;
-		}
-		MessageLog.trace("Arquivo descompactado com sucesso! " + zipFile + " no destino: " + destiny);
-		return true;
-	}
-
-	/* 
-	find 7zip binary - used to zip template
-	*/	
-	function BD1_Find7Zip() {
-		var p;
-		if(about.isMacArch() || about.isLinuxArch()){
-			p = specialFolders.bin + "/bin_3rdParty/7za";
-			if(BD1_FileExists(p)){
-				return p;
-			}
-			p = specialFolders.bin + "/../../external/macosx/p7zip/7za";
-			if(BD1_FileExists(p)){
-				return p;
-			}
-		} else if (about.isWindowsArch()){
-			p = specialFolders.bin + "/bin_3rdParty/7z.exe";
-			if(BD1_FileExists(p)){
-				return p;
-			}
-		}
-		MessageBox.information("cannot find 7zip to compress template. aborting");
-		return false;	
-	}
-
-//##################### FFMPEG #####################//
-	/* 
-	acha o executavel do ffmpeg no birdoApp
-	@birdoAPP_root - caminho do birdoApp Root (pegar com o objetc to projeto)
-	*/
-	function BD1_Get_ffmpeg(birdoAPP_root){
-		if(about.isMacArch()){
-			return birdoAPP_root + "extra/ffmpeg/mac/bin/ffmpeg";
-		} else if(about.isWindowsArch()){
-			return birdoAPP_root + "extra/ffmpeg/windows/bin/ffmpeg.exe";
-		}
-		return false;
-	}
-	
-	/* 
-	converte o arquivo de video dado para uma seq de imagens no output folder tmb dado
-	@movie - arquivo de video a ser convertido
-	@outPutFolder - folder de saida das imagens
-	*/
-	function BD1_convert_mov_to_images(birdoAPP_root, movie, outPutFolder, extension){
-		var ffmpeg = BD1_Get_ffmpeg(birdoAPP_root);
-		var images = outPutFolder + "f-%04d." + extension;
-		System.processOneEvent();
-
-		//get reduced size of image based on scene size
-		var scene_x = scene.defaultResolutionX();
-		var scene_y = scene.defaultResolutionY();
-		var y = 270;
-		var x = Math.round(scene_x/(scene_y/y));
-		var res = [x, y].join("x");
-
-		var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), "-r", 24, "-s", res, images);
-		var ret = process.launch();// let's home this worked.
-
-		if(ret != 0){
-			MessageLog.trace("Erro ao converter movie: " + BD2_FormatPathOS(movie));
-			return false;
-		} else {
-			MessageLog.trace("Movie : " + movie + " converted to image sequence in : " + outPutFolder);
-			return true;
-		}
-	}
-
-	/*
-	Compressao basica usando ffmpeg (retirada do shotgun) do render para upload
-	@birdoAppRoot - root do birdoApp
-	@input_file - arquivo para ser convertido
-	@output_file - saida do arquivo
-	*/
-	function BD1_CompressMovieFile(birdoAppRoot, input_file, output_file){
-		var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
-	Print("TESTE FFMPEG: " + ffmpeg);
-    	var vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
-    	var acodec = "-strict experimental -acodec aac -ab 160k -ac 2"
-    	var start = Process2(ffmpeg, "-i", input_file, vcodec, acodec, "-f", "mp4", BD2_FormatPathOS(output_file));
-   		var ret = start.launch();
-		
-		if(ret == 0){
-			Print("Movie converted with ffmepg: " + output_file);
-			return true;
-		} else {
-			Print("[FFMPEG COMPRESS ERROR] Errror compressing movie file: " + input_file);
-			return false;
-		}
-	}
-	
-	/*
-	comprime uma seq de imagens em um mov
-	@birdoAppRoot - root do birdoApp
-	@startFrame - frame de inicio
-	@imagePatern - padrao de imagem para achar (usar modo: fullpath/Name_%04d.png como padrao)
-	@duration - duracao em frames do mov
-	@fps - frame rate do mov
-	@input_file - arquivo para ser convertido
-	@output_file - saida do arquivo
-	*/
-	function BD1_MakeMovieFromImageSeq(birdoAppRoot, startFrame, imagePatern, duration, fps, output_file){
-		var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
-		var vcodec = "-c:v libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf  3";
-			var start = Process2(ffmpeg, "-y", "-start_number", startFrame, "-i", imagePatern, "-vframes", duration, "-r", fps, vcodec, BD2_FormatPathOS(output_file));
-		var ret = start.launch();
-			
-		if(ret == 0){
-			Print("Movie converted with ffmepg: " + output_file);
-			return true;
-		} else {
-			Print("[FFMPEG COMPRESS ERROR] Errror compressing movie file: " + output_file);
-			return false;
-		}
-	}
-	
-	/*
-	extract audio from movie file
-	@birdoAppRoot - root do birdoApp
-	@movie - arquivo de video de origem
-	@outputFile - saida do arquivo em audio
-	*/
-	function BD1_extract_audio_from_movieFile(birdoAppRoot, movie, outputFile){//converte o mov para audio (dar nome completo do output file com extencao);
-		var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
-		
-		if(!BD1_FileExists(ffmpeg)){
-			Print("Erro: ffmpeg nao encontrado neste computador!");
-			return false;
-		}
-
-		var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), outputFile);
-		var ret = process.launch();// let's home this worked.
-
-		if(ret != 0){
-			Print("Erro ao extrair audio: " + movie);
-			return false;
-		} else {
-			Print("audio extracted: " + outputFile);
-			return true;
-		}
-	}
-	
-	
-	//UTRANSFORM
-	/*
-	convert tvg image to png (thumbnail size) using Utransform
-	@imputTvgImage - imput tvg to convert
-	@outputPng - output png file
-	*/
-	function BD1_convertTVGtoPNGThumbnail(imputTvgImage, outputPng){
-		var utransform = specialFolders.bin + "/utransform.exe";
-		var format = "PNG4";
-		var process = new Process2(utransform, "-outformat", format, "-outfile", outputPng, "-align", "AUTO_ALIGN", "-resolution", 96, 96, imputTvgImage);
-		var ret = process.launch();
-
-		if(ret != 0){
-			Print("Error converting tvg into png: " + imputTvgImage);
-			return false;
-		} else {
-			Print("PNG converted: " + outputPng);
-			return true;
-		}
-	}
-
-	/*
-		sleep command for sec 
-	*/
-	function BD1_sleep(sec){
-		System.processOneEvent();
-		Print("sleeping for " + sec + " secconds...");
-		var process = new Process2("timeout", sec);
-		process.launch();
-		Print("sleep end!");
-	}
-	
-	/*
-		ensure the folder is clean and exists (delete and cretate it again to make sure is empty)
-	*/
-	function BD1_CleanFolder(folderPath){
-		if(BD1_DirExist(folderPath)){
-			if(!BD1_RemoveDirs(folderPath)){
-				Print("fail to clean folder: " + folderPath);
+			if(!BD1_CompareFileSize(copyPath, pastePath)){
+				Print("[COPYFILE][ERROR] Copy fail! Size is not the same of origin: " + pastePath);
 				return false;
 			}
+			Print("[COPYFILE] File: '" + pastePath + "' Copied!");
 		}
-		return BD1_createDirectoryREDE(folderPath);
-	}	
+	} catch (e) {
+		Print(e);
+	}
+	return copy;
+}
+
+function BD1_CompareFileSize(filePath1, filePath2){
+	var size1 = new QFileInfo(filePath1).size();
+	var size2 = new QFileInfo(filePath2).size();
+	return size1 == size2;
+}
+
+/*Lista os arquivos no folder dado
+@path => folder pra listar os arquivos
+@filter => filtro do tipo de arquivo ("*") para listar todos... ex ("*.psd");
+*/	
+function BD1_ListFiles(path, filter){
+	if(!BD1_FileExists(path)){
+		Print("[LISTFILES] ERROR! Path does not exist: " + path);
+		return false;
+	}
+	var dir = new Dir(path);
+	var files = dir.entryList(filter).sort();
+	return files.filter(function isTrash(value) {return value != "." && value != ".."});
+}
+
+/*importa audio para cena
+@filename => audio file para ser importado na cena
+*/	
+function BD1_Import_sound(filename, column_name){
+	column.add(column_name, "SOUND");
+	result = column.importSound(column_name, 1, filename);
+	if(!result){
+		MessageLog.trace("fail to import sound.. " + filename);
+	} else {
+		MessageLog.trace("Sound importated: " + filename);
+	}
+	return result;
+}
+
+/*retorna data de modificacao do arquivo
+	@filePath
+*/
+function BD1_get_last_modified(file){
+	var file = new File(file);
+	file.open(FileAccess.ReadOnly);
+	var lmodified = file.lastModified;
+	file.close();
+	return lmodified;
+}
+/*renomeia o arquivo para new_name
+	@filePath
+*/
+function BD1_rename_file(filePath, new_name){
+	var file = new QFile(filePath);
+	if(file.rename(new_name)){
+		Print("File : " + filePath + " renamed to : " + new_name);
+		return true;
+	} else {
+		Print("Error renaming file : " + filePath + " to : " + new_name);
+		return false;
+	}
+}
+//#####################ZIP files#####################//
+/*Cria um zip do arquivo dado no caminho de destino dado
+@src_file => arquivo para ser compactado
+@zipName => nome do arquivo zip a ser gerado
+@dstPath => folder de destino a ser salvo o zip (nao use "/" no fim da string)
+*/	
+function BD1_ZipFile(src_file, zipName, dstPath){
+	if(!BD1_DirExist(src_file)){
+		MessageBox.information("ZipFile: Falha ao encontrar arquivo de Origem: " + src_file);
+		return false;
+	}
+
+	if(!BD1_DirExist(dstPath)){
+		MessageBox.information("ZipFile: Falha ao encontrar diretorio de destino: " + dstPath);
+		return false;
+	}
+
+	var zipper = BD1_Find7Zip();
+	var zipFile = dstPath + "/" + zipName + ".zip";
+
+	System.processOneEvent();
+
+	var process = new Process2(zipper, "a", "-tzip", BD1_addScapeForMac(zipFile), BD1_addScapeForMac(src_file));
+	var ret = process.launch();// let's home this worked.
+	if(ret != 0){
+		MessageBox.information("Erro ao comprimir arquivo: " + zipFile);
+		return false;
+	} else {
+		return zipFile;
+	}
+}
+
+/*Cria um zip de todos arquivos e folders dentro do folder dado
+@src_folder => folder para ter os arquivos dentro zipados
+@zipName => nome do arquivo zip a ser gerado
+@dstPath => folder de destino a ser salvo o zip (nao use "/" no fim da string)
+*/	
+function BD2_ZipFilesInFolder(src_folder, zipName, dstPath){
+	MessageLog.trace("Zipping files in folder..." + src_folder);
+
+	src_folder += "/*";  //*/ 
+	var zip_to = dstPath +"/" + zipName +".zip";
+
+	var cmd = BD1_Find7Zip();
+	var cmd_args = [cmd, "a", zip_to, src_folder];	
+
+	try{
+		Process.execute(cmd_args);
+	}
+	catch(e){
+		MessageLog.trace(e);
+		return false;
+	}
+
+	return zip_to;
+}
+
+
+/*UNZip arquivo no caminho dado
+@zipFile => arquivo zip para ser descompactado
+@destiny => destino dos arquivos descompatados do zip
+*/	
+function BD1_UnzipFile(zipFile, destiny){
+	var command = BD1_Find7Zip();
+	var commandArguments = [command, "x", zipFile, "-o" + destiny, "-aoa"];
+	try {
+		Process.execute(commandArguments);
+	} catch (err){
+		MessageBox.warning( "Error while unziping File: " + zipFile, 1, 0, 0);
+		return false;
+	}
+	MessageLog.trace("Arquivo descompactado com sucesso! " + zipFile + " no destino: " + destiny);
+	return true;
+}
+
+/* 
+find 7zip binary - used to zip template
+*/	
+function BD1_Find7Zip() {
+	var p;
+	if(about.isMacArch() || about.isLinuxArch()){
+		p = specialFolders.bin + "/bin_3rdParty/7za";
+		if(BD1_FileExists(p)){
+			return p;
+		}
+		p = specialFolders.bin + "/../../external/macosx/p7zip/7za";
+		if(BD1_FileExists(p)){
+			return p;
+		}
+	} else if (about.isWindowsArch()){
+		p = specialFolders.bin + "/bin_3rdParty/7z.exe";
+		if(BD1_FileExists(p)){
+			return p;
+		}
+	}
+	MessageBox.information("cannot find 7zip to compress template. aborting");
+	return false;	
+}
+
+//##################### FFMPEG #####################//
+/* 
+acha o executavel do ffmpeg no birdoApp
+@birdoAPP_root - caminho do birdoApp Root (pegar com o objetc to projeto)
+*/
+function BD1_Get_ffmpeg(birdoAPP_root){
+	if(about.isMacArch()){
+		return birdoAPP_root + "extra/ffmpeg/mac/bin/ffmpeg";
+	} else if(about.isWindowsArch()){
+		return birdoAPP_root + "extra/ffmpeg/windows/bin/ffmpeg.exe";
+	}
+	return false;
+}
+
+/* 
+converte o arquivo de video dado para uma seq de imagens no output folder tmb dado
+@movie - arquivo de video a ser convertido
+@outPutFolder - folder de saida das imagens
+*/
+function BD1_convert_mov_to_images(birdoAPP_root, movie, outPutFolder, extension){
+	var ffmpeg = BD1_Get_ffmpeg(birdoAPP_root);
+	var images = outPutFolder + "f-%04d." + extension;
+	System.processOneEvent();
+
+	//get reduced size of image based on scene size
+	var scene_x = scene.defaultResolutionX();
+	var scene_y = scene.defaultResolutionY();
+	var y = 270;
+	var x = Math.round(scene_x/(scene_y/y));
+	var res = [x, y].join("x");
+
+	var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), "-r", 24, "-s", res, images);
+	var ret = process.launch();// let's home this worked.
+
+	if(ret != 0){
+		MessageLog.trace("Erro ao converter movie: " + BD2_FormatPathOS(movie));
+		return false;
+	} else {
+		MessageLog.trace("Movie : " + movie + " converted to image sequence in : " + outPutFolder);
+		return true;
+	}
+}
+
+/*
+Compressao basica usando ffmpeg (retirada do shotgun) do render para upload
+@birdoAppRoot - root do birdoApp
+@input_file - arquivo para ser convertido
+@output_file - saida do arquivo
+*/
+function BD1_CompressMovieFile(birdoAppRoot, input_file, output_file){
+	var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
+Print("TESTE FFMPEG: " + ffmpeg);
+	var vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
+	var acodec = "-strict experimental -acodec aac -ab 160k -ac 2"
+	var start = Process2(ffmpeg, "-i", input_file, vcodec, acodec, "-f", "mp4", BD2_FormatPathOS(output_file));
+	var ret = start.launch();
+	
+	if(ret == 0){
+		Print("Movie converted with ffmepg: " + output_file);
+		return true;
+	} else {
+		Print("[FFMPEG COMPRESS ERROR] Errror compressing movie file: " + input_file);
+		return false;
+	}
+}
+
+/*
+comprime uma seq de imagens em um mov
+@birdoAppRoot - root do birdoApp
+@startFrame - frame de inicio
+@imagePatern - padrao de imagem para achar (usar modo: fullpath/Name_%04d.png como padrao)
+@duration - duracao em frames do mov
+@fps - frame rate do mov
+@input_file - arquivo para ser convertido
+@output_file - saida do arquivo
+*/
+function BD1_MakeMovieFromImageSeq(birdoAppRoot, startFrame, imagePatern, duration, fps, output_file){
+	var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
+	var vcodec = "-c:v libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf  3";
+		var start = Process2(ffmpeg, "-y", "-start_number", startFrame, "-i", imagePatern, "-vframes", duration, "-r", fps, vcodec, BD2_FormatPathOS(output_file));
+	var ret = start.launch();
+		
+	if(ret == 0){
+		Print("Movie converted with ffmepg: " + output_file);
+		return true;
+	} else {
+		Print("[FFMPEG COMPRESS ERROR] Errror compressing movie file: " + output_file);
+		return false;
+	}
+}
+
+/*
+extract audio from movie file
+@birdoAppRoot - root do birdoApp
+@movie - arquivo de video de origem
+@outputFile - saida do arquivo em audio
+*/
+function BD1_extract_audio_from_movieFile(birdoAppRoot, movie, outputFile){//converte o mov para audio (dar nome completo do output file com extencao);
+	var ffmpeg = BD1_Get_ffmpeg(birdoAppRoot);
+	
+	if(!BD1_FileExists(ffmpeg)){
+		Print("Erro: ffmpeg nao encontrado neste computador!");
+		return false;
+	}
+
+	var process = new Process2(ffmpeg, "-i", BD2_FormatPathOS(movie), outputFile);
+	var ret = process.launch();// let's home this worked.
+
+	if(ret != 0){
+		Print("Erro ao extrair audio: " + movie);
+		return false;
+	} else {
+		Print("audio extracted: " + outputFile);
+		return true;
+	}
+}
+
+
+//UTRANSFORM
+/*
+convert tvg image to png (thumbnail size) using Utransform
+@imputTvgImage - imput tvg to convert
+@outputPng - output png file
+*/
+function BD1_convertTVGtoPNGThumbnail(imputTvgImage, outputPng){
+	var utransform = specialFolders.bin + "/utransform.exe";
+	var format = "PNG4";
+	var process = new Process2(utransform, "-outformat", format, "-outfile", outputPng, "-align", "AUTO_ALIGN", "-resolution", 96, 96, imputTvgImage);
+	var ret = process.launch();
+
+	if(ret != 0){
+		Print("Error converting tvg into png: " + imputTvgImage);
+		return false;
+	} else {
+		Print("PNG converted: " + outputPng);
+		return true;
+	}
+}
+
+/*
+	sleep command for sec 
+*/
+function BD1_sleep(sec){
+	System.processOneEvent();
+	Print("sleeping for " + sec + " secconds...");
+	var process = new Process2("timeout", sec);
+	process.launch();
+	Print("sleep end!");
+}
+
+/*
+	ensure the folder is clean and exists (delete and cretate it again to make sure is empty)
+*/
+function BD1_CleanFolder(folderPath){
+	if(BD1_DirExist(folderPath)){
+		if(!BD1_RemoveDirs(folderPath)){
+			Print("fail to clean folder: " + folderPath);
+			return false;
+		}
+	}
+	return BD1_createDirectoryREDE(folderPath);
+}	
 
 /*
 	forca a criacao do folder (caso ja exista um folder com o mesmo nome, cria um nome novo com um sufixo de numero _1)
