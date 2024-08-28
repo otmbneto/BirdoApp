@@ -165,10 +165,6 @@ class Copier(QDialog):
 # loads the interface
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) != 4:
-        print("Numero de argumentos invalidos!")
-        sys.exit("error: wrong number of arguments!")
-
     src_file = str(args[1])
     dst_file = str(args[2])
     ask_override = "ask" in args
