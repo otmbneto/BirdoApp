@@ -161,7 +161,7 @@ function createInrterface(projectDATA, psd_data){
 		
 		//warning de extra psds na cena
 		if(this.psds_data["others"].length > 0){
-			MessageBox.warning("ATENCAO! Há outros psds na cena que aparentemente NAO sao da cena.\nFavor verificar!");
+			MessageBox.warning("ATENCAO! Há outros psds na cena que aparentemente NAO sao da cena.\nFavor verificar!",0,0);
 		}
 		
 		try{
