@@ -2,6 +2,7 @@ import os
 import re
 import string
 import ctypes
+import importlib
 from ctypes import wintypes,windll
 _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
 _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
@@ -50,3 +51,13 @@ def getAvailableVersions(regex,default_path):
 				availableVersions.append(os.path.join(current_path,version))
 
 	return availableVersions
+
+def fetchApplications(base = "",ignore = ["utils.py","__init__.py"]):
+
+	path = os.path.dirname(os.path.realpath(__file__))
+	modules = [importlib.import_module(".".join([base,module.replace(".py","")])) for module in os.listdir(path) if module.endswith(".py") and not module in ignore]
+	applications = []
+	for module in modules:
+		applications.append((getattr(module,"DEFAULT_WIN_INSTALL"),getattr(module,"DEFAULT_REGEX_INSTALL"),getattr(module,"Application")))
+
+	return applications

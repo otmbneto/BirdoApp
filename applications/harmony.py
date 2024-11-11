@@ -4,7 +4,6 @@ import subprocess
 import shlex
 import shutil
 import sys
-import utils
 
 DEFAULT_WIN_INSTALL = "/Program Files (x86)/Toon Boom Animation/"
 DEFAULT_REGEX_INSTALL = r'Toon Boom Harmony \d{2}(\.\d)* [Essentials|Advanced|Premium]'
@@ -65,7 +64,7 @@ class Application:
 
 	def findScriptsPath(self):
 
-		appdata = utils.get_short_path_name(os.getenv('APPDATA')) if sys.platform == 'win32' else os.getenv('APPDATA')
+		appdata = os.getenv('APPDATA')
 		version_code = self.version + self.subversion + "0"
 		return os.path.join(appdata,"Toon Boom Animation","Toon Boom Harmony " + self.edition,version_code + "-scripts")
 

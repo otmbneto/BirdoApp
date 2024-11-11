@@ -14,6 +14,8 @@ import sys
 import subprocess
 import re
 
+from applications import utils
+
 app_root = os.path.dirname(os.path.realpath(__file__))
 
 global_icons = {
@@ -101,12 +103,28 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_line.textChanged.connect(self.update_login_page)
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
 
-    def createPluginBtn(self, plugin, project_code):
+    def createAppBtn(self,app, project_code,icon=None):
+        button = QtGui.QToolButton()
+        plugin_name = app.getName()
+        button.setToolTip(plugin_name)
+        #icon = os.path.join(os.path.dirname(app), "plugin.ico") if icon is None else icon
+        if icon is not None and os.path.exists(icon):
+            button.setIcon(QtGui.QIcon(icon))
+            button.setIconSize(QtCore.QSize(100, 100))
+        BUTTON_SIZE = QtCore.QSize(115, 115)
+        button.setMinimumSize(BUTTON_SIZE)
+        button.setMaximumSize(BUTTON_SIZE)
+        button.clicked.connect(lambda: app.run())
+        return button
+
+    def createPluginBtn(self, plugin, project_code,icon=None):
         button = QtGui.QToolButton()
         plugin_name = os.path.basename(plugin).replace(".py", "")
         button.setToolTip(plugin_name)
-        button.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(plugin), "plugin.ico")))
-        button.setIconSize(QtCore.QSize(100, 100))
+        icon = os.path.join(os.path.dirname(plugin), "plugin.ico") if icon is None else icon
+        if os.path.exists(icon):
+            button.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(plugin), "plugin.ico")))
+            button.setIconSize(QtCore.QSize(100, 100))
         BUTTON_SIZE = QtCore.QSize(115, 115)
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
@@ -196,16 +214,31 @@ class BirdoApp(QtGui.QMainWindow):
         return
 
     def initPluginPage(self):
-        self.plugins = self.getPlugins()
+        ##################load applications dynamically######################
+        apps = [app for app in utils.fetchApplications(base="applications")]
+        softwares = []
+        for app in apps:
+            versions = utils.getAvailableVersions(app[1],app[0])
+            for version in versions:
+                softwares.append(app[2](version))
+        #####################################################################
+
+        self.plugins = self.getPlugins() 
         self.cleanLayout(self.ui.plugin_layout)
         self.ui.plugin_layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
         columnNum = 3
         i = 0
+        print(self.plugins)
         for plugin in self.plugins:
             print plugin
             btn = self.createPluginBtn(plugin, self.project_data["id"])
             self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)
             i += 1
+        for s in softwares:
+            if s.isInstalled():
+                btn = self.createAppBtn(s,self.project_data["id"],icon = s.getIcon())
+                self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)
+                i += 1
         self.ui.stackedWidget.setCurrentIndex(3)
         return
 
@@ -287,6 +320,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def isRepoUpdated(self):
 
+        return True
         return rev_parse("@") == rev_parse("@{u}")
 
     def on_init(self):
@@ -316,7 +350,7 @@ class BirdoApp(QtGui.QMainWindow):
             MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
             self.getDiscordUserName(self.project_data)
             self.login_page()
-        elif not main_update(self.project_data, self):
+        elif False or not main_update(self.project_data, self):
             print "check update failed!"
             self.initProjectPage()
         else:
