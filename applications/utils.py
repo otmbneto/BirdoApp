@@ -55,7 +55,7 @@ def getAvailableVersions(regex,default_path):
 def fetchApplications(base = "",ignore = ["utils.py","__init__.py"]):
 
 	path = os.path.dirname(os.path.realpath(__file__))
-	modules = [importlib.import_module(".".join([base,module.replace(".py","")])) for module in os.listdir(path) if module.endswith(".py") and not module in ignore]
+	modules = [importlib.import_module(".".join([base,module.replace(".py","")]) if base != "" else module.replace(".py","")) for module in os.listdir(path) if module.endswith(".py") and not module in ignore]
 	applications = []
 	for module in modules:
 		applications.append((getattr(module,"DEFAULT_WIN_INSTALL"),getattr(module,"DEFAULT_REGEX_INSTALL"),getattr(module,"Application")))
