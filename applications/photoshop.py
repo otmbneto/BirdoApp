@@ -67,16 +67,15 @@ class Application:
 		return self.scriptsPath
 
 
-	def run(self,scene = None):
+	def run(self,data):
 
-		if scene is not None and not os.path.exists(scene):
-			print "[ERROR] Scene not found: {0}".format(scene)
-			return -1
-
-		print(self.executable)
 		cmd = '{0}'.format(self.executable)
-		if scene:
-			cmd += ' "{0}"'.format(scene)
+		if "scene" in data.keys() and scene is not None:
+			if not os.path.exists(scene):
+				print "[ERROR] Scene not found: {0}".format(data["scene"])
+				return -1
+			
+			cmd += ' "{0}"'.format(data["scene"])
 
 		print(cmd)
 		return subprocess.call(shlex.split(cmd)) == 0

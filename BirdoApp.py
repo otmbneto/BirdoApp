@@ -104,6 +104,9 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.combo_funcao.currentIndexChanged.connect(self.update_login_page)
 
     def createAppBtn(self,app, project_code,icon=None):
+
+        data = {"python": self.getPython(),"proj_code": project_code}
+
         button = QtGui.QToolButton()
         plugin_name = app.getName()
         button.setToolTip(plugin_name)
@@ -114,7 +117,7 @@ class BirdoApp(QtGui.QMainWindow):
         BUTTON_SIZE = QtCore.QSize(115, 115)
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
-        button.clicked.connect(lambda: app.run())
+        button.clicked.connect(lambda: app.run(data))
         return button
 
     def createPluginBtn(self, plugin, project_code,icon=None):
@@ -216,6 +219,7 @@ class BirdoApp(QtGui.QMainWindow):
     def initPluginPage(self):
         ##################load applications dynamically######################
         apps = [app for app in utils.fetchApplications(base="applications")]
+        print("Fetching applications: " + str(apps))
         softwares = []
         for app in apps:
             versions = utils.getAvailableVersions(app[1],app[0])
@@ -235,6 +239,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)
             i += 1
         for s in softwares:
+            print("Softwares: " + str(s))
             if s.isInstalled():
                 btn = self.createAppBtn(s,self.project_data["id"],icon = s.getIcon())
                 self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)

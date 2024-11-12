@@ -120,24 +120,24 @@ class Application:
 
 		return self.menusFile
 
-	def run(self,scene = None,script = None, batch = False):
+	def run(self,data):
 
-		if scene is not None and not os.path.exists(scene):
-			print "[ERROR] Scene not found: {0}".format(scene)
-			return -1
-
-		elif script is not None and not os.path.exists(script):
-			print "[ERROR] Script not found: {0}".format(script)
-			return -2
-
-		print(self.executable)
 		cmd = '{0}'.format(self.executable)
-		if scene:
-			cmd += ' "{0}"'.format(scene)
-		if batch:
-			cmd += ' -batch'
-		if script:
-			cmd += ' -compile "{0}"'.format(script)
+		if "scene" in data.keys() and data["scene"] is not None:
+			if not os.path.exists(data["scene"]):
+				print "[ERROR] Scene not found: {0}".format(data["scene"])
+				return -1
+			cmd += ' "{0}"'.format(data["scene"])
 
+		if "batch" in data.keys() and data["batch"]:
+			cmd += ' -batch'
+
+		if "script" in data.keys() and data["script"] is not None: 
+
+			if not os.path.exists(data["script"]):
+				print "[ERROR] Script not found: {0}".format(data["script"])
+				return -2
+			cmd += ' -compile "{0}"'.format(data["script"])
+			
 		print(cmd)
 		return subprocess.call(shlex.split(cmd)) == 0
