@@ -4,7 +4,7 @@ import sys
 import time
 import subprocess
 from distutils.dir_util import copy_tree
-from PySide import QtGui,QtCore,QtUiTools
+from PySide import QtGui, QtCore, QtUiTools
 from threading import Thread
 import shutil
 
@@ -30,7 +30,6 @@ from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_date
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.ffmpeg import compress_render
 
-
 MessageBox = CreateMessageBox()
 
 # REGEX
@@ -39,7 +38,7 @@ mov_reg = r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
 version_reg = r'_v\d{2}.mov'
 
 
-#sinais usados para indicar a thread principal que a janela precisa ser atualizada.
+# sinais usados para indicar a thread principal que a janela precisa ser atualizada.
 class CustomSignal(QtCore.QObject):
     episode_received = QtCore.Signal(object)
     progress_reseted = QtCore.Signal(object)
@@ -49,7 +48,8 @@ class CustomSignal(QtCore.QObject):
 
 
 def copy_scene_template(prefix, scene_name, work_dir):
-    """Creates a clean scene setup by copying the shot_SETUP template in birdoAPP template folder to the working scene folder"""
+    """Creates a clean scene setup by copying the shot_SETUP template in birdoAPP template folder to the working
+    scene folder """
     placeholder = '{0}_shot_SETUP'.format(prefix)
     template = os.path.join(birdo_app_root, 'templates', placeholder)
     try:
@@ -65,14 +65,14 @@ def copy_scene_template(prefix, scene_name, work_dir):
     return True
 
 
-#TODO:Trazer o loading episodes pra uma thread separada usando signals.
+# TODO:Trazer o loading episodes pra uma thread separada usando signals.
 class OpenShot(QtGui.QWidget):
     """Main OpenShot interface"""
+
     def __init__(self, project_data, initial_shot):
         super(OpenShot, self).__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        
         '''
         self.app_root = os.path.dirname(os.path.realpath(__file__))
         ui_path = os.path.join(self.app_root, "ui/dialog.ui").replace("\\", "/")
@@ -94,7 +94,7 @@ class OpenShot(QtGui.QWidget):
 
         self.ui.explorer_path.setReadOnly(True)
         f = self.ui.explorer_path.font()
-        f.setPointSize(8) # sets the size to 27
+        f.setPointSize(8)  # sets the size to 27
         self.ui.explorer_path.setFont(f)
 
         self.setupConnections()
@@ -113,7 +113,7 @@ class OpenShot(QtGui.QWidget):
             MessageBox.warning("Fail to connect to " + self.project_data["server"]["type"].capitalize() + " server!")
             self.close()
             return
-        
+
         if self.root_test["has_root"]:
             self.root = self.project_data['paths']["root"] + self.project_data['paths']["projRoot"]
         else:
@@ -150,7 +150,7 @@ class OpenShot(QtGui.QWidget):
             # IF IT WAS GIVEN AN INITIAL OPENED SHOT AS PARAMETER
             self.opened_scenes[initial_shot] = None
 
-        #LIMPA A PASTA TEMP ANTES DE COMECAR
+        # LIMPA A PASTA TEMP ANTES DE COMECAR
         self.temp_open_scene = os.path.join(self.project_data["system"]["temp"], 'BirdoApp', 'OpenScene')
         if os.path.exists(self.temp_open_scene):
             shutil.rmtree(self.temp_open_scene, ignore_errors=True)
@@ -161,7 +161,6 @@ class OpenShot(QtGui.QWidget):
         ui_file = QtCore.QFile(page)
         ui_file.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
-
         return loader.load(ui_file)
 
     def setupConnections(self):
@@ -176,7 +175,7 @@ class OpenShot(QtGui.QWidget):
         self.ui.checkBox_open_local.stateChanged.connect(self.on_check_open_local)
         self.ui.comboStep.currentIndexChanged.connect(self.on_change_step)
         self.ui.explorer_btn.clicked.connect(self.open_local_folder)
-        
+
         # SIGNAL CONNECTIONS
         self.signals = CustomSignal()
         self.signals.episode_received.connect(self.insert_episode)
@@ -207,7 +206,8 @@ class OpenShot(QtGui.QWidget):
         """Generates scenes list from animatic movs of the ep"""
         mov_reg = r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
         version_reg = r'_v\d{2}.mov'
-        animatic_renders_path = self.root + self.project_folders.get_render_path(ep) + '/' + self.project_folders.get_animatic_folder()
+        animatic_renders_path = self.root + self.project_folders.get_render_path(
+            ep) + '/' + self.project_folders.get_animatic_folder()
         scenes_data = {}
         list_full = self.server.list_folder(animatic_renders_path)
 
@@ -230,16 +230,13 @@ class OpenShot(QtGui.QWidget):
         return scenes_data
 
     def getProgress(self):
-        
         return self.ui.progress_bar.value()
 
     def incrementProgress(self):
-
         value = self.getProgress()
         self.ui.progress_bar.setValue(value + 1)
 
-    def get_episode_data(self,episode):
-
+    def get_episode_data(self, episode):
         episode_data = None
         episode_name = episode.get_name()
         self.signals.progress_format.emit(["loading {0}...".format(episode_name)])
@@ -259,14 +256,14 @@ class OpenShot(QtGui.QWidget):
         episode_list.sort(key=lambda x: x.get_name())
 
         if episode_list and len(episode_list) > 0:
-            self.signals.progress_range_set.emit([0,len(episode_list)])
+            self.signals.progress_range_set.emit([0, len(episode_list)])
             for episode in episode_list:
                 result = self.get_episode_data(episode)
                 if result is not None:
                     self.signals.episode_received.emit([{episode.get_name(): result}])
             self.signals.progress_reseted.emit([])
         else:
-            print "Fail to get episodes list from server!"            
+            print "Fail to get episodes list from server!"
 
         return
 
@@ -348,38 +345,31 @@ class OpenShot(QtGui.QWidget):
         self.ui.progress_bar.setValue(0)
         return versions_data
 
-    #Abaixo estao os callbacks de cada custom signal.
+    # Abaixo estao os callbacks de cada custom signal.
     @QtCore.Slot(object)
-    def insert_episode(self,args):
-        
+    def insert_episode(self, args):
         episode = args[0]
         row = self.ui.listEpisodes.count()
-        self.ui.listEpisodes.insertItem(row,episode.keys()[0])
+        self.ui.listEpisodes.insertItem(row, episode.keys()[0])
         self.episodes_data.update(episode)
 
     @QtCore.Slot(object)
-    def increment_progress(self,args):
-
+    def increment_progress(self, args):
         self.incrementProgress()
 
     @QtCore.Slot(object)
-    def format_progress(self,args):
-
+    def format_progress(self, args):
         self.ui.progress_bar.setFormat(args[0])
 
     @QtCore.Slot(object)
-    def reset_progress(self,args):
-
+    def reset_progress(self, args):
         self.ui.progress_bar.setFormat("")
-        self.ui.progress_bar.setValue(0)        
-
+        self.ui.progress_bar.setValue(0)
         return
 
     @QtCore.Slot(object)
-    def set_progress_range(self,args):
-
-        self.ui.progress_bar.setRange(args[0],args[-1])
-
+    def set_progress_range(self, args):
+        self.ui.progress_bar.setRange(args[0], args[-1])
         return
 
     def list_episodes(self):
@@ -392,14 +382,12 @@ class OpenShot(QtGui.QWidget):
         self.ui.listScenes.setEnabled(True)
         self.ui.listVersions.setEnabled(True)
 
-
     def on_select_ep(self, item):
-
         """callback function when select ep item"""
         self.ui.listScenes.clear()
         self.ui.listVersions.clear()
         self.ui.checkBox_open_local.setEnabled(False)
-        path = self.project_folders.get_episode_scenes_path(item.text(),self.ui.comboStep.currentText())
+        path = self.project_folders.get_episode_scenes_path(item.text(), self.ui.comboStep.currentText())
         self.ui.explorer_path.setText(path)
 
         shot_list = self.episodes_data[item.text()].keys()
@@ -474,15 +462,17 @@ class OpenShot(QtGui.QWidget):
             return False
         else:
             if not self.harmony_manager.compile_script(self.import_animatic_script, xstage_file):
-                print "error running import animatic js script: {0} on scene {1}".format(self.import_animatic_script, scene_name)
-                MessageBox.warning("Erro rodando o Script que importa o Animatic para cena. Use o Update Animatic para importar, e caso continue dando erro, avise a Direcao Tecnica!")
+                print "error running import animatic js script: {0} on scene {1}".format(self.import_animatic_script,
+                                                                                         scene_name)
+                MessageBox.warning(
+                    "Erro rodando o Script que importa o Animatic para cena. Use o Update Animatic para importar, e caso continue dando erro, avise a Direcao Tecnica!")
 
         # CLEANS THE TEMP MOV FILE
         os.remove(temp_mov)
 
         return xstage_file
 
-    def check_if_scene_is_opened(self,scene_name):
+    def check_if_scene_is_opened(self, scene_name):
 
         # CHECKS IF SCENE IS ALREADY OPENED
         if scene_name in self.opened_scenes:
@@ -497,14 +487,13 @@ class OpenShot(QtGui.QWidget):
                 self.set_scene_opened()
             else:
                 print "scene process is finished: {0}".format(scene_process)
-                del self.opened_scenes[shot_name]
+                del self.opened_scenes[scene_name]
         else:
             self.ui.listVersions.setEnabled(True)
-
         return
 
     def on_select_scene(self, item):
-        
+
         """callback function when select scene"""
         self.ui.listVersions.clear()
         self.ui.open_button.setEnabled(False)
@@ -512,11 +501,13 @@ class OpenShot(QtGui.QWidget):
         selected_ep = self.ui.listEpisodes.currentItem().text()
         shot_animatic_mov = {
             "server": self.episodes_data[selected_ep][shot_name],
-            "local": self.project_folders.get_local_root() + self.project_folders.get_render_path(selected_ep) + '/' + self.project_folders.get_animatic_folder() + '/' + os.path.basename(self.episodes_data[selected_ep][shot_name])
+            "local": self.project_folders.get_local_root() + self.project_folders.get_render_path(
+                selected_ep) + '/' + self.project_folders.get_animatic_folder() + '/' + os.path.basename(
+                self.episodes_data[selected_ep][shot_name])
         }
         current_step = self.ui.comboStep.currentText()
 
-        path = self.project_folders.get_scene_path(shot_name,self.ui.comboStep.currentText())
+        path = self.project_folders.get_scene_path(shot_name, self.ui.comboStep.currentText())
         self.ui.explorer_path.setText(path)
 
         self.check_if_scene_is_opened(shot_name)
@@ -536,7 +527,7 @@ class OpenShot(QtGui.QWidget):
         # IF STEP IS ANIM, CHECK IN ANIM FOLDER, IF DONT FIND FILES, LOOK IN SETUP AND SO ON...
         i = new_step_list.index(current_step)
         while i < len(new_step_list):
-            
+
             print "creating step {0} data...".format(new_step_list[i])
             # IF THE STEP IS USED
             if self.shot_versions[new_step_list[i]]["is_used"]:
@@ -550,7 +541,8 @@ class OpenShot(QtGui.QWidget):
                 if new_step_list[i] != "ANIMATIC":
                     # IF ITS NOT ANIMATIC
                     last_version_obj = self.shot_versions[new_step_list[i]]['versions'][version_list[-1]]
-                    saved_last_version_time = timestamp_from_isodatestr(last_version_obj.get_last_modified().isoformat())
+                    saved_last_version_time = timestamp_from_isodatestr(
+                        last_version_obj.get_last_modified().isoformat())
                     self.shot_versions["most_recent"] = self.check_local_version(saved_last_version_time)
                     version = re.findall(r'v\d+', last_version_obj.get_name())[0]
                 else:
@@ -566,7 +558,9 @@ class OpenShot(QtGui.QWidget):
                         self.ui.checkBox_open_local.setEnabled(False)
                         self.ui.checkBox_open_local.setChecked(False)
 
-                self.ui.label_info.setText('version: {0}\nstep: {1}\nfile: {2}'.format(version, new_step_list[i], self.shot_versions["most_recent"]))
+                self.ui.label_info.setText('version: {0}\nstep: {1}\nfile: {2}'.format(version, new_step_list[i],
+                                                                                       self.shot_versions[
+                                                                                           "most_recent"]))
                 # MARK STEP THAT CONTAINS THE RIGHT VERSION TO OPEN WITH THIS KEY
                 self.shot_versions["step_to_open"] = new_step_list[i]
                 break
@@ -582,7 +576,8 @@ class OpenShot(QtGui.QWidget):
         selected_version = item.text()
 
         print "ROOT:" + self.root
-        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(self.project_folders.get_local_root(),"")
+        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(
+            self.project_folders.get_local_root(), "")
         print path
         self.ui.explorer_path.setText(path)
 
@@ -611,14 +606,14 @@ class OpenShot(QtGui.QWidget):
         if items_count > 1:
             self.ui.checkBox_all_versions.setEnabled(True)
             show_all = not self.ui.checkBox_all_versions.isChecked()
-            for i in range(items_count-1):
+            for i in range(items_count - 1):
                 self.ui.listVersions.item(i).setHidden(show_all)
         else:
             self.ui.checkBox_all_versions.setEnabled(False)
 
     def open_local_folder(self):
 
-        path = os.path.join(self.project_folders.get_local_root(),self.ui.explorer_path.text())
+        path = os.path.join(self.project_folders.get_local_root(), self.ui.explorer_path.text())
         if os.path.exists(path):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
         else:
@@ -650,7 +645,7 @@ class OpenShot(QtGui.QWidget):
 
         shot = self.ui.listScenes.currentItem()
         if shot is not None:
-            path = self.project_folders.get_scene_path(shot.text(),self.ui.comboStep.currentText())
+            path = self.project_folders.get_scene_path(shot.text(), self.ui.comboStep.currentText())
             self.ui.explorer_path.setText(path)
         print "reset widgets with version shot info..."
 
@@ -669,11 +664,15 @@ class OpenShot(QtGui.QWidget):
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
             if self.shot_versions["most_recent"] == 'server':
-                ask = MessageBox.question("Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(selected_scene))
+                ask = MessageBox.question(
+                    "Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(
+                        selected_scene))
                 if not ask:
                     return
             else:
-                MessageBox.information("Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(selected_scene))
+                MessageBox.information(
+                    "Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
+                        selected_scene))
 
             if not local_scene["xstage"] or not os.path.exists(local_scene["xstage"]):
                 self.ui.progress_bar.setFormat("ERROR! File not found!")
@@ -688,7 +687,8 @@ class OpenShot(QtGui.QWidget):
                 return
         else:
             if self.shot_versions["most_recent"] == 'local':
-                ask = MessageBox.question("Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)")
+                ask = MessageBox.question(
+                    "Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)")
                 if not ask:
                     return
 
@@ -731,7 +731,8 @@ class OpenShot(QtGui.QWidget):
         print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
         if not self.server.download_file(scene_obj.path, temp_file):
             print "fail to download scene: {0}".format(scene_obj.get_name())
-            MessageBox.warning("Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
+            MessageBox.warning(
+                "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
             return
 
         # CHECK IF NEED BACKUP
@@ -776,7 +777,8 @@ class OpenShot(QtGui.QWidget):
         # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
         if not os.path.exists(local_scene["path"]):
             print "error! Cant find unpacked version scene folder!"
-            MessageBox.warning("Erro! Nao foi possivel encontrar o folder da cena descompactada! Avise a Direcao Tecnica!")
+            MessageBox.warning(
+                "Erro! Nao foi possivel encontrar o folder da cena descompactada! Avise a Direcao Tecnica!")
             return
 
         # OPEN SCENE DOWNLOADED
