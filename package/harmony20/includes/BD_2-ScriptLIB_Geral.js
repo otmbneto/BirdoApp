@@ -545,10 +545,10 @@ function BD2_AddNodeUnder(nodeSel, nodeName, type, end_connection, nodePort){
 		var compPort = node.dstNodeInfo(nodeSel, nodePort, 0).port;
 		var comp = node.dstNode(nodeSel, nodePort, 0);
 		node.unlink(comp, compPort);
-		node.link(newNode, 0, comp, compPort);
+		node.link(newNode, 0, comp, compPort, false, true);
 	}
 
-	node.link(nodeSel, nodePort, newNode, 0);
+	node.link(nodeSel, nodePort, newNode, 0, false, false);
 	return newNode;
 }
 
@@ -570,10 +570,10 @@ function BD2_AddNodeUp(nodeSel, nodeName, type){
 	var newX = coord.x + ((coord.w - node.width(newNode))/2);
 	node.setCoord(newNode, newX, newY);
 
-	var up_node = node.srcNode(nodeSel, 0);
+	var up_node = node.srcNodeInfo(nodeSel, 0);
 	if(up_node){
 		node.unlink(nodeSel, 0);	
-		node.link(up_node, 0, newNode, 0);
+		node.link(up_node.node, up_node.port, newNode, 0, false, false);
 	}
 	node.link(newNode, 0, nodeSel, 0);
 
