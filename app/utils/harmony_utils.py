@@ -16,17 +16,14 @@ class ToonBoomHarmony:
 
 		self.regex = r'Toon Boom Harmony (\d{2})(\.\d)* (Essentials|Advanced|Premium)'
 		self.installation_path = installation_path
-		print "INSTALLATION PATH:" + installation_path
 		self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith("/") or installation_path.endswith("\\") else os.path.basename(installation_path)
-		
-		print "NAME: " + self.name
-		print re.findall(self.regex,self.name)
 		self.version = re.findall(self.regex,self.name)[0][0]
 		self.subversion = re.findall(self.regex,self.name)[0][1].replace(".","") if len(re.findall(self.regex,self.name)[0][1]) > 0 else "0"
 		self.edition = re.findall(self.regex,self.name)[0][2]
 		self.scriptsPath = self.findScriptsPath()
 		self.executable = os.path.join(self.installation_path,"win64","bin","Harmony" + self.edition + ".exe")
-		
+		self.menusFile = os.path.join(self.installation_path,"resources","menus.xml")
+
 		return
 
 	def getVersion(self):
@@ -66,6 +63,41 @@ class ToonBoomHarmony:
 	def getScriptsPath(self):
 
 		return self.scriptsPath
+
+	def menu_exists(self,menu_name):
+
+		content = None
+		with open(self.menusFile,"r") as menu:
+			content = menu.read()
+
+		return re.search('<menu.*text="{0}".*>'.format(menu_name),content)
+
+	def addTbMenu(self,menu_name):
+
+		if self.menu_exists(menu_name):
+			print("Menu already exist!: {0}".format(menu_name))
+			return
+
+		content = None
+		with open(self.menusFile,"r") as menu:
+
+			content = menu.read()
+			m = re.search('<menu.*aboutToShowSlot="aboutToShowHelpMenu\(AC_Menu\*\)".*text="Help".*>', content)
+			if m:
+				help_line = m.group(0)
+				addon = '<menu id="{0}" text="{0}" >\n     // Add your submenu options here\n  </menu>\n  '.format(menu_name)
+				content = content.replace(help_line,addon + help_line)
+			else:
+				content = None
+
+		if content is not None:
+
+			with open(self.menusFile,"w") as menu:
+				menu.write(content)
+
+	def getMenuFile(self):
+
+		return self.menusFile
 
 	def run(self,scene = None,script = None, batch = False):
 
@@ -125,4 +157,11 @@ if __name__ == '__main__':
 	for version in versions:
 
 		v = ToonBoomHarmony(version)
-		print get_short_path_name(v.getScriptsPath())
+		print(v.getVersion())
+		print(v.getSubversion())
+		print(v.getEdition())
+		print(v.getScriptsPath())
+		print(v.getExecutable())
+		print(v.getMenuFile())
+		v.addTbMenu("BirdoApp")
+		break

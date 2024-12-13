@@ -22,6 +22,7 @@ class Application:
 		app_root = os.path.dirname(os.path.realpath(__file__))
 		icon_file = os.path.join(app_root,"ui","photoshop.png")
 		self.icon = icon_file if os.path.exists(icon_file) else None
+		self.scriptsPath = "C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions"
 
 		return
 
@@ -57,9 +58,18 @@ class Application:
 
 		return
 
+	def findRegistryKey(self,key):
+
+		return 
+
 	def installPackage(self,package):
 
-
+		extensions = [os.path.join(package,extension).replace("\\","/") for extension in os.listdir(package)]
+		for extension in extensions:
+			dst = os.path.join(self.scriptsPath,os.path.basename(extension)).replace("\\","/")
+			if not os.path.exists(dst):
+				os.makedirs(dst)
+				shutil.copytree(extension,dst)
 		return
 
 	def getScriptsPath(self):

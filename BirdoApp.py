@@ -15,6 +15,8 @@ import subprocess
 import re
 
 from applications import utils
+#from applications import unrealEngine as ue
+
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
@@ -217,18 +219,9 @@ class BirdoApp(QtGui.QMainWindow):
         return
 
     def initPluginPage(self):
-        ##################load applications dynamically######################
-        apps = [app for app in utils.fetchApplications(base="applications")]
-        print("Fetching applications: " + str(apps))
-        softwares = []
-        for app in apps:
-            versions = utils.getAvailableVersions(app[1],app[0])
-            for version in versions:
-                softwares.append(app[2](version))
-        #####################################################################
-
-        self.plugins = self.getPlugins() 
+ 
         self.cleanLayout(self.ui.plugin_layout)
+        self.plugins = self.getPlugins() 
         self.ui.plugin_layout.setAlignment(QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
         columnNum = 3
         i = 0
@@ -238,14 +231,21 @@ class BirdoApp(QtGui.QMainWindow):
             btn = self.createPluginBtn(plugin, self.project_data["id"])
             self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)
             i += 1
+
+        ##################load applications dynamically######################
+        apps = [app for app in utils.fetchApplications(base="applications")]  #[ue.Application(app) for app in utils.getAvailableVersions(ue.DEFAULT_REGEX_INSTALL,ue.DEFAULT_WIN_INSTALL)]
+        softwares = []
+        for app in apps:
+            versions = utils.getAvailableVersions(app[1],app[0])
+            for version in versions:
+                softwares.append(app[2](version))
+        #####################################################################
         for s in softwares:
-            print("Softwares: " + str(s))
             if s.isInstalled():
                 btn = self.createAppBtn(s,self.project_data["id"],icon = s.getIcon())
                 self.ui.plugin_layout.addWidget(btn, i/columnNum, i%columnNum)
                 i += 1
         self.ui.stackedWidget.setCurrentIndex(3)
-        return
 
     def showEvent(self, event):
         # do stuff here

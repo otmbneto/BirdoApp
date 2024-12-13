@@ -177,6 +177,7 @@ def pull_remote_repo(main_app = None):
 
 def first_update(main_app = None):
 
+    return True
     main_app.ui.progressBar.setRange(0, 3)
     main_app.ui.progressBar.setValue(0)
     print "first_update"
@@ -196,6 +197,7 @@ def first_update(main_app = None):
 
 def main_update(proj_data, main_app=None):
     
+    return True
     main_app.ui.progressBar.setRange(0, 4)
     main_app.ui.progressBar.setValue(0)
     print "main_update"
