@@ -291,13 +291,13 @@ class BirdoApp(QtGui.QMainWindow):
 
     def on_init(self):
 
-        fix_old_repos()
+        #fix_old_repos()
         install_requirements(main_app=self)
-        print "is updated: " + str(self.isRepoUpdated())
-        if not self.isRepoUpdated():
-            self.ui.stackedWidget.setCurrentIndex(1)
-            first_update(main_app = self)
-            os.execv(sys.executable, ['python'] + sys.argv)
+        #print "is updated: " + str(self.isRepoUpdated())
+        #if not self.isRepoUpdated():
+        self.ui.stackedWidget.setCurrentIndex(1)
+        first_update(main_app = self)
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     def splash_page(self):
 

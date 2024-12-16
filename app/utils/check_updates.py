@@ -173,7 +173,7 @@ def install_requirements(main_app=None):
 
 def pull_remote_repo(main_app = None):
 
-    return os.system(os.path.join(main_app.app_root,"update.bat")) if main_app is not None else 0
+    return os.system(os.path.join(main_app.app_root,"update.ps1")) if main_app is not None else 0
 
 def first_update(main_app = None):
 
@@ -211,8 +211,8 @@ def main_update(proj_data, main_app=None):
     print "update toon boom package"
     # UPDATE TOON BOOM PACKAGE
     main_app.ui.progressBar.setValue(3)
-    main_app.ui.loading_label.setText("updating harmony package...")
-    install_harmony_package_config(proj_data)
+    #main_app.ui.loading_label.setText("updating harmony package...")
+    #install_harmony_package_config(proj_data)
 
     main_app.ui.progressBar.setValue(4)
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
