@@ -3,6 +3,12 @@ if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
     Exit
 }
 
+
+#TODO : Checar se python install existe - Done
+#       Checar pq a elevação de admin esta causando erro.
+#       Trocar invoke-restmethod por invoke-webrequest
+#       colocar o caminho do python hardcoded na hora de instalar o venv
+
 function Ask-User($question){
 
     $wshell = New-Object -ComObject Wscript.Shell
@@ -246,19 +252,29 @@ function Install-Shortcut {
     }
 }
 
-$answer = Ask-User("Python installation not found! Do you want to install it?")
-if($answer -eq 6){
-    Write-Host "Downloading python 2.7..."
-    Download-Python
+if(-Not (Test-Path "C:\Python27\python.exe")){
+
+    $answer = Ask-User("Python installation not found! Do you want to install it?")
+    if($answer -eq 6){
+        Write-Host "Downloading python 2.7..."
+        Download-Python
+    }
+
 }
 
 Set-Location -Path $env:APPDATA
-$gitpath = Get-GitRelease "otmbneto/BirdoApp" $env:APPDATA "Source"
+$birdoTemp = "$env:TEMP\BirdoApp"
 $birdoApp = "$env:APPDATA\BirdoApp"
-if(-not (Test-Path $birdoApp)){
-    New-Item -Path "$env:APPDATA" -Name "BirdoApp" -ItemType "directory"
+if(Test-Path $birdoTemp){
+    Remove-Item "$birdoTemp"
 }
-Expand-Archive -Path $gitpath -DestinationPath "$birdoapp" -Force
+New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
+$gitpath = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
+Expand-Archive -Path $gitpath -DestinationPath "$birdoTemp" -Force
+Remove-Item -Path "$gitpath" -Force
+$unzip = Get-ChildItem -Path $birdoTemp -Name
+Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
+
 Download-Ffmpeg "$birdoApp"
 #scripts
 #[Environment]::SetEnvironmentVariable("", "", "User")
