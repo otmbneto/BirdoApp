@@ -266,8 +266,8 @@ if(-Not (Test-Path "$pythonInstall")){
 Set-Location -Path $env:APPDATA
 $birdoTemp = "$env:TEMP\BirdoApp"
 $birdoApp = "$env:APPDATA\BirdoApp"
-if(Test-Path $birdoTemp){
-    Remove-Item "$birdoTemp"
+if(Test-Path $birdoTemp){ 
+    Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
 $gitpath = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
