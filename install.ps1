@@ -5,8 +5,8 @@ if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
 
 
 #TODO : Checar se python install existe - Done
-#       Checar pq a elevação de admin esta causando erro.
-#       Trocar invoke-restmethod por invoke-webrequest
+#       Checar pq a elevação de admin esta causando erro. - Done
+#       Trocar invoke-restmethod por invoke-webrequest - Done
 #       colocar o caminho do python hardcoded na hora de instalar o venv
 
 function Ask-User($question){
@@ -183,22 +183,22 @@ function Find-Venv($name,$root){
 
 }
 
-function Update-Venv($venv,$base){
+function Update-Venv($venv,$base,$python){
 
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
-    python -m pip install -r "requirement.txt" 
+    & $python -m pip install -r "requirement.txt" 
     deactivate
 
 }
 
-function Init-Venv($venv,$base){
+function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
         write-host "installing virtualenv"
-        python -m pip install virtualenv
+        & $python -m pip install virtualenv
 
     }
 
@@ -206,10 +206,10 @@ function Init-Venv($venv,$base){
 
         Write-Host "creating new"
         Set-Location -Path $base
-        python -m virtualenv "$venv"
+        & $python -m virtualenv "$venv"
         Set-Location -Path "$base\$venv"
         virtualenv .
-        Update-Venv "$venv" $base
+        Update-Venv "$venv" $base $python
 
     }
 
@@ -252,7 +252,8 @@ function Install-Shortcut {
     }
 }
 
-if(-Not (Test-Path "C:\Python27\python.exe")){
+$pythonInstall = "C:\Python27\python.exe"
+if(-Not (Test-Path "$pythonInstall")){
 
     $answer = Ask-User("Python installation not found! Do you want to install it?")
     if($answer -eq 6){
@@ -281,7 +282,7 @@ Download-Ffmpeg "$birdoApp"
 #packages
 #[Environment]::SetEnvironmentVariable("", "", "User")
 $currentFolder = ($PWD).path
-Init-Venv "venv" "$env:APPDATA\BirdoApp"
+Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
 Set-Location $currentFolder
 # Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
