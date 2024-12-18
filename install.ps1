@@ -82,14 +82,11 @@ function Download-Ffmpeg($app_folder){
 }
 
 function Download-Python {
-    $python_path = "C:\Python27\python.exe"
-    if(-Not (Test-Path $python_path)){
-        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -OutFile "$PWD\python27.msi"
-        if(Test-Path "$PWD\python27.msi"){
-            Start-Process msiexec.exe -Wait -ArgumentList "/I $PWD\python27.msi"
-        }
-        Remove-Item "$PWD\python27.msi"
+    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -OutFile "$PWD\python27.msi"
+    if(Test-Path "$PWD\python27.msi"){
+        Start-Process msiexec.exe -Wait -ArgumentList "/I $PWD\python27.msi"
     }
+    Remove-Item "$PWD\python27.msi"
 }
 
 function Is-Virtualenv {
