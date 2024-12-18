@@ -193,6 +193,7 @@ def first_update(main_app = None):
     install_requirements(main_app=main_app)
     main_app.ui.progressBar.setValue(3)
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
+    return True
 
 def main_update(proj_data, main_app=None):
     
@@ -211,14 +212,10 @@ def main_update(proj_data, main_app=None):
     print "update toon boom package"
     # UPDATE TOON BOOM PACKAGE
     main_app.ui.progressBar.setValue(3)
-    #main_app.ui.loading_label.setText("updating harmony package...")
-    #install_harmony_package_config(proj_data)
-
     main_app.ui.progressBar.setValue(4)
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
 
     return True
-
 
 def update_app_version():
 
@@ -229,101 +226,6 @@ def update_app_version():
 
     app_json["app_version"] = ".".join(list(version))
     write_json_file(app_file,app_json)
-
-'''
-def main_update(proj_data, main_app=None):
-    
-    """main function - returns False if fail to get new package and True if no need updates or successful update!"""
-    paths = proj_data["paths"]
-    server_data = proj_data["server"]
-    nc = NextcloudServer(server_data, paths)
-    get_roots = nc.get_roots()
-    temp_folder = os.path.join(proj_data["system"]["temp"], 'BirdoApp', 'downloaded_packs')
-
-    # SETS MAIN APP LOADING BAR RANGE
-    main_app.ui.progressBar.setRange(0, 7)
-
-    main_app.ui.progressBar.setValue(1)
-    main_app.ui.loading_label.setText("connecting server...")
-    if not get_roots:
-        print "erro ao conectar ao server!"
-        return False
-
-    if get_roots["has_root"]:
-        pack_updates = paths["root"] + paths["projRoot"] + paths["tblib"] + paths["packUpdate"]
-    else:
-        if not nc.get_file_info(paths["tblib"]):
-            main_app.ui.progressBar.setValue(0)
-            main_app.ui.loading_label.setText("tbLib not found!!!!")
-            main_app.ui.loading_label.setStyleSheet("color: rgb(255, 100, 74);")
-            print 'tblib not found!'
-            return False
-        else:
-            pack_updates = paths["tblib"] + paths["packUpdate"]
-
-    print "TESTE LEO folder packs: {0}".format(pack_updates)
-
-    # LISTING UPDATES...
-    main_app.ui.progressBar.setValue(2)
-    main_app.ui.loading_label.setText("listing updates packs...")
-    pack_list = nc.list_folder(pack_updates)
-    recent_pack = get_most_recent_pack(pack_list)
-    print "TESTE LEO recent pack: {0}".format(recent_pack)
-
-    if not recent_pack:
-        print "no packs found on the server"
-        main_app.ui.progressBar.setValue(5)
-        main_app.ui.loading_label.setText("no updates needed!")
-        return True
-
-    if check_package_update(recent_pack.get_name()):
-        print "new package to download: {0} ...".format(recent_pack.get_name())
-        # ADD FUNCAO DE BAIXAR O PACK E INSTALAR AQUI!!!
-
-        # CRIA O FOLDER TEMP
-        if not os.path.exists(temp_folder):
-            main_app.ui.loading_label.setText("creating temp folder...")
-            os.makedirs(temp_folder)
-
-        # DOWNLOAD DO PACK
-        temp_pack_zip = os.path.join(temp_folder, recent_pack.get_name())
-        server_pack_path = recent_pack.get_path() + "/" + str(recent_pack.get_name())
-        main_app.ui.progressBar.setValue(3)
-        main_app.ui.loading_label.setText("downloading pack {0} ...".format(recent_pack.get_name()))
-        print 'baixando : ' + server_pack_path
-        if not nc.download_file(server_pack_path, temp_pack_zip):
-            main_app.ui.progressBar.setValue(5)
-            main_app.ui.loading_label.setStyleSheet("color: rgb(255, 100, 74);")
-            main_app.ui.loading_label.setText("download failed!")
-            MessageBox.warning('Fail to donwload new pack from the server! Package update canceled!')
-            return False
-
-        # INSTALL PACKAGE
-        update_json = os.path.join(temp_folder, recent_pack.get_name().replace(".zip", ".json"))
-        main_app.ui.progressBar.setValue(4)
-        main_app.ui.loading_label.setText("installing package...")
-        update = extract_zipfile(temp_pack_zip, app_root)
-        if not update:
-            print "fail to extract temp zip pack..."
-            return False
-        update_data = {"updated_files": update, "date": datetime.now().isoformat()}
-        write_json_file(update_json, update_data)
-        main_app.ui.progressBar.setValue(5)
-        main_app.ui.loading_label.setText("update complete!")
-    else:
-        print "most recent package already installed!"
-        main_app.ui.progressBar.setValue(5)
-        main_app.ui.loading_label.setText("most recent package already installed!")
-
-    # UPDATE TOON BOOM PACKAGE
-    main_app.ui.progressBar.setValue(6)
-    main_app.ui.loading_label.setText("updating harmony package...")
-    install_harmony_package_config(proj_data)
-
-    main_app.ui.progressBar.setValue(7)
-    main_app.ui.loading_label.setText("update done!")
-    return True
-'''
 
 if __name__ == "__main__":
     pdata = config_project(app_root, 0)

@@ -277,11 +277,10 @@ Expand-Archive -Path $gitpath -DestinationPath "$birdoTemp" -Force
 Remove-Item -Path "$gitpath" -Force
 $unzip = Get-ChildItem -Path $birdoTemp -Name
 Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
+Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
 
 Write-Host "Baixando Ffmpeg..."
-
 Download-Ffmpeg "$birdoApp"
-
 Write-Host "Criando variáveis de ambiente..."
 
 #scripts

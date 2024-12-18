@@ -43,15 +43,15 @@ function Ask-User($question){
 
 }
 
-
 $birdoTemp = "$env:TEMP\BirdoApp"
-if(-not (Test-Path $birdoTemp)){
-
-    New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
-
+$birdoApp = "$env:APPDATA\BirdoApp"
+if(Test-Path $birdoTemp){ 
+    Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
+New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
 
-$lastModified = Get-Item "$env:APPDATA\BirdoApp"
+
+$lastModified = Get-Item "$birdoApp\lastUpdated.txt"
 $releaseDate = Get-RepoReleaseDate "otmbneto/BirdoApp"
 if (-Not ((Get-Date $lastModified.LastWriteTime) -lt (Get-Date $releaseDate))){
 
@@ -60,7 +60,12 @@ if (-Not ((Get-Date $lastModified.LastWriteTime) -lt (Get-Date $releaseDate))){
 
         Write-Host "New release found! Donwloading it!"
         $zipFile = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
-        Expand-Archive -Path $zipFile -DestinationPath "$env:APPDATA" -Force
+        Expand-Archive -Path $zipFile -DestinationPath "$birdoTemp" -Force
+        Remove-Item -Path "$zipFile" -Force
+        $unzip = Get-ChildItem -Path $birdoTemp -Name
+        Write-Host "$birdoTemp\$unzip"
+        Copy-item -Force -Recurse -Verbose "$birdoTemp\$unzip\*" -Destination "$birdoApp\"
+        Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
 
     }
 
