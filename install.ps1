@@ -168,7 +168,92 @@ function Install-Shortcut {
     }
 }
 
+$greetings = "
++-------------------------------------------------------------------+
+|                                                       _    _      |
+|         ____  _          __      ___                 , ``._) '>    |
+|        / __ )(_)________/ /___  /   |  ____  ____    '//,,, |     |
+|       / __  / / ___/ __  / __ \/ /| | / __ \/ __ \      )_/       |
+|      / /_/ / / /  / /_/ / /_/ / ___ |/ /_/ / /_/ /     /_|        |
+|     /_____/_/_/   \__,_/\____/_/  |_/ .___/ .___/                 |
+|                                    /_/   /_/                      |
+|                                                                   |
+|                   ASSISTENTE  DE  INSTALAÇAO                      |
++-------------------------------------------------------------------+
+
+   Bem vindo ao assistente de instalação do BirdoApp, um conjunto
+   de scripts e programas que auxiliam produções de animação 2D.
+   Pressione ENTER para continuar.
+"
+
+$licence = "O BirdoApp é distribuido de forma gratuita atraves da"
+$licence += "`nlicença MIT, descrita nos termos a seguir:`n`n"
+$licence += "Copyright (c) 2024 BirdoStudios
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the `"Software`"), to deal in
+the Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED `"AS IS`", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`n"
+
+function AskYesNo {
+    param([String]$question)
+    $Response = ""
+    while ($Response -ne "S" -and $Response -ne "N") {
+        Write-Host $question
+        $Response = $host.UI.ReadLine()
+    }
+    return $Response
+}
+
 #### MAIN ROUTINE ####
+
+echo $greetings
+$host.UI.ReadLine()
+
+if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
+    echo "Parece que o BirdoApp já está instalado em seu computador."
+    echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
+    echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
+    exit
+}
+
+echo $licence
+
+$LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
+
+if ($LastUserResponse -eq "N") {
+    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    exit
+}
+
+echo "`nAs seguintes ações serão executadas:`n"
+echo "  - Download e instalação do Python 2.7"
+echo "  - Criação de um ambiente virtual Python"
+echo "  - Instalação de módulos no ambiente virtual"
+echo "  - Download do programa Ffmpeg"
+echo "  - Downloads de scripts e programas do BirdoApp"
+echo "  - Cópia dos arquivos para pasta %APPDATA%"
+echo "  - Criação de variáveis de ambiente"
+echo "  - Cria um atalho do BirdoApp na Area de Trabalho`n"
+
+$LastUserResponse = AskYesNo "Está de acordo com as ações dos itens acima? (S/N)"
+
+if ($LastUserResponse -eq "N") {
+    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    exit
+}
 
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
