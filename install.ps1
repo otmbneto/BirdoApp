@@ -21,7 +21,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
     }
     elseif($type -eq "Binary"){
         $releases = "https://api.github.com/repos/$repo/releases"
-        Write-Host Determining latest release
+        Write-Host "Buscando pelo release mais recente."
         $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
         $download = "https://github.com/$repo/releases/download/$tag/$file"
         $name = $file.Split(".")[0]
@@ -32,7 +32,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
         return $null
     }
 
-    Write-Host Dowloading latest release to "$dst\$zip"
+    Write-Host "Baixando último release em $dst\$zip"
     Invoke-WebRequest $download -Out $dst\$zip
 
     return "$dst\$zip"
@@ -45,18 +45,17 @@ function Download-Ffmpeg($app_folder){
     $ffmpegInstall = "$app_folder\extra\ffmpeg"
 
     # Display message
-    Write-Host "Downloading ffmpeg"
 
     # Check if the folder exists, if not create it
     if (-not (Test-Path $ffmpegInstall)) {
-        Write-Host "Creating directory $ffmpegInstall"
+        Write-Host "Criando pasta $ffmpegInstall"
         New-Item -ItemType Directory -Force -Path $ffmpegInstall
     }
 
     $zipFile = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
 
     # Expand the archive using PowerShell's Expand-Archive cmdlet
-    Write-Host "Expanding archive"
+    Write-Host "Descompactando arquivo"
     Expand-Archive -Path $zipFile -DestinationPath $ffmpegInstall -Force
 
     # Delete the zip file after extraction
@@ -78,7 +77,7 @@ function Download-Ffmpeg($app_folder){
     $ffmpegPath = "$ffmpegInstall\windows\bin"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::Machine)
 
-    Write-Host "ffmpeg installed and PATH updated"
+    Write-Host "Ffmpeg instalado e variável PATH atualizada"
 }
 
 function Download-Python {
@@ -116,14 +115,14 @@ function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
-        write-host "installing virtualenv"
+        Write-Host "Instalando módulo 'virtualenv'"
         & $python -m pip install virtualenv
 
     }
 
     if(-Not (Find-Venv "$venv" $base)){
 
-        Write-Host "creating new"
+        Write-Host "Criando ambiente virtual"
         Set-Location -Path $base
         & $python -m virtualenv "$venv"
         Set-Location -Path "$base\$venv"
@@ -155,8 +154,6 @@ function Install-Shortcut {
 
     # Check if the shortcut already exists
     if (-not (Test-Path -Path $shortcutPath)) {
-        Write-Host "Creating $ShortcutName shortcut..."
-
         # Create the shortcut
         $WScriptShell = New-Object -ComObject WScript.Shell
         $shortcut = $WScriptShell.CreateShortcut($shortcutPath)
@@ -167,7 +164,7 @@ function Install-Shortcut {
         $shortcut.Save()
 
     } else {
-        Write-Host "Not necessary to create $ShortcutName shortcut."
+        Write-Host "Atalho já existe. Pulando essa etapa."
     }
 }
 
@@ -180,6 +177,8 @@ if(-Not (Test-Path "$pythonInstall")){
 } else {
     Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
+
+Write-Host "Baixando scripts e programas do BirdoApp..."
 
 Set-Location -Path $env:APPDATA
 $birdoTemp = "$env:TEMP\BirdoApp"
@@ -194,13 +193,24 @@ Remove-Item -Path "$gitpath" -Force
 $unzip = Get-ChildItem -Path $birdoTemp -Name
 Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
 
+Write-Host "Baixando Ffmpeg..."
+
 Download-Ffmpeg "$birdoApp"
+
+Write-Host "Criando variáveis de ambiente..."
+
 #scripts
 [Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
 #packages
 [Environment]::SetEnvironmentVariable("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER", "$env:APPDATA\BirdoApp\package\harmony20\packages", "User")
+
+Write-Host "Criando ambiente virtual..."
+
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
+
+Write-Host "Criando atalho na área de trabalho..."
+
 Set-Location $currentFolder
 # Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
