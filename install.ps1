@@ -88,9 +88,9 @@ function Download-Python {
     Remove-Item "$PWD\python27.msi"
 }
 
-function Is-Virtualenv {
+function Is-Virtualenv($python) {
 
-    $test= python -m virtualenv --version
+    $test= & $python -m virtualenv --version
     return $test -ne $null
 
 }
@@ -136,7 +136,7 @@ function Init-Venv($venv,$base,$python){
 function Install-Shortcut {
     param (
         [string]$ShortcutName,
-        [string]$Args,
+        [string]$Arguments,
         [string]$WorkingDir,
         [string]$PythonPath,
         [string]$Icon
@@ -158,7 +158,7 @@ function Install-Shortcut {
         $WScriptShell = New-Object -ComObject WScript.Shell
         $shortcut = $WScriptShell.CreateShortcut($shortcutPath)
         $shortcut.TargetPath = $pythonPath
-        $shortcut.Arguments = $Args
+        $shortcut.Arguments = $Arguments
         $shortcut.WorkingDirectory = $workingDir
         $shortcut.IconLocation = $Icon
         $shortcut.Save()
