@@ -9,14 +9,6 @@ if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
 #       Trocar invoke-restmethod por invoke-webrequest - Done
 #       colocar o caminho do python hardcoded na hora de instalar o venv
 
-function Ask-User($question){
-
-    $wshell = New-Object -ComObject Wscript.Shell
-    $answer = $wshell.Popup($question,0,"Alert",64+4)
-
-    return $answer
-}
-
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
 
@@ -29,7 +21,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
     }
     elseif($type -eq "Binary"){
         $releases = "https://api.github.com/repos/$repo/releases"
-        Write-Host Determining latest release
+        Write-Host "Buscando pelo release mais recente."
         $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
         $download = "https://github.com/$repo/releases/download/$tag/$file"
         $name = $file.Split(".")[0]
@@ -40,7 +32,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
         return $null
     }
 
-    Write-Host Dowloading latest release to "$dst\$zip"
+    Write-Host "Baixando último release em $dst\$zip"
     Invoke-WebRequest $download -Out $dst\$zip
 
     return "$dst\$zip"
@@ -53,18 +45,17 @@ function Download-Ffmpeg($app_folder){
     $ffmpegInstall = "$app_folder\extra\ffmpeg"
 
     # Display message
-    Write-Host "Downloading ffmpeg"
 
     # Check if the folder exists, if not create it
     if (-not (Test-Path $ffmpegInstall)) {
-        Write-Host "Creating directory $ffmpegInstall"
+        Write-Host "Criando pasta $ffmpegInstall"
         New-Item -ItemType Directory -Force -Path $ffmpegInstall
     }
 
     $zipFile = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
 
     # Expand the archive using PowerShell's Expand-Archive cmdlet
-    Write-Host "Expanding archive"
+    Write-Host "Descompactando arquivo"
     Expand-Archive -Path $zipFile -DestinationPath $ffmpegInstall -Force
 
     # Delete the zip file after extraction
@@ -86,88 +77,15 @@ function Download-Ffmpeg($app_folder){
     $ffmpegPath = "$ffmpegInstall\windows\bin"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::Machine)
 
-    Write-Host "ffmpeg installed and PATH updated"
-}
-
-function Kill-SSH_Agent{
-
-    # Get the process ID (PID) of ssh-agent processes
-    Get-Process ssh-agent -ErrorAction SilentlyContinue | ForEach-Object {
-        # Kill the process by its PID
-        Write-Host "Killing task $($_.Id)"
-        Stop-Process -Id $_.Id -Force
-    }
-}
-
-function setServiceToManual{
-
-    param($serviceName)
-    $servicelist=Get-Service $serviceName
-    foreach ($service in $servicelist) { 
-        try {
-            if ($service.Status -eq "Stopped") {
-                Write-Host $service.Name "Stopped."
-                if ($service.StartType -eq "Disabled"){
-                    Write-Host $service.Name "is Disabled! Turning to Manual..."
-                    Set-Service -Name $service.Name -StartupType Manual
-                }                
-            }
-
-        } catch {
-            Write-Host "$service does not exist."
-        }
-    }
-}
-
-function Run-Application($app){
-
-    if(Test-Path "$app"){
-        if("$app" -match ".*\.exe$"){
-            & "$app"
-        }
-        elseif("$app" -match ".*\.msi$"){
-            Start-Process msiexec.exe -Wait -ArgumentList "/I $app"
-        }
-        else{
-            Write-Host "ERROR: Could not identify app type."
-        }
-    }
-}
-
-function Donwload-App($from,$to,$check){
-
-    if(-Not (Test-Path $check)){
-        Invoke-WebRequest -Uri "$from" -OutFile "$to"
-        if(Test-Path "$to"){
-            Run-Application "$to"
-        }
-        Remove-Item "$to"
-    }
-
-
+    Write-Host "Ffmpeg instalado e variável PATH atualizada"
 }
 
 function Download-Python {
-    $python_path = "C:\Python27\python.exe"
-    if(-Not (Test-Path $python_path)){
-        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -OutFile "$PWD\python27.msi"
-        if(Test-Path "$PWD\python27.msi"){
-            Start-Process msiexec.exe -Wait -ArgumentList "/I $PWD\python27.msi"
-        }
-        Remove-Item "$PWD\python27.msi"
+    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -OutFile "$PWD\python27.msi"
+    if(Test-Path "$PWD\python27.msi"){
+        Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
-}
-
-function Download-Git {
-    Write-Host "Downloading Git..."
-    $git_path = "C:\Program Files\Git\bin\git.exe"
-    if(-Not (Test-Path $git_path)){
-        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe" -OutFile "$PWD\git.exe"
-        if(Test-Path "$PWD\git.exe"){
-            & "$PWD\git.exe"
-        }
-        Remove-Item "$PWD\git.exe"
-    }
+    Remove-Item "$PWD\python27.msi"
 }
 
 function Is-Virtualenv {
@@ -197,14 +115,14 @@ function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
-        write-host "installing virtualenv"
+        Write-Host "Instalando módulo 'virtualenv'"
         & $python -m pip install virtualenv
 
     }
 
     if(-Not (Find-Venv "$venv" $base)){
 
-        Write-Host "creating new"
+        Write-Host "Criando ambiente virtual"
         Set-Location -Path $base
         & $python -m virtualenv "$venv"
         Set-Location -Path "$base\$venv"
@@ -236,8 +154,6 @@ function Install-Shortcut {
 
     # Check if the shortcut already exists
     if (-not (Test-Path -Path $shortcutPath)) {
-        Write-Host "Creating $ShortcutName shortcut..."
-
         # Create the shortcut
         $WScriptShell = New-Object -ComObject WScript.Shell
         $shortcut = $WScriptShell.CreateShortcut($shortcutPath)
@@ -248,20 +164,106 @@ function Install-Shortcut {
         $shortcut.Save()
 
     } else {
-        Write-Host "Not necessary to create $ShortcutName shortcut."
+        Write-Host "Atalho já existe. Pulando essa etapa."
     }
+}
+
+$greetings = "
++-------------------------------------------------------------------+
+|                                                       _    _      |
+|         ____  _          __      ___                 , ``._) '>    |
+|        / __ )(_)________/ /___  /   |  ____  ____    '//,,, |     |
+|       / __  / / ___/ __  / __ \/ /| | / __ \/ __ \      )_/       |
+|      / /_/ / / /  / /_/ / /_/ / ___ |/ /_/ / /_/ /     /_|        |
+|     /_____/_/_/   \__,_/\____/_/  |_/ .___/ .___/                 |
+|                                    /_/   /_/                      |
+|                                                                   |
+|                   ASSISTENTE  DE  INSTALAÇAO                      |
++-------------------------------------------------------------------+
+
+   Bem vindo ao assistente de instalação do BirdoApp, um conjunto
+   de scripts e programas que auxiliam produções de animação 2D.
+   Pressione ENTER para continuar.
+"
+
+$licence = "O BirdoApp é distribuido de forma gratuita atraves da"
+$licence += "`nlicença MIT, descrita nos termos a seguir:`n`n"
+$licence += "Copyright (c) 2024 BirdoStudios
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the `"Software`"), to deal in
+the Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED `"AS IS`", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`n"
+
+function AskYesNo {
+    param([String]$question)
+    $Response = ""
+    while ($Response -ne "S" -and $Response -ne "N") {
+        Write-Host $question
+        $Response = $host.UI.ReadLine()
+    }
+    return $Response
+}
+
+#### MAIN ROUTINE ####
+
+echo $greetings
+$host.UI.ReadLine()
+
+if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
+    echo "Parece que o BirdoApp já está instalado em seu computador."
+    echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
+    echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
+    exit
+}
+
+echo $licence
+
+$LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
+
+if ($LastUserResponse -eq "N") {
+    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    exit
+}
+
+echo "`nAs seguintes ações serão executadas:`n"
+echo "  - Download e instalação do Python 2.7"
+echo "  - Criação de um ambiente virtual Python"
+echo "  - Instalação de módulos no ambiente virtual"
+echo "  - Download do programa Ffmpeg"
+echo "  - Downloads de scripts e programas do BirdoApp"
+echo "  - Cópia dos arquivos para pasta %APPDATA%"
+echo "  - Criação de variáveis de ambiente"
+echo "  - Cria um atalho do BirdoApp na Area de Trabalho`n"
+
+$LastUserResponse = AskYesNo "Está de acordo com as ações dos itens acima? (S/N)"
+
+if ($LastUserResponse -eq "N") {
+    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    exit
 }
 
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
-
-    $answer = Ask-User("Python installation not found! Do you want to install it?")
-    if($answer -eq 6){
-        Write-Host "Downloading python 2.7..."
-        Download-Python
-    }
-
+    Write-Host "Baixando Python 2.7..."
+    Download-Python
+} else {
+    Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
+
+Write-Host "Baixando scripts e programas do BirdoApp..."
 
 Set-Location -Path $env:APPDATA
 $birdoTemp = "$env:TEMP\BirdoApp"
@@ -276,13 +278,24 @@ Remove-Item -Path "$gitpath" -Force
 $unzip = Get-ChildItem -Path $birdoTemp -Name
 Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
 
+Write-Host "Baixando Ffmpeg..."
+
 Download-Ffmpeg "$birdoApp"
+
+Write-Host "Criando variáveis de ambiente..."
+
 #scripts
 [Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
 #packages
 [Environment]::SetEnvironmentVariable("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER", "$env:APPDATA\BirdoApp\package\harmony20\packages", "User")
+
+Write-Host "Criando ambiente virtual..."
+
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
+
+Write-Host "Criando atalho na área de trabalho..."
+
 Set-Location $currentFolder
 # Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
