@@ -89,64 +89,6 @@ function Download-Ffmpeg($app_folder){
     Write-Host "ffmpeg installed and PATH updated"
 }
 
-function Kill-SSH_Agent{
-
-    # Get the process ID (PID) of ssh-agent processes
-    Get-Process ssh-agent -ErrorAction SilentlyContinue | ForEach-Object {
-        # Kill the process by its PID
-        Write-Host "Killing task $($_.Id)"
-        Stop-Process -Id $_.Id -Force
-    }
-}
-
-function setServiceToManual{
-
-    param($serviceName)
-    $servicelist=Get-Service $serviceName
-    foreach ($service in $servicelist) { 
-        try {
-            if ($service.Status -eq "Stopped") {
-                Write-Host $service.Name "Stopped."
-                if ($service.StartType -eq "Disabled"){
-                    Write-Host $service.Name "is Disabled! Turning to Manual..."
-                    Set-Service -Name $service.Name -StartupType Manual
-                }                
-            }
-
-        } catch {
-            Write-Host "$service does not exist."
-        }
-    }
-}
-
-function Run-Application($app){
-
-    if(Test-Path "$app"){
-        if("$app" -match ".*\.exe$"){
-            & "$app"
-        }
-        elseif("$app" -match ".*\.msi$"){
-            Start-Process msiexec.exe -Wait -ArgumentList "/I $app"
-        }
-        else{
-            Write-Host "ERROR: Could not identify app type."
-        }
-    }
-}
-
-function Donwload-App($from,$to,$check){
-
-    if(-Not (Test-Path $check)){
-        Invoke-WebRequest -Uri "$from" -OutFile "$to"
-        if(Test-Path "$to"){
-            Run-Application "$to"
-        }
-        Remove-Item "$to"
-    }
-
-
-}
-
 function Download-Python {
     $python_path = "C:\Python27\python.exe"
     if(-Not (Test-Path $python_path)){
@@ -155,18 +97,6 @@ function Download-Python {
             Start-Process msiexec.exe -Wait -ArgumentList "/I $PWD\python27.msi"
         }
         Remove-Item "$PWD\python27.msi"
-    }
-}
-
-function Download-Git {
-    Write-Host "Downloading Git..."
-    $git_path = "C:\Program Files\Git\bin\git.exe"
-    if(-Not (Test-Path $git_path)){
-        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe" -OutFile "$PWD\git.exe"
-        if(Test-Path "$PWD\git.exe"){
-            & "$PWD\git.exe"
-        }
-        Remove-Item "$PWD\git.exe"
     }
 }
 
