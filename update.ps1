@@ -50,10 +50,12 @@ if(Test-Path $birdoTemp){
 }
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
 
-
 $lastModified = Get-Item "$birdoApp\lastUpdated.txt"
 $releaseDate = Get-RepoReleaseDate "otmbneto/BirdoApp"
-if (-Not ((Get-Date $lastModified.LastWriteTime) -lt (Get-Date $releaseDate))){
+Write-Host (Get-Date $lastModified.LastWriteTime -Format "yyyy-MM-dd hh:mm:ss")
+Write-Host (Get-Date $releaseDate -Format "yyyy-MM-dd hh:mm:ss")
+Start-Sleep -Seconds 5
+if ((Get-Date $lastModified.LastWriteTime -Format "yyyy-MM-dd hh:mm:ss") -lt (Get-Date $releaseDate -Format "yyyy-MM-dd hh:mm:ss")){
 
     $answer = Ask-User("There is a new version of the app available! Do you want to update?")
     if($answer -eq 6){

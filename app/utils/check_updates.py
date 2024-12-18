@@ -173,7 +173,9 @@ def install_requirements(main_app=None):
 
 def pull_remote_repo(main_app = None):
 
-    return os.system(os.path.join(main_app.app_root,"update.ps1")) if main_app is not None else 0
+    cmd = "powershell.exe {0}".format(os.path.join(main_app.app_root,"update.ps1"))
+    print(cmd)
+    return os.system(cmd) if main_app is not None else 0
 
 def first_update(main_app = None):
 
