@@ -9,14 +9,6 @@ if(!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]:
 #       Trocar invoke-restmethod por invoke-webrequest - Done
 #       colocar o caminho do python hardcoded na hora de instalar o venv
 
-function Ask-User($question){
-
-    $wshell = New-Object -ComObject Wscript.Shell
-    $answer = $wshell.Popup($question,0,"Alert",64+4)
-
-    return $answer
-}
-
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
 
@@ -182,15 +174,14 @@ function Install-Shortcut {
     }
 }
 
+#### MAIN ROUTINE ####
+
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
-
-    $answer = Ask-User("Python installation not found! Do you want to install it?")
-    if($answer -eq 6){
-        Write-Host "Downloading python 2.7..."
-        Download-Python
-    }
-
+    Write-Host "Baixando Python 2.7..."
+    Download-Python
+} else {
+    Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
 
 Set-Location -Path $env:APPDATA
