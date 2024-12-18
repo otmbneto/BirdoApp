@@ -88,9 +88,9 @@ function Download-Python {
     Remove-Item "$PWD\python27.msi"
 }
 
-function Is-Virtualenv($python) {
+function Is-Virtualenv {
 
-    $test= & $python -m virtualenv --version
+    $test= python -m virtualenv --version
     return $test -ne $null
 
 }
