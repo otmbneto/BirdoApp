@@ -278,9 +278,9 @@ Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
 
 Download-Ffmpeg "$birdoApp"
 #scripts
-#[Environment]::SetEnvironmentVariable("", "", "User")
+[Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
 #packages
-#[Environment]::SetEnvironmentVariable("", "", "User")
+[Environment]::SetEnvironmentVariable("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER", "$env:APPDATA\BirdoApp\package\harmony20\packages", "User")
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
 Set-Location $currentFolder
