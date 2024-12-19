@@ -101,12 +101,12 @@ function Find-Venv($name,$root){
 
 }
 
-function Update-Venv($venv,$base,$python){
+function Update-Venv($venv,$base){
 
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
-    & $python -m pip install -r "requirement.txt" 
+    python -m pip install -r "requirement.txt" 
     deactivate
 
 }
@@ -127,7 +127,7 @@ function Init-Venv($venv,$base,$python){
         & $python -m virtualenv "$venv"
         Set-Location -Path "$base\$venv"
         virtualenv .
-        Update-Venv "$venv" $base $python
+        Update-Venv "$venv" $base
 
     }
 
@@ -299,3 +299,4 @@ Set-Location $currentFolder
 # Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
 Install-Shortcut -ShortcutName "birdo_app" -Arguments "BirdoApp.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.ico"
+Start-Sleep 100
