@@ -31,10 +31,8 @@ def install_requirements(main_app=None):
     python = sys.executable
     requirements = os.path.join(main_app.app_root,"requirement.txt")
     cmd = "{0} -m pip install -r {1}".format(python,requirements)
-    print cmd
-    os.system(cmd) if main_app is not None else 0
-
-    return
+    print(cmd)
+    return os.system(cmd) if main_app is not None else 0
 
 def pull_remote_repo(main_app = None):
 
