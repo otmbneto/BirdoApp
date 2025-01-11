@@ -288,7 +288,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         install_requirements(main_app=self)
         self.ui.stackedWidget.setCurrentIndex(1)
-        result = update_app(main_app = self,install_req = True)
+        result = update_app(main_app = self)
         if not result:
             os.execv(sys.executable, ['python'] + sys.argv)
 
