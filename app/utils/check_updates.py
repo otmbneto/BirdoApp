@@ -8,9 +8,6 @@
 import sys
 import os
 
-app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-sys.path.append(app_root)
-
 def install_requirements(main_app=None):
 
     python = sys.executable
