@@ -7,24 +7,9 @@
 
 import sys
 import os
-import re
-import subprocess
-from subprocess import Popen
-from datetime import datetime
-from shutil import copytree, copyfile, rmtree
-
-
-from birdo_json import read_json_file, write_json_file
-from birdo_zip import extract_zipfile
-from MessageBox import CreateMessageBox
-from nextcloud_server import NextcloudServer
-from harmony_utils import ToonBoomHarmony
 
 app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.append(app_root)
-from app.config_project import config_project
-
-MessageBox = CreateMessageBox()
 
 def install_requirements(main_app=None):
 
