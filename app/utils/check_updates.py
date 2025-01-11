@@ -63,3 +63,21 @@ def main_update(proj_data, main_app=None):
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
 
     return True
+
+def update_app(main_app=None,install_req = False):
+
+    main_app.ui.progressBar.setRange(0, 3)
+    main_app.ui.progressBar.setValue(0)
+    result = pull_remote_repo(main_app = main_app)
+    main_app.ui.progressBar.setValue(1)
+    if result != 0:
+        print("something went wrong with update")
+        main_app.ui.progressBar.setValue(0)
+        return False
+    main_app.ui.progressBar.setValue(2)
+    if install_req:
+        install_requirements(main_app=main_app)
+    main_app.ui.progressBar.setValue(3)
+    main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
+
+    return True

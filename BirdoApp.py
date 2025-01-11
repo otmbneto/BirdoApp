@@ -5,7 +5,7 @@ from app.utils.MessageBox import CreateMessageBox
 from app.utils.enc_dec import PswEncDec
 from app.utils.birdo_json import read_json_file
 from app.utils.birdo_json import write_json_file,write_json_file_from_string
-from app.utils.check_updates import main_update,first_update,install_requirements
+from app.utils.check_updates import update_app,install_requirements
 from app.utils.system import SystemFolders, get_short_path_name
 from app.utils.harmony_utils import *
 from PySide import QtCore, QtGui, QtUiTools
@@ -288,7 +288,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         install_requirements(main_app=self)
         self.ui.stackedWidget.setCurrentIndex(1)
-        result = first_update(main_app = self)
+        result = update_app(main_app = self,install_req = True)
         if not result:
             os.execv(sys.executable, ['python'] + sys.argv)
 
@@ -309,7 +309,7 @@ class BirdoApp(QtGui.QMainWindow):
             MessageBox.warning("Aviso! Seu nome de usuario esta em um formato invalido. Para maior compatibilidade com o outros aplicativos da birdo sera necessario substituir seu nome de usuario com o seu nome no discord.(ex. johndoe#1234)")
             self.getDiscordUserName(self.project_data)
             self.login_page()
-        elif not main_update(self.project_data, self):
+        elif not update_app(main_app = self):
             print "check update failed!"
             self.initProjectPage()
         else:
