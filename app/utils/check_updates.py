@@ -81,9 +81,3 @@ def main_update(proj_data, main_app=None):
     main_app.ui.loading_label.setText("BirdoApp is up-to-date!")
 
     return True
-
-if __name__ == "__main__":
-    pdata = config_project(app_root, 0)
-
-    up = main_update(pdata)
-    print up
