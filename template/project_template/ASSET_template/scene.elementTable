@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<elements source="Harmony Premium (HarmonyPremium.exe) version 20.0.3 build 16743 2021-02-09 08:56:36" version="2003" build="16743">
+ <element id="4" elementName="Asset" elementFolder="Asset" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+ <element id="5" elementName="REFERENCIA" elementFolder="REFERENCIA" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+ <element id="103" elementName="Tips" elementFolder="Tips.103" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+ <element id="104" elementName="LineUp" elementFolder="LineUp.104" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+</elements>

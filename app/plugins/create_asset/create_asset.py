@@ -1,29 +1,24 @@
+"""
+    Este script serve para abrir o arquivo template de asset e abrir interface com opcoes
+    para criacao do arquivo setup para o ASSET desejado.
+    (o script init e um arquivo javascript q inicia junto com o template)
+"""
 import sys
-import subprocess
 import os
 
+# muda o caminho pra root do app e importa o ConfigInit
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
-
 sys.path.append(birdo_app_root)
-from app.config_project import config_project
-from app.utils.birdo_harmony import HarmonyManager
+from app.config import ConfigInit
 
 
 def main(proj_data):
-    """this script open the harmomny file template to create a asset file
-    (the init script is a javascript that runs in the start of the harmony file)"""
-    harmony_manager = HarmonyManager(proj_data)
+    project_template = os.path.join(proj_data.config_folder, 'ASSET_template')
+    xstage_file = proj_data.harmony.get_xstage_last_version(project_template)
 
-    project_template = os.path.join(birdo_app_root, 'templates', '{0}_ASSET_template'.format(proj_data["prefix"]))
-    xstage_file = harmony_manager.get_xstage_last_version(project_template)
-
-    harmony_path = harmony_manager.harmony_program.replace("\"", "")
-
-    process = subprocess.Popen([harmony_path, xstage_file], executable=harmony_path)
-
-    print "--template asset harmony opened for project: {0}, with pid: {1}".format(proj_data["prefix"], process.pid)
-    print "harmony: {0}".format(harmony_path)
+    process = proj_data.harmony.open_harmony_scene(xstage_file)
+    print "--template asset harmony opened for project: {0}, with pid: {1}".format(proj_data.prefix, process.pid)
     print "xstage path: {0}".format(xstage_file)
     os.system("pause")
 
@@ -33,12 +28,14 @@ if __name__ == "__main__":
 
     project_index = int(args[1])
 
-    p_data = config_project(birdo_app_root, project_index)
+    birdoapp = ConfigInit()
+    if not birdoapp.is_ready():
+        sys.exit("BirdoApp config is not complete!")
 
-    if not p_data:
-        print "error opening project data!"
+    project_data = birdoapp.get_project_data(project_index)
+    if not project_data:
         sys.exit("error opening project data!")
 
-    main(p_data)
+    main(project_data)
 
     sys.exit("Create Asset End!")

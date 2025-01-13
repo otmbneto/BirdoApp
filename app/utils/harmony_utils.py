@@ -2,127 +2,182 @@ import os
 import re
 import subprocess
 import shlex
-import sys
-
-import ctypes
-from ctypes import wintypes
-_GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
-_GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
-_GetShortPathNameW.restype = wintypes.DWORD
-
-class ToonBoomHarmony:
-
-	def __init__(self,installation_path):
-
-		self.regex = r'Toon Boom Harmony (\d{2})(\.\d)* (Essentials|Advanced|Premium)'
-		self.installation_path = installation_path
-		print "INSTALLATION PATH:" + installation_path
-		self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith("/") or installation_path.endswith("\\") else os.path.basename(installation_path)
-		
-		print "NAME: " + self.name
-		print re.findall(self.regex,self.name)
-		self.version = re.findall(self.regex,self.name)[0][0]
-		self.subversion = re.findall(self.regex,self.name)[0][1].replace(".","") if len(re.findall(self.regex,self.name)[0][1]) > 0 else "0"
-		self.edition = re.findall(self.regex,self.name)[0][2]
-		self.scriptsPath = self.findScriptsPath()
-		self.executable = os.path.join(self.installation_path,"win64","bin","Harmony" + self.edition + ".exe")
-		
-		return
-
-	def getVersion(self):
-
-		return self.version
-
-	def getSubversion(self):
-
-		return self.subversion
-
-	def getEdition(self):
-
-		return self.edition
-
-	def getName(self):
-
-		return self.name
-
-	def getExecutable(self):
-
-		return self.executable
-
-	def isInstalled(self):
-
-		return os.path.exists(self.executable)
-
-	def getFullpath(self):
-
-		return self.installation_path
-
-	def findScriptsPath(self):
-
-		appdata = self.get_short_path_name(os.getenv('APPDATA')) if sys.platform == 'win32' else os.getenv('APPDATA')
-		version_code = self.version + self.subversion + "0"
-		return os.path.join(appdata,"Toon Boom Animation","Toon Boom Harmony " + self.edition,version_code + "-scripts")
-
-	def getScriptsPath(self):
-
-		return self.scriptsPath
-
-	def run(self,scene = None,script = None, batch = False):
-
-		if scene is not None and not os.path.exists(scene):
-			print "[ERROR] Scene not found: {0}".format(scene)
-			return -1
-		elif script is not None and not os.path.exists(script):
-			print "[ERROR] Script not found: {0}".format(script)
-			return -2
-
-		cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable,os.path.normpath(scene),script)
-		return subprocess.call(shlex.split(cmd)) == 0
 
 
-	def get_short_path_name(self,long_name):
-	    """
-	    Gets the short path name of a given long path.
-	    http://stackoverflow.com/a/23598461/200291
-	    """
-	    output_buf_size = 0
-	    while True:
-	        output_buf = ctypes.create_unicode_buffer(output_buf_size)
-	        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
-	        if output_buf_size >= needed:
-	            return output_buf.value
-	        else:
-	            output_buf_size = needed
+class ToonBoomHarmony(object):
+    """
+    Creates a Class with user local Harmony information and project version setting
+    ...
+
+    Parameters
+    ----------
+    installation_path: string
+        caminho com a instalacao do harmony
+    """
+    def __init__(self, installation_path):
+
+        self.regex = r'Toon Boom Harmony (\d{2})(\.\d)* (Essentials|Advanced|Premium)'
+        self.installation_path = installation_path
+        self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith(
+            "/") or installation_path.endswith("\\") \
+            else os.path.basename(installation_path)
+
+        self.version = re.findall(self.regex, self.name)[0][0]
+        self.subversion = re.findall(self.regex, self.name)[0][1].replace(".", "") if len(
+            re.findall(self.regex, self.name)[0][1]) > 0 else "0"
+        self.edition = re.findall(self.regex, self.name)[0][2]
+        self.executable = os.path.join(self.installation_path, "win64", "bin", "Harmony" + self.edition + ".exe")
+
+    def get_version(self):
+        return self.version
+
+    def get_subversion(self):
+        return self.subversion
+
+    def get_edition(self):
+        return self.edition
+
+    def get_name(self):
+        return self.name
+
+    def is_installed(self):
+        return os.path.exists(self.executable)
+
+    def get_fullpath(self):
+        return self.installation_path
+
+    def get_scripts_path(self):
+        """
+            Return the path of the Birdo Package folder in 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' variable.
+            If variable is not installe, return False
+            ...
+            RETURN : string
+        """
+        scripts = os.getenv("TOONBOOM_GLOBAL_SCRIPT_LOCATION").replace("\\", "/")
+        if not scripts:
+            print "[[WARNING!]] 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' not installed in this computer!!!!"
+            return False
+
+    def get_package_folder(self):
+        """
+        Return the path of the Birdo Package folder in 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' variable.
+        If variable is not installe, return False
+        ...
+        RETURN : string
+        """
+        package = os.getenv("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER").replace("\\", "/")
+        if not package:
+            print "[[WARNING!]] 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' not installed in this computer!!!!"
+            return False
+        return package
+
+    def get_xstage_last_version(self, harmony_file_folder):
+        """
+        Retorna o arquivo .xstage mais recente no folder do arquivo harmony fornecido.
+        ...
+        Parameters
+        ----------
+        harmony_file_folder: string
+            caminho do folder da cena de harmony
+        RETURN : string
+        """
+        if not os.path.exists(harmony_file_folder):
+            print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(harmony_file_folder)
+            return False
+        xstage_files = filter(lambda x: x.endswith('.xstage'), os.listdir(harmony_file_folder))
+        if len(xstage_files) == 0:
+            print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(harmony_file_folder)
+            return False
+        last_version = sorted(xstage_files)[-1]
+        return os.path.join(harmony_file_folder, last_version).replace('\\', '/')
+
+    def render_scene(self, harmony_scene, pre_render_script=None):
+        """
+        Batch Render harmony scene writeNodes.
+        ...
+        Parameters
+        ----------
+        harmony_scene: string
+            caminho do xstage da cena de harmony
+        pre_render_script: string
+            caminho do script para rodar no pre-render (default is None)
+        RETURN : bool
+        """
+        if not harmony_scene.endswith(".xstage"):
+            print "[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            return False
+        cmd = '"{0}" -batch -scene "{1}"'.format(self.executable, os.path.normpath(harmony_scene))
+        if pre_render_script:
+            cmd = '"{0}" -batch -scene "{1}" -preRenderScript "{2}"'.format(self.executable,
+                                                                          os.path.normpath(harmony_scene),
+                                                                          pre_render_script)
+        render = subprocess.call(shlex.split(cmd))
+        return render == 0 or render == 12
+
+    def compile_script(self, script, harmony_file):
+        """
+        Compile script for harmony file
+        ...
+        Parameters
+        ----------
+        script: string
+            caminho do script para rodar em batch
+        harmony_file: string
+            caminho do xstage da cena de harmony
+        RETURN : bool
+        """
+        if not harmony_file.endswith(".xstage"):
+            print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            return False
+        cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable,
+                                                         os.path.normpath(harmony_file),
+                                                         script.replace("/", "\\\\"))
+        return subprocess.call(shlex.split(cmd)) == 0
+
+    def create_thumbnails(self, harmony_tpl):
+        """
+        Creates template thumbnails (path without '.xstage' file, just folder '.tpl').
+        ...
+        Parameters
+        ----------
+        harmony_tpl: string
+            caminho do template (folder .tpl)
+        RETURN : bool
+        """
+        cmd = '"{0}" -batch -template "{1}" -thumbnails -readonly'.format(self.executable,
+                                                                        os.path.normpath(harmony_tpl))
+        return subprocess.call(shlex.split(cmd)) == 0
+
+    def open_harmony_scene(self, xstage_file):
+        """
+        Opens a harmony file using a subprocess command.. will return the opened process.
+        ...
+        Parameters
+        ----------
+        xstage_file: string
+            caminho do xstage da cena de harmony
+        RETURN : object
+        """
+        return subprocess.Popen([self.executable, os.path.normpath(xstage_file)])
 
 
-#Convinience function that looks for every sensible installation for toon boom.
-#TODO: - Add MacOS support.
-#	   - Check all drives.
-def getAvailableHarmonyVersions():
+def get_available_harmony_installations():
+    """
+    Funcao que retorna todas possiveis instalacoes de harmony nos drives: C e D
+    ...
+    """
+    regex = r'Toon Boom Harmony \d{2}(\.\d)* [Essentials|Advanced|Premium]'
+    availableVersions = []
+    harmony_default_path = "/Program Files (x86)/Toon Boom Animation/"
+    drives = ["C:", "D:"]
 
-	regex = r'Toon Boom Harmony \d{2}(\.\d)* [Essentials|Advanced|Premium]'
-	availableVersions = []
-	harmony_default_path = "/Program Files (x86)/Toon Boom Animation/"
-	drives = ["C:","D:"]
+    for drive in drives:
+        current_path = os.path.join(drive, harmony_default_path)
+        if not os.path.exists(current_path):
+            continue
+        harmony_installations = os.listdir(current_path)
+        for harmony in harmony_installations:
 
-	for drive in drives:
-
-		current_path = os.path.join(drive,harmony_default_path)
-		if not os.path.exists(current_path):
-			continue
-		harmony_installations = os.listdir(current_path)
-		for harmony in harmony_installations:
-
-			if re.match(regex,harmony):
-				availableVersions.append(os.path.join(current_path,harmony))
-
-	return availableVersions
-
-
-if __name__ == '__main__':
-
-	versions = getAvailableHarmonyVersions()
-	for version in versions:
-
-		v = ToonBoomHarmony(version)
-		print get_short_path_name(v.getScriptsPath())
+            if re.match(regex, harmony):
+                availableVersions.append(os.path.join(current_path, harmony))
+    return availableVersions

@@ -4,6 +4,12 @@
 # Ignore pyc files
 *.pyc
 
+# python cache files
+*__pycache__/
+
+# virtual env
+venv/
+
 # Ignore Mac system files
 .DS_store
 
@@ -25,15 +31,5 @@ node_modules
 # ignore extra folder
 extra/
 
-# ignore old files leo package sandbox
-_create_package_version.py
-package/harmony20/_create_links.bat
-
-# ignore events config file
-app/plugins/events/_events.json
-
-# ignore script leo
-app/_fix_mc_astro.py
-
-# ignore create asset template config json
-*_assetCreate.json
+# ignore config file
+config.json

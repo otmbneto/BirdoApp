@@ -32,6 +32,7 @@ class SystemFolders(object):
 
         if self.system_os == 'Darwin':
             print 'it`s MacOS!'
+            self.user_home = os.getenv("HOME")
             self.appdata = os.getenv('HOME')
             self.programs = '/Applications'
             self.temp = os.getenv('TMPDIR')
@@ -39,6 +40,7 @@ class SystemFolders(object):
 
         elif self.system_os == 'Windows':
             print 'it`s Windows!'
+            self.user_home = os.getenv("HOMEPATH")
             self.appdata = os.getenv('APPDATA')
             self.programs = os.getenv('ProgramFiles(x86)')
             self.temp = os.getenv('TEMP')

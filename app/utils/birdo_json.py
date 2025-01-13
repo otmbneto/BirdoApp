@@ -1,47 +1,36 @@
 import json
+import os
 
-def read_json_file(json_file,op_code="r"):
-    """Reads json file and return Object Dictionary"""
-    with open(json_file,op_code) as fp:
+
+def read_json_file(json_file, op_code="r"):
+    """Le um arquivo json e retorna um dicionario"""
+    if not os.path.exists(json_file):
+        print("file does not exist: {0}".format(json_file))
+        return False
+    with open(json_file, op_code) as fp:
         try:
             obj = json.load(fp)
-        except:
-            print "error reading json file: {0}".format(json_file)
+        except Exception as e:
+            print "error reading json file: {0}\n{1}".format(json_file, e)
             return False
     return obj
 
 
-def write_json_file(json_file, data, sort_dic=False,op_code="w"):
-    """Saves object (dictionary) into json file"""
+def write_json_file(json_file, data, sort_dic=False, op_code="w", indent=2, encoding=None, ensure_ascii=True):
+    """Salva os dados passados em um json file (aceita string ou objeto como parametro)"""
     with open(json_file, op_code) as fp:
         try:
-            json.dump(data, fp, indent=2, sort_keys=sort_dic)
-        except:
-            print "error writing json file: {0}".format(json_file)
+            s = json.loads(data) if type(data) == str else data
+            if encoding:
+                json.dump(s, fp, indent=indent, sort_keys=sort_dic, ensure_ascii=ensure_ascii, encoding=encoding)
+            else:
+                json.dump(s, fp, indent=indent, sort_keys=sort_dic, ensure_ascii=ensure_ascii)
+        except Exception as e:
+            print "error writing json file: {0}\n{1}".format(json_file, e)
             return False
     return True
 
-def write_json_file_from_string(json_file,data,sort_dic=False,op_code="w",indent=2,encoding=None,ensure_ascii=True):
 
-    """Saves string (dictionary) into json file"""
-    with open(json_file, op_code) as fp:
-        s = json.dumps(data, fp, indent=indent, sort_keys=sort_dic,ensure_ascii=ensure_ascii)
-        if encoding is not None:
-            s = s.encode(encoding)
-        fp.write(s)
-
-    return True
-
-def read_json_file_from_string(json_file,op_code="r",encoding=None):
-
-    """Reads json file and return Object Dictionary"""
-    with open(json_file,op_code) as fp:
-        try:
-            s = fp.read()
-            if encoding is not None:
-                s = s.encode(encoding).decode(encoding)
-            obj = json.loads(s)
-        except:
-            print "error reading json file: {0}".format(json_file)
-            return False
-    return obj
+if __name__ == "__main__":
+    f = r"C:\_BirdoRemoto\PROJETOS\BirdoApp2\template\project_template\project_data.json"
+    print read_json_file(f)

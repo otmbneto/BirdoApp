@@ -1,9 +1,9 @@
 {
-	"user_types": [
-					"SETUP",
-					"ANIMATOR",
-					"ANIM_LEAD",
-					"COMP",
-					"DT"
-	]
+    "user_types": [
+        "SETUP",
+        "ANIM",
+        "ANIM_LEAD",
+        "COMP",
+        "DT"
+    ]
 }

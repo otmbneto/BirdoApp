@@ -1,7 +1,7 @@
 {
-	"user_types": [
-					"SETUP",
-					"COMP",
-					"DT"
-	]
+    "user_types": [
+        "SETUP",
+        "COMP",
+        "DT"
+    ]
 }

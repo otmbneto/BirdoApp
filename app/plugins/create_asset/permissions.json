@@ -1,7 +1,7 @@
 {
-	"user_types": [
-					"RIG",
-					"DESIGN",
-					"DT"
-	]
+    "user_types": [
+        "RIG",
+        "DESIGN",
+        "DT"
+    ]
 }

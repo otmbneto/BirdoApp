@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<elements source="Harmony Premium (HarmonyPremium.exe) version 20.0.3 build 16743 2021-02-09 08:56:36" version="2003" build="16743">
+ <element id="4" elementName="SAFE_AREA" elementFolder="SAFE_AREA" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+ <element id="9" elementName="BG" elementFolder="BG" pixmapFormat="9" scanType="2" fieldChart="12" vectorType="0" rootFolder="elements"/>
+ <element id="10" elementName="MNM_EP101_SC0010_v01" elementFolder="MNM_EP101_SC0010_v01" pixmapFormat="9" scanType="0" fieldChart="12" vectorType="0" rootFolder="elements"/>
+ <element id="14" elementName="LINEUP" elementFolder="LINEUP.14" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+ <element id="15" elementName="REF_ANIM" elementFolder="REF_ANIM.15" pixmapFormat="2" scanType="2" fieldChart="12" vectorType="2" rootFolder="elements"/>
+</elements>
