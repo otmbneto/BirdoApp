@@ -15,14 +15,18 @@ class Path:
         self.parent = os.path.dirname(path)
         self.suffix = os.path.splitext(path)[-1]
         self.suffixes = os.path.splitext(path)[1:]
+        self.stem = os.path.splitext(path)[0]
 
     def __str__(self):
         return self.path
 
     def __div__(self, other):
         if other == "":
-            return self
-        return Path(os.path.join(self.path, str(other)).replace("\\", "/"))
+            return Path(self.path)
+        return Path(os.path.join(self.path, str(other)))
+
+    def normpath(self):
+        return os.path.normpath(self.path)
 
     def is_dir(self):
         """retorna boolean se o caminho e um folder"""
@@ -53,7 +57,7 @@ class Path:
 
     def make_dirs(self):
         """cria folders"""
-        if not self.is_dir():
+        if self.is_file():
             raise Exception("Make dirs error: destiny is not a folder.")
         return os.makedirs(self.path)
 
@@ -66,10 +70,13 @@ class Path:
     def copy_file(self, dst_file, buffer_size=1024 * 1024, force_copy=True, pb=None):
         """
             copia o arquivo com progress bar
+            pb = (passe uma widget como progressbar para atualziar nela em vez do tqdm)
         """
         dst = Path(str(dst_file))
-        if not self.is_file():
-            raise Exception("Copy File error: path is not a file!")
+        if dst.is_dir():
+            if not dst.exists():
+                raise Exception("Copy File error: destiny path does not exist!")
+            dst = dst / self.name
 
         if dst.exists() and not force_copy:
             ask = raw_input("COPY_FILE: Destiny file {0} already exists. Do you want to override it?\n[y/n]".format(dst))
@@ -100,12 +107,30 @@ class Path:
         return True
 
     def copy_folder(self, destiny):
-        """Copia folder para o destino."""
+        """
+            Copia folder tree para o destino.
+            se o destino existir, cria um folder extra com o nome da origem.
+        """
         # Copy directory
+        if not self.is_dir():
+            raise Exception("Error copying folder: origin is not an existing folder!")
+
         dst = Path(str(destiny))
+        counter = 0
         if dst.exists():
-            raise Exception("copy folder error: destiny already exists: {0}".format(dst))
-        return shutil.copytree(self.path, str(dst))
+            dst = dst / self.name
+            dst.make_dirs()
+        try:
+            for item in tqdm(self.glob("*"), leave=False, desc='Copying {0}'.format(self.name)):
+                if item.is_dir():
+                    shutil.copytree(item.path, str(dst / item.name))
+                else:
+                    shutil.copy(item.path, dst.path)
+                counter += 1
+        except Exception as e:
+            raise e
+        print "{0} items copied...".format(counter)
+        return True
 
     def glob(self, pattern):
         """Lista sub arquivos do folder"""
@@ -121,5 +146,5 @@ class Path:
 
 
 if __name__ == "__main__":
-    s = Path("C:/_BirdoRemoto/_birdo2_testes/_fake_server/lupi_e_baduki") / ""
-    print s.path
+    src = Path(r"C:\_BirdoRemoto\PROJETOS\BIRDO_TESTES_RIGGER")
+    print src.parent
