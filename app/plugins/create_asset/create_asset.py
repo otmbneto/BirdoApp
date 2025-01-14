@@ -5,11 +5,7 @@
 """
 import sys
 import os
-
-# muda o caminho pra root do app e importa o ConfigInit
-curr_dir = os.path.dirname(os.path.realpath(__file__))
-birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
-sys.path.append(birdo_app_root)
+sys.path.append(os.curdir)
 from app.config import ConfigInit
 
 
