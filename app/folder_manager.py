@@ -143,16 +143,3 @@ class FolderManager(object):
             f = scene / item
             f.make_dirs()
         return scene
-
-    def create_project_server_folders(self):
-
-
-if __name__ == "__main__":
-    from utils.MessageBox import CreateMessageBox
-    from utils.birdo_json import read_json_file
-    MessageBox = CreateMessageBox()
-    pdata = read_json_file(r"C:\_BirdoRemoto\_birdo2_testes\_fake_server\_config_projects_teste\LEB\project_data.json")
-    lcaolf = Path("C:/_BirdoRemoto/_birdo2_testes/_fake_local/LUPI")
-    fm = FolderManager(pdata, lcaolf, MessageBox)
-    print fm.list_episodes()
-    print "END"
