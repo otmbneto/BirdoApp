@@ -10,7 +10,7 @@ import re
 class Path:
     """Classe que junta opcoes para lidar com arquivos e pastas."""
     def __init__(self, path):
-        self.path = path.replace("\\", "/")
+        self.path = str(path).replace("\\", "/")
         self.name = os.path.basename(path)
         self.parent = os.path.dirname(path)
         self.suffix = os.path.splitext(path)[-1]
@@ -134,17 +134,13 @@ class Path:
 
     def glob(self, pattern):
         """Lista sub arquivos do folder"""
-        if not self.is_dir():
+        if self.is_file():
             raise Exception("Not a folder to list!")
         if not self.exists():
-            raise Exception("Cant list folder that does not exist!")
+            print "folder does not exist... nothing to list."
+            return []
         reg = re.compile(pattern.replace("*", r".+"))
         return [
             self / x for x in
             filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
         ]
-
-
-if __name__ == "__main__":
-    src = Path(r"C:\_BirdoRemoto\PROJETOS\BIRDO_TESTES_RIGGER")
-    print src.parent
