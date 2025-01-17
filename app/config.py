@@ -1,4 +1,5 @@
 from utils.birdo_json import read_json_file, write_json_file
+from utils.birdo_pathlib import Path
 from utils.MessageBox import CreateMessageBox
 from utils.system import SystemFolders
 from folder_manager import FolderManager
@@ -13,24 +14,29 @@ import sys
 MessageBox = CreateMessageBox()
 
 
-class CreateClass(object):
-    """Creates Class object using the given dictionary
+class CreateProjectClass(object):
+    """
+        Transforma o dicionario do projeto em uma classe com metodo para update do json do projeto.
         ...
 
     Parameters
     ----------
-    my_dict : dict
-        Dictionary to convert into class
+    project_dict : dict
+        Dicionario do projeto para converter.
     """
-    def __init__(self, my_dict):
-        for key in my_dict:
-            if type(my_dict[key]) is dict:
-                setattr(self, key, CreateClass(my_dict[key]))
+    def __init__(self, project_dict):
+        self.raw_data = project_dict
+        for key in project_dict:
+            if type(project_dict[key]) is dict:
+                setattr(self, key, CreateProjectClass(project_dict[key]))
             else:
-                setattr(self, key, my_dict[key])
+                setattr(self, key, project_dict[key])
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
+
+    def update_json(self):
+        write_json_file(self.proj_json, self.raw_data)
 
 
 class ConfigInit(object):
@@ -39,7 +45,8 @@ class ConfigInit(object):
         metodos para gerenciar projetos, atualizar os dados de config
         ...
     """
-    def __init__(self):
+    def __init__(self, verbose=True):
+        self.verbose = verbose
         self.root = os.path.dirname(os.path.dirname(__file__))
         self.app_json = os.path.join(self.root, "app.json")
         self.data = read_json_file(self.app_json)
@@ -101,6 +108,17 @@ class ConfigInit(object):
     def get_plugins_folder(self):
         return os.path.join(self.root, "app", "plugins").replace("\\", "/")
 
+    def create_project(self, project_prefix):
+        config_path = Path(self.config_data["server_projects"]) / project_prefix
+        template_path = Path(self.root) / "template" / "project_template"
+        config_path.make_dirs()
+        for item in template_path.glob("*"):
+            if item.is_dir():
+                item.copy_folder(config_path.path)
+            elif item.is_file():
+                item.copy_file(config_path.path)
+        return config_path
+
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
@@ -108,13 +126,16 @@ class ConfigInit(object):
             return False
         for proj in os.listdir(self.config_data["server_projects"]):
             p = os.path.join(self.config_data["server_projects"], proj)
-            proj_data = os.path.join(p, "project_data.json")
-            if os.path.exists(proj_data) and bool(re.match(r"^\w{3}$", proj)):
-                p_data = read_json_file(proj_data)
+            proj_json = os.path.join(p, "project_data.json")
+            if os.path.exists(proj_json) and bool(re.match(r"^\w{3}$", proj)):
+                p_data = read_json_file(proj_json)
                 p_data["config_folder"] = p
+                p_data["proj_json"] = proj_json
+
                 self.projects.append(p_data)
         self.projects.sort(key=lambda x: x["id"])
-        print "Config App done! {0} projects listed for studio >> {1}".format(len(self.projects), self.config_data["studio_name"])
+        if self.verbose:
+            print "Config App done! {0} projects listed for studio >> {1}".format(len(self.projects), self.config_data["studio_name"])
 
     def get_project_data(self, project_index):
         """Creates Object with all information and methods for the project
@@ -167,7 +188,7 @@ class ConfigInit(object):
         # define harmony class
         project_data["harmony"] = ToonBoomHarmony(self.config_data["harmony_path"])
 
-        final_class = CreateClass(project_data)
+        final_class = CreateProjectClass(project_data)
         final_class.__doc__ = """
         Main class for project with data and methods.Get information and manipulate folders and connections with this class.
         ...
