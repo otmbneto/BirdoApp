@@ -8,22 +8,17 @@ import uploaderItem as upi
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 ui_path = os.path.join(curr_dir, 'ui')
 birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
-birdo_utils = os.path.join(birdo_app_root, 'app', 'utils')
-birdo_proj_utils = os.path.join(birdo_app_root, 'config', 'projects')
 
-global_icons = {
-    "birdo_app": os.path.join(birdo_app_root, 'app', 'icons', 'birdoAPPLogo.ico'),
-    "proj_logo": os.path.join(birdo_app_root, 'app', 'icons', 'logo_{0}.ico')
-}
 sys.path.append(ui_path)
 sys.path.append(birdo_app_root)
-from app.config_project2 import config_project
+from app.config import ConfigInit
 from app.utils.MessageBox import CreateMessageBox
 MessageBox = CreateMessageBox()
 
-
 class Uploader(QtGui.QMainWindow):
+    
     def __init__(self, project_data):
+        
         super(Uploader, self).__init__()
         self.project_data = project_data
         self.listOfWidgets = []
@@ -44,13 +39,8 @@ class Uploader(QtGui.QMainWindow):
         self.set_logic()
         self.setAcceptDrops(True)
 
-        # TEST SERVER CONNECTION
-        self.root = self.project_data.server.root
-        if self.project_data.server.status == "Offline":
-            MessageBox.warning("Falha em conectar o server!")
-
     def get_template_item(self, path, episodes):
-        template_item = upi.uiItem(path, episodes, self.ui.check_decimal)
+        template_item = upi.uiItem(path, episodes, self.ui.checkDecimal)
         return template_item
 
     def load_page(self, ui_path):
@@ -67,11 +57,11 @@ class Uploader(QtGui.QMainWindow):
         self.ui.executeBtn.clicked.connect(self.execute)
         self.ui.cleanBtn.clicked.connect(self.clean_scroll_list)
         self.ui.cancelBtn.clicked.connect(self.close)
-        self.ui.check_decimal.stateChanged.connect(self.check_decimal)
+        self.ui.checkDecimal.stateChanged.connect(self.checkDecimal)
         return
 
-    def check_decimal(self):
-        print "decimal changed to : {0}".format(self.ui.check_decimal.isChecked())
+    def checkDecimal(self):
+        print "decimal changed to : {0}".format(self.ui.checkDecimal.isChecked())
 
     def episode_changed(self):
         value = self.ui.globalEpisodes.currentIndex()
@@ -80,7 +70,7 @@ class Uploader(QtGui.QMainWindow):
 
     def get_project_episodes(self):
         self.episodes = [""]
-        folder = os.path.join(self.root, self.project_data.paths.get_episodes()).replace("\\", "/")
+        folder = self.project_data.paths.get_episodes_folder("server").normpath()
         self.episodes += [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f))]
         self.ui.globalEpisodes.addItems(self.episodes)
 
@@ -172,8 +162,8 @@ class Uploader(QtGui.QMainWindow):
 
 # main script
 if __name__ == "__main__":
+    
     args = sys.argv
-    print args
     if not len(args) == 3:
         print("Numero de argumentos invalidos!")
         sys.exit("error: wrong number of arguments!")
@@ -184,7 +174,8 @@ if __name__ == "__main__":
     if app is None:
         app = QtGui.QApplication([''])
 
-    p_data = config_project(project_index)
+    config = ConfigInit()
+    p_data = config.get_project_data(project_index)
     if not p_data:
         MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
         sys.exit(app.exec_())
