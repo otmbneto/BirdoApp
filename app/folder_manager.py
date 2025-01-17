@@ -1,4 +1,3 @@
-import os
 import re
 from utils.birdo_timeout import timeout
 from utils.birdo_pathlib import Path
@@ -24,12 +23,11 @@ class FolderManager(object):
     """
     def __init__(self, proj_data, local_folder, messagebox):
 
-        self.prefix = proj_data["prefix"]
         self.mb = messagebox
         self.regs = {
-            "scene": proj_data["pattern"]["scene"]["regex"],
+            "scene": proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"]),
             "asset": proj_data["pattern"]["asset"]["regex"],
-            "animatic": proj_data["pattern"]["animatic"]["regex"],
+            "animatic": proj_data["pattern"]["animatic"]["regex"].replace('PREFIX', proj_data["prefix"]),
             "ep": proj_data["pattern"]["ep"]["regex"]
         }
         self.root = {
@@ -70,6 +68,12 @@ class FolderManager(object):
         Retorna o caminho da tblib com a raiz fornecida (server or local)
         """
         return self.root[root] / self.tblib
+
+    def get_library_folder(self, root):
+        """
+        Retorna o caminho com a root (server ou local) da pasta LIBRARY
+        """
+        return self.root[root] / self.library
 
     def get_episodes_folder(self, root):
         """
@@ -132,6 +136,42 @@ class FolderManager(object):
     def list_project_animatics(self, ep):
         """Retorna lista de movs animatics do ep."""
         return self.get_animatics_folder("server", ep).glob(self.regs["animatic"])
+
+    def list_scenes_from_animatics(self, ep):
+        """Lista as cenas baseadas nos animatics do ep."""
+        return map(lambda x: re.findall(self.regs["scene"], x.name), self.list_project_animatics(ep))
+
+    def create_base_folders(self, root):
+        """Cria a base de diretorios no root do projeto (server ou local)"""
+        if root == "server":
+            folders = [self.get_tblib(root), self.get_episodes_folder(root), self.get_library_folder(root)]
+        else:
+            folders = [self.get_episodes_folder(root)]
+        for item in folders:
+            item.make_dirs()
+            print " -- base folder created: {0}".format(item.path)
+
+    def create_episode_scheme(self, root, ep):
+        """Cria o esquema de pastas do episodio"""
+        ep_root = self.get_episodes_folder(root) / ep
+        cenas_folder = self.get_scenes_root_folder(root, ep)
+        renders_root = self.get_renders_root(root, ep)
+        folders = [
+            cenas_folder,
+            ep_root / self.ep["boards"],
+            ep_root / self.ep["assets"]
+        ]
+        [folders.append(renders_root / x) for x in self.ep["cenas"]["render"]["sub_folders"]]
+
+        # list steps renders folders:
+        for step in self.steps:
+            folders.append(renders_root / self.steps[step]["folder_name"])
+            folders.append(cenas_folder / self.steps[step]["folder_name"])
+
+        # create folders listed
+        for f in folders:
+            f.make_dirs()
+            print " -- project folder created: {0}".format(f.path)
 
     def create_scene_scheme(self, root, scene_name, step):
         """
