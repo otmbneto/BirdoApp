@@ -31,7 +31,7 @@
 			"model": "{0}_EP{1}_SC{2}"
 		},
         "animatic": {
-			"regex": "PREFIX_EP\\d{3}_SC\\d{4}_v\\d{2}\.mov",
+			"regex": "PREFIX_EP_SC\\d{4}_v\\d{2}\\.mov",
 			"model": "{0}_EP{1}_SC{2}_v{3}"
 		},
         "ep": {
