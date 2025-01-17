@@ -31,7 +31,7 @@ class SystemFolders(object):
         self.system_os = platform.system()
 
         if self.system_os == 'Darwin':
-            print 'it`s MacOS!'
+            print 'Sistema MacOS detectado...'
             self.user_home = os.getenv("HOME")
             self.appdata = os.getenv('HOME')
             self.programs = '/Applications'
@@ -39,7 +39,7 @@ class SystemFolders(object):
             self.desktop = os.path.join(os.getenv('HOME'), 'Desktop')
 
         elif self.system_os == 'Windows':
-            print 'it`s Windows!'
+            print 'Sistema Windows detectado...'
             self.user_home = os.getenv("HOMEPATH")
             self.appdata = os.getenv('APPDATA')
             self.programs = os.getenv('ProgramFiles(x86)')
