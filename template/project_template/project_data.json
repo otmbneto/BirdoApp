@@ -27,11 +27,11 @@
 			"model": "{0}{1}_{2}"
 		},
         "scene": {
-			"regex": "\\w{3}_EP\\d{3}_SC\\d{4}",
+			"regex": "PREFIX_EP\\d{3}_SC\\d{4}",
 			"model": "{0}_EP{1}_SC{2}"
 		},
         "animatic": {
-			"regex": "\\w{3}_EP\\d{3}_SC\\d{4}_v\\d{2}\.mov",
+			"regex": "PREFIX_EP\\d{3}_SC\\d{4}_v\\d{2}\.mov",
 			"model": "{0}_EP{1}_SC{2}_v{3}"
 		},
         "ep": {
@@ -46,7 +46,7 @@
         "library": "00_BIBLIOTECA",
         "episodes": "01_EPISODIOS",
         "ep": {
-            "boards": "00_BOARD",
+            "boards": "01_BOARD",
             "assets": "02_ASSETS",
             "cenas": {
                 "folder": "03_CENAS",
