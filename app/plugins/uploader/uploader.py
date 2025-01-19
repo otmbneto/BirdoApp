@@ -40,7 +40,7 @@ class Uploader(QtGui.QMainWindow):
         self.setAcceptDrops(True)
 
     def get_template_item(self, path, episodes):
-        template_item = upi.uiItem(path, episodes, self.ui.checkDecimal)
+        template_item = upi.uiItem(path, episodes)
         return template_item
 
     def load_page(self, ui_path):
@@ -66,7 +66,7 @@ class Uploader(QtGui.QMainWindow):
     def episode_changed(self):
         value = self.ui.globalEpisodes.currentIndex()
         for item in self.listOfWidgets:
-            item.setCurrentEpisode(value)
+            item.setEpisode(value)
 
     def get_project_episodes(self):
         self.episodes = [""]
