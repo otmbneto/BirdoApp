@@ -29,8 +29,3 @@ def write_json_file(json_file, data, sort_dic=False, op_code="w", indent=2, enco
             print "error writing json file: {0}\n{1}".format(json_file, e)
             return False
     return True
-
-
-if __name__ == "__main__":
-    f = r"C:\_BirdoRemoto\PROJETOS\BirdoApp2\template\project_template\project_data.json"
-    print read_json_file(f)

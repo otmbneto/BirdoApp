@@ -67,6 +67,12 @@ class Path:
         with open(self.path, "r") as f:
             return f.read()
 
+    def write_text(self, text):
+        if self.is_dir():
+            raise Exception("Failed to write file text... destiny is a folder.")
+        with open(self.path, "w") as fl:
+            return fl.write(text)
+
     def copy_file(self, dst_file, buffer_size=1024 * 1024, force_copy=True, pb=None):
         """
             copia o arquivo com progress bar
@@ -104,7 +110,7 @@ class Path:
             print "file copied from: {0} to {1}".format(self.path, dst)
         except Exception as e:
             raise e
-        return True
+        return dst
 
     def copy_folder(self, destiny):
         """
@@ -144,3 +150,8 @@ class Path:
             self / x for x in
             filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
         ]
+
+
+if __name__ == "__main__":
+    f = Path(r"C:\_BirdoRemoto\PROJETOS\BirdoApp\icons\folder2_teste.txt")
+    print f.write_text("TESTE\nbora ver se rola!")

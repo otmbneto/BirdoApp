@@ -1,11 +1,14 @@
 import re
 import os
+import sys
 from config import ConfigInit
+from utils.birdo_pathlib import Path
 
 
 def convert_type(a, b):
     """Converte o tipo do objeto 'a' pelo tipo do objeto 'b'"""
-    return eval("{0}({1})".format(str(type(b).__name__), a))
+    c = a
+    return eval("{0}({1})".format(str(type(b).__name__), "c"))
 
 
 class DevTools:
@@ -13,7 +16,7 @@ class DevTools:
         self.app = ConfigInit(verbose=False)
         self.yes_reg = re.compile(r"(Y|YEP|YES|YEAH|OUI|SIM|SI|S)")
         self.main_menu = {
-            "header": "Escolha Opcao: (digite o numero da opcao)",
+            "header": "BirdoApp Tools: (digite o numero da opcao)",
             "options": ["Config BirdoApp", "Projetos", "Criar Novo Projeto", "Credits", "[SAIR]"]
         }
         self.last = {
@@ -38,12 +41,23 @@ class DevTools:
         msg = ["{0}: {1}".format(x, self.app.data[x]) for x in self.app.data]
         print "\n - ".join(msg)
 
-    def cli_input(self, title, is_question=False, options=None):
-        """Formata menu de cli para input do usuario (retorna item da lista escolhido ou boolean)"""
+    def cli_input(self, title, is_question=False, options=None, messagebox=False):
+        """Formata menu de cli para input do usuario (retorna item da lista escolhido ou boolean)
+        is_question = para perguntar e retornar boolean
+        options = para adicionar uma lista e retornar opcao escolhida
+        messagebox = para mostrar mensagem com unica opcao de voltar o menu para qualquer input (retona undefined)
+        """
         os.system("cls")
+        if messagebox:
+            input(title + "\n>>[pressione qualquer tecla para voltar...]")
+            self.back_page()
+            return
         opt = "\n".join([" -[{0}] {1}".format(i, x) for i, x in enumerate(options)]) if options else ("[Y / N]" if is_question else "")
         msg = " > {0}\n{1}\n >>".format(title, opt)
+
         r = raw_input(msg)
+        if bool(re.match(r"(QUIT\(\)|EXIT\(\))", r.upper())):
+            sys.exit("exit...")
         if options:
             i = int(r)
             if not i in range(len(options)):
@@ -65,7 +79,9 @@ class DevTools:
         """Monta menu com opcoes para edicao do dicionario dado"""
         self.last["title"] = title
         self.last["page"] = source_dict
-        item = self.cli_input(title, source_dict.keys() + "[VOLTAR]")
+        opt = source_dict.keys()
+        opt.append("[VOLTAR]")
+        item = self.cli_input(title, options=opt)
         if type(source_dict[item]) == dict:
             self.last["title"] = title + "n\{0}".format(item)
             self.config_dict(title + "n\{0}".format(item), source_dict[item])
@@ -103,12 +119,52 @@ class DevTools:
                 return
             self.project = self.app.get_project_data(opt.index(p))
             self.show_project_page()
+
         elif r == "Criar Novo Projeto":
-            pass
+            self.show_create_project_page()
+
         elif r == "Credits":
             self.show_version()
+
         elif r == "[SAIR]":
-            print "BirdoApp Dev Fechado!"
+            print "BirdoApp Tools Fechado!"
+
+    def show_config_app_page(self):
+        """inicia a pagina de config inicial do BirdoApp"""
+        # cria new config na ordem
+        self.app.config_data["studio_name"] = self.cli_input("Escolha o Nome do Estudio para configurar:")
+        self.app.config_data["server_projects"] = self.cli_input("Defina um caminho na rede (onde os usuarios do estudio tenham acesso) para "
+                                                       "salvar as configuracoes de projetos.")
+        if not os.path.exists(self.app.config_data["server_projects"]):
+            sys.exit("CAMINHO FORNECIDO INVALIDO. Precisa ser um caminho existente.")
+        self.app.config_data["user_name"] = self.cli_input("Escolha o nome de usuario para esta maquina.")
+        h = self.cli_input("Escolha o caminho de Harmony instalado na sua maquina:",
+                                                    options=[x.get_name() for x in self.app.harmony_versions])
+        self.app.config_data["harmony_path"] = next((x for x in self.app.harmony_versions if x.get_name() == h), None).installation_path
+
+        # atualiza o config object
+        self.app.update_config_json()
+        self.show_main_menu()
+
+    def show_create_project_page(self):
+        self.last["title"] = "MAIN"
+        create_data = {
+            "01_prefix": self.cli_input("Escolha o Prefixo do Projeto:\n(Obrigatoriamente 3 letras):"),
+            "02_name": self.cli_input("Escolha o Nome do Projeto:"),
+            "03_sub_name": self.cli_input("Escolha o Sub Titulo do projeto:"),
+            "04_server_root": self.cli_input("Escolha o caminho do server do projeto:"),
+            "05_icon": self.cli_input("Escolha um Arquivo de imagem (png ou ico) com logo do projeto.")
+        }
+        # checa se o icone fornecido e valido (PNG ou ICO)
+        if Path(create_data["05_icon"]).suffix not in [".png", ".ico"]:
+            if not self.cli_input(">>icone fornecido e invalido. Precisa ser de formato PNG ou ICO.\n"
+                              "Deseja fornecer outro?", is_question=True):
+                create_data["05_icon"] = False
+
+        if self.app.create_project(create_data):
+            sys.exit("Projeto {0} criado!".format(create_data["01_prefix"]))
+        else:
+            sys.exit("ERRO criando o Projeto {0}".format(create_data["01_prefix"]))
 
     def show_project_page(self):
         """Mostra o menu CLI do projeto"""
@@ -119,6 +175,7 @@ class DevTools:
             return
         elif r == "Config":
             self.last["json"] = "project"
+            self.last["app"] = "project_page"
             self.config_dict("Config Projeto: {0}".format(self.project.name), self.project.raw_data)
 
         elif r == "Episodios":
@@ -131,7 +188,12 @@ class DevTools:
             self.last["page"] = "project_page"
             self.show_ep_page(ep)
         elif r == "Criar EP":
+            eps = [x.name for x in self.project.paths.list_episodes("server")]
             ep = self.cli_input("Escolha o nome do ep para criar (EP000):")
+            if ep not in eps:
+                print "Episodio escolhido ({0}) ja existe no projeto!"
+                self.back_page()
+                return
             self.project.paths.create_episode_scheme("server", ep)
 
     def show_ep_page(self, ep):
@@ -153,5 +215,4 @@ class DevTools:
         if self.app.is_ready():
             self.show_main_menu()
         else:
-            self.last["json"] = "app"
-            self.config_dict("Config BirdoApp", self.app.config_data)
+            self.show_config_app_page()

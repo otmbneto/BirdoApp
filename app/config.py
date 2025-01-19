@@ -83,6 +83,8 @@ class ConfigInit(object):
         # lista de projetos do estudio
         self.projects = []
 
+        self.prefix_reg = re.compile(r"^\w{3}$")
+
         # system class para lidar com dados do sistema
         self.system = SystemFolders()
 
@@ -108,8 +110,17 @@ class ConfigInit(object):
     def get_plugins_folder(self):
         return os.path.join(self.root, "app", "plugins").replace("\\", "/")
 
-    def create_project(self, project_prefix):
-        config_path = Path(self.config_data["server_projects"]) / project_prefix
+    def create_project(self, create_data):
+        """cria novo projeto no server do estudio.(usado no modo dev)"""
+        if not bool(self.prefix_reg.match(create_data["01_prefix"])):
+            print "Prefixo de projeto invalido! Deve conter apenas 3 letras!"
+            return False
+        if create_data["01_prefix"] in [x["prefix"] for x in self.projects]:
+            print "Prefixo escolhido ja existe!"
+            return False
+
+        # copia os arquivos do template para o destino do projeto
+        config_path = Path(self.config_data["server_projects"]) / create_data["01_prefix"]
         template_path = Path(self.root) / "template" / "project_template"
         config_path.make_dirs()
         for item in template_path.glob("*"):
@@ -117,7 +128,38 @@ class ConfigInit(object):
                 item.copy_folder(config_path.path)
             elif item.is_file():
                 item.copy_file(config_path.path)
-        return config_path
+
+        # copy icon
+        if create_data["05_icon"]:
+            origin_icon = Path(create_data["05_icon"])
+            icon = origin_icon.copy_file(config_path / "icon{0}".format(origin_icon.suffix))
+        else:
+            origin_icon = Path(self.icons["template"])
+            icon = origin_icon.copy_file(config_path / "icon.ico")
+
+        # atualiza o arquivo xstage de asset_setup
+        asset_setup = config_path / "ASSET_template" / "ASSET_template.xstage"
+        content = asset_setup.read_text()
+        new_content = content.replace("PROJ_PREFIX_PLACE_HOLDER", create_data["01_prefix"])
+        asset_setup.write_text(new_content)
+        print "asset setup atualizado!"
+
+        # config project_data.json
+        new_json = config_path / "project_data.json"
+        pdata = read_json_file(new_json.path)
+        pdata["id"] = len(self.projects)
+        pdata["prefix"] = create_data["01_prefix"]
+        pdata["name"] = create_data["02_name"]
+        pdata["sub_name"] = create_data["03_sub_name"]
+        pdata["icon"] = icon.name
+        pdata["paths"]["root"] = create_data["04_server_root"]
+        #atualiza o project json
+        write_json_file(new_json.path, pdata)
+        pdata["config_folder"] = config_path
+        pdata["proj_json"] = new_json.path
+        # aciciona projeto criado a lista de projetos
+        self.projects.append(pdata)
+        return True
 
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
