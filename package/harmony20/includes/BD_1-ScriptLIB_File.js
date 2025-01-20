@@ -667,4 +667,10 @@ function BD1_copy_file_with_pb(proj_data, src_file, dst_file, ask_override){
 	var ret = start.launch();
 	return ret == 0;
 }
-	
+
+// Get Windows shortname of a dir via PythonManager wrapper
+function getPyShortName(path){
+	var appdata = System.getenv("APPDATA");
+	var fn = PythonManager.createPyObject(appdata + "/BirdoApp/package/harmony20/includes/harmonyPythonInterface.py");
+	return(fn.py.getShortName(path));
+}
