@@ -2,10 +2,14 @@ from PySide import QtCore, QtGui, QtUiTools
 import os
 import shutil
 import re
+import sys
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
-birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
-print birdo_app_root
+birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
+sys.path.append(birdo_app_root)
+
+print(birdo_app_root)
+from app.utils.ffmpeg import compress_render
 
 class uiItem(QtGui.QGroupBox):
 
@@ -164,7 +168,7 @@ class uiItem(QtGui.QGroupBox):
 	def getScene(self,filename,episode,project_data):
 
 		m = self.getShot(filename)
-		return "_".join([project_data["prefix"],episode,"SC" + m]) if m is not None else m
+		return "_".join([project_data.prefix,episode,"SC" + m]) if m is not None else m
 
 	def getFFMPEG(self):
 
@@ -177,16 +181,18 @@ class uiItem(QtGui.QGroupBox):
 	  print(cmd)
 	  return os.system(cmd)
 
-	def upload(self,root,project_folders,project_data,temp):
+	def upload(self,project_data,temp):
 
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
 			self.setStatus("No Episode","red")
 			return
+
+		print(project_data.paths.root["server"].path)
 		self.incrementProgress(10)
 		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
 		self.incrementProgress(10)
-		animatic_path = self.getAnimaticPath(episode_code,root,project_folders)
+		animatic_path = project_data.paths.get_animatics_folder("server",episode_code).normpath()
 		self.incrementProgress(10)
 		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
 		self.incrementProgress(10)
@@ -196,11 +202,13 @@ class uiItem(QtGui.QGroupBox):
 		dst = os.path.join(animatic_path,scene_name)
 		
 		compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
-		result = self.compressScene(self.getFullpath(),compressed) == 0
+		#result = self.compressScene(self.getFullpath(),compressed) == 0
+		result = compress_render(self.getFullpath(),compressed)
 		self.incrementProgress(25)
 		if result:
-			print dst
-			shutil.copyfile(compressed,dst)
+			print(dst)
+		#compressed = self.getFullpath()
+		shutil.copyfile(compressed,dst)
 		self.incrementProgress(25)
 		os.remove(compressed)
 		self.setStatus("Done","green")
