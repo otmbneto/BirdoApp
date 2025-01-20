@@ -37,6 +37,10 @@
         "ep": {
 			"regex": "EP\\d{3}",
 			"model": "EP{0}"
+		},
+		"sc": {
+			"regex": "SC\\d{4}",
+			"model": "SC{0}"
 		}
     },
     "paths": {
