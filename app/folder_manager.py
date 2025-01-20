@@ -12,13 +12,9 @@ class FolderManager(object):
     ----------
     proj_data : dict
         a dictionary with all the server path information (from project server_DATA.json)
-    prefix : string
-        prefixo do projeto com padrao de 3 letras
     local_folder : string
         caminho do folder local do projeto
-    patterns: dict
-        dicionario cmo regex vindos do project_data
-    messageBox : object
+    messagebox : object
         widget class object created with CreateMessageBox function in utils
     """
     def __init__(self, proj_data, local_folder, messagebox):
