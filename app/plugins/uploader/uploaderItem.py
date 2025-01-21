@@ -72,7 +72,6 @@ class uiItem(QtGui.QGroupBox):
 	def initLogic(self):
 
 		episode = self.getEpisode(self.getFullpath())
-		print "EPISODE:" + str(episode)
 		if episode is not None:
 			self.setEpisode(self.findIndexOf(episode))
 
@@ -144,10 +143,6 @@ class uiItem(QtGui.QGroupBox):
 
 		return "v" + str(len([f for f in os.listdir(path) if f.endswith(self.filetypes) and scene_name in f])+1).zfill(2) if os.path.exists(path) else "v01"
 
-	def getAnimaticPath(self,episode_code,root,project_folders):
-
-		return os.path.join(root,project_folders.get_animatic_folder_path(episode_code)).replace("\\","/")
-
 	def getRegexPattern(self,regex,filename):
 
 		index_range = regex.split("|")
@@ -170,17 +165,6 @@ class uiItem(QtGui.QGroupBox):
 		m = self.getShot(filename)
 		return "_".join([project_data.prefix,episode,"SC" + m]) if m is not None else m
 
-	def getFFMPEG(self):
-
-		return os.path.join(birdo_app_root,"extra/ffmpeg/windows/bin/ffmpeg.exe").replace("\\","/")
-
-	def compressScene(self,input_scene,output_scene):
-
-	  exe = self.getFFMPEG()
-	  cmd = "{0} -y -i \"{1}\" -vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23 -strict experimental -acodec aac -ab 160k -ac 2 -f mp4 \"{2}\"".format(exe,input_scene,output_scene)
-	  print(cmd)
-	  return os.system(cmd)
-
 	def upload(self,project_data,temp):
 
 		episode_code = self.getCurrentEpisode()
@@ -188,7 +172,6 @@ class uiItem(QtGui.QGroupBox):
 			self.setStatus("No Episode","red")
 			return
 
-		print(project_data.paths.root["server"].path)
 		self.incrementProgress(10)
 		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
 		self.incrementProgress(10)
@@ -202,12 +185,10 @@ class uiItem(QtGui.QGroupBox):
 		dst = os.path.join(animatic_path,scene_name)
 		
 		compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
-		#result = self.compressScene(self.getFullpath(),compressed) == 0
 		result = compress_render(self.getFullpath(),compressed)
 		self.incrementProgress(25)
 		if result:
 			print(dst)
-		#compressed = self.getFullpath()
 		shutil.copyfile(compressed,dst)
 		self.incrementProgress(25)
 		os.remove(compressed)
