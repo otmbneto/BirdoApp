@@ -106,6 +106,10 @@ function Download-Python {
     Remove-Item "$PWD\python27.msi"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
 
+    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py"
+
+    & C:\Python27\python.exe "$PWD\get-pip.py"
+
 }
 
 function Is-Virtualenv {
