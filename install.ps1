@@ -31,7 +31,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
 
 
     if($type -eq "Source"){
-        $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest"
+        $response = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/releases/latest"
         Write-Host "https://api.github.com/repos/$repo/releases/latest"
         $tag = $response.tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
@@ -40,7 +40,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
     elseif($type -eq "Binary"){
         $releases = "https://api.github.com/repos/$repo/releases"
         Write-Host "Buscando pelo release mais recente."
-        $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
+        $tag = (Invoke-WebRequest -UseBasicParsing $releases | ConvertFrom-Json)[0].tag_name
         $download = "https://github.com/$repo/releases/download/$tag/$file"
         $name = $file.Split(".")[0]
         $zip = "$name-$tag.zip"
