@@ -1,3 +1,5 @@
+Add-Type -Assembly System.IO.Compression.FileSystem
+
 function downloadFile($url, $targetFile) {
     Write-Host  "Baixando $url"
     $uri = New-Object "System.Uri" "$url"
@@ -70,9 +72,9 @@ function Download-Ffmpeg($app_folder){
 
     $zipFile = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
 
-    # Expand the archive using PowerShell's Expand-Archive cmdlet
+    # Expand the archive using PowerShell's System.IO.Compression.FileSystem
     Write-Host "Descompactando arquivo"
-    Expand-Archive -Path $zipFile -DestinationPath $ffmpegInstall -Force
+    [IO.Compression.ZipFile]::ExtractToDirectory($zipFile, $ffmpegInstall)
 
     # Delete the zip file after extraction
     Remove-Item -Path $zipFile -Force
@@ -289,7 +291,7 @@ if(Test-Path $birdoTemp){
 }
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
 $gitpath = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
-Expand-Archive -Path $gitpath -DestinationPath "$birdoTemp" -Force
+[IO.Compression.ZipFile]::ExtractToDirectory($gitpath, $birdoTemp)
 Remove-Item -Path "$gitpath" -Force
 $unzip = Get-ChildItem -Path $birdoTemp -Name
 Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
