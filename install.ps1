@@ -93,7 +93,7 @@ function Download-Ffmpeg($app_folder){
 
     # Add the ffmpeg binaries to the system PATH (permanently for all users)
     $ffmpegPath = "$ffmpegInstall\windows\bin"
-    [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::Machine)
+    [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::User)
 
     Write-Host "Ffmpeg instalado e variável PATH atualizada"
 }
@@ -104,6 +104,8 @@ function Download-Python {
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
     Remove-Item "$PWD\python27.msi"
+    [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
+
 }
 
 function Is-Virtualenv {
