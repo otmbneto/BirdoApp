@@ -28,7 +28,8 @@ class FolderManager(object):
             "scene": proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"]),
             "asset": proj_data["pattern"]["asset"]["regex"],
             "animatic": proj_data["pattern"]["animatic"]["regex"].replace('PREFIX', proj_data["prefix"]),
-            "ep": proj_data["pattern"]["ep"]["regex"]
+            "ep": proj_data["pattern"]["ep"]["regex"],
+            "sc": proj_data["pattern"]["sc"]["regex"]
         }
         self.root = {
             "server": Path(proj_data["paths"]["root"]) / proj_data["paths"]["sub_root"],
@@ -50,6 +51,20 @@ class FolderManager(object):
     @timeout(3)
     def is_server_available(self):
         return self.root["server"].exists()
+
+    def find_ep(self, raw_scene_name):
+        """Retorna uma string com a parte do nome da cena, que se refere ao numero do ep (EP000)"""
+        sc = re.findall(self.regs["sc"], raw_scene_name)
+        if len(sc) == 0:
+            return None
+        return sc[0]
+
+    def find_sc(self, raw_scene_name):
+        """Retorna uma string com a parte do nome da cena, que se refere ao numero da cena (SC0000)"""
+        ep = re.findall(self.regs["ep"], raw_scene_name)
+        if len(ep) == 0:
+            return None
+        return ep[0]
 
     def check_connection(self):
         """
@@ -112,7 +127,9 @@ class FolderManager(object):
         if len(scene) == 0:
             raise Exception("Invalid scene name: {0}".format(scene_name))
         scene_name = scene[0]
-        ep = re.compile(self.regs["ep"]).findall(scene_name)[0]
+        ep = self.find_ep(scene_name)
+        if not ep:
+            raise Exception("Invalid scene name: {0}".format(scene_name))
         return self.get_scenes_path(root, ep, step) / scene_name
 
     def get_renders_root(self, root, ep):

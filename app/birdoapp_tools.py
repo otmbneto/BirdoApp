@@ -82,6 +82,11 @@ class DevTools:
         opt = source_dict.keys()
         opt.append("[VOLTAR]")
         item = self.cli_input(title, options=opt)
+        if item == "[VOLTAR]":
+            self.last["title"] = "MAIN"
+            self.back_page()
+            return
+
         if type(source_dict[item]) == dict:
             self.last["title"] = title + "n\{0}".format(item)
             self.config_dict(title + "n\{0}".format(item), source_dict[item])
@@ -91,10 +96,7 @@ class DevTools:
             source_dict[item],
             type(source_dict[item]).__name__
         ))
-        if edited_item == "[VOLTAR]":
-            self.last["title"] = "MAIN"
-            self.back_page()
-            return
+
         edited_item = convert_type(edited_item, source_dict[item])
         if edited_item:
             source_dict[item] = edited_item
