@@ -162,8 +162,8 @@ class uiItem(QtGui.QGroupBox):
 
 	def getScene(self,filename,episode,project_data):
 
-		m = self.getShot(filename)
-		return "_".join([project_data.prefix,episode,"SC" + m]) if m is not None else m
+		m = project_data.paths.find_sc(filename)
+		return "_".join([project_data.prefix,episode,m]) if m is not None else m
 
 	def upload(self,project_data,temp):
 
@@ -172,6 +172,7 @@ class uiItem(QtGui.QGroupBox):
 			self.setStatus("No Episode","red")
 			return
 
+		print("FIND SC: " + str(project_data.paths.find_sc(self.getFilename())))
 		self.incrementProgress(10)
 		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
 		self.incrementProgress(10)
