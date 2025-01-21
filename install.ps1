@@ -31,7 +31,8 @@ function Get-GitRelease($repo,$dst,$type,$file){
     if($type -eq "Source"){
         $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest"
         Write-Host "https://api.github.com/repos/$repo/releases/latest"
-        $download = $response.zipball_url
+        $tag = $response.tag_name
+        $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
     }
     elseif($type -eq "Binary"){
