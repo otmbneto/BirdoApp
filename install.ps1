@@ -1,3 +1,28 @@
+function downloadFile($url, $targetFile) {
+    Write-Host  "Baixando $url"
+    $uri = New-Object "System.Uri" "$url"
+    $request = [System.Net.HttpWebRequest]::Create($uri)
+    $request.set_Timeout(10000)
+    $response = $request.GetResponse()
+    $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
+    $responseStream = $response.GetResponseStream()
+    $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
+    $buffer = new-object byte[] 10KB
+    $count = $responseStream.Read($buffer,0,$buffer.length)
+    $downloadedBytes = $count
+    while ($count -gt 0) {
+        $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
+        Write-Host -NoNewline $loopString
+        $targetStream.Write($buffer, 0, $count)
+        $count = $responseStream.Read($buffer,0,$buffer.length)
+        $downloadedBytes = $downloadedBytes + $count
+    }
+    Write-Host "`nDownload concluido."
+    $targetStream.Flush()
+    $targetStream.Close()
+    $targetStream.Dispose()
+    $responseStream.Dispose()
+}
 
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
@@ -23,7 +48,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
     }
 
     Write-Host "Baixando último release em $dst\$zip"
-    Invoke-WebRequest $download -Out $dst\$zip
+    downloadFile $download $dst\$zip
 
     return "$dst\$zip"
 
@@ -71,7 +96,7 @@ function Download-Ffmpeg($app_folder){
 }
 
 function Download-Python {
-    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" -OutFile "$PWD\python27.msi"
+    downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi"
     if(Test-Path "$PWD\python27.msi"){
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
