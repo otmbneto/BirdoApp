@@ -1,10 +1,4 @@
 
-
-#TODO : Checar se python install existe - Done
-#       Checar pq a elevação de admin esta causando erro. - Done
-#       Trocar invoke-restmethod por invoke-webrequest - Done
-#       colocar o caminho do python hardcoded na hora de instalar o venv
-
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
 
