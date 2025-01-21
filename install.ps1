@@ -315,4 +315,3 @@ Set-Location $currentFolder
 # Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
 Install-Shortcut -ShortcutName "birdo_app" -Arguments "BirdoApp.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.ico"
-Start-Sleep 100
