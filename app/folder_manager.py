@@ -54,14 +54,14 @@ class FolderManager(object):
 
     def find_ep(self, raw_scene_name):
         """Retorna uma string com a parte do nome da cena, que se refere ao numero do ep (EP000)"""
-        sc = re.findall(self.regs["sc"], raw_scene_name)
+        sc = re.findall(self.regs["ep"], raw_scene_name)
         if len(sc) == 0:
             return None
         return sc[0]
 
     def find_sc(self, raw_scene_name):
         """Retorna uma string com a parte do nome da cena, que se refere ao numero da cena (SC0000)"""
-        ep = re.findall(self.regs["ep"], raw_scene_name)
+        ep = re.findall(self.regs["sc"], raw_scene_name)
         if len(ep) == 0:
             return None
         return ep[0]
