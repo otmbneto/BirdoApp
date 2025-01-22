@@ -1,30 +1,37 @@
 Add-Type -Assembly System.IO.Compression.FileSystem
 
-function downloadFile($url, $targetFile) {
-    Write-Host  "Baixando $url"
+function downloadFile($url, $targetFile, $title, $end) {
+    $dots = "⠻⠽⠾⠷⠯⠟"
+    $inc = 0
     $uri = New-Object "System.Uri" "$url"
     $request = [System.Net.HttpWebRequest]::Create($uri)
     $request.set_Timeout(10000)
     $response = $request.GetResponse()
-    $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
+    # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
     $responseStream = $response.GetResponseStream()
     $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
     $buffer = new-object byte[] 10KB
     $count = $responseStream.Read($buffer,0,$buffer.length)
-    $downloadedBytes = $count
+    # $downloadedBytes = $count
     while ($count -gt 0) {
-        $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
-        Write-Host -NoNewline $loopString
+        # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
+        if ($title -ne $null) {
+            Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
+        }
         $targetStream.Write($buffer, 0, $count)
         $count = $responseStream.Read($buffer,0,$buffer.length)
-        $downloadedBytes = $downloadedBytes + $count
+        # $downloadedBytes = $downloadedBytes + $count
+        $inc = ($inc + 1) % 6000
     }
-    Write-Host "`nDownload concluido."
+    if ($title -ne $null) {
+        Write-Host ($dots[[Math]::Floor($inc / 1000)] + " " + $title)
+    }
     $targetStream.Flush()
     $targetStream.Close()
     $targetStream.Dispose()
     $responseStream.Dispose()
 }
+
 
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
@@ -50,8 +57,8 @@ function Get-GitRelease($repo,$dst,$type,$file){
         return $null
     }
 
-    Write-Host "Baixando último release em $dst\$zip"
-    downloadFile $download $dst\$zip
+    # Write-Host "Baixando Ãºltimo release em $dst\$zip"
+    downloadFile $download $dst\$zip "Baixando $repo..." "Baixou $repo!"
 
     return "$dst\$zip"
 
