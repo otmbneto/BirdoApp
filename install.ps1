@@ -1,5 +1,7 @@
 Add-Type -Assembly System.IO.Compression.FileSystem
 
+$logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
+
 function downloadFile($url, $targetFile, $title, $end) {
     $dots = "⠻⠽⠾⠷⠯⠟"
     $inc = 0
@@ -115,14 +117,14 @@ function Download-Python {
 
     downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py"
 
-    & C:\Python27\python.exe "$PWD\get-pip.py"
+    & C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
 
 }
 
 function Is-Virtualenv {
 
-    $test= python -m virtualenv --version
-    return $test -ne $null
+    python -m virtualenv --version > $logdir\testVenv.log 2> $logdir\testVenvErr.log
+    return ($LASTEXITCODE -eq 0)
 
 }
 
@@ -137,7 +139,7 @@ function Update-Venv($venv,$base){
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
-    python -m pip install -r "requirement.txt" 
+    python -m pip install -r "requirement.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
     deactivate
 
 }
@@ -146,8 +148,8 @@ function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
-        Write-Host "Instalando módulo 'virtualenv'"
-        & $python -m pip install virtualenv
+        Write-Host "Instalando mÃ³dulo 'virtualenv'"
+        & $python -m pip install virtualenv > $logdir\installVenvMod.log 2> $logdir\installVenvErrMod.log
 
     }
 
@@ -155,9 +157,9 @@ function Init-Venv($venv,$base,$python){
 
         Write-Host "Criando ambiente virtual"
         Set-Location -Path $base
-        & $python -m virtualenv "$venv"
+        & $python -m virtualenv "$venv" > $logdir\createVenv.log 2> $logdir\createVenvErr.log
         Set-Location -Path "$base\$venv"
-        virtualenv .
+        # virtualenv .
         Update-Venv "$venv" $base
 
     }
