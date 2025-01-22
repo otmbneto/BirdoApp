@@ -82,7 +82,8 @@ function Download-Ffmpeg($app_folder){
         New-Item -ItemType Directory -Force -Path $ffmpegInstall
     }
 
-    $zipFile = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
+    $returnedObject = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
+    $zipFile = $returnedObject[$returnedObject.length - 1]
 
     # Expand the archive using PowerShell's System.IO.Compression.FileSystem
     Write-Host "Descompactando arquivo"
@@ -314,7 +315,8 @@ if(Test-Path $birdoTemp){
     Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
-$gitpath = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
+$returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
+$gitpath = $returnedObject[$returnedObject.length - 1]
 [IO.Compression.ZipFile]::ExtractToDirectory($gitpath, $birdoTemp)
 Remove-Item -Path "$gitpath" -Force
 $unzip = Get-ChildItem -Path $birdoTemp -Name
