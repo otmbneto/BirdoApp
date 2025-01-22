@@ -32,6 +32,9 @@ function downloadFile($url, $targetFile, $title, $end) {
     $targetStream.Close()
     $targetStream.Dispose()
     $responseStream.Dispose()
+    if ($end -ne $null) {
+        & $gum style --border=double --align=center --padding="1 4" $end
+    }
 }
 
 
@@ -228,6 +231,19 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
+
+# FIXME cachear gum?
+if ((get-item $env:temp\gum.zip 2> $null) -ne $null) {
+    rm $env:temp\gum.zip
+}
+
+if ((get-item ($env:temp + "\gum_0.15.0_Windows_x86_64") 2> $null) -ne $null) {
+    rm -Recurse ($env:temp + "\gum_0.15.0_Windows_x86_64")
+}
+
+downloadFile "https://github.com/charmbracelet/gum/releases/download/v0.15.0/gum_0.15.0_Windows_x86_64.zip" "$env:TEMP\gum.zip"
+[IO.Compression.ZipFile]::ExtractToDirectory("$env:TEMP\gum.zip", $env:TEMP)
+$gum = ($env:TEMP + "\gum_0.15.0_Windows_x86_64\gum.exe")
 
 function AskYesNo {
     param([String]$question)
