@@ -246,14 +246,11 @@ downloadFile "https://github.com/charmbracelet/gum/releases/download/v0.15.0/gum
 [IO.Compression.ZipFile]::ExtractToDirectory("$env:TEMP\gum.zip", $env:TEMP)
 $gum = ($env:TEMP + "\gum_0.15.0_Windows_x86_64\gum.exe")
 
-function AskYesNo {
-    param([String]$question)
-    $Response = ""
-    while ($Response -ne "S" -and $Response -ne "N") {
-        Write-Host $question
-        $Response = $host.UI.ReadLine()
-    }
-    return $Response
+function AskYesNo ($question){
+    & $gum confirm --no-show-help --affirmative="Sim" --negative="Não" $question
+    return $LASTEXITCODE
+}
+
 }
 
 #### MAIN ROUTINE ####
@@ -271,9 +268,9 @@ if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
 echo $licenceA
 & $gum style --border=double --width=78 --margin="-1 0" --align=center --padding="1 2" $licenceB
 
-$LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
+$LastUserResponse = AskYesNo "VocÃª concorda com os termos descritos acima? (S/N)"
 
-if ($LastUserResponse -eq "N") {
+if ($LastUserResponse -eq 1) {
     echo "`nO BirdoApp NAO foi instalado. Encerrando..."
     exit
 }
@@ -291,9 +288,9 @@ $instalationSteps = @"
 "@
 & $gum style --border=double --width=56 --margin="-1 0" --align=left --padding="1 5" $instalationSteps
 
-$LastUserResponse = AskYesNo "Está de acordo com as ações dos itens acima? (S/N)"
+$LastUserResponse = AskYesNo "EstÃ¡ de acordo com as aÃ§Ãµes dos itens acima? (S/N)"
 
-if ($LastUserResponse -eq "N") {
+if ($LastUserResponse -eq 1) {
     echo "`nO BirdoApp NAO foi instalado. Encerrando..."
     exit
 }
