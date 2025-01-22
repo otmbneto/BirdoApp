@@ -119,7 +119,7 @@ function Download-Python {
     Remove-Item "$PWD\python27.msi"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
 
-    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py" "Baixando script de instalacccaaao do Pip..." "Baixou script de instalacccaaao do Pip!"
+    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
 
     & C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
 
@@ -152,7 +152,7 @@ function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
-        Write-Host "Instalando mÃ³dulo 'virtualenv'"
+        Write-Host "Instalando módulo 'virtualenv'"
         & $python -m pip install virtualenv > $logdir\installVenvMod.log 2> $logdir\installVenvErrMod.log
 
     }
@@ -223,8 +223,8 @@ $greetings = "
    de scripts e programas que auxiliam produções de animações 2D.
    Pressione ENTER para continuar."
 
-$licenceA =  "   O BirdoApp Ã© distribuido de forma gratuita atraves da`n"
-$licenceA += "   licenÃ§a MIT, descrita nos termos a seguir:`n"
+$licenceA =  "   O BirdoApp é distribuído de forma gratuita através da`n`n"
+$licenceA += "   licença MIT, descrita nos termos a seguir:`n"
 $licenceB = 'Copyright (c) 2025 BirdoStudios
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -268,10 +268,10 @@ if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
 echo $licenceA
 & $gum style --border=double --width=78 --margin="-1 0" --align=center --padding="1 2" $licenceB
 
-$LastUserResponse = AskYesNo "VocÃª concorda com os termos descritos acima? (S/N)"
+$LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
 
 if ($LastUserResponse -eq 1) {
-    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    echo "`nO BirdoApp NÃO foi instalado. Encerrando..."
     exit
 }
 
@@ -288,10 +288,10 @@ $instalationSteps = @"
 "@
 & $gum style --border=double --width=56 --margin="-1 0" --align=left --padding="1 5" $instalationSteps
 
-$LastUserResponse = AskYesNo "EstÃ¡ de acordo com as aÃ§Ãµes dos itens acima? (S/N)"
+$LastUserResponse = AskYesNo "Está de acordo com as ações listadas acima? (S/N)"
 
 if ($LastUserResponse -eq 1) {
-    echo "`nO BirdoApp NAO foi instalado. Encerrando..."
+    echo "`nO BirdoApp NÃO foi instalado. Encerrando..."
     exit
 }
 
