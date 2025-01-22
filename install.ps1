@@ -75,12 +75,10 @@ function Download-Ffmpeg($app_folder){
     # Define the installation folder for ffmpeg
     $ffmpegInstall = "$app_folder\extra\ffmpeg"
 
-    # Display message
-
     # Check if the folder exists, if not create it
     if (-not (Test-Path $ffmpegInstall)) {
         Write-Host "Criando pasta $ffmpegInstall"
-        New-Item -ItemType Directory -Force -Path $ffmpegInstall
+        New-Item -ItemType Directory -Force -Path $ffmpegInstall > $null
     }
 
     $returnedObject = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
@@ -312,7 +310,7 @@ $birdoApp = "$env:APPDATA\BirdoApp"
 if(Test-Path $birdoTemp){ 
     Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
-New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
+New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory" > $null
 $returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
 $gitpath = $returnedObject[$returnedObject.length - 1]
 [IO.Compression.ZipFile]::ExtractToDirectory($gitpath, $birdoTemp)
