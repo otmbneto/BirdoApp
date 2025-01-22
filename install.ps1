@@ -108,14 +108,14 @@ function Download-Ffmpeg($app_folder){
 }
 
 function Download-Python {
-    downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi"
+    downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
     if(Test-Path "$PWD\python27.msi"){
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
     Remove-Item "$PWD\python27.msi"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
 
-    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py"
+    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py" "Baixando script de instalacccaaao do Pip..." "Baixou script de instalacccaaao do Pip!"
 
     & C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
 
