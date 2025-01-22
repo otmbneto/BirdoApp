@@ -193,43 +193,32 @@ function Install-Shortcut {
 }
 
 $greetings = "
-+-------------------------------------------------------------------+
-|                                                       _    _      |
-|         ____  _          __      ___                 , ``._) '>    |
-|        / __ )(_)________/ /___  /   |  ____  ____    '//,,, |     |
-|       / __  / / ___/ __  / __ \/ /| | / __ \/ __ \      )_/       |
-|      / /_/ / / /  / /_/ / /_/ / ___ |/ /_/ / /_/ /     /_|        |
-|     /_____/_/_/   \__,_/\____/_/  |_/ .___/ .___/                 |
-|                                    /_/   /_/                      |
-|                                                                   |
-|                   ASSISTENTE  DE  INSTALAÇAO                      |
-+-------------------------------------------------------------------+
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║    ██████╗ ██╗██████╗ ██████╗  ██████╗     █████╗ ██████╗ ██████╗    ║
+║    ██╔══██╗██║██╔══██╗██╔══██╗██╔═══██╗   ██╔══██╗██╔══██╗██╔══██╗   ║
+║    ██████╔╝██║██████╔╝██║  ██║██║   ██║   ███████║██████╔╝██████╔╝   ║
+║    ██╔══██╗██║██╔══██╗██║  ██║██║   ██║   ██╔══██║██╔═══╝ ██╔═══╝    ║
+║    ██████╔╝██║██║  ██║██████╔╝╚██████╔╝   ██║  ██║██║     ██║        ║
+║    ╚═════╝ ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝  ╚═╝╚═╝     ╚═╝        ║
+║                                                                      ║
+║                     ASSISTENTE   DE   INSTALAÇÃO                     ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
 
    Bem vindo ao assistente de instalação do BirdoApp, um conjunto
-   de scripts e programas que auxiliam produções de animação 2D.
-   Pressione ENTER para continuar.
-"
+   de scripts e programas que auxiliam produções de animações 2D.
+   Pressione ENTER para continuar."
 
-$licence = "O BirdoApp é distribuido de forma gratuita atraves da"
-$licence += "`nlicença MIT, descrita nos termos a seguir:`n`n"
-$licence += "Copyright (c) 2024 BirdoStudios
+$licenceA =  "   O BirdoApp Ã© distribuido de forma gratuita atraves da`n"
+$licenceA += "   licenÃ§a MIT, descrita nos termos a seguir:`n"
+$licenceB = 'Copyright (c) 2025 BirdoStudios
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the `"Software`"), to deal in
-the Software without restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
-Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED `"AS IS`", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`n"
+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
 
 function AskYesNo {
     param([String]$question)
@@ -253,7 +242,8 @@ if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
     exit
 }
 
-echo $licence
+echo $licenceA
+& $gum style --border=double --width=78 --margin="-1 0" --align=center --padding="1 2" $licenceB
 
 $LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
 
@@ -262,15 +252,18 @@ if ($LastUserResponse -eq "N") {
     exit
 }
 
-echo "`nAs seguintes ações serão executadas:`n"
-echo "  - Download e instalação do Python 2.7"
-echo "  - Criação de um ambiente virtual Python"
-echo "  - Instalação de módulos no ambiente virtual"
-echo "  - Download do programa Ffmpeg"
-echo "  - Downloads de scripts e programas do BirdoApp"
-echo "  - Cópia dos arquivos para pasta %APPDATA%"
-echo "  - Criação de variáveis de ambiente"
-echo "  - Cria um atalho do BirdoApp na Area de Trabalho`n"
+echo "`n   As seguintes etapas serao executadas:`n"
+$instalationSteps = @"
+1) Downloads dos arquivos do BirdoApp
+2) Cópia Do BirdoApp para pasta %APPDATA%
+3) Download do programa Ffmpeg
+4) Download e instalação do Python 2.7
+5) Criação de um ambiente virtual Python
+6) Instalação das dependências
+7) Criação de variáveis de ambiente
+8) Atalho do BirdoApp na Área de Trabalho
+"@
+& $gum style --border=double --width=56 --margin="-1 0" --align=left --padding="1 5" $instalationSteps
 
 $LastUserResponse = AskYesNo "Está de acordo com as ações dos itens acima? (S/N)"
 
