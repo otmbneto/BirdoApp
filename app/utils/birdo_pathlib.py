@@ -4,8 +4,6 @@ from tqdm import tqdm
 from datetime import datetime
 import re
 
-# TODO: testar todos os metodos (principalmente os de copy)
-
 
 class Path:
     """Classe que junta opcoes para lidar com arquivos e pastas."""
@@ -150,8 +148,3 @@ class Path:
             self / x for x in
             filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
         ]
-
-
-if __name__ == "__main__":
-    f = Path(r"C:\_BirdoRemoto\PROJETOS\BirdoApp\icons\folder2_teste.txt")
-    print f.write_text("TESTE\nbora ver se rola!")
