@@ -6,7 +6,7 @@ from utils.birdo_pathlib import Path
 
 
 def convert_type(a, b):
-    """Converte o tipo do objeto 'a' pelo tipo do objeto 'b'"""
+    """Converte o objeto 'a' pelo tipo do objeto 'b'"""
     c = a
     return eval("{0}({1})".format(str(type(b).__name__), "c"))
 
@@ -41,6 +41,10 @@ class DevTools:
         msg = ["{0}: {1}".format(x, self.app.data[x]) for x in self.app.data]
         print "\n - ".join(msg)
 
+    def pause(self):
+        """da um pause na cli"""
+        os.system("pause")
+
     def cli_input(self, title, is_question=False, options=None, messagebox=False):
         """Formata menu de cli para input do usuario (retorna item da lista escolhido ou boolean)
         is_question = para perguntar e retornar boolean
@@ -52,7 +56,8 @@ class DevTools:
             input(title + "\n>>[pressione qualquer tecla para voltar...]")
             self.back_page()
             return
-        opt = "\n".join([" -[{0}] {1}".format(i, x) for i, x in enumerate(options)]) if options else ("[Y / N]" if is_question else "")
+        opt = "\n".join([" -[{0}] {1}".format(i, x) for i, x in enumerate(options)]) if options else (
+            "[Y / N]" if is_question else "")
         msg = " > {0}\n{1}\n >>".format(title, opt)
 
         r = raw_input(msg)
@@ -135,14 +140,16 @@ class DevTools:
         """inicia a pagina de config inicial do BirdoApp"""
         # cria new config na ordem
         self.app.config_data["studio_name"] = self.cli_input("Escolha o Nome do Estudio para configurar:")
-        self.app.config_data["server_projects"] = self.cli_input("Defina um caminho na rede (onde os usuarios do estudio tenham acesso) para "
-                                                       "salvar as configuracoes de projetos.")
+        self.app.config_data["server_projects"] = self.cli_input(
+            "Defina um caminho na rede (onde os usuarios do estudio tenham acesso) para "
+            "salvar as configuracoes de projetos.")
         if not os.path.exists(self.app.config_data["server_projects"]):
             sys.exit("CAMINHO FORNECIDO INVALIDO. Precisa ser um caminho existente.")
         self.app.config_data["user_name"] = self.cli_input("Escolha o nome de usuario para esta maquina.")
         h = self.cli_input("Escolha o caminho de Harmony instalado na sua maquina:",
-                                                    options=[x.get_name() for x in self.app.harmony_versions])
-        self.app.config_data["harmony_path"] = next((x for x in self.app.harmony_versions if x.get_name() == h), None).installation_path
+                           options=[x.get_name() for x in self.app.harmony_versions])
+        self.app.config_data["harmony_path"] = next((x for x in self.app.harmony_versions if x.get_name() == h),
+                                                    None).installation_path
 
         # atualiza o config object
         self.app.update_config_json()
@@ -160,17 +167,19 @@ class DevTools:
         # checa se o icone fornecido e valido (PNG ou ICO)
         if Path(create_data["05_icon"]).suffix not in [".png", ".ico"]:
             if not self.cli_input(">>icone fornecido e invalido. Precisa ser de formato PNG ou ICO.\n"
-                              "Deseja fornecer outro?", is_question=True):
+                                  "Deseja fornecer outro?", is_question=True):
                 create_data["05_icon"] = False
 
         if self.app.create_project(create_data):
-            sys.exit("Projeto {0} criado!".format(create_data["01_prefix"]))
+            print "Projeto {0} criado!".format(create_data["01_prefix"])
         else:
-            sys.exit("ERRO criando o Projeto {0}".format(create_data["01_prefix"]))
+            print "ERRO criando o Projeto {0}".format(create_data["01_prefix"])
+        self.pause()
+        self.back_page()
 
     def show_project_page(self):
         """Mostra o menu CLI do projeto"""
-        opt = ["Conifg", "Episodios", "Criar EP", "[VOLTAR]"]
+        opt = ["Config", "Episodios", "Criar EP", "[VOLTAR]"]
         r = self.cli_input("Projeto - {0}".format(self.project.name), options=opt)
         if r == "[VOLTAR]":
             self.back_page()
@@ -192,11 +201,14 @@ class DevTools:
         elif r == "Criar EP":
             eps = [x.name for x in self.project.paths.list_episodes("server")]
             ep = self.cli_input("Escolha o nome do ep para criar (EP000):")
-            if ep not in eps:
+            if ep in eps:
                 print "Episodio escolhido ({0}) ja existe no projeto!"
+                self.pause()
                 self.back_page()
                 return
             self.project.paths.create_episode_scheme("server", ep)
+            self.pause()
+            self.back_page()
 
     def show_ep_page(self, ep):
         """mostra o menu CLI do ep"""
@@ -205,12 +217,27 @@ class DevTools:
         if r == "[VOLTAR]":
             self.back_page()
             return
+        if r == "Importar animatics":
+            af = self.cli_input("Escolha o folder de origem dos animatics\n"
+                                "(Tem q ser uma pasta onde contenha somente os arquivos de animatic do episodio que deseja importar)")
+            if not af:
+                raise Exception("Invalid animatic folder.")
+            animatics_folder = Path(af)
+            animatics = filter(lambda x: x.is_file(), animatics_folder.glob("*"))
+            self.project.paths.import_animatics_to_ep(animatics, ep)
+            self.pause()
+
         if r == "Criar pastas":
             self.project.paths.create_episode_scheme("server", ep)
+            self.pause()
+
         if r == "Criar setup basico das cenas":
             scenes = self.project.paths.list_scenes_from_animatics(ep)
             for item in scenes:
                 print item
+            self.pause()
+        # volta para pagina anterior
+        self.back_page()
 
     def start(self):
         """inicia o cli do dev"""
