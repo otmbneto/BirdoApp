@@ -179,7 +179,8 @@ class DevTools:
 
     def show_project_page(self):
         """Mostra o menu CLI do projeto"""
-        opt = ["Config", "Episodios", "Criar EP", "[VOLTAR]"]
+        opt = ["Config", "Episodios / Sequencias", "Criar EP / SQ", "[VOLTAR]"]
+        eps = [x.name for x in self.project.paths.list_episodes("server")]
         r = self.cli_input("Projeto - {0}".format(self.project.name), options=opt)
         if r == "[VOLTAR]":
             self.back_page()
@@ -189,8 +190,7 @@ class DevTools:
             self.last["app"] = "project_page"
             self.config_dict("Config Projeto: {0}".format(self.project.name), self.project.raw_data)
 
-        elif r == "Episodios":
-            eps = [x.name for x in self.project.paths.list_episodes("server")]
+        elif r == "Episodios / Sequencias":
             eps.append("[VOLTAR]")
             ep = self.cli_input("Escolha o Episodio do projeto: {0}".format(self.project.name), options=eps)
             if ep == "[VOLTAR]":
@@ -198,21 +198,21 @@ class DevTools:
                 return
             self.last["page"] = "project_page"
             self.show_ep_page(ep)
-        elif r == "Criar EP":
-            eps = [x.name for x in self.project.paths.list_episodes("server")]
-            ep = self.cli_input("Escolha o nome do ep para criar (EP000):")
-            if ep in eps:
-                print "Episodio escolhido ({0}) ja existe no projeto!"
-                self.pause()
-                self.back_page()
-                return
-            self.project.paths.create_episode_scheme("server", ep)
+        elif r == "Criar EP / SQ":
+            ep_r = self.cli_input("Escolha o nome do ep(sq) para criar (EX:. EP001 ou SQ001)\n"
+                                "Ou forneca uma lista de ep(sq) separados por virgula ou espaco")
+            input_eps = re.findall(self.project.paths.regs["ep"]["regex"], ep_r)
+            for ep in input_eps:
+                if ep in eps:
+                    print "Episodio escolhido ({0}) ja existe no projeto!".format(ep)
+                    continue
+                self.project.paths.create_episode_scheme("server", ep)
             self.pause()
             self.back_page()
 
     def show_ep_page(self, ep):
         """mostra o menu CLI do ep"""
-        opts = ["Importar animatics", "Criar pastas", "Criar setup basico das cenas", "[VOLTAR]"]
+        opts = ["Importar animatics", "Criar setup basico das cenas", "[VOLTAR]"]
         r = self.cli_input("Escolha o que deseja fazer com o ep: {0}".format(ep), options=opts)
         if r == "[VOLTAR]":
             self.back_page()
@@ -225,10 +225,6 @@ class DevTools:
             animatics_folder = Path(af)
             animatics = filter(lambda x: x.is_file(), animatics_folder.glob("*"))
             self.project.paths.import_animatics_to_ep(animatics, ep)
-            self.pause()
-
-        if r == "Criar pastas":
-            self.project.paths.create_episode_scheme("server", ep)
             self.pause()
 
         if r == "Criar setup basico das cenas":
