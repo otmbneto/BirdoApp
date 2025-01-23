@@ -1,8 +1,22 @@
 import re
+from tqdm import tqdm
 from utils.birdo_timeout import timeout
 from utils.birdo_pathlib import Path
+from utils.ffmpeg import compress_render
 
-# TODO: testar tods metodos (principalmente os usados pro birdoapp hj)
+
+def find_scenes_pattern(input_list):
+    """Retorna o padrao de nome das cenas em uma sequencia de nomes de cenas"""
+    patterns = []
+    for p in re.findall(r"[a-zA-Z]+", input_list[0]):
+        if not any(p not in x for x in input_list):
+            match = re.findall(r"{0}\d+".format(p), input_list[0])
+            if len(match) == 1:
+                reg = p + r"\d{" + str(len(re.findall(r"\d", match[0]))) + "}"
+                match_list = [re.findall(reg, y)[0] for y in input_list]
+                if not any(match_list.count(x) > 1 for x in match_list) and reg not in patterns:
+                    patterns.append(reg)
+    return None if len(patterns) == 0 else patterns[0]
 
 
 class FolderManager(object):
@@ -12,25 +26,20 @@ class FolderManager(object):
     ----------
     proj_data : dict
         a dictionary with all the server path information (from project server_DATA.json)
-    prefix : string
-        prefixo do projeto com padrao de 3 letras
     local_folder : string
         caminho do folder local do projeto
-    patterns: dict
-        dicionario cmo regex vindos do project_data
-    messageBox : object
+    messagebox : object
         widget class object created with CreateMessageBox function in utils
     """
     def __init__(self, proj_data, local_folder, messagebox):
 
         self.mb = messagebox
-        self.regs = {
-            "scene": proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"]),
-            "asset": proj_data["pattern"]["asset"]["regex"],
-            "animatic": proj_data["pattern"]["animatic"]["regex"].replace('PREFIX', proj_data["prefix"]),
-            "ep": proj_data["pattern"]["ep"]["regex"],
-            "sc": proj_data["pattern"]["sc"]["regex"]
-        }
+        self.regs = proj_data["pattern"]
+        self.regs["scene"]["regex"] = proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"])
+        self.regs["scene"]["model"] = proj_data["pattern"]["scene"]["model"].replace('PREFIX', proj_data["prefix"])
+        self.regs["animatic"]["regex"] = proj_data["pattern"]["animatic"]["regex"].replace('PREFIX', proj_data["prefix"])
+        self.regs["animatic"]["model"] = proj_data["pattern"]["animatic"]["model"].replace('PREFIX', proj_data["prefix"])
+
         self.root = {
             "server": Path(proj_data["paths"]["root"]) / proj_data["paths"]["sub_root"],
             "local": local_folder if bool(local_folder) else ""
@@ -54,17 +63,19 @@ class FolderManager(object):
 
     def find_ep(self, raw_scene_name):
         """Retorna uma string com a parte do nome da cena, que se refere ao numero do ep (EP000)"""
-        sc = re.findall(self.regs["ep"], raw_scene_name)
-        if len(sc) == 0:
-            return None
-        return sc[0]
-
-    def find_sc(self, raw_scene_name):
-        """Retorna uma string com a parte do nome da cena, que se refere ao numero da cena (SC0000)"""
-        ep = re.findall(self.regs["sc"], raw_scene_name)
+        ep = re.findall(self.regs["ep"]["regex"], raw_scene_name)
         if len(ep) == 0:
             return None
         return ep[0]
+
+    def find_sc(self, raw_scene_name, sc_reg=None):
+        """Retorna uma string com a parte do nome da cena, que se refere ao numero da cena (SC0000)"""
+        if not sc_reg:
+            sc_reg = self.regs["sc"]["regex"]
+        sc = re.findall(sc_reg, raw_scene_name)
+        if len(sc) == 0:
+            return None
+        return sc[0]
 
     def check_connection(self):
         """
@@ -100,7 +111,7 @@ class FolderManager(object):
         """
         Retorna caminhos de todos episodios na root (server ou local) da pasta EPISODIOS
         """
-        return self.get_episodes_folder(root).glob(self.regs["ep"])
+        return self.get_episodes_folder(root).glob(self.regs["ep"]["regex"])
 
     def get_scenes_root_folder(self, root, ep):
         """
@@ -118,12 +129,12 @@ class FolderManager(object):
 
     def list_scenes(self, root, ep, step):
         """retorna lista de cenas no servidor do ep e step"""
-        return self.get_scenes_path(root, ep, step).glob(self.regs["scene"])
+        return self.get_scenes_path(root, ep, step).glob(self.regs["scene"]["regex"])
 
     def get_scene_path(self, root, scene_name, step):
         """retorna caminho completo da cena.
         """
-        scene = re.findall(self.regs["scene"], scene_name)
+        scene = re.findall(self.regs["scene"]["regex"], scene_name)
         if len(scene) == 0:
             raise Exception("Invalid scene name: {0}".format(scene_name))
         scene_name = scene[0]
@@ -150,14 +161,53 @@ class FolderManager(object):
         """
         return self.get_renders_root(root, ep) / self.steps[step]["folder_name"]
 
+    # animatics methods
     def list_project_animatics(self, ep):
         """Retorna lista de movs animatics do ep."""
-        return self.get_animatics_folder("server", ep).glob(self.regs["animatic"])
+        return self.get_animatics_folder("server", ep).glob(self.regs["animatic"]["regex"])
 
     def list_scenes_from_animatics(self, ep):
         """Lista as cenas baseadas nos animatics do ep."""
-        return map(lambda x: re.findall(self.regs["scene"], x.name), self.list_project_animatics(ep))
+        return map(lambda x: re.findall(self.regs["scene"]["regex"], x.name), self.list_project_animatics(ep))
 
+    def get_next_animatic_version(self, scene_name):
+        """Retorna a proxima versao de animatic para cena 'scene_name'"""
+        ep = self.find_ep(scene_name)
+        animatics_root = self.get_animatics_folder("server", ep)
+        movs = animatics_root.glob("{0}*.mov".format(scene_name))
+        return len(movs) + 1
+
+    def import_animatics_to_ep(self, animatics, ep):
+        """Importa os arquivos de video, de fora da estrutura do birdoapp,
+        na lista de arquivos 'animatics' para a pasta de animatic do ep"""
+        files_names = map(lambda x: x.stem, animatics)
+        reg = None
+        if any(not self.find_sc(x) for x in files_names):
+            print "padrao de nome de cenas na sequencia de animatic nao e o padrao do " \
+                  "birdoapp.\nTentando achar padrao na sequencia..."
+            reg = find_scenes_pattern(files_names)
+            if not reg:
+                raise Exception("Sequencia de animatic fornecida nao tem um padrao de nome de cenas valido!")
+        error_count = 0
+        animatics_root = self.get_animatics_folder("server", ep)
+        if not animatics_root.exists():
+            animatics_root.make_dirs()
+        for file in tqdm(animatics, desc="Convertendo Animatics..."):
+            sc = self.find_sc(file.stem, sc_reg=reg)
+            if not sc:
+                print ">> ERRO achando o padrao de nome de cena no arquivo: {0}".format(file.path)
+                continue
+            ep_num, sc_num = int(re.findall(r"\d+", ep)[0].strip()), int(re.findall(r"\d+", sc)[0].strip())
+            scene = self.regs["scene"]["model"].format(ep_num, sc_num)
+            animatic_name = self.regs["animatic"]["model"].format(ep_num, sc_num, self.get_next_animatic_version(scene))
+            animatic_file = animatics_root / animatic_name
+            if not compress_render(file.path, animatic_file.path):
+                print "ERRO convertendo o arquivo: {0}".format(file.path)
+                error_count += 1
+                continue
+        print "Animatics import acabou com {0} errors, e {1} arquivos importados!".format(error_count, len(animatics) - error_count)
+
+    # folder creation methods
     def create_base_folders(self, root):
         """Cria a base de diretorios no root do projeto (server ou local)"""
         if root == "server":
