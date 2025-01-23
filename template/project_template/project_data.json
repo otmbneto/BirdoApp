@@ -23,24 +23,24 @@
     },
     "pattern": {
         "asset": {
-			"regex": "(\\w{2}\\d{3}|\\w{2})_\\w+",
-			"model": "{0}{1}_{2}"
+			"regex": "[a-zA-Z]{2}\\d{3}_\\w+",
+			"model": "{0}{1:03d}_{2}"
 		},
         "scene": {
-			"regex": "PREFIX_EP\\d{3}_SC\\d{4}",
-			"model": "{0}_EP{1}_SC{2}"
+			"regex": "PREFIX_EP\\d{0:02d}_SC\\d{1}",
+			"model": "PREFIX_EP{0:03d}_SC{1:04d}"
 		},
         "animatic": {
 			"regex": "PREFIX_EP_SC\\d{4}_v\\d{2}\\.mov",
-			"model": "{0}_EP{1}_SC{2}_v{3}"
+			"model": "PREFIX_EP{0:03d}_SC{1:04d}_v{2:02d}.mov"
 		},
         "ep": {
 			"regex": "EP\\d{3}",
-			"model": "EP{0}"
+			"model": "EP{0:03d}"
 		},
 		"sc": {
 			"regex": "SC\\d{4}",
-			"model": "SC{0}"
+			"model": "SC{0:04d}"
 		}
     },
     "paths": {
