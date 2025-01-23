@@ -200,8 +200,17 @@ class DevTools:
             self.show_ep_page(ep)
         elif r == "Criar EP / SQ":
             ep_r = self.cli_input("Escolha o nome do ep(sq) para criar (EX:. EP001 ou SQ001)\n"
-                                "Ou forneca uma lista de ep(sq) separados por virgula ou espaco")
+                                "Ou forneca uma lista de ep(sq) separados por virgula ou espaco\n"
+                                "(se quiser criar uma sequencia de eps, por exemplo de 1 ate o 14, digite 1-14)")
             input_eps = re.findall(self.project.paths.regs["ep"]["regex"], ep_r)
+            if len(input_eps) == 0:
+                div = re.findall(r"\d+-\d+", ep_r)
+                if len(div) == 0:
+                    print "Input Invalido!"
+                    self.pause()
+                    self.back_page()
+                    return
+                input_eps = [self.project.paths.regs["ep"]["model"].format(i) for i in range(int(div[0].split("-")[0]), int(div[0].split("-")[1]))]
             for ep in input_eps:
                 if ep in eps:
                     print "Episodio escolhido ({0}) ja existe no projeto!".format(ep)
