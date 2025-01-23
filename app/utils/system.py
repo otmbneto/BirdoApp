@@ -1,3 +1,4 @@
+from birdo_pathlib import Path
 import platform
 import os
 import ctypes
@@ -40,11 +41,11 @@ class SystemFolders(object):
 
         elif self.system_os == 'Windows':
             print 'Sistema Windows detectado...'
-            self.user_home = os.getenv("HOMEPATH")
-            self.appdata = os.getenv('APPDATA')
-            self.programs = os.getenv('ProgramFiles(x86)')
-            self.temp = os.getenv('TEMP')
-            self.desktop = os.path.join(os.getenv('userprofile'), 'Desktop')
+            self.user_home = Path(os.getenv("HOMEPATH"))
+            self.appdata = Path(os.getenv('APPDATA'))
+            self.programs = Path(os.getenv('ProgramFiles(x86)'))
+            self.temp = Path(os.getenv('TEMP')) / "BirdoApp"
+            self.desktop = Path(os.getenv('userprofile')) / 'Desktop'
 
     # checa se o sistema operacional e suportado
     def check_os(self):
@@ -67,13 +68,13 @@ class SystemFolders(object):
         RETURN: bool
         """
         check = True
-        if not os.path.exists(self.appdata):
+        if not self.appdata.exists():
             print "ERRO finding appdata path in the system: {0}".format(self.appdata)
             check = False
-        if not os.path.exists(self.appdata):
+        if not self.appdata.exists():
             print "ERRO finding programs path in the system: {0}".format(self.programs)
             check = False
-        if not os.path.exists(self.appdata):
+        if not self.appdata.exists():
             print "ERRO finding temp path in the system: {0}".format(self.temp)
             check = False
         return check
@@ -90,3 +91,8 @@ class SystemFolders(object):
         elif self.system_os == 'Darwin':
             return "mac"
         return False
+
+
+if __name__ == "__main__":
+    s = SystemFolders()
+    print s

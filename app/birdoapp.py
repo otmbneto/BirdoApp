@@ -235,6 +235,7 @@ class BirdoApp(QtGui.QMainWindow):
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
         button.clicked.connect(lambda: self.project_selected(project))
+        button.setToolTip(project["name"])
         return button
 
     def project_selected(self, project):
@@ -297,7 +298,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()
-        dialog.setDirectory(self.app.system.user_home)
+        dialog.setDirectory(self.app.system.user_home.path)
         folder = dialog.getExistingDirectory()
         edit_line.setText(folder)
 
