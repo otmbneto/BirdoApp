@@ -13,14 +13,16 @@ from app.utils.ffmpeg import compress_render
 
 class uiItem(QtGui.QGroupBox):
 
-	def __init__(self,fullpath,episode_list):
+	def __init__(self,fullpath,episode_list,project_data):
 		super(uiItem,self).__init__()
 
 		self.filename = "ITEM_NAME"
 		self.filetypes = (".mov",".mp4")
+		self.project_data = project_data
 		if fullpath is not None:
 			self.filename = fullpath.split("/")[-1]
 			self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
+		self.sceneFound = True
 
 		self.initLayout(episode_list)
 		self.initLogic()
@@ -39,6 +41,15 @@ class uiItem(QtGui.QGroupBox):
 
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
+
+		scene_label = QtGui.QLabel("Scene:")
+		scene_font = QtGui.QFont("Arial", 8)
+		scene_label.setFont(item_font)
+		scene_label.setMinimumWidth(50)
+
+		self.scene_text = QtGui.QLineEdit()
+		#self.scene_text.setEnabled(False)
+		self.toggleSceneText()
 
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
@@ -63,6 +74,8 @@ class uiItem(QtGui.QGroupBox):
 
 		horizontal_layout.addWidget(item_label)
 		horizontal_layout.addWidget(self.episodes)
+		horizontal_layout.addWidget(scene_label)
+		horizontal_layout.addWidget(self.scene_text)
 		horizontal_layout.addWidget(self.progress_bar)
 		horizontal_layout.addWidget(self.status_label)        
 		horizontal_layout.addWidget(self.delete_button)
@@ -72,10 +85,28 @@ class uiItem(QtGui.QGroupBox):
 	def initLogic(self):
 
 		episode = self.getEpisode(self.getFullpath())
+		shot = self.project_data.paths.find_sc(self.getFilename())
+		if shot is None:
+			self.toggleSceneText()
+			self.setBackgroundColor("purple")
+			self.sceneFound = False
+
 		if episode is not None:
 			self.setEpisode(self.findIndexOf(episode))
 
 		self.delete_button.clicked.connect(self.close)
+
+	def wasSceneFound(self):
+
+		return self.sceneFound
+
+	def setBackgroundColor(self,color):
+
+		self.setStyleSheet("background-color: {0}".format(color));
+
+	def toggleSceneText(self):
+
+		self.scene_text.setEnabled(not self.scene_text.isEnabled())
 
 	def findIndexOf(self,text):
 	    index = self.episodes.findText(text, QtCore.Qt.MatchFixedString)
@@ -160,23 +191,22 @@ class uiItem(QtGui.QGroupBox):
 
 		return self.getRegexPattern('.*SC_(\d{4}).*|.*SC(\d{4}).*',filename)
 
-	def getScene(self,filename,episode,project_data):
+	def getScene(self,filename,episode):
 
-		m = project_data.paths.find_sc(filename)
-		return "_".join([project_data.prefix,episode,m]) if m is not None else m
+		m = self.project_data.paths.find_sc(filename)
+		return "_".join([self.project_data.prefix,episode,m]) if m is not None else m
 
-	def upload(self,project_data,temp):
+	def upload(self,temp):
 
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
 			self.setStatus("No Episode","red")
 			return
 
-		print("FIND SC: " + str(project_data.paths.find_sc(self.getFilename())))
 		self.incrementProgress(10)
-		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
+		scene_name = self.getScene(self.getFilename().upper(),episode_code)
 		self.incrementProgress(10)
-		animatic_path = project_data.paths.get_animatics_folder("server",episode_code).normpath()
+		animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
 		self.incrementProgress(10)
 		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
 		self.incrementProgress(10)

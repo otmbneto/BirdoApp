@@ -40,7 +40,7 @@ class Uploader(QtGui.QMainWindow):
         self.setAcceptDrops(True)
 
     def get_template_item(self, path, episodes):
-        template_item = upi.uiItem(path, episodes)
+        template_item = upi.uiItem(path, episodes,self.project_data)
         return template_item
 
     def load_page(self, ui_path):
