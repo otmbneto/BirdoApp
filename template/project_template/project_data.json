@@ -21,6 +21,7 @@
         "PRE_COMP": "NO_COLOUR_SPACE",
         "COMP": "NO_COLOUR_SPACE"
     },
+	"division": "EP",
     "pattern": {
         "asset": {
 			"regex": "[a-zA-Z]{2}\\d{3}_\\w+",
