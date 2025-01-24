@@ -1,4 +1,5 @@
 "use strict";
+MessageLog.trace("<<<<<<<<<<TESETETETTE>>>>>>>>>>>>>>>>");
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
@@ -14,13 +15,8 @@ include("BD_2-ScriptLIB_Geral.js");
 					
 */
 function configure(packageFolder, packageName){
-	
 	Print("[BIRDO] Package " + packageName + " configure was called in folder: " + packageFolder);
-	
-	if(about.isPaintMode()){
-		Print("[BIRDO] Paint mode... leaving package");
-		return;
-	}
+	return;
 	
 	//Get File and Project Data
 	var projectDATA = BD2_ProjectInfo();

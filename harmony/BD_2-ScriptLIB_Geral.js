@@ -1317,66 +1317,6 @@ function BD2_loadingBirdo(birdoAppPath, timeout, loadingtext){
 	return start;
 }
 
-
-//encript pw
-function BD2_enc_string(string){
-	var enc = "";
-	var mult = string.length;
-	for(var i=0; i<string.length; i++){
-		var curr_i = BD2_all_chars.indexOf(string[i]);
-		var new_i = curr_i - (mult*2);
-		while(new_i < 0){
-			new_i += BD2_all_chars.length;
-		}
-		enc += BD2_all_chars[new_i];
-		mult--;
-	}
-	return enc;
-}
-//decript pw
-function BD2_dec_string(string){
-	var dec = "";
-	var mult = string.length;
-	for(var i=0; i<string.length; i++){
-		var curr_i = BD2_all_chars.indexOf(string[i]);
-		var new_i = curr_i + (mult*2);
-		while(new_i >= BD2_all_chars.length){
-			new_i -= BD2_all_chars.length;
-		}
-		dec += BD2_all_chars[new_i];
-		mult--;
-	}
-	return dec;
-}
-
-
-/*
-Upload de arquivos e pastas para o server do nextcloud do projeto 
-@birdoAppAPth = path do birdoapp
-@file_or_dir = 'file' or 'dir' arquivo ou folder para subir pra rede
-@server_path
-*/
-function BD2_UploadToNextcloud(birdoAppPath, file_or_dir, server_path, local_path){
-	var pythonPath = birdoAppPath + "venv/Scripts/python";
-	var pyFile = BD2_RenameAll(birdoAppPath + "app/utils/nextcloud_upload_" + file_or_dir + ".py", "/", "\\\\");
-	var tempfolder = specialFolders.temp + "/BirdoApp/";
-
-	if(!BD1_DirExist(tempfolder)){
-		BD1_createDirectoryREDE(tempfolder);
-	}
-
-	var output_json = tempfolder + "uploadNextcloud_" + new Date().getTime() + ".json";
-	var start = Process2(pythonPath, pyFile, server_path, local_path, output_json);
-	var ret = start.launch();
-		
-	if(ret != 0){
-		Print("Fail to start progressBirdo progress!");
-		return false; 
-	}
-
-	return BD1_ReadJSONFile(output_json);
-}
-
 /*
 	Formata o caminho pro OS usado
 	@path => caminho a ser mudado
@@ -1388,8 +1328,7 @@ function BD2_FormatPathOS(path){
 		finalPath = BD2_RenameAll(nativePath, "\\", "/");
 	} else if(about.isWindowsArch()){//define caminhos no Windows
 		finalPath = nativePath;		
-	} 
-
+	}
 	return finalPath;
 }
 
