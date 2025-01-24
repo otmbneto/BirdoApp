@@ -28,7 +28,7 @@
 			"model": "{0}{1:03d}_{2}"
 		},
         "scene": {
-			"regex": "PREFIX_EP\\d{0:02d}_SC\\d{1}",
+			"regex": "PREFIX_EP\\d{3}_SC\\d{4}",
 			"model": "PREFIX_EP{0:03d}_SC{1:04d}"
 		},
         "animatic": {
