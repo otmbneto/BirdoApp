@@ -294,6 +294,8 @@ if ($LastUserResponse -eq 1) {
     exit
 }
 
+
+# 4) Download e instalação do Python 2.7
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
     Write-Host "Baixando Python 2.7..."
@@ -302,6 +304,7 @@ if(-Not (Test-Path "$pythonInstall")){
     Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
 
+# 1) Downloads dos arquivos do BirdoApp
 Write-Host "Baixando scripts e programas do BirdoApp..."
 
 Set-Location -Path $env:APPDATA
@@ -315,12 +318,17 @@ $returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
 $gitpath = $returnedObject[$returnedObject.length - 1]
 [IO.Compression.ZipFile]::ExtractToDirectory($gitpath, $birdoTemp)
 Remove-Item -Path "$gitpath" -Force
+
+# 2) Cópia Do BirdoApp para pasta %APPDATA%
 $unzip = Get-ChildItem -Path $birdoTemp -Name
 Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
 Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
 
+# 3) Download do programa Ffmpeg
 Write-Host "Baixando Ffmpeg..."
 Download-Ffmpeg "$birdoApp"
+
+# 7) Criação de variáveis de ambiente
 Write-Host "Criando variáveis de ambiente..."
 
 #scripts
@@ -328,14 +336,17 @@ Write-Host "Criando variáveis de ambiente..."
 #packages
 [Environment]::SetEnvironmentVariable("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER", "$env:APPDATA\BirdoApp\package\harmony20\packages", "User")
 
-Write-Host "Criando ambiente virtual..."
 
+# 5) Criação de um ambiente virtual Python
+# 6) Instalação das dependências
+Write-Host "Criando ambiente virtual..."
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
 
+
+# 8) Atalho do BirdoApp na Área de Trabalho
 Write-Host "Criando atalho na área de trabalho..."
 
 Set-Location $currentFolder
-# Example usage:
 $birdoapp = "$env:APPDATA/BirdoApp"
 Install-Shortcut -ShortcutName "birdo_app" -Arguments "BirdoApp.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.ico"
