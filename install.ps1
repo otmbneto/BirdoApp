@@ -42,29 +42,29 @@ function downloadFile($url, $targetFile, $title, $end) {
 #download the last release of a giving repo
 function Get-GitRelease($repo,$dst,$type,$file){
 
-
     if($type -eq "Source"){
         $response = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/releases/latest"
-        Write-Host "https://api.github.com/repos/$repo/releases/latest"
         $tag = $response.tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
+        $msg = "Baixando arquivos do repositó do BirdoApp..." #FIXME weird :|
+        $end = "Arquivos do BirdoApp baixados!"  #FIXME weird :|
     }
     elseif($type -eq "Binary"){
         $releases = "https://api.github.com/repos/$repo/releases"
-        Write-Host "Buscando pelo release mais recente."
         $tag = (Invoke-WebRequest -UseBasicParsing $releases | ConvertFrom-Json)[0].tag_name
         $download = "https://github.com/$repo/releases/download/$tag/$file"
         $name = $file.Split(".")[0]
         $zip = "$name-$tag.zip"
+        $msg = "Baixando Ffmpeg..." #FIXME weird :|
+        $end = "Baixou Ffmpeg!"  #FIXME weird :|
     }
     else{
 
         return $null
     }
 
-    # Write-Host "Baixando Ãºltimo release em $dst\$zip"
-    downloadFile $download $dst\$zip "Baixando $repo..." "Baixou $repo!"
+    downloadFile $download $dst\$zip $msg $end
 
     return "$dst\$zip"
 
@@ -294,19 +294,19 @@ if ($LastUserResponse -eq 1) {
     exit
 }
 
+if($DEBUG) {
+    exit
+}
 
 # 4) Download e instalação do Python 2.7
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
-    Write-Host "Baixando Python 2.7..."
     Download-Python
 } else {
     Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
 
 # 1) Downloads dos arquivos do BirdoApp
-Write-Host "Baixando scripts e programas do BirdoApp..."
-
 Set-Location -Path $env:APPDATA
 $birdoTemp = "$env:TEMP\BirdoApp"
 $birdoApp = "$env:APPDATA\BirdoApp"
