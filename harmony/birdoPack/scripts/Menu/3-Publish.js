@@ -22,7 +22,7 @@ function Publish(){
 		return false;
 	}
 	
-	var step = projectDATA.getStepByUser();
+	var step = projectDATA.getPublishStep();
 	
 	var shot_server_path = projectDATA.getShotPublishFolder(step);
 
@@ -213,5 +213,104 @@ function Publish(){
 	
 	
 }
-
 exports.Publish = Publish;
+
+
+
+function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
+
+	var options = {};
+	var d = new Dialog;
+	d.title = "Publish Cena";
+
+	var mainGroup = new GroupBox;
+
+	var publish_step = new ComboBox("Escolha o Step de destino (se disponivel): ");
+	var render_step = new ComboBox("Escolha o Step de RENDER (se disponível): ");
+	var send_farm = new Checkbox("Enviar para Render Farm ");
+	
+	mainGroup.add(publish_step);
+	mainGroup.add(render_step);
+	d.addSpace(5);
+	mainGroup.add(send_farm);
+
+	mainGroup.title = "Opcoes";
+	d.addSpace(1);
+	d.add(mainGroup);
+	
+	//set items
+	publish_step.itemList = proj_data.getPublishStep();
+	
+
+	asset_number.label = "number: ";
+	asset_number.maximum = 999;
+	asset_number.minimum = 0;
+	asset_number.value = current_number;
+
+	imput_name.label = "name: ";
+	imput_name.text = current_name;
+
+
+	rig_type.label = "RIG Type: ";
+	if(current_type != "CH" && current_type != "PR" && current_type != "FX"){
+		rig_type.itemList = ["", "FULL", "SIMPLE"];
+	} else if (current_type == "CH"){
+		rig_type.itemList = ["FULL", "SIMPLE"];
+	} else if (current_type == "PR"){
+		rig_type.itemList = ["SIMPLE"];
+	} else if (current_type == "FX"){
+		rig_type.itemList = ["SIMPLE"];
+	}
+
+	version.label = "RIG version: ";
+	version.maximum = 999;
+	version.minimum = 0;
+	version.value = 0;
+
+	
+	var rc = d.exec();
+
+	if(!rc){
+		return false;
+	}
+
+	if(rig_type.currentItem == "FULL"){
+		var verPath = get_RIG_FULL_group(asset_nodes.asset);
+		if(!verPath){
+		MessageBox.information("Aparentemente este RIG nao e um RIG COMPLETO ou ele contem mais de um GRUPO onde deveria conter somente o grupo do rig: 'prj.NOME_CHAR-v01'\n Confira a selecao novamente, e lembre-se:\n - RIG_FULL => Sao os RIGs com a estrurua de conexao de PROPs e o grupo do RIG de fato dentro do primeiro grupo;\n - RIG_SIMPLE => Rigs mais simples onde o RIG fica todo dentro do primeiro grupo!");
+		return false;
+		}
+	} else if(rig_type.currentItem == "SIMPLE"){
+		var verPath = null;
+	}
+
+	
+	rig.assetNode = asset_nodes.asset;
+	rig.pegNode = asset_nodes.peg;
+	rig.rigFull = verPath;
+	rig.version = "v" + ("00" + version.value).slice(-2);//FIXME: trocar o numero de zeros na versao do rig aqui
+	rig.rigType = rig_type.currentItem;
+	rig.assetType = asset_type.currentItem;
+	rig.assetNumber = asset_number.value;
+	rig.name = imput_name.text.toUpperCase();
+	rig.fullName = asset_type.currentItem.substring(0,2) + ("000" + asset_number.value).slice(-3) + "_" + imput_name.text.toUpperCase();
+
+	return rig;
+	
+	function get_RIG_FULL_group(rig_path){//retorna o grupo do RIG version : prj.NOME_CHAR-v01
+		var subNod = node.subNodes(rig_path);
+		var groupsIn = [];
+
+		for(var i=0; i<subNod.length; i++){
+			if(node.isGroup(subNod[i])){
+				groupsIn.push(subNod[i]);
+			}
+		}
+
+		if(groupsIn.length != 1){
+			return false;
+		}
+
+		return groupsIn[0];
+	}
+}

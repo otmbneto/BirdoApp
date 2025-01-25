@@ -1,11 +1,12 @@
-"use strict";
-include("BD_1-ScriptLIB_File.js");
-include("BD_2-ScriptLIB_Geral.js");
+/*
+  Function: TB_sceneOpened
+  Description: function executes when opening an existing scene.
+ */ 
 
+function TB_sceneOpened(){
+	
 
-function configure(packageFolder, packageName){
-
-	Print("[BIRDO] Package " + packageName + " configure was called in folder: " + packageFolder);
+Print("[BIRDO] Package " + packageName + " configure was called in folder: " + packageFolder);
 	return;
 	
 	//Get File and Project Data
@@ -167,5 +168,3 @@ function checkMenuUpdate(){//checa se o menu.xml do toon boom esta atualizado pa
 	file.close();
 	return string.indexOf('<menu id="Birdo" text="Birdo" >') != -1;
 }
-
-

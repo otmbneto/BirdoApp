@@ -41,7 +41,7 @@ function BD_AddWriteNode(){
 		return;
 	}
 
-	var renderPath = projData.getRenderComp(currScene);
+	var renderPath = projData.getRenderComp();
 
 	if(!renderPath){
 		MessageBox.warning("Este computador nao reconhece o caminho de render na rede! Avise a DT!",0,0);

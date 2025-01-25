@@ -791,26 +791,29 @@ function BD2_GetLastSceneVersion(scenePath){
 /*Pega os caminhos do projeto (locais e rede) e retorna objeto
 */
 function BD2_ProjectInfo(){
-	
-	var birdoPackage = BD2_updateUserNameInPath(specialFolders.userScripts) + "/packages/BirdoPack/";
-	var pathsScript = birdoPackage + "/utils/birdoPaths.js";
+	var birdoApp_scripts = System.getenv("TOONBOOM_GLOBAL_SCRIPT_LOCATION");
+	if(!birdoApp_scripts || birdoApp_scripts.indexOf("BirdoApp") == -1){
+		Print("[BIRDOAPP] variavel do harmony 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' não está instalada para o BirdoApp!");
+		return false;
+	}
+	var birdoPackage = BD2_updateUserNameInPath(BD2_FormatPathOS(birdoApp_scripts + "/birdoPack/"));
+	var pathsScript = birdoPackage + "birdoapp_config.js";
 	
 	if(!BD1_FileExists(pathsScript)){
-		Print("[ERROR] Script 'birdoPaths.js' nao encontrado! Nao sera possivel pegar informacoes do projeto!");
+		Print("[BIRDOAPP][ERROR] Script 'birdoapp_config.js' nao encontrado! Nao sera possivel iniciar o BirdoApp no Harmony!");
 		return false;
 	}
 	
-	var projectDATA = require(pathsScript).birdoPaths();
+	//cria a classe do birdo_init
+	var birdoApp = require(pathsScript).birdoapp_init(birdoApp_scripts);
 	
-	if(!projectDATA){
-		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
-		return false;
-	}
+	//roda o metodo para definir a entity do arquivo Harmony aberto.
+	birdoApp.defineEntity();
 	
-	projectDATA["paths"]["birdoPackage"] = birdoPackage;
+	//atualiza a classe paths com o caminho do root do harmony package Birdo
+	birdoApp.paths["birdoPackage"] = birdoPackage;
 
-	return projectDATA;
-	
+	return birdoApp;
 }
 
 
@@ -1411,22 +1414,13 @@ muda os att do writenode baseado no STEP (se for comp usa o json de comp no conf
 @projectData => objeto com info do projeto
 @writeNode => caminho do node de write para mudar
 @step => step para buscar o json do projeto com att do writeNode. COMP ou normal!
+retorna um objeto com info do output esperado do writenode
 */
 
 function BD2_changeWriteNodeAtt(projectData, writeNode, output_name, step){
 	
 	var output_info = {};
-	var attJsonFile = projectData.birdoApp + "config/projects/" + projectData.prefix + "/writenode_att.json";
-	
-	if(step == "COMP"){
-		attJsonFile = projectData.birdoApp + "config/projects/" + projectData.prefix + "/writenode_att_comp.json";
-	}
-	
-	if(!BD1_FileExists(attJsonFile)){
-		Print("Erro ao encontrar o json de att do projeto: " + attJsonFile);
-		return false;
-	}
-	var attData = BD1_ReadJSONFile(attJsonFile);
+	var attData = projectData.getWriteNodeAtt(step);
 	
 	Print("[BD2_CHANGEWRITENODEATT] : " + writeNode);
 
