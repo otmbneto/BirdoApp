@@ -1,26 +1,13 @@
-"use strict";
-include("BD_1-ScriptLIB_File.js");
-include("BD_2-ScriptLIB_Geral.js");
+/*
+  Function: TB_sceneOpened
+  Description: function executes when opening an existing scene.
+ */ 
 
+function TB_sceneOpened(){
+	
 
-/*pipeline: configure:  [X]- Criar objeto pathBirdo e jogar no print;
-						[X]- checar conexao com o nextcloud atravez do metodo do pathBirdo;
-						[X]- checar se ha versao nova do packBirdo (jogar aviso dizendo para atualizar!); (falta criar o zip do pack na rede e testar uma forma de atualizar
-						[X]- criar atalhos;
-						[ ]- filtar menus e toolBars pelo UserType;
-							TESTAR - fazer um json no folder com a lista de arquivos (cuidar para nao deixar arquivos nao documentados)
-						[X]- criar tooldBars;
-						[ ]- atualizar o TB_SceneOpened.js da cena (testar copiar esse arquivo pra cena antes de iniciar);
-					
-*/
-function configure(packageFolder, packageName){
-	
-	Print("[BIRDO] Package " + packageName + " configure was called in folder: " + packageFolder);
-	
-	if(about.isPaintMode()){
-		Print("[BIRDO] Paint mode... leaving package");
-		return;
-	}
+Print("[BIRDO] Package " + packageName + " configure was called in folder: " + packageFolder);
+	return;
 	
 	//Get File and Project Data
 	var projectDATA = BD2_ProjectInfo();
@@ -72,6 +59,7 @@ function configure(packageFolder, packageName){
 	Print("[BIRDO] Birdo Configure Done...");
 
 }
+exports.configure = configure;
 
 
 function createMenu(projDATA, menuPath, menuScripts){//Cria o Menu na UI do programa
@@ -180,7 +168,3 @@ function checkMenuUpdate(){//checa se o menu.xml do toon boom esta atualizado pa
 	file.close();
 	return string.indexOf('<menu id="Birdo" text="Birdo" >') != -1;
 }
-
-
-exports.configure = configure;
-

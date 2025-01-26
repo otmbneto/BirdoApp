@@ -23,7 +23,7 @@ function prepare_for_render(projData, render_step, use_extra_writenodes, is_farm
 
 	//objeto com info do output esperado
 	var output_data = {
-		"render_comp": projData.getRenderComp(projData.entity.name),
+		"render_comp": projData.getRenderComp(),
 		"folder": null, 
 		"render_number": 0, 
 		"frames_number": frame.numberOf(),

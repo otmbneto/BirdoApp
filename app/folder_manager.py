@@ -68,6 +68,10 @@ class FolderManager(object):
             return None
         return ep[0]
 
+    def format_ep(self, ep_num):
+        """formata o nome padrao do episodio (recebe o numero do ep)"""
+        return self.regs["ep"]["model"].format(ep_num)
+
     def find_sc(self, raw_scene_name, sc_reg=None):
         """Retorna uma string com a parte do nome da cena, que se refere ao numero da cena (SC0000)"""
         if not sc_reg:
@@ -76,6 +80,10 @@ class FolderManager(object):
         if len(sc) == 0:
             return None
         return sc[0]
+
+    def format_sc(self, sc_num):
+        """formata o nome padrao da cena (recebe o numero da cena)"""
+        return self.regs["sc"]["model"].format(sc_num)
 
     def check_connection(self):
         """
