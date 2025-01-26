@@ -17,7 +17,7 @@ class uiItem(QtGui.QGroupBox):
 		super(uiItem,self).__init__()
 
 		self.filename = "ITEM_NAME"
-		self.filetypes = (".mov",".mp4")
+		self.filetypes = (".mov",".mp4",".zip")
 		self.project_data = project_data
 		if fullpath is not None:
 			self.filename = fullpath.split("/")[-1]
@@ -92,16 +92,19 @@ class uiItem(QtGui.QGroupBox):
 	def initLogic(self):
 
 		episode = self.getEpisode(self.getFullpath())
-		shot = self.project_data.paths.find_sc(self.getFilename())
-		if shot is None:
-			self.toggleSceneText()
-			self.setBackgroundColor("purple")
-			self.sceneFound = False
-
+		self.checkScene()
 		if episode is not None:
 			self.setEpisode(self.findIndexOf(episode))
 
 		self.delete_button.clicked.connect(self.close)
+
+	def checkScene(self,toggle = True):
+		shot = self.project_data.paths.find_sc(self.getFilename())
+		if shot is None:
+			if toggle:
+				self.toggleSceneText()
+			self.setBackgroundColor("purple")
+			self.sceneFound = False
      
 	def onLineEditChange(self):
 		# Start the timer every time the text changes
@@ -112,6 +115,9 @@ class uiItem(QtGui.QGroupBox):
 		print("User stopped typing: {0}".format(self.scene_text.text()))
 		if len(self.scene_text.text()) > 0:
 			self.setBackgroundColor("#233142")
+			sceneFound = True
+		else:
+			self.checkScene(toggle = False)
 
 	def wasSceneFound(self):
 
