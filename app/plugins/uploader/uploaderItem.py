@@ -217,6 +217,8 @@ class uiItem(QtGui.QGroupBox):
 		m = self.project_data.paths.find_sc(filename)
 		return "_".join([self.project_data.prefix,episode,m]) if m is not None else m
 
+	#TODO: Move the name scene generation to the folder manager
+	#TODO: Move the animatic name generation to the folder manager
 	def upload(self,temp):
 
 		episode_code = self.getCurrentEpisode()
@@ -229,7 +231,6 @@ class uiItem(QtGui.QGroupBox):
 			self.setStatus("Scene Not found","red")
 			return
 
-		print("SHOT: " + self.project_data.paths.format_sc(self.scene_text.text()))
 		scene_name = self.getScene(self.project_data.paths.format_sc(self.scene_text.text()),episode_code) if self.scene_text.isEnabled() else self.getScene(self.getFilename().upper(),episode_code)
 		self.incrementProgress(10)
 		animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
@@ -244,8 +245,6 @@ class uiItem(QtGui.QGroupBox):
 		compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
 		result = compress_render(self.getFullpath(),compressed)
 		self.incrementProgress(25)
-		if result:
-			print(dst)
 		shutil.copyfile(compressed,dst)
 		self.incrementProgress(25)
 		os.remove(compressed)
