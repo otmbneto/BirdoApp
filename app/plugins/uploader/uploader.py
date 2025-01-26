@@ -103,7 +103,7 @@ class Uploader(QtGui.QMainWindow):
             os.makedirs(temp)
 
             QtGui.qApp.processEvents()
-            movie.upload(self.project_data, temp)
+            movie.upload(temp)
             self.incrementProgress(progression)
 
         self.setProgress(100)

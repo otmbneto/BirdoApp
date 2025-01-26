@@ -26,6 +26,7 @@ class uiItem(QtGui.QGroupBox):
 
 		self.initLayout(episode_list)
 		self.initLogic()
+		print(self.palette().color(QtGui.QPalette.Base).name())
 
 	def initLayout(self,episode_list):
 
@@ -50,6 +51,12 @@ class uiItem(QtGui.QGroupBox):
 		self.scene_text = QtGui.QLineEdit()
 		#self.scene_text.setEnabled(False)
 		self.toggleSceneText()
+		self.scene_text.setValidator(QtGui.QIntValidator(self))
+		self.scene_text.textChanged.connect(self.onLineEditChange)
+
+		self.typing_timer = QtCore.QTimer(self)
+		self.typing_timer.setSingleShot(True)  # Run only once after the timeout
+		self.typing_timer.timeout.connect(self.onTypingFinished)
 
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
@@ -95,6 +102,16 @@ class uiItem(QtGui.QGroupBox):
 			self.setEpisode(self.findIndexOf(episode))
 
 		self.delete_button.clicked.connect(self.close)
+     
+	def onLineEditChange(self):
+		# Start the timer every time the text changes
+		self.typing_timer.start(1500)  # 1000 ms = 1 second delay
+
+	def onTypingFinished(self):
+		# Trigger action after user stops typing for 1 second
+		print("User stopped typing: {0}".format(self.scene_text.text()))
+		if len(self.scene_text.text()) > 0:
+			self.setBackgroundColor("#233142")
 
 	def wasSceneFound(self):
 
@@ -102,7 +119,11 @@ class uiItem(QtGui.QGroupBox):
 
 	def setBackgroundColor(self,color):
 
-		self.setStyleSheet("background-color: {0}".format(color));
+		self.setStyleSheet("background-color: {0}".format(color))
+		self.episodes.setStyleSheet("background-color: white")
+		self.scene_text.setStyleSheet("background-color: white")
+		self.progress_bar.setStyleSheet("background-color: rgb(40, 60, 90)")
+		self.delete_button.setStyleSheet("background-color: rgb(56, 186, 255)")
 
 	def toggleSceneText(self):
 
@@ -200,11 +221,16 @@ class uiItem(QtGui.QGroupBox):
 
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
-			self.setStatus("No Episode","red")
+			self.setStatus("No episode was chosen","red")
 			return
 
 		self.incrementProgress(10)
-		scene_name = self.getScene(self.getFilename().upper(),episode_code)
+		if (not self.scene_text.isEnabled()) or len(self.scene_text.text()) == 0:
+			self.setStatus("Scene Not found","red")
+			return
+
+		print("SHOT: " + self.project_data.paths.format_sc(self.scene_text.text()))
+		scene_name = self.getScene(self.project_data.paths.format_sc(self.scene_text.text()),episode_code) if self.scene_text.isEnabled() else self.getScene(self.getFilename().upper(),episode_code)
 		self.incrementProgress(10)
 		animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
 		self.incrementProgress(10)
