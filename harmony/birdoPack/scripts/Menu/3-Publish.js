@@ -1,79 +1,65 @@
 /*
-	Script para fazer publish do shot na rede do projeto
+	Script para fazer publish da cena na rede do projeto
 
 */
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-//TODO: Fazer funcao para gerar fila do render e mudar mensagem de aviso da fazendinha pos publish
 
 function Publish(){
 				
 	var projectDATA = BD2_ProjectInfo();
 
 	if(!projectDATA){
-		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		Print("[BIRDOAPP][PUBLISH] ERRO gerando dados do Birdoapp...");
 		return false;
 	}
 
 	if(projectDATA.entity.type != "SHOT"){
-		MessageBox.warning("Erro! Este nao e um SHOT do projeto! O script de publish por enquanto somente funciona para SHOT!", 0, 0);
-		Print("[PUBLISH] Error! Script de publish por enquanto somente funciona para shot!");
+		MessageBox.warning("Erro! Este nao e uma Cena do projeto! O script de publish por enquanto somente funciona para Cenas!", 0, 0);
+		Print("[BIRDOAPP][PUBLISH] Error! Script de publish por enquanto somente funciona para shot!");
 		return false;
 	}
 	
-	var step = projectDATA.getPublishStep();
-	
-	var shot_server_path = projectDATA.getShotPublishFolder(step);
-
-	if(!shot_server_path){
-		MessageBox.warning("Fail to get server_shot_path!", 0, 0);
-		Print("fail to get server_shot_path!");
+	var pusblish_data = PublishDialog(projectDATA);
+	if(!publish_data){
+		Print("Canceled...");
 		return;
 	}
 	
-	var render_step = projectDATA.getRenderStep();
+	//define publish paths
+	pusblish_data["publish_path"] = projectDATA.getShotPublishFolder(pusblish_data["publish_step"]);
+	pusblish_data["render_path"] = projectDATA.getRenderPath("server", pusblish_data["render_step"]) + "/" + projectDATA.entity.name + ".mov";
 	
-	if(!render_step){
-		Print("Canceled..");
-		return;
+	//aviso sobre quantidade de frames da cena em relacao ao animatic
+	if("render_farm" in projectDATA){
+		if(!BD2_checkFrames()){
+			Print("cancelado pelo usuario por estar sem o numero de frames corretos!");
+			return;
+		}
 	}
 	
-	var render_path = projectDATA.getRenderPath("server", render_step);
-
-	if(!render_path){
-		MessageBox.warning("Fail to get server_shot_path!", 0, 0);
-		Print("fail to get server_shot_path!");
-		return;
-	}
-	
-	render_path = render_path + projectDATA.entity.name + ".mov";
-	
-	if(!BD2_checkFrames()){
-		Print("cancelado pelo usuario por estar sem o numero de frames corretos!");
+	//mensagem de confirmação!
+	if(!BD2_AskQuestion("Publish CENA: Este script irá salvar esta cena, e enviar para o server com o versionamento correto!\nDeseja continuar?")){
+		Print("publish cancelado pelo usuario!");
 		return;
 	}
 	
 	//roda o script pre-publish com todas funcoes q modificam a cena antes de enviar
-	var pre_publish_js = projectDATA["paths"]["birdoPackage"] + "utils/pre_publish.js";
-	if(!BD1_FileExists(pre_publish_js)){
-		Print("Fail to find project_recolor.js script!");
-		MessageBox.warning("Fail to run pre-publish scripts!",0,0);
-		return;
+	var pre_publish_js = projectDATA.proj_confg_root + "pre_publish.js";
+	if(BD1_FileExists(pre_publish_js)){
+		require(pre_publish_js).pre_publish(projectDATA);
+	} else {
+		Print("Nenhum script pre_publish.js encontrado para o projeto.");
 	}
-	require(pre_publish_js).pre_publish(projectDATA);
 	
-	//save scene modifications!
+	//salva a cena antes de enviar
 	scene.saveAll();
 	
+	//compacta o arquivo para envio
 	var compactJs = projectDATA.paths.birdoPackage + "utils/compact_version.js";
-
 	var compact_version_data = require(compactJs).create_compact_file_list();
 
-	if(!BD2_AskQuestion("Publish SHOT: Este script irá salvar esta cena, e enviar para o server com o versionamento correto!\nDeseja continuar?")){
-		Print("publish cancelado pelo usuario!");
-		return;
-	}
 
 	var publish_data = publish_py_script(projectDATA, compact_version_data, shot_server_path, render_path, render_step, step);
 	
@@ -218,7 +204,14 @@ exports.Publish = Publish;
 
 
 function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
-
+	
+	var publish_steps = proj_data.getPublishStep();
+	var render_steps = proj_data.getRenderStep();
+	
+	if(publish_steps.length == 1 || render_steps.length == 1 && !("render_farm" in proj_data)){
+		return {"publish_step": publish_steps[0], "render_step": render_steps[0], "send_farm": false};
+	}
+	
 	var options = {};
 	var d = new Dialog;
 	d.title = "Publish Cena";
@@ -243,16 +236,14 @@ function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
 	d.addSpace(15);
 	
 	//set items
-	publish_step.itemList = proj_data.getPublishStep().sort();
-	render_step.itemList = proj_data.getPublishStep().sort();
+	publish_step.itemList = publish_steps.sort();
+	render_step.itemList = render_steps.sort();
 	publish_step.label = "Escolha o Step (se disponível): ";
 	render_step.label = "RENDER Step (se disponível): ";
 	send_farm.text = "Enviar para Render Farm ";
 
 	publishGroup.title = "Opções de Publish";
 	renderGroup.title = "Opções de RENDER";
-	
-	render.enabled = "render_farm" in proj_data;
 	
 	var rc = d.exec();
 

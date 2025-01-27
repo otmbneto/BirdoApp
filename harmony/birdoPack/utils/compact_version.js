@@ -87,7 +87,8 @@ function create_compact_file_list(){
     }
 	progressDlg.hide();
     Print("COMPACT VERSION LIST DONE! " + counter_file + " arquivos adicionados a lista para compactar no python!");
-	
+	return finalOutput;
+
  /////////////// funcoes complementares - limpa cena////////////////////
 	function validate_main_item(item){//valida se o arquivo no folder principal e valido
 		var file_extension = BD1_file_extension(item);
@@ -150,7 +151,6 @@ function create_compact_file_list(){
 		}
 	}
 	
-	return finalOutput;
 }
 
 exports.create_compact_file_list = create_compact_file_list;
