@@ -49,8 +49,8 @@ function birdoapp_init(scripts_path){
 			}
 		}
 	} else {
-		var proj_data = BD1_ReadJSONFile(birdoapp_root + "/template/project_template/project_data.json");
-		proj_data["proj_confg_root"] = null;
+		proj_data["proj_confg_root"] = birdoapp_root + "/template/project_template/"
+		var proj_data = BD1_ReadJSONFile(proj_data["proj_confg_root"] + "project_data.json");;
 	}
 
 	var birdodata = new BirdoAppConfig(config_data, proj_data);
