@@ -13,17 +13,20 @@ from app.utils.ffmpeg import compress_render
 
 class uiItem(QtGui.QGroupBox):
 
-	def __init__(self,fullpath,episode_list):
+	def __init__(self,fullpath,episode_list,project_data):
 		super(uiItem,self).__init__()
 
 		self.filename = "ITEM_NAME"
 		self.filetypes = (".mov",".mp4")
+		self.project_data = project_data
 		if fullpath is not None:
 			self.filename = fullpath.split("/")[-1]
 			self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
+		self.sceneFound = True
 
 		self.initLayout(episode_list)
 		self.initLogic()
+		print(self.palette().color(QtGui.QPalette.Base).name())
 
 	def initLayout(self,episode_list):
 
@@ -39,6 +42,21 @@ class uiItem(QtGui.QGroupBox):
 
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
+
+		scene_label = QtGui.QLabel("Scene:")
+		scene_font = QtGui.QFont("Arial", 8)
+		scene_label.setFont(item_font)
+		scene_label.setMinimumWidth(50)
+
+		self.scene_text = QtGui.QLineEdit()
+		#self.scene_text.setEnabled(False)
+		self.toggleSceneText()
+		self.scene_text.setValidator(QtGui.QIntValidator(self))
+		self.scene_text.textChanged.connect(self.onLineEditChange)
+
+		self.typing_timer = QtCore.QTimer(self)
+		self.typing_timer.setSingleShot(True)  # Run only once after the timeout
+		self.typing_timer.timeout.connect(self.onTypingFinished)
 
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
@@ -63,6 +81,8 @@ class uiItem(QtGui.QGroupBox):
 
 		horizontal_layout.addWidget(item_label)
 		horizontal_layout.addWidget(self.episodes)
+		horizontal_layout.addWidget(scene_label)
+		horizontal_layout.addWidget(self.scene_text)
 		horizontal_layout.addWidget(self.progress_bar)
 		horizontal_layout.addWidget(self.status_label)        
 		horizontal_layout.addWidget(self.delete_button)
@@ -72,10 +92,42 @@ class uiItem(QtGui.QGroupBox):
 	def initLogic(self):
 
 		episode = self.getEpisode(self.getFullpath())
+		shot = self.project_data.paths.find_sc(self.getFilename())
+		if shot is None:
+			self.toggleSceneText()
+			self.setBackgroundColor("purple")
+			self.sceneFound = False
+
 		if episode is not None:
 			self.setEpisode(self.findIndexOf(episode))
 
 		self.delete_button.clicked.connect(self.close)
+     
+	def onLineEditChange(self):
+		# Start the timer every time the text changes
+		self.typing_timer.start(1500)  # 1000 ms = 1 second delay
+
+	def onTypingFinished(self):
+		# Trigger action after user stops typing for 1 second
+		print("User stopped typing: {0}".format(self.scene_text.text()))
+		if len(self.scene_text.text()) > 0:
+			self.setBackgroundColor("#233142")
+
+	def wasSceneFound(self):
+
+		return self.sceneFound
+
+	def setBackgroundColor(self,color):
+
+		self.setStyleSheet("background-color: {0}".format(color))
+		self.episodes.setStyleSheet("background-color: white")
+		self.scene_text.setStyleSheet("background-color: white")
+		self.progress_bar.setStyleSheet("background-color: rgb(40, 60, 90)")
+		self.delete_button.setStyleSheet("background-color: rgb(56, 186, 255)")
+
+	def toggleSceneText(self):
+
+		self.scene_text.setEnabled(not self.scene_text.isEnabled())
 
 	def findIndexOf(self,text):
 	    index = self.episodes.findText(text, QtCore.Qt.MatchFixedString)
@@ -160,23 +212,27 @@ class uiItem(QtGui.QGroupBox):
 
 		return self.getRegexPattern('.*SC_(\d{4}).*|.*SC(\d{4}).*',filename)
 
-	def getScene(self,filename,episode,project_data):
+	def getScene(self,filename,episode):
 
-		m = project_data.paths.find_sc(filename)
-		return "_".join([project_data.prefix,episode,m]) if m is not None else m
+		m = self.project_data.paths.find_sc(filename)
+		return "_".join([self.project_data.prefix,episode,m]) if m is not None else m
 
-	def upload(self,project_data,temp):
+	def upload(self,temp):
 
 		episode_code = self.getCurrentEpisode()
 		if episode_code == "":
-			self.setStatus("No Episode","red")
+			self.setStatus("No episode was chosen","red")
 			return
 
-		print("FIND SC: " + str(project_data.paths.find_sc(self.getFilename())))
 		self.incrementProgress(10)
-		scene_name = self.getScene(self.getFilename().upper(),episode_code,project_data)
+		if (not self.scene_text.isEnabled()) or len(self.scene_text.text()) == 0:
+			self.setStatus("Scene Not found","red")
+			return
+
+		print("SHOT: " + self.project_data.paths.format_sc(self.scene_text.text()))
+		scene_name = self.getScene(self.project_data.paths.format_sc(self.scene_text.text()),episode_code) if self.scene_text.isEnabled() else self.getScene(self.getFilename().upper(),episode_code)
 		self.incrementProgress(10)
-		animatic_path = project_data.paths.get_animatics_folder("server",episode_code).normpath()
+		animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
 		self.incrementProgress(10)
 		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
 		self.incrementProgress(10)
