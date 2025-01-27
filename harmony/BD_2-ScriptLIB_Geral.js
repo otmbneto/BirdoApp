@@ -797,18 +797,15 @@ function BD2_ProjectInfo(){
 		return false;
 	}
 	var birdoPackage = BD2_updateUserNameInPath(BD2_FormatPathOS(birdoApp_scripts + "/birdoPack/"));
-	var pathsScript = birdoPackage + "birdoapp_config.js";
+	var pathsScript = birdoPackage + "birdoapp_init.js";
 	
 	if(!BD1_FileExists(pathsScript)){
-		Print("[BIRDOAPP][ERROR] Script 'birdoapp_config.js' nao encontrado! Nao sera possivel iniciar o BirdoApp no Harmony!");
+		Print("[BIRDOAPP][ERROR] Script 'birdoapp_init.js' nao encontrado! Nao sera possivel iniciar o BirdoApp no Harmony!");
 		return false;
 	}
 	
 	//cria a classe do birdo_init
 	var birdoApp = require(pathsScript).birdoapp_init(birdoApp_scripts);
-	
-	//roda o metodo para definir a entity do arquivo Harmony aberto.
-	birdoApp.defineEntity();
 	
 	//atualiza a classe paths com o caminho do root do harmony package Birdo
 	birdoApp.paths["birdoPackage"] = birdoPackage;

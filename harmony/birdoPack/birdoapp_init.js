@@ -16,14 +16,14 @@ function birdoapp_init(scripts_path){
 	//primeiro monta um objeto com importantes valores, depois cria a classe principal
 	
 	//get config data
-	var birdoApp = BD2_updateUserNameInPath(BD1_dirname(scripts_path));
-	var config_json = birdoApp + "/config.json";
+	var birdoapp_root = BD2_updateUserNameInPath(BD1_dirname(scripts_path));
+	var config_json = birdoapp_root + "/config.json";
 	var config_data = BD1_FileExists(config_json) ? BD1_ReadJSONFile(config_json) : {"user_name": null, "server_projects": null, "user_projects": []};
 	
-	//define se a config birdoapp é valida:
+	//define se a config birdoapp_root é valida:
 	config_data["valid"] = BD1_FileExists(config_json) && config_data["server_projects"] && prefix;
 
-	config_data["birdoApp"] = birdoapp_root;
+	config_data["birdoapp"] = birdoapp_root;
 	config_data["appdata"] = BD2_updateUserNameInPath(BD2_FormatPathOS(System.getenv("APPDATA")));
 	config_data["systemTempFolder"] = BD2_updateUserNameInPath(BD2_FormatPathOS(specialFolders.temp));
 	config_data["scripts_path"] = scripts_path;
@@ -31,26 +31,31 @@ function birdoapp_init(scripts_path){
 	var prefix = find_scene_project_prefix();
 		
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
-	var proj_data = BD1_ReadJSONFile(birdoApp + "/template/project_template/project_data.json");
-	proj_data["proj_confg_root"] = null;
 	if(prefix && config_data["server_projects"]){
 		var folders_prefix = BD1_ListFolders(config_data["server_projects"]);
-		if(folders_prefix.indexOf(prefix)){
-			proj_data["proj_confg_root"] = config_data["server_projects"] + "/" + prefix + "/";
-			var proj_data = BD1_ReadJSONFile(proj_data["proj_confg_root"] + "project_data.json");
+
+		if(folders_prefix.indexOf(prefix) != -1){
+			var proj_root = [config_data["server_projects"], prefix].join("/") + "/";
+			var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
 			var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
+			proj_data["proj_confg_root"] = proj_root;
 			if(find_proj_data.length == 0){
 				proj_data["paths"]["local_folder"] = null;
 				proj_data["user_role"] = null;
 				config_data["valid"] = false;
 			}else {
-				proj_data["local_folder"] = find_proj_data[0]["local_folder"]
+				proj_data["paths"]["local_folder"] = find_proj_data[0]["local_folder"]
 				proj_data["user_role"] = find_proj_data[0]["user_role"];
 			}
 		}
+	} else {
+		var proj_data = BD1_ReadJSONFile(birdoapp_root + "/template/project_template/project_data.json");
+		proj_data["proj_confg_root"] = null;
 	}
 
 	var birdodata = new BirdoAppConfig(config_data, proj_data);
+	birdodata.defineEntity();
+	
 	if(birdodata.valid){
 		Print("[BIRDOAPP] BirdoApp configurado para o projeto '" + birdodata.project_name + "' com sucesso!");
 	} else {
@@ -83,7 +88,7 @@ function find_scene_project_prefix(){
 function BirdoAppConfig(config_data, project_data){
 	
 	//main paths data
-	this.birdoApp = birdoapp_root;
+	this.birdoApp = config_data["birdoapp"];
 	this.appdata = config_data["appdata"];
 	this.systemTempFolder = config_data["systemTempFolder"];
 	
@@ -105,8 +110,8 @@ function BirdoAppConfig(config_data, project_data){
 	//cria os objetos de regex
 	this.pattern = {
         "asset": new RegExp(project_data["pattern"]["asset"]["regex"]),
-        "scene": new RegExp(project_data["pattern"]["scene"]["regex"].replace("PREFIX", this.prefix),
-        "animatic": new RegExp(project_data["pattern"]["animatic"]["regex"].replace("PREFIX", this.prefix),
+        "scene": new RegExp(project_data["pattern"]["scene"]["regex"].replace("PREFIX", this.prefix)),
+        "animatic": new RegExp(project_data["pattern"]["animatic"]["regex"].replace("PREFIX", this.prefix)), 
         "ep": new RegExp(project_data["pattern"]["ep"]["regex"]),
 		"sc": new RegExp(project_data["pattern"]["sc"]["regex"])
     }
@@ -131,7 +136,7 @@ function BirdoAppConfig(config_data, project_data){
 		} else if(this.pattern["asset"].test(fileName)){
 			this.entity["type"] = "ASSET";
 			this.entity["asset_type"] = /[a-zA-Z]+/.exec(fileName)[0];
-			this.entity["name"] = fileName.replace(version_reg, "");		
+			this.entity["name"] = fileName.replace(/_v\d+^/, "");		
 			this.entity["ep"] = [];
 		} else {
 			MessageLog.trace("[BIRDOAPP] Nao foi possivel determinar a 'entity' do arquivo Harmony. Algumas funcionalidades nao estaram disponiveis.");
@@ -272,26 +277,18 @@ function BirdoAppConfig(config_data, project_data){
 	
 	this.getRenderComp = function(){//caminho do render de comp
 		var server_root = this.getServerRoot();
-		return [
-			server_root, 
+		return server_root + [ 
 			this.paths["episodes"], 
 			this.entity.ep, 
 			this.paths.ep.cenas.folder, 
 			this.get_scene_step_folder("COMP"),
 			this.entity["name"],
-			this.paths.step.COMP.server.filter(function(item){ return item.indexOf("RENDER") != -1})[0]
-			].join("/");
+			this.paths.step.COMP.server.filter(function(item){ return item.toUpperCase().indexOf("RENDER") != -1})[0]
+		].join("/");
 	}
 	
-	this.getRenderPath = function(root, step){//retorna o caminho de folder do render (com o root dado local ou server - no server deixei vazio pra escolher no python)
-		
-		if(this.entity.type != "SHOT"){
-			MessageLog.trace("[GETRENDERPATH] Metodo somente disponivel para SHOTS!");
-			return false;
-		}
-		var ep = this.entity["ep"];
-		var sceneName = this.entity["name"];
-		
+	this.getRenderPath = function(root, step){
+				
 		var tb_root = "";
 		if(root == "server"){
 			tb_root = this.getServerRoot();
@@ -299,48 +296,23 @@ function BirdoAppConfig(config_data, project_data){
 			tb_root = this.getLocalRoot();
 		}
 		
-		var step_folder = this.get_render_step_folder(step);
-		
-		if(!step_folder){
-			MessageLog.trace("[GETRENDERPATH] Step nao encontrado para este nome de step!");
-			return false;
-		}
-		return tb_root + this.paths["episodes"] + ep + "/03_CENAS/00_RENDER/" + step_folder + "/";
+		return tb_root + [
+			this.paths["episodes"], 
+			this.entity.ep, 
+			this.paths.ep.cenas.folder, 
+			this.paths.ep.cenas.render.folder, 
+			this.get_scene_step_folder(step)
+		].join("/");
 	}
 	
 	this.getRenderAnimaticLocalFolder = function(){//retorna o folder local dos renders do animatic
-		var animatic_render_path = this.getRenderPath("local", "ANIMATIC");
-		return animatic_render_path;
-	}
-	
-	this.getSceneStep = function(){//retorna o step baseado na funcao do usuario (usado para o envio de cena)
-		if(this.user_type == "ANIMATOR" || this.user_type == "ANIM_LEAD"){
-			return "ANIM";
-		}
-		if(this.user_type == "COMP"){
-			return "COMP";
-		}
-		if(this.user_type == "SETUP"){
-			return "SETUP";
-		}
-		return ["SETUP", "ANIM", "COMP"];
-	}
-	
-	this.find_step_in_scene_path = function(){//procura o step no caminho da cena caso ela esteja na estrutura de cenas do projeto
-		var scene_path = scene.currentProjectPath();
-		var splited = scene_path.split(/\/|\\/);
-		var step_regex = /^(\d{2}_(SETUP|ANIM|COMP))$/;
-		for(var i=0; i<splited.length; i++){
-			if(step_regex.test(splited[i])){
-				return splited[i].replace(/\d{2}_/, "");
-			}
-		}
-		return null;
-	}
-	
-	this.checkConnection = function(){//ESCREVER FUNCAO PRA TESTAR CONEXAO COM O NEXTCLOUD (testar um esquema no python pra checar e retornar a raiz no server??)
-		MessageLog.trace("[CHECKCONNECTION] Falta escrever funcao no python pra checar conexao com o Nextcloud aqui!");
-		return true;
+		return this.getLocalRoot() + [
+			this.paths["episodes"], 
+			this.entity.ep, 
+			this.paths.ep.cenas.folder, 
+			this.paths.ep.cenas.render.folder, 
+			this.paths.ep.cenas.render.sub_folders[0]
+		].join("/");
 	}
 	
 	this.getLibPath = function(){
@@ -348,13 +320,12 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.usesBirdoLib = function(){//testa se o projeto usa birdoLib
-		return true;	
+		return dirExist(this.getLibPath());	
 	}
 	
 	this.getWriteNodeAtt = function(step){//retorna o atributo do write node para o step ('pre_comp' ou 'comp')
 		return this.write_node_att[step.toLowerCase()];
 	}
-	///////////////FIM DOS METODOS////////////////////////
 		
 	//funcoes complementares//
 	function fileExists(filePath){//check if file exis
