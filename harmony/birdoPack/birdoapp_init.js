@@ -264,10 +264,6 @@ function BirdoAppConfig(config_data, project_data){
 	}
 
 	this.getShotPublishFolder = function(step){//retorna o caminho de folder para publish do arquivo aberto para o projeto - OK
-		if(this.entity.type != "SHOT"){
-			MessageLog.trace("[GETSHOTPUBLISHFOLDER] Error! Metodo somente funciona para shot!");
-			return false;
-		}
 		var ep = this.entity["ep"];
 		var sceneName = this.entity["name"];
 		var publish = null;
@@ -292,6 +288,9 @@ function BirdoAppConfig(config_data, project_data){
 		var tb_root = "";
 		if(root == "server"){
 			tb_root = this.getServerRoot();
+			if(step == "COMP"){
+				return this.getRenderComp();
+			}
 		} else if(root == "local"){
 			tb_root = this.getLocalRoot();
 		}
