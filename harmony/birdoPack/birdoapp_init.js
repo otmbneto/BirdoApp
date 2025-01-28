@@ -19,16 +19,18 @@ function birdoapp_init(scripts_path){
 	var birdoapp_root = BD2_updateUserNameInPath(BD1_dirname(scripts_path));
 	var config_json = birdoapp_root + "/config.json";
 	var config_data = BD1_FileExists(config_json) ? BD1_ReadJSONFile(config_json) : {"user_name": null, "server_projects": null, "user_projects": []};
-	
-	//define se a config birdoapp_root é valida:
-	config_data["valid"] = BD1_FileExists(config_json) && config_data["server_projects"] && prefix;
+		
+	//acha o prefix na cena
+	var prefix = find_scene_project_prefix();
 
-	config_data["birdoapp"] = birdoapp_root;
+	//define se a config birdoapp_root é valida:
+	config_data["valid"] = BD1_FileExists(config_json) && Boolean(config_data["server_projects"]) && Boolean(prefix);
+
+	config_data["birdoapp"] = birdoapp_root + "/";
 	config_data["appdata"] = BD2_updateUserNameInPath(BD2_FormatPathOS(System.getenv("APPDATA")));
 	config_data["systemTempFolder"] = BD2_updateUserNameInPath(BD2_FormatPathOS(specialFolders.temp));
 	config_data["scripts_path"] = scripts_path;
 	
-	var prefix = find_scene_project_prefix();
 		
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
 	if(prefix && config_data["server_projects"]){
@@ -128,6 +130,7 @@ function BirdoAppConfig(config_data, project_data){
 	//Metodos de caminhos
 	this.defineEntity = function(){//metodo para definir chave entity da classe
 		var fileName = scene.currentScene();
+		MessageLog.trace(this.pattern["scene"]);
 		if(this.pattern["scene"].test(fileName)){
 			this.entity["type"] = "SHOT";
 			this.entity["name"] = fileName;
