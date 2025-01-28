@@ -4,13 +4,15 @@
 		"1-Export_Asset.js",
 		"4-Save_Asset_tpl.js",
 		"5-Import_Assets.js",
-		"10-Update_Setup.js"
+		"10-Update_Setup.js",
+		"11-Ajuda"
 	  ],
 	"OTHER": [
 		"1-Export_Asset.js",
 		"4-Save_Asset_tpl.js",
 		"5-Import_Assets.js",
-		"10-Update_Setup.js"
+		"10-Update_Setup.js",
+		"11-Ajuda"
 	]
   }, 		
   "SHOT": {
@@ -23,7 +25,8 @@
 		"7-Add_Notes.js",
 		"8-Send_Notes.js",
 		"9-Get_Notes.js",
-		"10-Update_Setup.js"
+		"10-Update_Setup.js",
+		"11-Ajuda"
 	], 
 	"OTHER": [
 		"0-Update_Animatic.js",
@@ -31,7 +34,8 @@
 		"5-Import_Assets.js",
 		"6-Render_Preview.js",
 		"9-Get_Notes.js",
-		"10-Update_Setup.js"
+		"10-Update_Setup.js",
+		"11-Ajuda"
 	]
   } 	
 }
