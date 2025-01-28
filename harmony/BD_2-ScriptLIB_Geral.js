@@ -1322,14 +1322,7 @@ function BD2_loadingBirdo(birdoAppPath, timeout, loadingtext){
 	@path => caminho a ser mudado
 */
 function BD2_FormatPathOS(path){
-	var finalPath = null;
-	var nativePath = fileMapper.toNativePath(path);
-	if(about.isMacArch()){//define caminhos no Mac
-		finalPath = BD2_RenameAll(nativePath, "\\", "/");
-	} else if(about.isWindowsArch()){//define caminhos no Windows
-		finalPath = nativePath;		
-	}
-	return finalPath;
+	return BD2_RenameAll(fileMapper.toNativePath(path), "\\", "/");
 }
 
 /*
