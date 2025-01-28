@@ -245,20 +245,6 @@ function BirdoAppConfig(config_data, project_data){
 		}
 	}
 	
-	this.modifyScenePreRender = function(step){//modifica a cena antes do render
-		var get_psd_data_script = this.paths.birdoPackage + "utils/get_psd_anim_data.js";
-		if(step == "COMP"){
-			try{
-				require(get_psd_data_script).get_psd_anim_data(true);//exporta info dos psd
-			} catch(e){
-				MessageLog.trace(e.message);
-				MessageLog.trace("[BIRDOAPP][modifyScenePreRender] Error creating PSD files data!");
-			}
-		} else {
-			MessageLog.trace("[BIRDOAPP] Nenhuma acao de modify scene para o pre_comp (adicione um codigo para modificar a cena aqui!)");
-		}
-	}
-	
 	this.get_scene_step_folder = function(step_type){//retorna o nome da pasta de step no render
 		return this.paths["step"][step_type]["folder_name"];	
 	}
