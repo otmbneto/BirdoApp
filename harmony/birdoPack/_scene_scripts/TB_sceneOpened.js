@@ -16,7 +16,7 @@ function TB_sceneOpened(){
 		return false;
 	}
 
-	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 15000, "Loading scripts...");
+	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 15000, "Loading_scripts...");
 
 	Print("[BIRDOAPP] BirdoAPP Project DATA:\n");
 	Print(projectDATA);
