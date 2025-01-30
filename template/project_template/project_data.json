@@ -4,6 +4,7 @@
     "name": "NoNoNoNoNo",
     "sub_name": "NoNoNoNoNo",
     "icon": "NoNoNo",
+	"render_farm": false,
     "roles": [
         "RIG",
         "DESIGN",
@@ -92,6 +93,7 @@
             },
 			"COMP": {
                 "folder_name": "03_COMP",
+				"harmony": false,
                 "server": [
                     "01_AFTER_PROJECTS",
                     "02_TB_RENDERS",

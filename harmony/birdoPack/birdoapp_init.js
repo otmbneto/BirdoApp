@@ -90,6 +90,7 @@ function find_scene_project_prefix(){
 function BirdoAppConfig(config_data, project_data){
 	
 	//main paths data
+	this.render_farm = project_data["render_farm"];
 	this.birdoApp = config_data["birdoapp"];
 	this.appdata = config_data["appdata"];
 	this.systemTempFolder = config_data["systemTempFolder"];
@@ -130,7 +131,6 @@ function BirdoAppConfig(config_data, project_data){
 	//Metodos de caminhos
 	this.defineEntity = function(){//metodo para definir chave entity da classe
 		var fileName = scene.currentScene();
-		MessageLog.trace(this.pattern["scene"]);
 		if(this.pattern["scene"].test(fileName)){
 			this.entity["type"] = "SHOT";
 			this.entity["name"] = fileName;
@@ -180,26 +180,32 @@ function BirdoAppConfig(config_data, project_data){
 		return false;
 	}
 	
-	this.getPublishStep = function(){//retorna steps disponiveis para publish para o user_type
+	this.getPublishStep = function(){//retorna uma lista com steps baseado no USER TYPE (DT retorna todos steps possiveis, e outros filtram)
+		var steps_list = Object.keys(this.paths.steps);
+		//se a comp NAO usar harmony, tira comp de destino possível para step de publish
+		if(!this.paths.steps.COMP.harmony){
+			steps_list.splice(steps_list.indexOf("COMP"), 1);
+		}
+
+		var user_type = this.user_type;
+		if(user_type == "COMP"){
+			return ["ANIM"];
+		}
+		var step_filtered = steps_list.filter(function(item){ return user_type.indexOf(item) != -1});
+		if(step_filtered.length == 0){
+			return steps_list;
+		}
+		
+		return step_filtered;
+	}
+	
+	this.getRenderStep = function(){//retorna o step do render (DT e COMP retorna mais opcoes)
 		var steps_list = Object.keys(this.paths.steps);
 		var user_type = this.user_type;
 		if(user_type == "DT"){
 			return steps_list;
 		}
 		return steps_list.filter(function(item){ return user_type.indexOf(item) != -1});
-	}
-	
-	this.getRenderStep = function(){//retorna o step do render (DT e COMP retorna mais opcoes)
-		var steps_list = Object.keys(this.paths.steps);
-		
-		if(this.user_type == "DT"){
-			return steps_list;
-		} else if (this.user_type == "COMP"){
-			steps_list.shift();
-			return steps_list;
-		} else {
-			return steps_list.filter(function(item){ return user_type.indexOf(item) != -1});
-		}
 	}
 	
 	this.setProjectCS = function(step){//seta o espaco de cor para o projeto
@@ -252,7 +258,7 @@ function BirdoAppConfig(config_data, project_data){
 		return this.paths["step"][step_type]["folder_name"];	
 	}
 
-	this.getShotPublishFolder = function(step){//retorna o caminho de folder para publish do arquivo aberto para o projeto - OK
+	this.getShotPublishFolder = function(step){//retorna o caminho de folder para publish do arquivo aberto para o projeto
 		var ep = this.entity["ep"];
 		var sceneName = this.entity["name"];
 		var publish = null;
@@ -261,6 +267,9 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.getRenderComp = function(){//caminho do render de comp
+		if(this.paths.steps.COMP.harmony){
+			return this.getRenderPath("server", "COMP")		
+		}
 		var server_root = this.getServerRoot();
 		return server_root + [ 
 			this.paths["episodes"], 
@@ -277,9 +286,6 @@ function BirdoAppConfig(config_data, project_data){
 		var tb_root = "";
 		if(root == "server"){
 			tb_root = this.getServerRoot();
-			if(step == "COMP"){
-				return this.getRenderComp();
-			}
 		} else if(root == "local"){
 			tb_root = this.getLocalRoot();
 		}

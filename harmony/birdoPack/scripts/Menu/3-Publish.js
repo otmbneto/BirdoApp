@@ -9,15 +9,8 @@ include("BD_2-ScriptLIB_Geral.js");
 function Publish(){
 				
 	var projectDATA = BD2_ProjectInfo();
-
 	if(!projectDATA){
 		Print("[BIRDOAPP][PUBLISH] ERRO gerando dados do Birdoapp...");
-		return false;
-	}
-
-	if(projectDATA.entity.type != "SHOT"){
-		MessageBox.warning("Erro! Este nao e uma Cena do projeto! O script de publish por enquanto somente funciona para Cenas!", 0, 0);
-		Print("[BIRDOAPP][PUBLISH] Error! Script de publish por enquanto somente funciona para shot!");
 		return false;
 	}
 	
@@ -205,45 +198,63 @@ exports.Publish = Publish;
 
 function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
 	
-	var publish_steps = proj_data.getPublishStep();
+	var publish_steps = proj_data.getPublishStep().sort();
 	var render_steps = proj_data.getRenderStep();
 	
-	if(publish_steps.length == 1 || render_steps.length == 1 && !("render_farm" in proj_data)){
+	//escolhe o step atual da cena (caso exista);
+	var curr_step = "N.A";
+	var scene_path = scene.currentProjectPath();
+	for(var i=0; i<publish_steps.length; i++){
+		if(scene_path.indexOf(publish_steps[i]) != -1){
+			curr_step = publish_steps[i];
+			break;
+		}
+	}
+	
+	if(publish_steps.length == 1 && !proj_data["render_farm"]){
 		return {"publish_step": publish_steps[0], "render_step": render_steps[0], "send_farm": false};
 	}
 	
 	var options = {};
 	var d = new Dialog;
-	d.title = "Publish Cena";
-
-	//groups
-	var publishGroup = new GroupBox;
-	var renderGroup = new GroupBox;
+	d.title = "BIRDOAPP Publish";
 	
-	//widgets
-	var publish_step = new ComboBox();
-	var render_step = new ComboBox();
-	var send_farm = new CheckBox();
+	if(publish_steps.length > 1){
+		var publishGroup = new GroupBox;
+		var publish_step = new ComboBox();
+		var label = new Label();
+		publishGroup.add(publish_step);
+		publishGroup.addSpace(5);
+		publishGroup.add(label);
+		d.add(publishGroup);
+		d.addSpace(5);
+		publish_step.itemList = publish_steps;
+		publish_step.label = "Escolha o Step do PUBLISH:\n(Step ATUAL: " + curr_step + ")";
+		if(curr_step != "N.A"){
+			publish_step.currentItem = curr_step;
+		}
+		label.text = "Atenção: Somente escolha um step diferente do atual da cena\nse tiver CERTEZA do que está fazendo!";
+		publishGroup.title = "Opções de Publish";
+	}
 	
-	publishGroup.add(publish_step);
-	renderGroup.add(render_step);
-	renderGroup.add(send_farm);
+	if(proj_data["render_farm"]){
+		var renderGroup = new GroupBox;
+		var render_step = new ComboBox();
+		var send_farm = new CheckBox();
+		send_farm.checked = true;
+		renderGroup.add(send_farm);
+		renderGroup.add(render_step);
+		d.add(renderGroup);
+		d.addSpace(15);
+		send_farm.text = "Adicionar na Fila da Render Farm";
+		render_step.itemList = render_steps.sort();
+		render_step.label = "RENDER Step: ";
+		renderGroup.title = "Opções de RENDER";
+		if(render_steps.indexOf(curr_step) != -1){
+			render_step.currentItem = curr_step;	
+		}
+	}
 	
-	//add groups
-	d.add(publishGroup);
-	d.addSpace(5);
-	d.add(renderGroup);
-	d.addSpace(15);
-	
-	//set items
-	publish_step.itemList = publish_steps.sort();
-	render_step.itemList = render_steps.sort();
-	publish_step.label = "Escolha o Step (se disponível): ";
-	render_step.label = "RENDER Step (se disponível): ";
-	send_farm.text = "Enviar para Render Farm ";
-
-	publishGroup.title = "Opções de Publish";
-	renderGroup.title = "Opções de RENDER";
 	
 	var rc = d.exec();
 
@@ -251,8 +262,8 @@ function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
 		return false;
 	}
 	
-	options["publish_step"] = publish_step.currentItem;
-	options["render_step"] = render_step.currentItem;
-	options["send_farm"] = send_farm.checked;
+	options["publish_step"] = publish_steps.length > 1 ? publish_step.currentItem : publish_steps[0];
+	options["render_step"] = proj_data["render_farm"] ? render_step.currentItem : null;
+	options["send_farm"] = proj_data["render_farm"] ? send_farm.checked : null;
 	return options;
 }
