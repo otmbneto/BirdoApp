@@ -25,7 +25,7 @@ function Publish(){
 	pusblish_data["render_path"] = projectDATA.getRenderPath("server", pusblish_data["render_step"]) + "/" + projectDATA.entity.name + ".mov";
 	
 	//aviso sobre quantidade de frames da cena em relacao ao animatic
-	if("render_farm" in projectDATA){
+	if(projectDATA["render_farm"]){
 		if(!BD2_checkFrames()){
 			Print("cancelado pelo usuario por estar sem o numero de frames corretos!");
 			return;
@@ -51,7 +51,7 @@ function Publish(){
 	
 	//compacta o arquivo para envio
 	var compactJs = projectDATA.paths.birdoPackage + "utils/compact_version.js";
-	var compact_version_data = require(compactJs).create_compact_file_list();
+	var compact_version_data = require(compactJs).create_compact_file_list(true);
 
 
 	var publish_data = publish_py_script(projectDATA, compact_version_data, shot_server_path, render_path, render_step, step);

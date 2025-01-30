@@ -18,7 +18,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
-function create_compact_file_list(){
+function create_compact_file_list(use_progressbar){
 
 	//LISTAR TRATAMENTO DE ARQUIVOS AQUI////
 	var main_folders = ["audio", "elements", "frames", "palette-library", "scripts"];
@@ -37,13 +37,16 @@ function create_compact_file_list(){
 	
 	var finalOutput = {"user_name": null, "file_list": []};
 	
-	var max = all_files.length - 1;
-	var progressDlg = new QProgressDialog();
-	progressDlg.setStyleSheet(progressDlg_style);
-	progressDlg.modal = true;
-	progressDlg.open();
-	progressDlg.setRange(0, max);
-
+	if(use_progressbar){
+		var max = all_files.length - 1;
+		var progressDlg = new QProgressDialog();
+		progressDlg.setStyleSheet(progressDlg_style);
+		progressDlg.modal = true;
+		progressDlg.open();
+		progressDlg.setRange(0, max);
+		progressDlg.setAutoClose(true);
+	}
+	
 	var mainFolderItem = {"full_path": cenaPath, "relative_path": cenaPath.replace(cenaDir, "")};
 	finalOutput["file_list"].push(mainFolderItem);
 	Print("Main folder added to list: " + cenaPath);
@@ -51,10 +54,13 @@ function create_compact_file_list(){
 
 
 	for(var i=0; i<all_files.length; i++){
-		progressDlg.setLabelText("Listing Scene Files:\n" + all_files[i]);
-		progressDlg.setValue(i);
+		if(use_progressbar){
+			progressDlg.setLabelText("Listing Scene Files:\n" + all_files[i]);
+			progressDlg.setValue(i);
+		}
+		
+		//fullpath of file
 		var file_path = cenaPath + "/" + all_files[i];
-		Print("CHECKING: " + file_path);
 		if(all_files[i] == "elements" && !BD1_is_file(file_path)) {
 			var elementRootItem = {"full_path": file_path, "relative_path": file_path.replace(cenaDir, "")};
 			finalOutput["file_list"].push(elementRootItem);
@@ -85,7 +91,11 @@ function create_compact_file_list(){
 			counter_file++;
 		}
     }
-	progressDlg.hide();
+
+	if(use_progressbar){
+		progressDlg.close();
+	}
+	
     Print("COMPACT VERSION LIST DONE! " + counter_file + " arquivos adicionados a lista para compactar no python!");
 	return finalOutput;
 
@@ -112,8 +122,10 @@ function create_compact_file_list(){
         var readList = node.getNodes(["READ"]);
 		var msg = "Listing Scene Files: elements: ";
         for(var i=0; i<readList.length; i++){
-			progressDlg.setLabelText(msg + "[" + i + "/" + readList.length + "]");
-            var id = node.getElementId(readList[i]);
+			if(use_progressbar){
+				progressDlg.setLabelText(msg + "[" + i + "/" + readList.length + "]");
+            }
+			var id = node.getElementId(readList[i]);
             var folder = BD2_updateUserNameInPath(element.completeFolder(id));
 			if(elementList.indexOf(folder) != -1){
 				continue;
