@@ -884,26 +884,6 @@ function BD2_get_Rig_Data(selectedNode){
 
 
 /*
-Cria uma janela de aviso e retorna o resultado da escolha do usuario.
-*/
-function BD2_warnUser(msg,title,yes_text,no_text){
-
-  	var sampleDialog = new Dialog();
-  	sampleDialog.title = title;
- 	var bodyText = new Label();
-  	bodyText.text = msg;
-  	sampleDialog.add( bodyText );
-  	sampleDialog.addSpace( 15 );
-
-  	sampleDialog.okButtonText = yes_text;
-  	sampleDialog.cancelButtonText = no_text;
-  	var result = sampleDialog.exec();
-
-	return result;
-}
-
-
-/*
 formata uma string com zeros a esquerda e.g 01,001,0001,etc...
 */
 function BD2_zerosFill(number, zeros){
