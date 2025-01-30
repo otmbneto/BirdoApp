@@ -19,7 +19,7 @@ Copyright:   leobazao_@Birdo
 function pre_render(projectDATA, render_step){
 	
 	//rodar funcoes com o acum undo nesse bloco
-	scene.beginUndoRedoAccum("pre render modifications");
+	scene.beginUndoRedoAccum("BIRDOAPP Modificacoes antes do Render");
 	
 	var get_psd_data_script = projectDATA.paths.birdoPackage + "utils/get_psd_anim_data.js";
 	if(step == "COMP"){
