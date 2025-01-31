@@ -4,6 +4,7 @@
     "name": "NoNoNoNoNo",
     "sub_name": "NoNoNoNoNo",
     "icon": "NoNoNo",
+	"render_farm": false,
     "roles": [
         "RIG",
         "DESIGN",
@@ -32,7 +33,7 @@
 			"model": "PREFIX_EP{0:03d}_SC{1:04d}"
 		},
         "animatic": {
-			"regex": "PREFIX_EP_SC\\d{4}_v\\d{2}\\.mov",
+			"regex": "PREFIX_EP\\d{3}_SC\\d{4}_v\\d{2}\\.mov",
 			"model": "PREFIX_EP{0:03d}_SC{1:04d}_v{2:02d}.mov"
 		},
         "ep": {
@@ -92,6 +93,7 @@
             },
 			"COMP": {
                 "folder_name": "03_COMP",
+				"harmony": false,
                 "server": [
                     "01_AFTER_PROJECTS",
                     "02_TB_RENDERS",

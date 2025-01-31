@@ -1,79 +1,58 @@
 /*
-	Script para fazer publish do shot na rede do projeto
+	Script para fazer publish da cena na rede do projeto
 
 */
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-//TODO: Fazer funcao para gerar fila do render e mudar mensagem de aviso da fazendinha pos publish
 
 function Publish(){
 				
 	var projectDATA = BD2_ProjectInfo();
-
 	if(!projectDATA){
-		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
-		return false;
-	}
-
-	if(projectDATA.entity.type != "SHOT"){
-		MessageBox.warning("Erro! Este nao e um SHOT do projeto! O script de publish por enquanto somente funciona para SHOT!", 0, 0);
-		Print("[PUBLISH] Error! Script de publish por enquanto somente funciona para shot!");
+		Print("[BIRDOAPP][PUBLISH] ERRO gerando dados do Birdoapp...");
 		return false;
 	}
 	
-	var step = projectDATA.getPublishStep();
-	
-	var shot_server_path = projectDATA.getShotPublishFolder(step);
-
-	if(!shot_server_path){
-		MessageBox.warning("Fail to get server_shot_path!", 0, 0);
-		Print("fail to get server_shot_path!");
+	var pusblish_data = PublishDialog(projectDATA);
+	if(!publish_data){
+		Print("Canceled...");
 		return;
 	}
 	
-	var render_step = projectDATA.getRenderStep();
+	//define publish paths
+	pusblish_data["publish_path"] = projectDATA.getShotPublishFolder(pusblish_data["publish_step"]);
+	pusblish_data["render_path"] = projectDATA.getRenderPath("server", pusblish_data["render_step"]) + "/" + projectDATA.entity.name + ".mov";
 	
-	if(!render_step){
-		Print("Canceled..");
-		return;
+	//aviso sobre quantidade de frames da cena em relacao ao animatic
+	if(projectDATA["render_farm"]){
+		if(!BD2_checkFrames()){
+			Print("cancelado pelo usuario por estar sem o numero de frames corretos!");
+			return;
+		}
 	}
 	
-	var render_path = projectDATA.getRenderPath("server", render_step);
-
-	if(!render_path){
-		MessageBox.warning("Fail to get server_shot_path!", 0, 0);
-		Print("fail to get server_shot_path!");
-		return;
-	}
-	
-	render_path = render_path + projectDATA.entity.name + ".mov";
-	
-	if(!BD2_checkFrames()){
-		Print("cancelado pelo usuario por estar sem o numero de frames corretos!");
+	//mensagem de confirmação!
+	if(!BD2_AskQuestion("Publish CENA: Este script irá salvar esta cena, e enviar para o server com o versionamento correto!\nDeseja continuar?")){
+		Print("publish cancelado pelo usuario!");
 		return;
 	}
 	
 	//roda o script pre-publish com todas funcoes q modificam a cena antes de enviar
-	var pre_publish_js = projectDATA["paths"]["birdoPackage"] + "utils/pre_publish.js";
-	if(!BD1_FileExists(pre_publish_js)){
-		Print("Fail to find project_recolor.js script!");
-		MessageBox.warning("Fail to run pre-publish scripts!",0,0);
-		return;
+	var pre_publish_js = projectDATA.proj_confg_root + "pre_publish.js";
+	if(BD1_FileExists(pre_publish_js)){
+		require(pre_publish_js).pre_publish(projectDATA);
+	} else {
+		Print("Nenhum script pre_publish.js encontrado para o projeto.");
 	}
-	require(pre_publish_js).pre_publish(projectDATA);
 	
-	//save scene modifications!
+	//salva a cena antes de enviar
 	scene.saveAll();
 	
+	//compacta o arquivo para envio
 	var compactJs = projectDATA.paths.birdoPackage + "utils/compact_version.js";
+	var compact_version_data = require(compactJs).create_compact_file_list(true);
 
-	var compact_version_data = require(compactJs).create_compact_file_list();
-
-	if(!BD2_AskQuestion("Publish SHOT: Este script irá salvar esta cena, e enviar para o server com o versionamento correto!\nDeseja continuar?")){
-		Print("publish cancelado pelo usuario!");
-		return;
-	}
 
 	var publish_data = publish_py_script(projectDATA, compact_version_data, shot_server_path, render_path, render_step, step);
 	
@@ -218,99 +197,73 @@ exports.Publish = Publish;
 
 
 function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
-
+	
+	var publish_steps = proj_data.getPublishStep().sort();
+	var render_steps = proj_data.getRenderStep();
+	
+	//escolhe o step atual da cena (caso exista);
+	var curr_step = "N.A";
+	var scene_path = scene.currentProjectPath();
+	for(var i=0; i<publish_steps.length; i++){
+		if(scene_path.indexOf(publish_steps[i]) != -1){
+			curr_step = publish_steps[i];
+			break;
+		}
+	}
+	
+	if(publish_steps.length == 1 && !proj_data["render_farm"]){
+		return {"publish_step": publish_steps[0], "render_step": render_steps[0], "send_farm": false};
+	}
+	
 	var options = {};
 	var d = new Dialog;
-	d.title = "Publish Cena";
-
-	var mainGroup = new GroupBox;
-
-	var publish_step = new ComboBox("Escolha o Step de destino (se disponivel): ");
-	var render_step = new ComboBox("Escolha o Step de RENDER (se disponível): ");
-	var send_farm = new Checkbox("Enviar para Render Farm ");
+	d.title = "BIRDOAPP Publish";
 	
-	mainGroup.add(publish_step);
-	mainGroup.add(render_step);
-	d.addSpace(5);
-	mainGroup.add(send_farm);
-
-	mainGroup.title = "Opcoes";
-	d.addSpace(1);
-	d.add(mainGroup);
-	
-	//set items
-	publish_step.itemList = proj_data.getPublishStep();
-	
-
-	asset_number.label = "number: ";
-	asset_number.maximum = 999;
-	asset_number.minimum = 0;
-	asset_number.value = current_number;
-
-	imput_name.label = "name: ";
-	imput_name.text = current_name;
-
-
-	rig_type.label = "RIG Type: ";
-	if(current_type != "CH" && current_type != "PR" && current_type != "FX"){
-		rig_type.itemList = ["", "FULL", "SIMPLE"];
-	} else if (current_type == "CH"){
-		rig_type.itemList = ["FULL", "SIMPLE"];
-	} else if (current_type == "PR"){
-		rig_type.itemList = ["SIMPLE"];
-	} else if (current_type == "FX"){
-		rig_type.itemList = ["SIMPLE"];
+	if(publish_steps.length > 1){
+		var publishGroup = new GroupBox;
+		var publish_step = new ComboBox();
+		var label = new Label();
+		publishGroup.add(publish_step);
+		publishGroup.addSpace(5);
+		publishGroup.add(label);
+		d.add(publishGroup);
+		d.addSpace(5);
+		publish_step.itemList = publish_steps;
+		publish_step.label = "Escolha o Step do PUBLISH:\n(Step ATUAL: " + curr_step + ")";
+		if(curr_step != "N.A"){
+			publish_step.currentItem = curr_step;
+		}
+		label.text = "Atenção: Somente escolha um step diferente do atual da cena\nse tiver CERTEZA do que está fazendo!";
+		publishGroup.title = "Opções de Publish";
 	}
-
-	version.label = "RIG version: ";
-	version.maximum = 999;
-	version.minimum = 0;
-	version.value = 0;
-
+	
+	if(proj_data["render_farm"]){
+		var renderGroup = new GroupBox;
+		var render_step = new ComboBox();
+		var send_farm = new CheckBox();
+		send_farm.checked = true;
+		renderGroup.add(send_farm);
+		renderGroup.add(render_step);
+		d.add(renderGroup);
+		d.addSpace(15);
+		send_farm.text = "Adicionar na Fila da Render Farm";
+		render_step.itemList = render_steps.sort();
+		render_step.label = "RENDER Step: ";
+		renderGroup.title = "Opções de RENDER";
+		if(render_steps.indexOf(curr_step) != -1){
+			render_step.currentItem = curr_step;	
+		}
+	}
+	
 	
 	var rc = d.exec();
 
 	if(!rc){
 		return false;
 	}
-
-	if(rig_type.currentItem == "FULL"){
-		var verPath = get_RIG_FULL_group(asset_nodes.asset);
-		if(!verPath){
-		MessageBox.information("Aparentemente este RIG nao e um RIG COMPLETO ou ele contem mais de um GRUPO onde deveria conter somente o grupo do rig: 'prj.NOME_CHAR-v01'\n Confira a selecao novamente, e lembre-se:\n - RIG_FULL => Sao os RIGs com a estrurua de conexao de PROPs e o grupo do RIG de fato dentro do primeiro grupo;\n - RIG_SIMPLE => Rigs mais simples onde o RIG fica todo dentro do primeiro grupo!");
-		return false;
-		}
-	} else if(rig_type.currentItem == "SIMPLE"){
-		var verPath = null;
-	}
-
 	
-	rig.assetNode = asset_nodes.asset;
-	rig.pegNode = asset_nodes.peg;
-	rig.rigFull = verPath;
-	rig.version = "v" + ("00" + version.value).slice(-2);//FIXME: trocar o numero de zeros na versao do rig aqui
-	rig.rigType = rig_type.currentItem;
-	rig.assetType = asset_type.currentItem;
-	rig.assetNumber = asset_number.value;
-	rig.name = imput_name.text.toUpperCase();
-	rig.fullName = asset_type.currentItem.substring(0,2) + ("000" + asset_number.value).slice(-3) + "_" + imput_name.text.toUpperCase();
-
-	return rig;
-	
-	function get_RIG_FULL_group(rig_path){//retorna o grupo do RIG version : prj.NOME_CHAR-v01
-		var subNod = node.subNodes(rig_path);
-		var groupsIn = [];
-
-		for(var i=0; i<subNod.length; i++){
-			if(node.isGroup(subNod[i])){
-				groupsIn.push(subNod[i]);
-			}
-		}
-
-		if(groupsIn.length != 1){
-			return false;
-		}
-
-		return groupsIn[0];
-	}
+	options["publish_step"] = publish_steps.length > 1 ? publish_step.currentItem : publish_steps[0];
+	options["render_step"] = proj_data["render_farm"] ? render_step.currentItem : null;
+	options["send_farm"] = proj_data["render_farm"] ? send_farm.checked : null;
+	return options;
 }

@@ -797,18 +797,15 @@ function BD2_ProjectInfo(){
 		return false;
 	}
 	var birdoPackage = BD2_updateUserNameInPath(BD2_FormatPathOS(birdoApp_scripts + "/birdoPack/"));
-	var pathsScript = birdoPackage + "birdoapp_config.js";
+	var pathsScript = birdoPackage + "birdoapp_init.js";
 	
 	if(!BD1_FileExists(pathsScript)){
-		Print("[BIRDOAPP][ERROR] Script 'birdoapp_config.js' nao encontrado! Nao sera possivel iniciar o BirdoApp no Harmony!");
+		Print("[BIRDOAPP][ERROR] Script 'birdoapp_init.js' nao encontrado! Nao sera possivel iniciar o BirdoApp no Harmony!");
 		return false;
 	}
 	
 	//cria a classe do birdo_init
 	var birdoApp = require(pathsScript).birdoapp_init(birdoApp_scripts);
-	
-	//roda o metodo para definir a entity do arquivo Harmony aberto.
-	birdoApp.defineEntity();
 	
 	//atualiza a classe paths com o caminho do root do harmony package Birdo
 	birdoApp.paths["birdoPackage"] = birdoPackage;
@@ -883,26 +880,6 @@ function BD2_get_Rig_Data(selectedNode){
 	rig_data["selection_path"] = selectedNode;
 	rig_data["type"] = rig_type;
 	return rig_data;
-}
-
-
-/*
-Cria uma janela de aviso e retorna o resultado da escolha do usuario.
-*/
-function BD2_warnUser(msg,title,yes_text,no_text){
-
-  	var sampleDialog = new Dialog();
-  	sampleDialog.title = title;
- 	var bodyText = new Label();
-  	bodyText.text = msg;
-  	sampleDialog.add( bodyText );
-  	sampleDialog.addSpace( 15 );
-
-  	sampleDialog.okButtonText = yes_text;
-  	sampleDialog.cancelButtonText = no_text;
-  	var result = sampleDialog.exec();
-
-	return result;
 }
 
 
@@ -1325,14 +1302,7 @@ function BD2_loadingBirdo(birdoAppPath, timeout, loadingtext){
 	@path => caminho a ser mudado
 */
 function BD2_FormatPathOS(path){
-	var finalPath = null;
-	var nativePath = fileMapper.toNativePath(path);
-	if(about.isMacArch()){//define caminhos no Mac
-		finalPath = BD2_RenameAll(nativePath, "\\", "/");
-	} else if(about.isWindowsArch()){//define caminhos no Windows
-		finalPath = nativePath;		
-	}
-	return finalPath;
+	return BD2_RenameAll(fileMapper.toNativePath(path), "\\", "/");
 }
 
 /*
