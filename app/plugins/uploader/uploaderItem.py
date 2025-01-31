@@ -34,22 +34,30 @@ class uiItem(QtGui.QGroupBox):
 		self.setMaximumHeight(50)
 
 		horizontal_layout = QtGui.QHBoxLayout()
+		self.item_check = QtGui.QCheckBox()
+		self.item_check.setChecked(True)
+
 		item_label = QtGui.QLabel(self.filename.split(".")[0])
 		item_font = QtGui.QFont("Arial", 8)
 		item_label.setFont(item_font)
 
 		item_label.setMinimumWidth(150)
+		item_label.setMaximumWidth(150)
 
 		self.episodes = QtGui.QComboBox()
 		self.episodes.addItems(episode_list)
+		self.episodes.setMinimumWidth(25)
+		self.episodes.setMaximumWidth(25)
 
 		scene_label = QtGui.QLabel("Scene:")
 		scene_font = QtGui.QFont("Arial", 8)
 		scene_label.setFont(item_font)
 		scene_label.setMinimumWidth(50)
+		scene_label.setMaximumWidth(50)
 
 		self.scene_text = QtGui.QLineEdit()
-		#self.scene_text.setEnabled(False)
+		self.scene_text.setMinimumWidth(50)
+		self.scene_text.setMaximumWidth(50)
 		self.toggleSceneText()
 		self.scene_text.setValidator(QtGui.QIntValidator(self))
 		self.scene_text.textChanged.connect(self.onLineEditChange)
@@ -57,6 +65,11 @@ class uiItem(QtGui.QGroupBox):
 		self.typing_timer = QtCore.QTimer(self)
 		self.typing_timer.setSingleShot(True)  # Run only once after the timeout
 		self.typing_timer.timeout.connect(self.onTypingFinished)
+
+		self.stepBox = QtGui.QComboBox()
+		self.stepBox.addItems(self.project_data.paths.steps.keys())
+		self.stepBox.setMinimumWidth(50)
+		self.stepBox.setMaximumWidth(50)
 
 		self.progress_bar = QtGui.QProgressBar()
 		self.progress_bar.setMinimum(0)
@@ -79,15 +92,24 @@ class uiItem(QtGui.QGroupBox):
 		self.delete_button.setMinimumWidth(25)
 		self.delete_button.setMaximumWidth(25)
 
+		horizontal_layout.addWidget(self.item_check)
 		horizontal_layout.addWidget(item_label)
 		horizontal_layout.addWidget(self.episodes)
 		horizontal_layout.addWidget(scene_label)
 		horizontal_layout.addWidget(self.scene_text)
+		if self.filename.endswith(".zip"):
+			horizontal_layout.addWidget(self.stepBox)
+		else:
+			empty_space = QtGui.QLabel("")
+			empty_space.setMinimumWidth(100)
+			empty_space.setMaximumWidth(100)
+			horizontal_layout.addWidget(empty_space)
 		horizontal_layout.addWidget(self.progress_bar)
 		horizontal_layout.addWidget(self.status_label)        
 		horizontal_layout.addWidget(self.delete_button)
 		horizontal_layout.addStretch()
 		self.setLayout(horizontal_layout)
+		self.setBackgroundColor("#233142")
 
 	def initLogic(self):
 
@@ -129,6 +151,8 @@ class uiItem(QtGui.QGroupBox):
 		self.episodes.setStyleSheet("background-color: white")
 		self.scene_text.setStyleSheet("background-color: white")
 		self.progress_bar.setStyleSheet("background-color: rgb(40, 60, 90)")
+		self.status_label.setStyleSheet("background-color: white")
+		self.stepBox.setStyleSheet("background-color: white")
 		self.delete_button.setStyleSheet("background-color: rgb(56, 186, 255)")
 
 	def toggleSceneText(self):
@@ -176,6 +200,10 @@ class uiItem(QtGui.QGroupBox):
 	def setStatus(self,text,color):
 	    self.status_label.setText(text)
 	    self.status_label.setStyleSheet("QLabel { color : " + color + "; }")
+
+	def isChecked(self):
+
+		return self.item_check.isChecked()
 
 	def getCurrentEpisode(self):
 		return self.episodes.currentText()
@@ -225,6 +253,7 @@ class uiItem(QtGui.QGroupBox):
 
 	#TODO: Move the name scene generation to the folder manager
 	#TODO: Move the animatic name generation to the folder manager
+	#TODO: Define the default format for renders
 	def upload(self,temp):
 
 		episode_code = self.getCurrentEpisode()
@@ -233,27 +262,40 @@ class uiItem(QtGui.QGroupBox):
 			return
 
 		self.incrementProgress(10)
-		if (not self.scene_text.isEnabled()) or len(self.scene_text.text()) == 0:
+		if self.scene_text.isEnabled() and len(self.scene_text.text()) == 0:
 			self.setStatus("Scene Not found","red")
 			return
 
 		scene_name = self.getScene(self.project_data.paths.format_sc(self.scene_text.text()),episode_code) if self.scene_text.isEnabled() else self.getScene(self.getFilename().upper(),episode_code)
 		self.incrementProgress(10)
-		animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
-		self.incrementProgress(10)
-		scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
-		self.incrementProgress(10)
-		if not os.path.exists(animatic_path):
-			os.makedirs(animatic_path)
-		self.incrementProgress(10)
-		dst = os.path.join(animatic_path,scene_name)
+		if self.filename.endswith(".zip"):
+			scene_path = self.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
+			self.incrementProgress(10)
+			scene_name += "_" + self.getVersion(scene_name,scene_path) + ".zip"
+			self.incrementProgress(10)
+			if not os.path.exists(scene_path):
+				os.makedirs(scene_path)
+			self.incrementProgress(10)
+			upload_scene = os.path.join(scene_path,scene_name).replace("\\","/")		
+			self.incrementProgress(25)
+			shutil.copyfile(self.getFullpath(),upload_scene)
+			self.incrementProgress(25)	
+		else:
+			animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
+			self.incrementProgress(10)
+			scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
+			self.incrementProgress(10)
+			if not os.path.exists(animatic_path):
+				os.makedirs(animatic_path)
+			self.incrementProgress(10)
+			dst = os.path.join(animatic_path,scene_name)
+			compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
+			result = compress_render(self.getFullpath(),compressed)
+			self.incrementProgress(25)
+			shutil.copyfile(compressed,dst)
+			self.incrementProgress(25)
+			os.remove(compressed)
 		
-		compressed = os.path.join(temp,self.getFilename()).replace("\\","/")
-		result = compress_render(self.getFullpath(),compressed)
-		self.incrementProgress(25)
-		shutil.copyfile(compressed,dst)
-		self.incrementProgress(25)
-		os.remove(compressed)
 		self.setStatus("Done","green")
 
 		return

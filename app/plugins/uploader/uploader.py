@@ -66,7 +66,14 @@ class Uploader(QtGui.QMainWindow):
     def episode_changed(self):
         value = self.ui.globalEpisodes.currentIndex()
         for item in self.listOfWidgets:
-            item.setEpisode(value)
+            if item.isChecked():
+                item.setEpisode(value)
+
+    def step_changed(self):
+        value = self.ui.globalSteps.currentIndex()
+        for item in self.listOfWidgets:
+            if item.isChecked():
+                item.setStep(value)
 
     def get_project_episodes(self):
         self.episodes = [""]
