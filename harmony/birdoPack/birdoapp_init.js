@@ -30,31 +30,22 @@ function birdoapp_init(scripts_path){
 	config_data["appdata"] = BD2_updateUserNameInPath(BD2_FormatPathOS(System.getenv("APPDATA")));
 	config_data["systemTempFolder"] = BD2_updateUserNameInPath(BD2_FormatPathOS(specialFolders.temp));
 	config_data["scripts_path"] = scripts_path;
-	
 		
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
-	if(prefix && config_data["server_projects"]){
-		var folders_prefix = BD1_ListFolders(config_data["server_projects"]);
-
-		if(folders_prefix.indexOf(prefix) != -1){
-			var proj_root = [config_data["server_projects"], prefix].join("/") + "/";
-			var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
-			var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
-			proj_data["proj_confg_root"] = proj_root;
-			if(find_proj_data.length == 0){
-				proj_data["paths"]["local_folder"] = null;
-				proj_data["user_role"] = null;
-				config_data["valid"] = false;
-			}else {
-				proj_data["paths"]["local_folder"] = find_proj_data[0]["local_folder"]
-				proj_data["user_role"] = find_proj_data[0]["user_role"];
-			}
-		}
-	} else {
-		proj_data["proj_confg_root"] = birdoapp_root + "/template/project_template/"
-		var proj_data = BD1_ReadJSONFile(proj_data["proj_confg_root"] + "project_data.json");;
+	var root_path = [config_data["server_projects"], prefix].join("/") + "/";
+	var proj_root = BD1_DirExist(root_path) ? root_path : birdoapp_root + "/template/project_template/";
+	var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
+	var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
+	proj_data["proj_confg_root"] = proj_root;
+	if(find_proj_data.length == 0){
+		proj_data["paths"]["local_folder"] = null;
+		proj_data["user_role"] = null;
+		config_data["valid"] = false;
+	}else {
+		proj_data["paths"]["local_folder"] = find_proj_data[0]["local_folder"]
+		proj_data["user_role"] = find_proj_data[0]["user_role"];
 	}
-
+	
 	var birdodata = new BirdoAppConfig(config_data, proj_data);
 	birdodata.defineEntity();
 	
@@ -143,7 +134,10 @@ function BirdoAppConfig(config_data, project_data){
 			this.entity["ep"] = [];
 		} else {
 			MessageLog.trace("[BIRDOAPP] Nao foi possivel determinar a 'entity' do arquivo Harmony. Algumas funcionalidades nao estaram disponiveis.");
-			this.entity["type"] = false;
+			this.entity["type"] = null;
+			this.entity["name"] = scene.currentScene();
+			this.entity["ep"] = null;
+			this.entity["asset_type"] = null;
 		}
 	}
 	
