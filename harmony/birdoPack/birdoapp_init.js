@@ -33,7 +33,8 @@ function birdoapp_init(scripts_path){
 		
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
 	var root_path = [config_data["server_projects"], prefix].join("/") + "/";
-	var proj_root = BD1_DirExist(root_path) ? root_path : birdoapp_root + "/template/project_template/";
+	var proj_root = (Boolean(prefix) && BD1_DirExist(root_path)) ? root_path : birdoapp_root + "/template/project_template/";
+	Print("TESTE PROJ ROOT: " + proj_root);
 	var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
 	var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
 	proj_data["proj_confg_root"] = proj_root;
