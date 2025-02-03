@@ -1,26 +1,17 @@
 from birdo_pathlib import Path
 import platform
 import os
-import ctypes
-from ctypes import wintypes
-_GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
-_GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
-_GetShortPathNameW.restype = wintypes.DWORD
+import subprocess
 
 
 def get_short_path_name(long_name):
     """
-    Gets the short path name of a given long path for windows.
-    http://stackoverflow.com/a/23598461/200291
+        retorna o shortname para o folder 'long_name'
+        (windows shortname e um caminho 'reduzido' do original, que o windows reconhece como o proprio caminho
+        usado para casos com caminhos com caracteres invalidos como espaco ou acentos)
     """
-    output_buf_size = 0
-    while True:
-        output_buf = ctypes.create_unicode_buffer(output_buf_size)
-        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
-        if output_buf_size >= needed:
-            return output_buf.value
-        else:
-            output_buf_size = needed
+    cmd = 'cmd /c for %A in ("{0}") do @echo %~sA'.format(long_name)
+    return subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True).strip()
 
 
 class SystemFolders(object):
@@ -91,8 +82,3 @@ class SystemFolders(object):
         elif self.system_os == 'Darwin':
             return "mac"
         return False
-
-
-if __name__ == "__main__":
-    s = SystemFolders()
-    print s
