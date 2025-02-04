@@ -1310,27 +1310,12 @@ function BD2_FormatPathOS(path){
 	@dirPath => caminho a ser mudado
 */
 function BD2_updateUserNameInPath(dirPath){
-	var regex = /([^\u0000-\u007F]+|\s)/;//ASCII characters (non english chars)
-	var systemUser = dirPath.split(/\/|\\/)[2];//pega o 3 nome no path contando q seja o user
-	if(!regex.test(systemUser)){
-		Print("Caminho: " + dirPath + " nao contem o usuario no nome! Nao e necessario mudar path!");
-		return dirPath;
+	//get python object
+	var py = BD1_GetPythonObject();
+	if(!py){
+		Print("[BIRDOAPP] GetShortName - Erro pegando o objeto Python!"); 
 	}
-
-	if(about.isWindowsArch()){//If is windows check OS user name
-		if(regex.test(systemUser)){
-			var shortPathJson = "C:/_BirdoRemoto/_localBirdoApp.json";
-			if(!BD1_FileExists(shortPathJson)){
-				Print("[ERROR] Usuario do Windows com caracteres invalidos! Salve o Json com o shortname antes de continuar!");
-			}
-			userFolderShortName = BD1_ReadJSONFile(shortPathJson)["userFolder_short"];
-			var newPath = dirPath.replace(systemUser, userFolderShortName);
-			Print("Path name replace: " + userFolderShortName);
-			return newPath;
-		}
-	}
-	Print("No Need to change path: " + dirPath);
-	return dirPath;	
+	return py.get_short_name(dirPath);
 }
 
 /*
