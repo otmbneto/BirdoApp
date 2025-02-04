@@ -10,6 +10,7 @@ sys.path.append(birdo_app_root)
 
 print(birdo_app_root)
 from app.utils.ffmpeg import compress_render
+from app.utils.birdo_zip import compact_folder
 
 class uiItem(QtGui.QGroupBox):
 
@@ -37,7 +38,7 @@ class uiItem(QtGui.QGroupBox):
 		self.item_check = QtGui.QCheckBox()
 		self.item_check.setChecked(True)
 
-		item_label = QtGui.QLabel(self.filename.split(".")[0])
+		item_label = QtGui.QLabel(self.filename)
 		item_font = QtGui.QFont("Arial", 8)
 		item_label.setFont(item_font)
 
@@ -67,7 +68,7 @@ class uiItem(QtGui.QGroupBox):
 		self.typing_timer.timeout.connect(self.onTypingFinished)
 
 		self.stepBox = QtGui.QComboBox()
-		self.stepBox.addItems(self.project_data.paths.steps.keys())
+		self.stepBox.addItems([""] + self.project_data.paths.steps.keys())
 		self.stepBox.setMinimumWidth(50)
 		self.stepBox.setMaximumWidth(50)
 
@@ -165,7 +166,7 @@ class uiItem(QtGui.QGroupBox):
 
 	def isValid(self):#method needs to be changed by project necessity
 
-		return self.filename.endswith(self.filetypes)
+		return self.filename.endswith(self.filetypes) or os.path.isdir(self.filepath)
 
 	def setSceneName(self,name):
 		self.item_label.setText(name)
@@ -211,6 +212,9 @@ class uiItem(QtGui.QGroupBox):
 	def setEpisode(self,index):
 		self.episodes.setCurrentIndex(index)
 
+	def setStep(self,index):
+		self.stepBox.setCurrentIndex(index)
+
 	def addEpisodes(self,episodes):
 		self.episodes.addItems(episodes)
 
@@ -246,10 +250,12 @@ class uiItem(QtGui.QGroupBox):
 
 		return self.getRegexPattern('.*SC_(\d{4}).*|.*SC(\d{4}).*',filename)
 
-	def getScene(self,filename,episode):
+	def getScene(self,episode_num,shot_num):
 
-		m = self.project_data.paths.find_sc(filename)
-		return "_".join([self.project_data.prefix,episode,m]) if m is not None else m
+		return self.project_data.paths.regs["scene"]["model"].format(episode_num,shot_num) if shot_num is not None else None
+
+		#m = self.project_data.paths.find_sc(filename)
+		#return "_".join([self.project_data.prefix,episode,m]) if m is not None else m
 
 	#TODO: Move the name scene generation to the folder manager
 	#TODO: Move the animatic name generation to the folder manager
@@ -265,8 +271,10 @@ class uiItem(QtGui.QGroupBox):
 		if self.scene_text.isEnabled() and len(self.scene_text.text()) == 0:
 			self.setStatus("Scene Not found","red")
 			return
-
-		scene_name = self.getScene(self.project_data.paths.format_sc(self.scene_text.text()),episode_code) if self.scene_text.isEnabled() else self.getScene(self.getFilename().upper(),episode_code)
+		shot_num = self.project_data.paths.find_sc(self.filename)
+		if not self.scene_text.isEnabled() and shot_num is None:
+			return
+		scene_name = self.getScene(int(re.sub("\D","",episode_code)),int(self.scene_text.text())) if self.scene_text.isEnabled() else self.getScene(int(re.sub("\D","",episode_code)),int(re.sub("\D","",shot_num)))
 		self.incrementProgress(10)
 		if self.filename.endswith(".zip"):
 			scene_path = self.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
@@ -280,7 +288,7 @@ class uiItem(QtGui.QGroupBox):
 			self.incrementProgress(25)
 			shutil.copyfile(self.getFullpath(),upload_scene)
 			self.incrementProgress(25)	
-		else:
+		elif self.filename.endswith((".mov",".mp4")):
 			animatic_path = self.project_data.paths.get_animatics_folder("server",episode_code).normpath()
 			self.incrementProgress(10)
 			scene_name += "_" + self.getVersion(scene_name,animatic_path) + ".mov"
@@ -295,6 +303,30 @@ class uiItem(QtGui.QGroupBox):
 			shutil.copyfile(compressed,dst)
 			self.incrementProgress(25)
 			os.remove(compressed)
+		else:
+			scene_path = self.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
+			self.incrementProgress(10)
+			scene_name += "_" + self.getVersion(scene_name,scene_path)
+			self.incrementProgress(10)
+			if not os.path.exists(scene_path):
+				os.makedirs(scene_path)
+			self.incrementProgress(10)
+			upload_scene = os.path.join(scene_path,scene_name + ".zip").replace("\\","/")
+
+			temp_dir = os.path.join(temp,self.filename) 
+			print(temp_dir)
+			shutil.copytree(self.fullpath,temp_dir)
+			if not os.path.exists(temp_dir):
+				return
+			xstage = self.project_data.harmony.get_xstage_last_version(temp_dir)
+			compress_script = os.path.join(birdo_app_root,"batch","BAT_CompactScene.js")
+			if not os.paths.exists(xstage) or not os.path.exists(compile_script):
+				return
+			self.project_data.harmony.compile_script(compile_script,xstage)
+			zip_file = compact_folder(temp_dir)
+			shutil.copyfile(zip_file,upload_scene)
+			shutil.rmtree(temp_dir)
+
 		
 		self.setStatus("Done","green")
 
