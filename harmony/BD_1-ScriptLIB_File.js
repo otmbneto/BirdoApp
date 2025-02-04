@@ -667,4 +667,35 @@ function BD1_copy_file_with_pb(proj_data, src_file, dst_file, ask_override){
 	var ret = start.launch();
 	return ret == 0;
 }
-	
+
+
+/*
+	Cria um objeto Python para ser usado no js do Harmony;
+*/
+function BD1_GetPythonObject(){
+	try{
+		var birdoapp_data = BD2_ProjectInfo();
+		var pyFilePath = birdoapp_data.birdoApp + "harmony/birdoPack/harmonyPythonInterface.py";
+		var pyObjects = PythonManager.getPyObjects();
+		
+		if("birdoAppScripts" in pyObjects){
+			Print("[BIRDOAPP] Python Object loaded!");
+			return pyObjects["birdoAppScripts"].py;
+		} else {
+			//creates python objetc
+			var myPythonObject = PythonManager.createPyObject(pyFilePath, "birdoAppScripts");
+			if(!myPythonObject){
+				Print("[BIRDOAPP] ERROR Creating Python Object!");
+				return null;
+			}
+			
+			myPythonObject.addObject("birdoapp", birdoapp_data.birdoApp);//add birdoapp root to python object
+			myPythonObject.addObject("messageLog", MessageLog);
+			Print("[BIRDOAPP] Python Object Created!");
+			return myPythonObject.py;
+		}
+	} catch (e){
+		Print(e);
+		return null;
+	}
+}
