@@ -62,7 +62,8 @@ class ConfigInit(object):
 
         # define caminho do arquivo da gui .ui
         self.gui_file = os.path.join(self.root, "gui", "main.ui").replace("\\", "/")
-        self.css_file = os.path.join(self.root, "gui", "style.qss").replace("\\", "/")
+        css_file = Path(os.path.join(self.root, "gui", "style.qss").replace("\\", "/"))
+        self.css_style = css_file.read_text()
 
         # pega os dados do config.json
         self.config_json = os.path.join(self.root, "config.json")
