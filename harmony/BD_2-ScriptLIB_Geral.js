@@ -1313,7 +1313,8 @@ function BD2_updateUserNameInPath(dirPath){
 	//get python object
 	var py = BD1_GetPythonObject();
 	if(!py){
-		Print("[BIRDOAPP] GetShortName - Erro pegando o objeto Python!"); 
+		Print("[BIRDOAPP] GetShortName - Erro pegando o objeto Python!");
+		return dirPath;
 	}
 	return py.get_short_name(dirPath);
 }
