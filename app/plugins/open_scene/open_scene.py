@@ -6,6 +6,7 @@ from distutils.dir_util import copy_tree
 from PySide import QtGui, QtCore, QtUiTools
 from threading import Thread
 import shutil
+import tempfile
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 ui_path = os.path.join(curr_dir, 'ui')
@@ -18,7 +19,7 @@ global_icons = {
 }
 
 sys.path.append(birdo_app_root)
-from app.config_project import config_project
+from app.config import ConfigInit
 from app.utils.MessageBox import CreateMessageBox
 from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_string
 from app.utils.birdo_zip import extract_zipfile, compact_folder
@@ -84,19 +85,16 @@ class OpenScene(QtGui.QWidget):
         self.signals = None
         self.setup_connections()
 
-        # print server connection type:
-        print "-- server type: {0}".format(self.project_data.server.type)
-
         # TEST SERVER CONNECTION
-        self.root = self.project_data.server.root
-        self.update_server_status()
-        if self.project_data.server.status == "Offline":
+        self.root = project_data.paths.root["server"].normpath()
+        status = self.update_server_status()
+        if status == "Offline":
             MessageBox.warning("Falha em conectar o server!")
 
         self.current_path = ""
 
         # SERVER EPISODES PATH
-        self.episodes_path = os.path.join(self.root, self.project_data.paths.get_episodes())
+        self.episodes_path = os.path.join(self.root, self.project_data.paths.get_episodes_folder("server").normpath())
 
         # STEPS LIST
         self.steps = ["ANIM", "SETUP"]
@@ -122,7 +120,7 @@ class OpenScene(QtGui.QWidget):
             self.opened_scenes[initial_shot] = None
 
         # LIMPA A PASTA TEMP ANTES DE COMECAR
-        self.temp_open_scene = os.path.join(self.project_data.system.temp, 'BirdoApp', 'OpenScene')
+        self.temp_open_scene = os.path.join(tempfile.gettempdir(), 'BirdoApp', 'OpenScene')
         if os.path.exists(self.temp_open_scene):
             shutil.rmtree(self.temp_open_scene, ignore_errors=True)
         os.makedirs(self.temp_open_scene)
@@ -155,14 +153,16 @@ class OpenScene(QtGui.QWidget):
         return
 
     def update_server_status(self):
-        self.project_data.server.check_connection()
-        self.ui.status_server.setText(self.project_data.server.status)
-        color = "color: rgb(250, 150, 120);" if self.project_data.server.status == "Offline" else "color: rgb(87, 255, 143);"
+        self.project_data.paths.check_connection()
+        status = self.project_data.paths.server_status
+        self.ui.status_server.setText(status)
+        color = "color: rgb(250, 150, 120);" if status == "Offline" else "color: rgb(87, 255, 143);"
         self.ui.status_server.setStyleSheet(color)
+        return status
 
     def define_step_by_user(self):
         """Defines default step by user type. Sets the step combo to this step"""
-        user_type = self.project_data.user_data.type
+        user_type = self.project_data.user_role
         if user_type == "SETUP" or user_type == "DT":
             print "Step SETUP is default for this user..."
             self.ui.comboStep.setEnabled(True)
@@ -177,28 +177,27 @@ class OpenScene(QtGui.QWidget):
 
     def get_scenes_list(self, ep):
         """Generates scenes list from animatic movs of the ep"""
-        mov_reg = r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
+        mov_reg = self.project_data.paths.regs["animatic"]["regex"] #r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
         version_reg = r'_v\d{2}.mov'
-        animatic_renders_path = os.path.join(self.root, self.project_data.paths.get_render_path(ep), self.project_data.paths.get_animatic_folder())
+        animatic_renders_path = self.project_data.paths.get_animatics_folder("server", ep).normpath() #os.path.join(self.root, self.project_data.paths.get_render_path(ep), self.project_data.paths.get_animatic_folder())
         scenes_data = {}
-        list_full = self.project_data.server.list_folder(animatic_renders_path)
+        list_full = self.project_data.paths.list_project_animatics(ep) #self.project_data.server.list_folder(animatic_renders_path)
 
         if not list_full or len(list_full) == 0:
             print "episode not valid: {0}".format(ep)
             return False
 
-        mov_list = filter(lambda x: bool(re.match(mov_reg, x.get_name())), list_full)
-        mov_list.sort(key=lambda x: x.get_name())
-
+        mov_list = filter(lambda x: bool(re.match(mov_reg, x.name)), list_full)
+        mov_list.sort(key=lambda x: x.name)
         if len(mov_list) == 0:
             print "error listing episode list: {0}".format(ep)
             return False
 
         for item in mov_list:
-            scene_name = item.get_name().replace(re.findall(version_reg, item.get_name())[0], "")
+            scene_name = item.name.replace(re.findall(version_reg, item.name)[0], "")
             if scene_name not in scenes_data:
-                animatic_mov = filter(lambda y: y.get_name().startswith(scene_name), mov_list)[-1]
-                scenes_data[scene_name] = animatic_mov.get_path() + "/" + animatic_mov.get_name()
+                animatic_mov = filter(lambda y: y.name.startswith(scene_name), mov_list)[-1]
+                scenes_data[scene_name] = os.path.join(animatic_mov.path, animatic_mov.name)
         return scenes_data
 
     def get_progress(self):
@@ -206,9 +205,9 @@ class OpenScene(QtGui.QWidget):
 
     def get_episode_data(self, episode):
         episode_data = None
-        episode_name = episode.get_name()
+        episode_name = episode.name
         self.signals.progress_format.emit(["loading {0}...".format(episode_name)])
-        if bool(re.search(self.project_data.paths.ep_regex, episode_name)):
+        if bool(re.search(self.project_data.paths.regs["ep"]["regex"], episode_name)):
             scenes_data = self.get_scenes_list(episode_name)
             if scenes_data and len(scenes_data) > 0:
                 episode_data = scenes_data
@@ -218,15 +217,16 @@ class OpenScene(QtGui.QWidget):
 
     def get_episodes_data(self):
         """Generates all episodes and shots data object"""
-        episode_list = self.project_data.server.list_folder(self.episodes_path)
+        episode_list = self.project_data.paths.list_episodes("server") #self.project_data.server.list_folder(self.episodes_path)
 
+        print(episode_list)
         if episode_list and len(episode_list) > 0:
-            episode_list.sort(key=lambda x: x.get_name())
+            episode_list.sort(key=lambda x: x.name)
             self.signals.progress_range_set.emit([0, len(episode_list)])
             for episode in episode_list:
                 result = self.get_episode_data(episode)
                 if result is not None:
-                    self.signals.episode_received.emit([{episode.get_name(): result}])
+                    self.signals.episode_received.emit([{episode.name: result}])
             self.signals.progress_reseted.emit([])
         else:
             print "Fail to get episodes list from server!"
@@ -280,8 +280,8 @@ class OpenScene(QtGui.QWidget):
             self.ui.progress_bar.setFormat("searching versions {0}".format(step))
 
             scene_path = self.project_data.paths.get_scene_path(scene_name, step)
-            scene_publish_path = self.root + scene_path + "/PUBLISH"
-            full_list_publish = self.project_data.server.list_folder(scene_publish_path)
+            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step) #self.root + scene_path + "/PUBLISH"
+            full_list_publish = os.listdir(scene_publish_path)
             versions_data[step] = {
                 "is_used": False,
                 "local_path": self.get_local_scene(scene_path, scene_name),
@@ -389,7 +389,8 @@ class OpenScene(QtGui.QWidget):
             os.makedirs(os.path.dirname(temp_mov))
 
         print "downloading mov {0} to {1}...".format(server_mov, temp_mov)
-        if not self.project_data.server.download_file(server_mov, temp_mov):
+        shutil.copyfile(server_mov,temp_mov)
+        if not os.path.exists(temp_mov): #self.project_data.server.download_file(server_mov, temp_mov):
             print "error downloading movie animatic file {0}".format(server_mov)
             MessageBox.warning("Erro baixando o animatic para montar a cena! Avise a Direcao Tecnica!")
             return False
@@ -694,7 +695,8 @@ class OpenScene(QtGui.QWidget):
             os.makedirs(self.temp_open_scene)
 
         print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
-        if not self.project_data.server.download_file(scene_obj.path, temp_file):
+        shutil.copyfile(scene_obj.path, temp_file)
+        if not os.path.exists(temp_file):
             print "fail to download scene: {0}".format(scene_obj.get_name())
             MessageBox.warning(
                 "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
@@ -792,7 +794,8 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication.instance()
 
-    p_data = config_project(project_index)
+    config = ConfigInit()
+    p_data = config.get_project_data(project_index)
     if not p_data:
         MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
         sys.exit(app.exec_())
