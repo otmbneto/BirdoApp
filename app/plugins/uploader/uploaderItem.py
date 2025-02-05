@@ -98,7 +98,7 @@ class uiItem(QtGui.QGroupBox):
 		horizontal_layout.addWidget(self.episodes)
 		horizontal_layout.addWidget(scene_label)
 		horizontal_layout.addWidget(self.scene_text)
-		if self.filename.endswith(".zip"):
+		if self.filename.endswith(".zip") or os.path.isdir(self.getFullpath()):
 			horizontal_layout.addWidget(self.stepBox)
 		else:
 			empty_space = QtGui.QLabel("")
@@ -250,6 +250,16 @@ class uiItem(QtGui.QGroupBox):
 
 		return self.getRegexPattern('.*SC_(\d{4}).*|.*SC(\d{4}).*',filename)
 
+	def renamefiles(self,name,files):
+
+		for file in files:
+
+			path = os.path.dirname(file)
+			extension = file.split(".")[-1]
+			os.rename(file,os.path.join(path,name + "." + extension))
+
+		return
+
 	def getScene(self,episode_num,shot_num):
 
 		return self.project_data.paths.regs["scene"]["model"].format(episode_num,shot_num) if shot_num is not None else None
@@ -306,26 +316,35 @@ class uiItem(QtGui.QGroupBox):
 		else:
 			scene_path = self.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
 			self.incrementProgress(10)
+			temp_dir = os.path.join(temp,scene_name)
 			scene_name += "_" + self.getVersion(scene_name,scene_path)
 			self.incrementProgress(10)
 			if not os.path.exists(scene_path):
 				os.makedirs(scene_path)
 			self.incrementProgress(10)
-			upload_scene = os.path.join(scene_path,scene_name + ".zip").replace("\\","/")
-
-			temp_dir = os.path.join(temp,self.filename) 
+			upload_scene = os.path.join(scene_path,scene_name + ".zip").replace("\\","/") 
 			print(temp_dir)
-			shutil.copytree(self.fullpath,temp_dir)
+			self.incrementProgress(10)
+			shutil.copytree(self.getFullpath(),temp_dir)
 			if not os.path.exists(temp_dir):
 				return
+			self.incrementProgress(20)
 			xstage = self.project_data.harmony.get_xstage_last_version(temp_dir)
+			print(xstage)
 			compress_script = os.path.join(birdo_app_root,"batch","BAT_CompactScene.js")
-			if not os.paths.exists(xstage) or not os.path.exists(compile_script):
+			if (not xstage) or (not os.path.exists(xstage) or not os.path.exists(compress_script)):
+				print("ERROR: can't compile because files were not found")
 				return
-			self.project_data.harmony.compile_script(compile_script,xstage)
-			zip_file = compact_folder(temp_dir)
+			self.incrementProgress(20)
+			self.project_data.harmony.compile_script(compress_script,xstage)
+			self.renamefiles(scene_name,[os.path.join(temp_dir,f) for f in os.listdir(temp_dir) if f.endswith((".xstage",".xstage~","aux","aux~"))])
+			zip_file = compact_folder(temp_dir,temp_dir + ".zip")
 			shutil.copyfile(zip_file,upload_scene)
-			shutil.rmtree(temp_dir)
+			self.incrementProgress(10)
+			#shutil.rmtree(temp_dir)
+			self.incrementProgress(10)
+
+
 
 		
 		self.setStatus("Done","green")
