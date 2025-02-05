@@ -218,7 +218,6 @@ class OpenScene(QtGui.QWidget):
     def get_episodes_data(self):
         """Generates all episodes and shots data object"""
         episode_list = self.project_data.paths.list_episodes("server") #self.project_data.server.list_folder(self.episodes_path)
-
         print(episode_list)
         if episode_list and len(episode_list) > 0:
             episode_list.sort(key=lambda x: x.name)
@@ -234,7 +233,9 @@ class OpenScene(QtGui.QWidget):
 
     def get_local_scene(self, scene_path, scene_name):
         """returns object with local scene information"""
-        scene_local_path = os.path.join(self.project_data.paths.get_local_root(), scene_path, "WORK", scene_name)
+        selected_ep = self.ui.listEpisodes.currentItem().text()
+        current_step = self.ui.comboStep.currentText()
+        scene_local_path = os.path.join(self.project_data.paths.get_scenes_path("local",selected_ep,current_step).normpath(), "WORK", scene_name)
         local_scene_data = {
             "path": scene_local_path,
             "xstage": self.project_data.harmony.get_xstage_last_version(scene_local_path)
@@ -279,9 +280,10 @@ class OpenScene(QtGui.QWidget):
             self.ui.progress_bar.setValue(index)
             self.ui.progress_bar.setFormat("searching versions {0}".format(step))
 
-            scene_path = self.project_data.paths.get_scene_path(scene_name, step)
-            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step) #self.root + scene_path + "/PUBLISH"
-            full_list_publish = os.listdir(scene_publish_path)
+            scene_path = self.project_data.paths.get_scene_path("local",scene_name, step).normpath()
+            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step).normpath() #self.root + scene_path + "/PUBLISH"
+            
+            full_list_publish = os.listdir(scene_publish_path) if os.path.exists(scene_publish_path) else []
             versions_data[step] = {
                 "is_used": False,
                 "local_path": self.get_local_scene(scene_path, scene_name),
@@ -293,8 +295,8 @@ class OpenScene(QtGui.QWidget):
                 index += 1
                 continue
             # ORGANIZE ZIP LIST FROM SCENE PUBLISH LIST
-            zips = filter(lambda x: x.get_name().endswith(".zip"), full_list_publish)
-            zips.sort(key=lambda x: x.get_name())
+            zips = filter(lambda x: x.endswith(".zip"), full_list_publish)
+            zips.sort(key=lambda x: x)
 
             if len(zips) == 0:
                 print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
@@ -302,7 +304,7 @@ class OpenScene(QtGui.QWidget):
                 continue
 
             for item in zips:
-                versions_data[step]['versions'][item.get_name()] = item
+                versions_data[step]['versions'][item.name] = item
 
             versions_data[step]["is_used"] = True
             versions_data["scene_exists"] = True
@@ -355,7 +357,7 @@ class OpenScene(QtGui.QWidget):
         self.ui.listScenes.clear()
         self.ui.listVersions.clear()
         self.ui.checkBox_open_local.setEnabled(False)
-        path = self.project_data.paths.get_episode_scenes_path(item.text(), self.ui.comboStep.currentText())
+        path = self.project_data.paths.get_scenes_path("server",item.text(), self.ui.comboStep.currentText()).normpath()
         self.ui.explorer_path.setText(path)
 
         shot_list = self.episodes_data[item.text()].keys()
@@ -468,18 +470,12 @@ class OpenScene(QtGui.QWidget):
         selected_ep = self.ui.listEpisodes.currentItem().text()
         shot_animatic_mov = {
             "server": self.episodes_data[selected_ep][shot_name],
-            "local": os.path.join(
-                self.project_data.paths.get_local_root(),
-                self.project_data.paths.get_render_path(selected_ep),
-                self.project_data.paths.get_animatic_folder(),
-                os.path.basename(self.episodes_data[selected_ep][shot_name])
-            )
+            "local": os.path.join(self.project_data.paths.get_animatics_folder("local", selected_ep).normpath(),os.path.basename(self.episodes_data[selected_ep][shot_name]))
         }
         current_step = self.ui.comboStep.currentText()
 
-        path = self.project_data.paths.get_scene_path(shot_name, self.ui.comboStep.currentText())
+        path = self.project_data.paths.get_scene_path("server",shot_name, self.ui.comboStep.currentText()).normpath()
         self.ui.explorer_path.setText(path)
-
         self.check_if_scene_is_opened(shot_name)
 
         # UPDATES MAIN KEY VERSION OBJECT VALUE WITH CURRENT SCENE SELECTED
@@ -546,7 +542,7 @@ class OpenScene(QtGui.QWidget):
         selected_version = item.text()
 
         print "ROOT:" + self.root
-        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(self.project_data.paths.get_local_root(), "")
+        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(self.project_data.paths.root["local"].normpath(), "")
         print " >> full path: " + path
         self.ui.explorer_path.setText(path)
 
@@ -581,7 +577,7 @@ class OpenScene(QtGui.QWidget):
             self.ui.checkBox_all_versions.setEnabled(False)
 
     def open_local_folder(self):
-        path = os.path.join(self.project_data.paths.get_local_root(), self.ui.explorer_path.text())
+        path = os.path.join(self.project_data.paths.root["local"].normpath(), self.ui.explorer_path.text())
         if os.path.exists(path):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
         else:
@@ -612,7 +608,7 @@ class OpenScene(QtGui.QWidget):
 
         shot = self.ui.listScenes.currentItem()
         if shot is not None:
-            path = self.project_data.paths.get_scene_path(shot.text(), self.ui.comboStep.currentText())
+            path = self.project_data.paths.get_scene_path("server",shot.text(), self.ui.comboStep.currentText()).normpath()
             self.ui.explorer_path.setText(path)
         print "reset widgets with version shot info..."
 
