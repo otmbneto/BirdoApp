@@ -258,3 +258,18 @@ class FolderManager(object):
             f = scene / item
             f.make_dirs()
         return scene
+
+    def get_publish_file(self, scene_name, step):
+        """retorna o caminho do proximo arquivo zip para publish no server"""
+        ep = self.find_ep(scene_name)
+        if not ep:
+            print "[BIRDOAPP] nome de cena invalido!"
+            return None
+        dir_name = filter(lambda x: "PUBLISH" in x, self.steps[step]["server"])[0]
+        publish_folder = self.get_scenes_path("server", ep, step) / scene_name / dir_name
+        if not publish_folder.exists():
+            self.create_scene_scheme("server", scene_name, step)
+        versions = publish_folder.glob("{0}*.zip".format(scene_name))
+        versions.sort()
+        last_v_num = len(versions)
+        return publish_folder / "{0}_v{1:02d}.zip".format(scene_name, (1 + last_v_num))
