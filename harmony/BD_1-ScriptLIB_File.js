@@ -674,26 +674,15 @@ function BD1_copy_file_with_pb(proj_data, src_file, dst_file, ask_override){
 */
 function BD1_GetPythonObject(){
 	try{
-		var birdoapp_data = BD2_ProjectInfo();
-		var pyFilePath = birdoapp_data.birdoApp + "harmony/birdoPack/harmonyPythonInterface.py";
 		var pyObjects = PythonManager.getPyObjects();
-		
 		if("birdoAppScripts" in pyObjects){
 			Print("[BIRDOAPP] Python Object loaded!");
-			return pyObjects["birdoAppScripts"].py;
-		} else {
-			//creates python objetc
-			var myPythonObject = PythonManager.createPyObject(pyFilePath, "birdoAppScripts");
-			if(!myPythonObject){
-				Print("[BIRDOAPP] ERROR Creating Python Object!");
-				return null;
-			}
-			
-			myPythonObject.addObject("birdoapp", birdoapp_data.birdoApp);//add birdoapp root to python object
-			myPythonObject.addObject("messageLog", MessageLog);
-			Print("[BIRDOAPP] Python Object Created!");
-			return myPythonObject.py;
+			Print("[BIRDOAPP] - has object 'birdoapp_root': " + pyObjects["birdoAppScripts"].hasObject('birdoapp_root'));
+			Print("[BIRDOAPP] - has object 'messageLog': " + pyObjects["birdoAppScripts"].hasObject('messageLog'));
+			return pyObjects["birdoAppScripts"].py;			
 		}
+		Print("[BIRDOAPP] Nao foi possivel encontrar o objeto python 'birdoAppScripts' da birdo!");
+		return null;
 	} catch (e){
 		Print(e);
 		return null;
