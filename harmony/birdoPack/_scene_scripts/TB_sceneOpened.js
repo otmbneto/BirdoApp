@@ -45,7 +45,19 @@ function TB_sceneOpened(){
 		Print(e);		
 	}
 	
-	Print("[BIRDO] Birdo Configure Done...");
+	//create birdo python object
+	var pyFilePath = projectDATA.birdoApp + "harmony/birdoPack/harmonyPythonInterface.py";
+	var myPythonObject = PythonManager.createPyObject(pyFilePath, "birdoAppScripts");
+	if(!myPythonObject){
+		MessageBox.warning("Erro Criando o PythonObject do BirdoApp! Algumas ferramentas não irão funcionar corretamente!",0,0);
+		Print("[BIRDOAPP] ERROR Creating Python Object!");
+	} else {
+		myPythonObject.addObject("birdoapp_root", projectDATA.birdoApp);
+		myPythonObject.addObject("messageLog", MessageLog);
+
+		Print("[BIRDOAPP] Python Object Created!");
+	}
+	Print("[BIRDOAPP] BirdoApp Configure Done...");
 
 }
 
