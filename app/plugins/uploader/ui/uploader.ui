@@ -280,7 +280,7 @@ QProgressBar::chunk {
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="step_label">
        <property name="text">
         <string>v2.0</string>
        </property>
@@ -305,7 +305,7 @@ QProgressBar::chunk {
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,2">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -315,6 +315,16 @@ QProgressBar::chunk {
      </item>
      <item>
       <widget class="QComboBox" name="globalEpisodes"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Step: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="globalSteps"/>
      </item>
      <item alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="checkDecimal">

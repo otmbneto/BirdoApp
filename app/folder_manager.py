@@ -42,7 +42,7 @@ class FolderManager(object):
 
         self.root = {
             "server": Path(proj_data["paths"]["root"]) / proj_data["paths"]["sub_root"],
-            "local": local_folder if bool(local_folder) else ""
+            "local": Path(local_folder) if bool(local_folder) else ""
         }
         self.tblib = str(proj_data["paths"]["tblib"])
         self.library = str(proj_data["paths"]["library"])

@@ -54,6 +54,7 @@ class Uploader(QtGui.QMainWindow):
             self.get_project_episodes()
         self.ui.progressBar.setVisible(False)
         self.ui.globalEpisodes.currentIndexChanged.connect(self.episode_changed)
+        self.ui.globalSteps.currentIndexChanged.connect(self.step_changed)
         self.ui.executeBtn.clicked.connect(self.execute)
         self.ui.cleanBtn.clicked.connect(self.clean_scroll_list)
         self.ui.cancelBtn.clicked.connect(self.close)
@@ -66,13 +67,23 @@ class Uploader(QtGui.QMainWindow):
     def episode_changed(self):
         value = self.ui.globalEpisodes.currentIndex()
         for item in self.listOfWidgets:
-            item.setEpisode(value)
+            if item.isChecked():
+                item.setEpisode(value)
+
+    def step_changed(self):
+        value = self.ui.globalSteps.currentIndex()
+        for item in self.listOfWidgets:
+            if item.isChecked():
+                item.setStep(value)
 
     def get_project_episodes(self):
         self.episodes = [""]
+        self.steps = [""]
         folder = self.project_data.paths.get_episodes_folder("server").normpath()
         self.episodes += [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f))]
+        self.steps += self.project_data.paths.steps.keys()
         self.ui.globalEpisodes.addItems(self.episodes)
+        self.ui.globalSteps.addItems(self.steps)
 
     def clean_scroll_list(self):
         self.clean_layout(self.verticalLayout)
@@ -144,14 +155,18 @@ class Uploader(QtGui.QMainWindow):
             e.setDropAction(QtCore.Qt.CopyAction)
             e.accept()
             urls = e.mimeData().urls()
-
+            droppedSomething = False
             for url in urls:
                 QtGui.qApp.processEvents()
                 u = str(url.toLocalFile())
                 movWidget = self.get_template_item(u, self.episodes)
+                print(movWidget)
                 if movWidget.isValid():
                     self.listOfWidgets.append(movWidget)
                     self.verticalLayout.addWidget(movWidget)
+                    droppedSomething = True
+            if droppedSomething:
+                self.ui.cleanBtn.setEnabled(True)
         else:
             e.ignore()
 
