@@ -1311,12 +1311,12 @@ function BD2_FormatPathOS(path){
 */
 function BD2_updateUserNameInPath(dirPath){
 	//get python object
-	var py = BD1_GetPythonObject();
+	/*var py = BD1_GetPythonObject();
 	if(!py){
 		Print("[BIRDOAPP] GetShortName - Erro pegando o objeto Python!");
 		return dirPath;
-	}
-	return py.get_short_name(dirPath);
+	}*/
+	return dirPath;
 }
 
 /*
