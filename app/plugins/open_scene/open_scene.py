@@ -45,17 +45,18 @@ class CustomSignal(QtCore.QObject):
 def copy_scene_template(prefix, scene_name, work_dir):
     """Creates a clean scene setup by copying the shot_SETUP template in birdoAPP template folder to the working
     scene folder """
-    placeholder = '{0}_shot_SETUP'.format(prefix)
-    template = os.path.join(birdo_app_root, 'templates', placeholder)
+    template_name = 'SCENE_template'
+    template = os.path.join(birdo_app_root, 'template', 'project_template',template_name)
     try:
         copy_tree(template, work_dir)
-    except:
+    except Exception as e:
+        print(e)
         print 'error copying template tree structure : ' + template + " : " + work_dir
         return False
-    to_rename_file_list = filter(lambda x: placeholder in x, os.listdir(work_dir))
+    to_rename_file_list = filter(lambda x: template_name in x, os.listdir(work_dir))
     for item in to_rename_file_list:
         template_file = os.path.join(work_dir, item)
-        final_file_name = template_file.replace(placeholder, (scene_name + "_v00"))
+        final_file_name = template_file.replace(template_name, (scene_name + "_v00"))
         os.rename(template_file, final_file_name)
     return True
 
@@ -197,7 +198,7 @@ class OpenScene(QtGui.QWidget):
             scene_name = item.name.replace(re.findall(version_reg, item.name)[0], "")
             if scene_name not in scenes_data:
                 animatic_mov = filter(lambda y: y.name.startswith(scene_name), mov_list)[-1]
-                scenes_data[scene_name] = os.path.join(animatic_mov.path, animatic_mov.name)
+                scenes_data[scene_name] = animatic_mov.normpath()
         return scenes_data
 
     def get_progress(self):
@@ -235,7 +236,7 @@ class OpenScene(QtGui.QWidget):
         """returns object with local scene information"""
         selected_ep = self.ui.listEpisodes.currentItem().text()
         current_step = self.ui.comboStep.currentText()
-        scene_local_path = os.path.join(self.project_data.paths.get_scenes_path("local",selected_ep,current_step).normpath(), "WORK", scene_name)
+        scene_local_path = os.path.join(self.project_data.paths.get_scene_path("local",scene_name,current_step).normpath(),"WORK",scene_name)
         local_scene_data = {
             "path": scene_local_path,
             "xstage": self.project_data.harmony.get_xstage_last_version(scene_local_path)
@@ -320,6 +321,7 @@ class OpenScene(QtGui.QWidget):
         episode = args[0]
         row = self.ui.listEpisodes.count()
         self.ui.listEpisodes.insertItem(row, episode.keys()[0])
+        print("EPISODE: "+ str(episode))
         self.episodes_data.update(episode)
 
     @QtCore.Slot(object)
@@ -398,7 +400,7 @@ class OpenScene(QtGui.QWidget):
             return False
 
         # CREATES FOLDER SCHEME
-        local_scene_path = self.project_data.paths.create_local_scene_scheme(scene_name, step)
+        local_scene_path = self.project_data.paths.create_scene_scheme("local", scene_name, step).normpath() #self.project_data.paths.create_local_scene_scheme(scene_name, step)
         if not local_scene_path:
             print "error creating scene folder scheeme!"
             MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
@@ -411,7 +413,7 @@ class OpenScene(QtGui.QWidget):
             print "error compressing file with ffmpeg do final path!"
             MessageBox.warning("Erro ao processar mov do animatic para compressao adequada! Avise a Direcao Tecnica!")
             return False
-        work_dir = os.path.join(local_scene_path, 'WORK', scene_name)
+        work_dir = os.path.join(local_scene_path, 'WORK',scene_name)
 
         self.ui.progress_bar.setFormat("creating SETUP[3/4]")
         self.ui.progress_bar.setValue(4)
@@ -500,6 +502,8 @@ class OpenScene(QtGui.QWidget):
                 version_list = self.shot_versions[new_step_list[i]]['versions'].keys()
                 version_list.sort()
                 row = 0
+
+                print("VERSIONS: " + str(version_list))
                 for version in version_list:
                     self.ui.listVersions.insertItem(row, version)
                     row += 1
@@ -542,7 +546,7 @@ class OpenScene(QtGui.QWidget):
         selected_version = item.text()
 
         print "ROOT:" + self.root
-        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"].replace(self.project_data.paths.root["local"].normpath(), "")
+        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"]#.replace(self.project_data.paths.root["local"].normpath(), "")
         print " >> full path: " + path
         self.ui.explorer_path.setText(path)
 
@@ -577,7 +581,9 @@ class OpenScene(QtGui.QWidget):
             self.ui.checkBox_all_versions.setEnabled(False)
 
     def open_local_folder(self):
+
         path = os.path.join(self.project_data.paths.root["local"].normpath(), self.ui.explorer_path.text())
+        print("path local: " + path)
         if os.path.exists(path):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
         else:
