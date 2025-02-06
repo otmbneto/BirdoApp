@@ -13,7 +13,7 @@ class Path:
         self.parent = os.path.dirname(path)
         self.suffix = os.path.splitext(path)[-1]
         self.suffixes = os.path.splitext(path)[1:]
-        self.stem = os.path.splitext(path)[0]
+        self.stem = os.path.splitext(self.name)[0]
 
     def __str__(self):
         return self.path
@@ -48,7 +48,7 @@ class Path:
         return os.path.getsize(self.path)
 
     def get_relative_path(self, relative_to):
-        return Path("/" + os.path.relpath(self.path, relative_to))
+        return Path("/" + os.path.relpath(self.path, str(relative_to)))
 
     def is_relative_path(self):
         return self.path.startswith("/")
@@ -148,3 +148,11 @@ class Path:
             self / x for x in
             filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
         ]
+
+    def remove(self):
+        if not self.exists():
+            raise Exception("Not a existing path to delete!")
+        if self.is_dir():
+            return shutil.rmtree(self.path)
+        else:
+            return os.remove(self.path)
