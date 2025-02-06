@@ -111,6 +111,15 @@ class ConfigInit(object):
     def get_plugins_folder(self):
         return os.path.join(self.root, "app", "plugins").replace("\\", "/")
 
+    def get_temp_folder(self, sub_folder=None, clean=False):
+        """retorna o caminho do temp folder (aceita subfolder para concatenar no caminho final e clean para forcar a pasta limpa)"""
+        temp_folder = self.system.temp if not sub_folder else self.system.temp / sub_folder
+        if clean and temp_folder.exists():
+            temp_folder.remove()
+        if not temp_folder.exists():
+            temp_folder.make_dirs()
+        return temp_folder
+
     def create_project(self, create_data):
         """cria novo projeto no server do estudio.(usado no modo dev)"""
         if not bool(self.prefix_reg.match(create_data["01_prefix"])):
