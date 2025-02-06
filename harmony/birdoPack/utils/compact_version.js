@@ -38,13 +38,11 @@ function create_compact_file_list(use_progressbar){
 	var finalOutput = {"user_name": null, "file_list": []};
 	
 	if(use_progressbar){
-		var max = all_files.length - 1;
 		var progressDlg = new QProgressDialog();
 		progressDlg.setStyleSheet(progressDlg_style);
 		progressDlg.modal = true;
 		progressDlg.open();
-		progressDlg.setRange(0, max);
-		progressDlg.setAutoClose(true);
+		progressDlg.setRange(0, all_files.length - 1);
 	}
 	
 	var mainFolderItem = {"full_path": cenaPath, "relative_path": cenaPath.replace(cenaDir, "")};
@@ -55,7 +53,7 @@ function create_compact_file_list(use_progressbar){
 
 	for(var i=0; i<all_files.length; i++){
 		if(use_progressbar){
-			progressDlg.setLabelText("Listing Scene Files:\n" + all_files[i]);
+			progressDlg.setLabelText("Listing Scene Files: [" + i + "/" + all_files.length + "]");
 			progressDlg.setValue(i);
 		}
 		

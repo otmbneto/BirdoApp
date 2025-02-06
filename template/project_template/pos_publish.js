@@ -17,7 +17,7 @@ Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
 
-function pos_publish(projectDATA){
+function pos_publish(projectDATA, publish_data){
 	
 	//rodar funcoes com o acum undo nesse bloco
 	scene.beginUndoRedoAccum("BIRDOAPP acoes pos publish");
