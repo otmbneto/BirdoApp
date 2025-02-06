@@ -13,10 +13,10 @@ include("BD_2-ScriptLIB_Geral.js");
 //main func para criar objeto atravez do arquivo config classe do projeto
 function birdoapp_init(scripts_path){
 	
-	//primeiro monta um objeto com importantes valores, depois cria a classe principal
 	
+	var birdoapp_root = BD1_dirname(scripts_path);
+		
 	//get config data
-	var birdoapp_root = BD2_updateUserNameInPath(BD1_dirname(scripts_path));
 	var config_json = birdoapp_root + "/config.json";
 	var config_data = BD1_FileExists(config_json) ? BD1_ReadJSONFile(config_json) : {"user_name": null, "server_projects": null, "user_projects": []};
 		
@@ -34,7 +34,7 @@ function birdoapp_init(scripts_path){
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
 	var root_path = [config_data["server_projects"], prefix].join("/") + "/";
 	var proj_root = (Boolean(prefix) && BD1_DirExist(root_path)) ? root_path : birdoapp_root + "/template/project_template/";
-	Print("TESTE PROJ ROOT: " + proj_root);
+
 	var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
 	var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
 	proj_data["proj_confg_root"] = proj_root;
@@ -55,6 +55,7 @@ function birdoapp_init(scripts_path){
 	} else {
 		Print("[BIRDOAPP] BirdoApp configurado (sem projeto) com sucesso!");	
 	}
+	
 	return birdodata;
 }
 exports.birdoapp_init = birdoapp_init;
@@ -90,8 +91,9 @@ function BirdoAppConfig(config_data, project_data){
 	//define se a config e valida
 	this.valid = config_data["valid"];
 	
-	//get project data
+	//project data
 	this.prefix = project_data["prefix"];
+	this.id = project_data["id"];
 
 	this.project_name = project_data["name"];
 	this.user_name = config_data["user_name"];
