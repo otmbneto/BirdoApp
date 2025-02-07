@@ -796,7 +796,7 @@ function BD2_ProjectInfo(){
 		Print("[BIRDOAPP] variavel do harmony 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' não está instalada para o BirdoApp!");
 		return false;
 	}
-	var birdoPackage = BD2_updateUserNameInPath(BD2_FormatPathOS(birdoApp_scripts + "/birdoPack/"));
+	var birdoPackage = BD2_FormatPathOS(birdoApp_scripts + "/birdoPack/");
 	var pathsScript = birdoPackage + "birdoapp_init.js";
 	
 	if(!BD1_FileExists(pathsScript)){
@@ -1310,13 +1310,17 @@ function BD2_FormatPathOS(path){
 	@dirPath => caminho a ser mudado
 */
 function BD2_updateUserNameInPath(dirPath){
-	//get python object
-	/*var py = BD1_GetPythonObject();
-	if(!py){
-		Print("[BIRDOAPP] GetShortName - Erro pegando o objeto Python!");
+	var birdo_py = BD1_GetPythonObject();
+	if(birdo_py){
+		Print("[BIRDOAPP] Nao foi possivel encontrar o Objeto Python do birdoapp");
+		return false;
+	}
+	var shortname = birdo_py.get_short_path(dirPath);
+	if(!shortname){
+		Print("[BIRDOAPP] Erro ao pegar o short name no python!");
 		return dirPath;
-	}*/
-	return dirPath;
+	}
+	return shortname;
 }
 
 /*

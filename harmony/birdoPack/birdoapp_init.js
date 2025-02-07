@@ -27,8 +27,8 @@ function birdoapp_init(scripts_path){
 	config_data["valid"] = BD1_FileExists(config_json) && Boolean(config_data["server_projects"]) && Boolean(prefix);
 
 	config_data["birdoapp"] = birdoapp_root + "/";
-	config_data["appdata"] = BD2_updateUserNameInPath(BD2_FormatPathOS(System.getenv("APPDATA")));
-	config_data["systemTempFolder"] = BD2_updateUserNameInPath(BD2_FormatPathOS(specialFolders.temp));
+	config_data["appdata"] = BD2_FormatPathOS(System.getenv("APPDATA"));
+	config_data["systemTempFolder"] = BD2_FormatPathOS(specialFolders.temp);
 	config_data["scripts_path"] = scripts_path;
 		
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
