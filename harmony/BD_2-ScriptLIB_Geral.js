@@ -1311,9 +1311,9 @@ function BD2_FormatPathOS(path){
 */
 function BD2_updateUserNameInPath(dirPath){
 	var birdo_py = BD1_GetPythonObject();
-	if(birdo_py){
+	if(!birdo_py){
 		Print("[BIRDOAPP] Nao foi possivel encontrar o Objeto Python do birdoapp");
-		return false;
+		return dirPath;
 	}
 	var shortname = birdo_py.get_short_path(dirPath);
 	if(!shortname){
