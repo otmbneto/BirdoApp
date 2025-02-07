@@ -224,7 +224,7 @@ class ConfigInit(object):
         project_data["system"] = self.system
 
         # pega a info do projeto e do usuario
-        project_user_data = next((x for x in self.config_data["user_projects"] if x["id"] == project_index), None)
+        project_user_data = next((x for x in self.config_data["user_projects"] if x["id"] == int(project_index)), None)
         if not project_user_data:
             print "project of index {0} is not configured for local user.. will open config project page...".format(project_index)
             project_data["ready"] = False
