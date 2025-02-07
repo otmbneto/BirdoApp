@@ -1,14 +1,19 @@
 import os
 import sys
+import argparse
 from zipfile import ZipFile, ZIP_DEFLATED
 from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout
 from PySide import QtCore, QtGui
 from MessageBox import CreateMessageBox
 from system import get_short_path_name
+from birdo_json import read_json_file
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from config import ConfigInit
 
 
 class Worker(QtCore.QObject):
     copied = QtCore.Signal(int)
+    zipped = QtCore.Signal(int)
     zip_end = QtCore.Signal(bool)
     transfer_end = QtCore.Signal(bool)
 
@@ -49,7 +54,6 @@ class Worker(QtCore.QObject):
         i = 0
         with ZipFile(dst_zip, 'w', compression=ZIP_DEFLATED) as zip_f:
             for (file, relpath) in zip(file_list, relpath_list):
-                self.copied.emit(i)
                 short_name_path = get_short_path_name(file)
                 print "** ziping file: {0}".format(file)
                 try:
@@ -57,6 +61,7 @@ class Worker(QtCore.QObject):
                 except Exception as e:
                     err_counter += 1
                     print e
+                self.zipped.emit(i)
                 i += 1
         print "[BIRDOAPP_py] Scene Zip erros: {0}".format(err_counter)
         self.zip_end.emit(os.path.exists(dst_zip))
@@ -68,12 +73,13 @@ class DialogPublish(QDialog):
 
     """Class With ProgressDialog to request copy file"""
 
-    def __init__(self, birdo_config, files_list, rel_list, dst_file):
+    def __init__(self, scene_name, birdo_config, files_list, rel_list, dst_file):
         super(DialogPublish, self).__init__()
         print("[BIRDOAPP_py] Progress File Dialog Created.")
 
         # birdoapp data
         self.birdoapp = birdo_config
+        self.scene_name = scene_name
 
         # define arquivos para processar
         self.temp_zip = self.birdoapp.get_temp_folder("publish_scene", clean=True) / "_temp.zip"
@@ -95,7 +101,7 @@ class DialogPublish(QDialog):
         self.setWindowIcon(QtGui.QIcon(self.birdoapp.icons["logo"]))
         self.setStyleSheet(self.birdoapp.css_style)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
-        self.setWindowTitle("PUBLISH SCENE")
+        self.setWindowTitle("PUBLISH SCENE: {0}".format(self.scene_name))
 
         # create widgets
         self.v_layout = QVBoxLayout(self)
@@ -116,6 +122,12 @@ class DialogPublish(QDialog):
         self.v_layout.setContentsMargins(22, 22, 22, 22)
         self.setLayout(self.v_layout)
 
+        # animation movie
+        self.movie = QtGui.QMovie(self.birdoapp.icons["file_transfer"])
+        self.movie.setScaledSize(QtCore.QSize(213, 120))
+        self.movie.setSpeed(80)
+        self.display_label.setMovie(self.movie)
+
         # create worker and thread attributes
         self.worker = None
         self.worker_thread = QtCore.QThread()
@@ -134,7 +146,8 @@ class DialogPublish(QDialog):
         self.worker = Worker()
         self.transfer_request.connect(self.worker.start_copy)
         self.zip_request.connect(self.worker.start_zip)
-        self.worker.copied.connect(self.update_pb)
+        self.worker.copied.connect(self.update_copy)
+        self.worker.zipped.connect(self.update_zip)
         self.worker.zip_end.connect(self.copy_file)
         self.worker.transfer_end.connect(self.final_message)
 
@@ -142,19 +155,19 @@ class DialogPublish(QDialog):
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.start()
 
-    def update_pb(self, bites):
+    def update_copy(self, bites):
         self.pb.setValue(self.pb.value() + bites)
+
+    def update_zip(self, i):
+        self.pb.setValue(i)
 
     def start_publish(self):
 
-        # display image
-        image = QtGui.QPixmap(self.birdoapp.icons["zip"])
-        image.scaled(QtCore.QSize(75, 75))
-        self.display_label.setPixmap(image)
-        self.display_label.setScaledContents(True)
+        # start animation
+        self.movie.start()
 
         # update dialog label
-        self.label.setText("Compactando {0} arquivos da Cena {0}".format(len(self.files_fullpath), self.publish_file.stem))
+        self.label.setText("Compactando {0} arquivos\nda Cena {1}".format(len(self.files_fullpath), self.scene_name))
 
         # sets progressbar range
         self.pb.setRange(0, len(self.files_fullpath))
@@ -167,11 +180,6 @@ class DialogPublish(QDialog):
         if not zip_result:
             self.message.warning("BIRDOAPP PUBLISH: ERRO ao compactar o arquivo para o temp!")
             return
-
-        # display image
-        image = QtGui.QPixmap(self.birdoapp.icons["template"])
-        image.scaled(QtCore.QSize(75, 75))
-        self.display_label.setPixmap(image)
 
         # update dialog label
         self.label.setText("Publicando Versao: {0}...".format(self.publish_file.name))
@@ -201,32 +209,37 @@ class DialogPublish(QDialog):
         print("[BIRDOAPP_py] - File transder canceled by the user...")
         self.close()
 
-#
-# if __name__ == "__main__":
-#     from birdo_pathlib import Path
-#     sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-#     from config import ConfigInit
-#
-#     f = Path(r"C:\_BirdoRemoto\PROJETOS\LupiBaduki\01_EPISODIOS\EP101\03_CENAS\01_SETUP\LEB_EP101_SC0080\WORK\LEB_EP101_SC0080")
-#     all_files = []
-#     rel_paths = []
-#
-#     def recurse_list_files(root):
-#         for item in root.glob("*"):
-#             all_files.append(item.path)
-#             rel_paths.append(item.get_relative_path(f.parent).path)
-#             if item.is_dir():
-#                 recurse_list_files(item)
-#
-#     recurse_list_files(f)
-#
-#     print("full paths: {0} => item [0] => {1}".format(len(all_files), all_files[0]))
-#     print("relative paths: {0} => item [0] => {1}".format(len(rel_paths), rel_paths[0]))
-#
-#     birdoapp = ConfigInit()
-#     app = QApplication.instance()
-#     dialog = DialogPublish(birdoapp, all_files, rel_paths, Path(r"C:\_BirdoRemoto\teste.zip"))
-#     dialog.start_publish()
-#     sys.exit(app.exec_())
-#
-#
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Publish Scene')
+    parser.add_argument('proj_id', help='Project id')
+    parser.add_argument('step', help='Publish Step')
+    parser.add_argument('scene_name', help='Scene Name')
+    parser.add_argument('scene_data_file', help='Scene data Json file')
+    args = parser.parse_args()
+
+    # arguments
+    proj, step, scene_name = int(args.proj_id), args.step, args.scene_name
+    scene_data = read_json_file(args.scene_data_file)
+
+    # inicia o birdoapp no python
+    birdoapp = ConfigInit()
+    if not birdoapp.is_ready():
+        sys.exit("[BIRDOAPP_py] - Birdo app nao esta configurado!")
+
+    proj_data = birdoapp.get_project_data(proj)
+    if not proj_data.ready:
+        sys.exit("[BIRDOAPP_py] - Projeto ainda nao configurado!")
+
+    # acha o arquivo de destino para publish
+    publish_file = proj_data.paths.get_publish_file(scene_name, step)
+
+    # formata lista de arquivos de input para serem zipadas
+    file_list = [x["full_path"] for x in scene_data["file_list"]]
+    rel_files = [x["relative_path"].replace("{PLACE_HOLDER}", publish_file.stem) for x in scene_data["file_list"]]
+
+    app = QApplication.instance()
+    dialog = DialogPublish(scene_name, birdoapp, file_list, rel_files, publish_file)
+    dialog.start_publish()
+    sys.exit(app.exec_())

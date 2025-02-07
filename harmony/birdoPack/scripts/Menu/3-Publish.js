@@ -28,7 +28,6 @@ function Publish(){
 		}
 	}
 	
-	
 	//roda o script pre-publish com todas funcoes q modificam a cena antes de enviar
 	var pre_publish_js = projectDATA.proj_confg_root + "pre_publish.js";
 	if(BD1_FileExists(pre_publish_js)){
@@ -48,25 +47,21 @@ function Publish(){
 			MessageBox.warning("ERRO ao listar arquivos para compactar!", 0, 0);
 			return;
 		}
+		var sc_json = projectDATA.systemTempFolder + "/BirdoApp/publish_scene/_sc_data.json";
+		BD1_WriteJsonFile(compact_version_data, sc_json);
 	} catch(e){
 		Print(e);
-	}
-		
-	//roda o publish no python
-	var birdo_py = BD1_GetPythonObject();
-	if(!birdo_py){
-		MessageBox.warning("Erro compilando o PythonObject do BirdoApp!",0,0);
 		return;
 	}
 	
-	try{ 
-		birdo_py.publish_scene(projectDATA.id, publish_data["publish_step"], projectDATA.entity.name, compact_version_data["file_list"]);
-	} catch (e){
-		Print(e);
-		MessageBox.warning("PUBLISH SCENE ERROR! Nao foi possivel publicar a cena. Verifique o MessageLog para mais detalhes.", 0, 0);
+	//run publish python script
+	if(run_publish_python(projectDATA, publish_data["publish_step"], projectDATA.entity.name, sc_json)){
+		Print("[BIRDOAPP] - Publish python scritp foi um sucesso!");		
+	} else{
+		MessageBox.warning("PUBLISH SCENE ERROR! Nao foi possivel publicar a cena. Verifique o terminal para mais detalhes.", 0, 0);
 		return;
 	}
-	
+
 	//roda o script post-publish com todas funcoes q modificam a cena antes de enviar
 	var pos_publish_js = projectDATA.proj_confg_root + "pos_publish.js";
 	if(BD1_FileExists(pos_publish_js)){
@@ -80,8 +75,23 @@ function Publish(){
 exports.Publish = Publish;
 
 
+function run_publish_python(proj_data, step, scene_name, sc_data_file){
+	Print("[BIRDOAPP] Rodando script publish em python...");
+	try{
+		var python = proj_data.birdoApp + "venv/Scripts/python.exe";
+		var pyFile = proj_data.birdoApp + "app/utils/publish_scene.py";
+		var start = Process2(python, pyFile, proj_data.id, step, scene_name, sc_data_file);
+		var ret = start.launch();
+		return ret == 0;
+	} catch (e){
+		Print(e);
+		return false;
+	}
+}
 
-function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
+
+//gera OBJETO com opcoes de publish
+function PublishDialog(proj_data){
 	
 	var publish_steps = proj_data.getPublishStep().sort();
 	var render_steps = proj_data.getRenderStep();
@@ -140,9 +150,7 @@ function PublishDialog(proj_data){//gera OBJETO com opcoes de publish
 		}
 	}
 	
-	
 	var rc = d.exec();
-
 	if(!rc){
 		return false;
 	}
