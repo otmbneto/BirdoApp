@@ -12,44 +12,43 @@ include("BD_2-ScriptLIB_Geral.js");
 function UpdateAnimatic(){
 
 	var projectDATA = BD2_ProjectInfo();
-	
 	if(!projectDATA){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return false;
 	}
 	
+	//checa se o arquivo é cena 
 	if(projectDATA["entity"]["type"] != "SHOT"){
-		MessageBox.information("Este script somente funciona para SHOTS!");
+		MessageBox.warning("Este script somente funciona para SHOTS!", 0, 0);
 		return;
 	}
+	
+	//Print("Esta cena contem mais de um animatic dentro do grupo 'ANIMATIC_'! Delete os animatics antigos na mao antes de importar o Animatic novo!");
+
 	
 	var update_animatic = false;
-	
-	scene.beginUndoRedoAccum("Update Animatic");
-	
 	var extension = "png";//extencao da seq imagem a ser convertida do movie
 
+	//define node de animatic da cena
 	var animaticPath = "Top/ANIMATIC_";
 	var portIn = animaticPath + "/Multi-Port-In";
-	var comp = getGroupComposite(animaticPath, 0);
-	if(!comp){
-		MessageBox.warning("ERRO! Nao foi encontrada a comp de animatic para efetuar atualização!");
-		return;
-	}
-	var old_animatic = getAnimaticNode(animaticPath);
-	var animatic_version = getCurretnAnimaticVersion(old_animatic);
-
-	if(old_animatic == "abort"){
-		scene.cancelUndoRedoAccum();
-		return;
-	}
-	
 	if(node.getName(animaticPath) == ""){
 		Print("Grupo do animatic nao encontrado!");
-		scene.cancelUndoRedoAccum();
 		return false;
 	}
 	
+	var comp = getGroupComposite(animaticPath, 0);
+	if(!comp){
+		MessageBox.warning("[BIRDOAPP] ERRO! Nao foi encontrada a comp de animatic para efetuar atualização!");
+		return;
+	}
+	
+	var old_animatic = getAnimaticNode(animaticPath);
+	if(!old_animatic){
+		return;
+	}
+	
+	var animatic_version = getCurretnAnimaticVersion(old_animatic);
 	if(node.getName(old_animatic) != ""){//checa se ja existe um animatic na cena
 		update_animatic = true;
 	} else {
@@ -57,15 +56,12 @@ function UpdateAnimatic(){
 	}
 	
 	var temp_movie_file = getAnimaticMovie(projectDATA, animatic_version);
-	
 	if(!temp_movie_file){
-		scene.cancelUndoRedoAccum();		
 		return;
 	}
 	
 	if(!BD1_FileExists(temp_movie_file["mov_path"])){
 		Print("Erro: Animatic nao encontrado!");
-		scene.cancelUndoRedoAccum();
 		return;
 	}
 	
@@ -77,16 +73,13 @@ function UpdateAnimatic(){
 		MessageBox.warning("[ERROR] Compressing mov file!", 0, 0);
 		Print("error compressing movie!");
 		loadingScreen.terminate();
-		scene.cancelUndoRedoAccum();		
 		return;
 	}
-
+	
 	var temp_folder = convert_movie_to_image_seq(projectDATA, compressed_movie, extension);// cretae temp folder with files
-
 	if(!temp_folder){
 		MessageBox.warning("[ERROR] Converting mov to image sequence!!!", 0, 0);
 		loadingScreen.terminate();
-		scene.cancelUndoRedoAccum();
 		return;
 	}
 	
@@ -94,6 +87,8 @@ function UpdateAnimatic(){
 		Print("closing loading screen...");
 		loadingScreen.terminate();
 	}
+	
+	scene.beginUndoRedoAccum("Update Animatic");
 
 	var up = updateAudio(temp_folder["audio_file"]);//deleta os audios da cena
 	if(!up){
@@ -102,10 +97,7 @@ function UpdateAnimatic(){
 		MessageBox.warning("[ERROR] Creating Audio layer!!!", 0, 0);
 	}
 	
-	if(update_animatic){//se ja existir um animatic na cena, deleta
-		deleteOldAnimatic(old_animatic);
-	}
-
+	
 	var animatic = create_animatic_node(temp_folder["image_folder"], extension, animaticPath, temp_movie_file["new_version"]);
 
 	if(node.getName(animatic) == "" || !animatic){
@@ -145,35 +137,13 @@ function UpdateAnimatic(){
 			
 		var version = "v00";
 		var version_regex = /v\d{2}/;
-		
 		if(version_regex.test(node.getName(animatic_node))){
 			version = version_regex.exec(node.getName(animatic_node))[0]
 		}
-		
 		return version;
+		
 	}
 	
-	function deleteOldAnimatic(animaticPath){//deleta o animatic antigo e seus audios!
-		var del = node.deleteNode(animaticPath, true, true);
-		Print("animatic deleted: " + del);
-		return del;
-	}
-
-	function getAnimaticNode(animGroup){//verifica se ha algum animatic na cena e retorna ele
-		var subs = node.subNodes(animGroup);
-		var listRead = [];
-		for(var i=0; i<subs.length; i++){
-			if(node.type(subs[i]) == "READ"){
-				listRead.push(subs[i]);
-			}			
-		}
-		if(listRead.length >1){
-			Print("Esta cena contem mais de um animatic dentro do grupo 'ANIMATIC_'! Delete os animatics antigos na mao antes de importar o Animatic novo!");
-			return "abort";
-		} else {
-			return listRead[0];
-		}
-	}
 
 	function create_animatic_node(image_folder, extension, parent, animatic_version){//cria um node de animatic com a sequencia de imagens convertidas
 
@@ -306,9 +276,9 @@ function UpdateAnimatic(){
 		return local_animatic_file;
 	}
 
-	function convert_movie_to_image_seq(projectData, movieFile, extension){//converte o aruquivo e retorna o folder com as imagens
+	function convert_movie_to_image_seq(projectData, movieFile, extension){//converte o arquivo e retorna o folder com as imagens
 		var output = {};
-		Print("TESTE movie to convert images: " + movieFile);
+		Print("[BIRDOAPP] Convert movie images: " + movieFile);
 		var pos = movieFile.lastIndexOf(".");
 		if(pos < 0){
 			Print("error: invalid mov file: " + movieFile);
@@ -322,10 +292,7 @@ function UpdateAnimatic(){
 		}
 
 		var audio_file = image_folder + "Animatic_" + new Date().getTime() + ".wav";
-		
-		Print("converting movie to image sequence... ");
 		var convertImages = BD1_convert_mov_to_images(projectData.birdoApp, movieFile, image_folder, extension);
-		
 		if(!convertImages){
 			Print("Convert mov to image sequence failed!");
 			return false;
@@ -340,7 +307,7 @@ function UpdateAnimatic(){
 		
 		output["image_folder"] = image_folder;
 		output["audio_file"] = audio_file;
-Print(output);
+		Print(output);
 		return output;
 
 	}
@@ -405,3 +372,31 @@ Print(output);
 }
 
 exports.UpdateAnimatic = UpdateAnimatic;
+
+
+
+
+function AnimaticData(){
+	
+	this.group = "Top/ANIMATIC_";
+	
+	//define antigo animatic
+	this.old_nodes = node.subNodes(this.group).filter(function(item){ return node.type(item) == "READ"});
+	
+	this.
+	
+	//methods
+	this.clean_group = function(){
+		this.old_nodes.forEach(function(item){ 
+			if(node.deleteNode(item, true, true)){
+				MessageLog.trace(" - Node deleted: " + item);
+			}
+		});	
+	}
+	
+	
+	
+}
+
+
+
