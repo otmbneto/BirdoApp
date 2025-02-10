@@ -31,9 +31,8 @@ class FolderManager(object):
     messagebox : object
         widget class object created with CreateMessageBox function in utils
     """
-    def __init__(self, proj_data, local_folder, messagebox):
+    def __init__(self, proj_data, local_folder):
 
-        self.mb = messagebox
         self.regs = proj_data["pattern"]
         self.regs["scene"]["regex"] = proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"])
         self.regs["scene"]["model"] = proj_data["pattern"]["scene"]["model"].replace('PREFIX', proj_data["prefix"])

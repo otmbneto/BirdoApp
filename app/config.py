@@ -10,9 +10,6 @@ import re
 import sys
 # TODO: usar o birdo_pathlib Path() aqui (depois de testar todos metodos dele!)
 
-# define widget message box class
-MessageBox = CreateMessageBox()
-
 
 class CreateProjectClass(object):
     """
@@ -50,6 +47,9 @@ class ConfigInit(object):
         self.root = os.path.dirname(os.path.dirname(__file__))
         self.app_json = os.path.join(self.root, "app.json")
         self.data = read_json_file(self.app_json)
+
+        # define widget message box class
+        self.mb = CreateMessageBox()
 
         # define o caminho do executavel venv do python
         self.python = sys.executable.replace("\\", "/")
@@ -174,7 +174,7 @@ class ConfigInit(object):
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
-            MessageBox.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
+            self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
         for proj in os.listdir(self.config_data["server_projects"]):
             p = os.path.join(self.config_data["server_projects"], proj)
@@ -200,20 +200,20 @@ class ConfigInit(object):
         """
         # checa se o config.json e valido
         if not self.is_ready():
-            MessageBox.critical("O BirdoApp nao parece configurado corretamente. Confira o arquivo 'config.json' e tente novamente!")
+            self.mb.critical("O BirdoApp nao parece configurado corretamente. Confira o arquivo 'config.json' e tente novamente!")
             return False
 
         # CHECA SE O SYSTEMA OS E SUPORTADO
         if not self.system.check_os():
-            MessageBox.critical("ATENCAO! Seu Sistema Operacional ainda nao e suportado no BirdoAPP! Avise a Direcao Tecnica!")
+            self.mb.critical("ATENCAO! Seu Sistema Operacional ainda nao e suportado no BirdoAPP! Avise a Direcao Tecnica!")
             return False
 
         if not self.system.check_paths():
-            MessageBox.critical("ERRO ao pegar os caminhos do sistema! Procure a Direcao Tecnica!")
+            self.mb.critical("ERRO ao pegar os caminhos do sistema! Procure a Direcao Tecnica!")
             return False
 
         if int(project_index) not in range(len(self.projects)):
-            MessageBox.warning("Algo deu errado! Argumento index de projeto invalido no 'config_project'! " + str(project_index))
+            self.mb.warning("Algo deu errado! Argumento index de projeto invalido no 'config_project'! " + str(project_index))
             return False
 
         project_data = copy.deepcopy(self.projects[int(project_index)])
@@ -235,7 +235,7 @@ class ConfigInit(object):
             local_folder = project_user_data["local_folder"]
 
         # define paths object
-        project_data["paths"] = FolderManager(project_data, local_folder, MessageBox)
+        project_data["paths"] = FolderManager(project_data, local_folder)
 
         # define harmony class
         project_data["harmony"] = ToonBoomHarmony(self.config_data["harmony_path"])
