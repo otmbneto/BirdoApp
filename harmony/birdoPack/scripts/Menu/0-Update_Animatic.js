@@ -378,12 +378,13 @@ exports.UpdateAnimatic = UpdateAnimatic;
 
 function AnimaticData(){
 	
+	//grupo dos animatics no SETUP
 	this.group = "Top/ANIMATIC_";
 	
 	//define antigo animatic
 	this.old_nodes = node.subNodes(this.group).filter(function(item){ return node.type(item) == "READ"});
 	
-	this.
+	this.version_reg = /v_\d{2}/;
 	
 	//methods
 	this.clean_group = function(){
@@ -394,6 +395,16 @@ function AnimaticData(){
 		});	
 	}
 	
+	this.get_next_version = function(animatic_node){//pega a versao do animatic atual da cena atraves do node de animatic
+			
+		var version = "v00";
+		var version_regex = /v\d{2}/;
+		if(version_regex.test(node.getName(animatic_node))){
+			version = version_regex.exec(node.getName(animatic_node))[0]
+		}
+		return version;
+		
+	}
 	
 	
 }
