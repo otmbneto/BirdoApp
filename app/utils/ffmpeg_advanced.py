@@ -10,7 +10,7 @@ from datetime import datetime
 from tqdm import tqdm
 
 
-class CoverterFFMPEG:
+class ConverterFFMPEG:
     """Main ffmpeg exporter class."""
     def __init__(self, temp_folder, ffmpeg_exe="ffmpeg"):
         self.ffmpeg = ffmpeg_exe
@@ -46,7 +46,7 @@ class CoverterFFMPEG:
                                    shell=True,
                                    stderr=subprocess.STDOUT,
                                    stdout=subprocess.PIPE,
-                                   cwd=self.temp_folder,
+                                   cwd=self.temp_folder.path,
                                    universal_newlines=True)
 
         for line in process.stdout:
@@ -59,6 +59,18 @@ class CoverterFFMPEG:
         os.chdir(self.initial_dir)
         print "[BIRDOAPP] comando ffmpeg finalizado!"
         return process.returncode is None
+
+    def get_resolution(self, input_file):
+        """retorna a resolucao do arquivo em pixels"""
+        try:
+            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, input_file), stderr=subprocess.STDOUT, shell=True)
+        except subprocess.CalledProcessError as exc:
+            res_raw = re.findall(r",\s\d+x\d+,", exc.output)
+            if len(res_raw) == 0:
+                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(input_file)
+                return None
+            resolution = [int(x) for x in re.findall(r"\d+", res_raw[0])]
+            return resolution
 
     def get_video_duration(self, video_file):
         """retorna a duracao do video em frames"""
@@ -96,8 +108,8 @@ class CoverterFFMPEG:
     def convert_movie_to_image_seq(self, input_mov, output_folder, img_format, scale_size=None):
         """converte um arquivo de video em uma sequecia de imagem no destino 'output_folder'"""
         img_out = "{0}/f-%04d.{1}".format(output_folder, img_format)
-        scale = "scale=iw/{0}:ih/{0} ".format(scale_size) if scale_size is not None else " "
-        self.cmd = "{0} -report -i {1} -vf {2}{3}".format(
+        scale = "-vf scale=iw/{0}:ih/{0} ".format(scale_size) if scale_size is not None else ""
+        self.cmd = "{0} -report -i {1} {2}{3}".format(
             self.ffmpeg, input_mov, scale, img_out
         )
         total_frames = self.get_video_duration(input_mov)
@@ -110,7 +122,7 @@ class CoverterFFMPEG:
         self.cmd = "{0} -report -i {1} {2}".format(
             self.ffmpeg, input_mov_file, output_audio_file
         )
-        os.chdir(self.temp_folder)
+        os.chdir(self.temp_folder.path)
         r = os.system(self.cmd)
         os.chdir(self.initial_dir)
         return r == 0
