@@ -2,6 +2,7 @@ from utils.birdo_json import read_json_file, write_json_file
 from utils.birdo_pathlib import Path
 from utils.MessageBox import CreateMessageBox
 from utils.system import SystemFolders
+from utils.ffmpeg_advanced import ConverterFFMPEG
 from folder_manager import FolderManager
 from utils.harmony_utils import ToonBoomHarmony, get_available_harmony_installations
 import copy
@@ -88,6 +89,13 @@ class ConfigInit(object):
 
         # system class para lidar com dados do sistema
         self.system = SystemFolders()
+
+        # cria classe do ffmpeg
+        if self.system.mac_or_windows() == "windows":
+            ffmpeg_exe = Path(self.root) / "extra" / "ffmpeg" / "windows" / "bin" / "ffmpeg.exe"
+        else:
+            ffmpeg_exe = Path(self.root) / "extra" / "ffmpeg" / "mac" / "bin" / "ffmpeg"
+        self.ffmpeg = ConverterFFMPEG(self.get_temp_folder("ffmpeg_logs"), ffmpeg_exe.path)
 
         # lista projetos no init
         if self.config_data["server_projects"]:
