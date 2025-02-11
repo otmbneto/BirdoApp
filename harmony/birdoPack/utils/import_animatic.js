@@ -1,379 +1,298 @@
-//VERSAO PROvISORIA
+/*
+	Utils do update Animatic;
+	(usar no modo BATCH e no scrit do Menu!);
+*/
+include("BD_1-ScriptLIB_File.js");
+include("BD_2-ScriptLIB_Geral.js");
 
-//TODO:
-//  - renomear as camadas de audio antigas para _DELETAR ou algo assim ?? checar se isso foi feito
-// atualizar funcao getAnimaticMovie() para usar o getProjData() novo
-// atualizar todos ffmpeg com o caminho da birdoApp 
 
-
-function import_animatic(){
-
-	var update_animatic = false;
-	var movie_file = getAnimaticMovie();
-
-	if(!fileExists(movie_file)){
-		Print("Erro: Animatic nao encontrado!");
-		return;
-	}
-
-	var animaticPath = "Top/ANIMATIC_";
-	var portIn = animaticPath + "/Multi-Port-In";
-	var comp = animaticPath + "/Comp_Animatic";
-	var old_animatic = getAnimaticNode(animaticPath);
+function Animatic(proj_data, verbose){
 	
-	var extension = "png";
-
-	if(node.getName(animaticPath) == ""){
-		Print("Grupo do animatic nao encontrado!");
-		return false;
-	}
-
-	if(old_animatic == "abort"){
-		return;
-	}
-
-	if(node.getName(old_animatic) != ""){//checa se ja existe um animatic na cena
-		deleteOldAnimatic(old_animatic);
-		update_animatic = true;
-	}
-
-	var temp_folder = convert_movie(movie_file, extension)// cretae temp folder with files
-
-	if(!temp_folder){
-		return;
-	}
-
-	var audio_file = temp_folder + "Animatic.wav";
-
-	var up = updateAudio(audio_file);//deleta os audios da cena
-	if(!up){
-		Print("falha ao criar o audio para a cena!");
-	}
-
-	var animatic = create_animatic_node(temp_folder, extension, animaticPath, update_animatic);
-
-	if(node.getName(animatic) == "" || !animatic){
-		Print("Falha ao importar o animatic!");
-	} else {
-		node.link(animatic, 0, comp, 0);
-		node.link(portIn, 0, animatic, 0, false, false);
-		node.setTextAttr(animatic, "OFFSET.X", 1, -4);
-		node.setLocked(animatic, true);
-		
-		Print("Animatic Importado com sucesso! Confira a duracao na timeline!");
+	//verbose (se false nao mostra nenhuma interface - para rodar no modo batch)
+	this.verbose = verbose
+	
+	//project data object
+	this.proj_data = proj_data;
+	
+	//folder temporario para salvar as images
+	this.temp_folder = [proj_data.systemTempFolder, "BirdoApp", "_animatic"].join("/");
+	
+	//grupo dos animatics no SETUP
+	this.group = "Top/ANIMATIC_";
+	
+	//animatic node name
+	this.node_name = "Animatic_{version}";
+	
+	//define extenção do arquivo de image
+	this.img_format = "png";
+	this.audio_format = "wav";
+	
+	//version reg
+	this.version_reg = new RegExp("v\\d{2}");
+	
+	//define antigo animatic
+	this.old_nodes = node.subNodes(this.group).filter(function(item){ return node.type(item) == "READ"});
+	this.curr_version = this.old_nodes.length == 1 ? this.version_reg.exec(this.old_nodes[0])[0] : "v00";
+	
+	//define se vai usar progressbar
+	if(this.verbose){
+		var mainapp = QApplication.activeWindow();
+		this.pb = new QProgressDialog(mainapp);
+		this.pb.modal = true;
+	} else{
+		this.pb = null;
 	}
 	
-	cleanCache();
-	
-}
-
-
-////////////FUNCOES EXTRAS////////////////////////
-function deleteOldAnimatic(animaticPath){//deleta o animatic antigo e seus audios!
-	var del = node.deleteNode(animaticPath, true, true);
-	Print("animatic deleted: " + del);
-	return del;
-}
-
-function getAnimaticNode(animGroup){//verifica se ha algum animatic na cena e retorna ele
-	var subs = node.subNodes(animGroup);
-	var listRead = [];
-	for(var i=0; i<subs.length; i++){
-		if(node.type(subs[i]) == "READ"){
-			listRead.push(subs[i]);
-		}			
-	}
-	if(listRead.length >1){
-		Print("Esta cena contem mais de um animatic dentro do grupo 'ANIMATIC_'! Delete os animatics antigos na mao antes de importar o Animatic novo!");
-		return "abort";
-	} else {
-		return listRead[0];
-	}
-}
-
-function create_animatic_node(image_folder, extension, parent, update_animatic){//cria um node de animatic com a sequencia de imagens convertidas
-
-	if(parent === undefined){
-		parent = node.root();
-	}
-
- 	var name = "Animatic";
-	var elemId = element.add(name, "COLOR", scene.numberOfUnitsZ(), extension.toUpperCase(), 0);
-	if(elemId == -1){
-		Print("falha ao criar elemento!");
-  		return null; // no read to add.
-	}
-
-	var uniqueColumnName = getUniqueColumnName(name);
-	column.add(uniqueColumnName , "DRAWING");
-	column.setElementIdOfDrawing( uniqueColumnName, elemId );
-
-	var read = node.add(parent, name, "READ", 0, 0, 0);
-	
-	node.linkAttr(read, "DRAWING.ELEMENT", uniqueColumnName);
-
-	var image_list =  listFiles(image_folder, "*.png");
-
-	var image_count = image_list.length;
-
-	if(image_count == 0){
-		Print("Falha ao encontrar imagens png!");
-		return false;
-	}
-
-	if(!update_animatic){
-		frame.insert(1, (image_count - 1));
-	}
-
-	for(var i = 0; i <image_count; i++){
-		var timing = (1+i).toString();
-		var image_path = image_folder + image_list[i]; 
-		Print("importing image: " + image_path);
-
-		Drawing.create(elemId, timing, true); // create a drawing drawing, 'true' indicate that the file exists.
-		var drawingFilePath = Drawing.filename(elemId, timing);   // get the actual path, in tmp folder.
-
-		copyFile( image_path, drawingFilePath );
-		column.setEntry(uniqueColumnName, 1, timing, timing);
-	}
-
-	return read; // name of the new drawing layer.
-}
-
-
-function getUniqueColumnName(column_prefix){
-	var suffix = 0;
-	var column_name = column_prefix;
-	while(suffix < 2000){
-		if(!column.type(column_name)){
-			break;
-		}
-	      suffix = suffix + 1;
-	      column_name = column_prefix + "_" + suffix;
+	//METHODS
+	this.get_next_version = function(){
+		var n = parseFloat(this.curr_version.replace("v", "")) + 1;
+		return "v" + ("00" + n).slice(-2);
 	}	
-	return column_name;
-}
-
-
-function import_sound(filename, column_name){
-	var frame = 1;
-	column.add(column_name, "SOUND");
-	result = column.importSound(column_name, frame, filename);
-	return result;
-}
-
-function updateAudio(audio_file){//copia o arquivo de audio para o audio da cena, se nao tiver somente importa o novo
-	var scene_audio_folder = scene.currentProjectPath() + "/audio/";
-	var sounds_columns = column.getColumnListOfType("SOUND");
-	if(sounds_columns.length > 0){
-		var copy_file = true;
-		for(var i=0; i<sounds_columns.length;i++){
-			var soundFile = scene_audio_folder + column.getEntry(sounds_columns[i], 1, 1);
-			if(!sound.copy(audio_file, soundFile)){
-				copy_file = false;
-				Print("falha ao copiar arquivo de audio: " + soundFile);
-			} else {
-				Print("falha ao copiar arquivo de audio: " + soundFile);
-			}
+	
+	this.get_temp_files = function(){//define os arquivos gerados pelo script python no folder temp
+		if(!path_exists(this.temp_folder)){
+			Print("[BIRDOAPP] Nao foi possivel encontrar o folder temp! Algo deu errado!");
+			return false;
 		}
-		return copy_file;
-	} else {
-		var column_name = getUniqueColumnName("Animatic_audio");
-		var audio_import = import_sound(audio_file, column_name);
-		Print("audio import " + column_name + " : " + audio_import);
-		return audio_import;
+		var dir = new Dir(this.temp_folder);
+		var files = dir.entryList("*")
+		
+		//define temp images list
+		var img_reg = new RegExp("\\." + this.img_format);
+		this.image_list = files.filter(function(item) {return img_reg.test(item)}).sort();
+		
+		//define audio file
+		var audio_reg = new RegExp("\\." + this.audio_format);
+		var audios = files.filter(function(item) {return audio_reg.test(item)}).sort();
+		this.audio_file = audios.length == 0 ? null : this.temp_folder + "/" + audios[0];
+		return this.image_list.length > 0;
 	}
-}
-
-function copyFile(copyPath, pastePath){//Copia um Arquivo para o caminho dado
-	var fileToCopy = new PermanentFile(copyPath);
-	var copyOfFile = new PermanentFile(pastePath);
-	var copy = fileToCopy.copy(copyOfFile);
-	if(!copy){
-		Print("Fail to copy the file: '" + copyPath + "' to : '" + pastePath + "'!");
-	} else { 
-		Print("File: '" + pastePath + "' Copied!");
-	}
-	return copy;
-}
-
-
-function removeFile(fn) {
-	var v = new PermanentFile(fn);
-	return v.remove();
-} 
-
-function cleanCache(){
-
-	var temp_folder = specialFolders.temp;
-	var regex_columName = /(ATV-\w{16})$/;// regex pra achar os nomes de coluna criado e ficaram de sujeira do importAnimatic do Shotgun
-	var list_folders = listFolders(temp_folder);
-	var count = 0;
-
-	for(var i=0; i<list_folders.length; i++){
-		if(regex_columName.test(list_folders[i])){
-			var to_delete = temp_folder + "/" + list_folders[i];
-			Print("trash found: " + list_folders[i]);
-			if(removeDirs(to_delete)){
-				count++;
+	
+	this.clean_group = function(){//deleta antigos nodes de animatic no grupo
+		this.old_nodes.forEach(function(item){ 
+			if(node.deleteNode(item, true, true)){
+				Print(" - Node deleted: " + item);
 			}
+		});	
+	}
+	
+	this.clean_temp = function(){//reseta o folder temp (deletando o conteudo e criando novamente o folder vazio
+		var dir = new Dir;
+		dir.path = this.temp_folder;
+		if(dir.exists){
+			dir.rmdirs();
+		} 
+		dir.mkdirs();
+		Print("[BIRDOAPP] Animatic Temp Folder resetado!");
+	}
+	
+	this.create_animatic_node = function(){
+		
+		//limpa os nodes antes de criar o novo;
+		this.clean_group();
+		
+		var name = this.node_name.replace("{version}", this.get_next_version());
+		var elemId = element.add(name, "COLOR", scene.numberOfUnitsZ(), this.img_format.toUpperCase(), 0);
+		if(elemId == -1){
+			Print("[BIRDOAPP] falha ao criar elemento!");
+			if(this.verbose){
+				MessageBox.warning("ERRO! Falha ao criar o elemento de nome '" + name + "'", 0, 0);
+			}
+			return false;
+		}
+
+		var image_count = this.image_list.length;
+		if(image_count == 0){
+			Print("[BIRDOAPP] Falha ao encontrar imagens do animatic no temp. Algo deu errado!");
+			if(this.verbose){
+				MessageBox.warning("ERRO! Nao foram encontrados nenhuma imagem convertida na pasta temp! Algo deu errado!", 0, 0);
+			}
+			return false;
+		}
+		
+		var uniqueColumnName = getUniqueColumnName(name);
+		column.add(uniqueColumnName , "DRAWING");
+		column.setElementIdOfDrawing( uniqueColumnName, elemId );
+
+		var read = node.add(this.group, name, "READ", 0, 0, 0);
+		node.linkAttr(read, "DRAWING.ELEMENT", uniqueColumnName);
+
+		//checa se precisa incrementar o numero de frames da cena
+		var sceneFrameNumber = frame.numberOf();
+		if(sceneFrameNumber < image_count){
+			Print("frames adicionados: " + (image_count - sceneFrameNumber));
+			frame.insert(sceneFrameNumber, (image_count - sceneFrameNumber));
+		}
+		
+		if(this.pb){
+			this.pb.setRange(0, image_count-1);
+			this.pb.open();
+		}
+		
+		for(var i = 0; i <image_count; i++){
+			var timing = (1+i).toString();
+			if(this.pb){
+				this.pb.setLabelText("Importing Animatic frame: [" + timing + "/" + image_count + "]");
+				this.pb.setValue(i);
+			}
+			var image_path = [this.temp_folder, this.image_list[i]].join("/"); 
+			Print("[BIRDOAPP] importing image: " + image_path);
+			Drawing.create(elemId, timing, true); // create a drawing drawing, 'true' indicate that the file exists.
+			var drawingFilePath = Drawing.filename(elemId, timing);   // get the actual path, in tmp folder.
+
+			copy_file( image_path, drawingFilePath );
+			column.setEntry(uniqueColumnName, 1, timing, timing);
+		}
+		if(this.pb){
+			this.pb.close();
+		}
+		
+		var comp = node.subNodes(this.group).filter(function(item){ return node.type(item) == "COMPOSITE"})[0];
+		var portIn = this.group + "/Multi-Port-In";
+		var create_port = true;
+		if(!comp){
+			Print("[BIRDOAPP] Nao foi encontrado nenhuma composite!");
+			comp = this.group + "/Multi-Port-Out";
+			create_port = false;
+		}
+	
+		node.link(read, 0, comp, 0, false, create_port);
+		node.link(portIn, 0, read, 0, false, false);
+		node.setTextAttr(read, "OFFSET.X", 1, -4);
+		node.setLocked(read, true);
+
+		Print("[BIRDOAPP] Node animatic criado com sucesso: " + read);
+		return true;
+	}
+	
+	this.update_scene_audio = function(){//deleta as colunas e arquivos de audio da cena e importa o novo
+
+		var scene_audio_folder = scene.currentProjectPath() + "/audio/";
+		if(!path_exists(this.audio_file)){
+			Print("[BIRDOAPP][UPDATE ANIMATIC] Audio file not found!");
+			return false;
+		}
+
+		var sounds_columns = column.getColumnListOfType("SOUND");
+		if(sounds_columns.length > 0){
+			//copy audio file to existing scene audios (maybe duplicate some)
+			var copy = true;
+			for(var i=0; i<sounds_columns.length;i++){
+				var soundFile = scene_audio_folder + column.getEntry(sounds_columns[i], 1, 1);
+				if(!sound.copy(this.audio_file, soundFile)){
+					copy = false;
+					Print("[BIRDOAPP] falha ao copiar arquivo de audio: " + soundFile);
+				} else {
+					Print("[BIRDOAPP] arquivo de audio copiado: " + soundFile);
+				}
+			}
+			Print("[BIRDOAPP] Audio copy files: " + copy);
+			return copy;
+		} else {
+			//add new audio to scene
+			var column_name = getUniqueColumnName("Animatic_audio");
+			column.add(column_name, "SOUND");
+			var audio_import = column.importSound(column_name, 1, this.audio_file);
+			Print("[BIRDOAPP] Animatic audio import " + column_name + " : " + audio_import);
+			return audio_import;
 		}
 	}
-
-
-	Print("Cache limpo!! " + count + " pastas foram deletadas!");
-}
-
-function listFolders(main_folder){
-	var dir = new Dir;
-	dir.path = main_folder;
-	var folderList = dir.entryList("*", 1, 4);
-	folderList.shift();
-	folderList.shift();
-	return folderList;
-}
-
-
-function removeDirs(dirPath){
-	var dir = new Dir;
-	dir.path = dirPath;
-	if(!dir.exists){
-		return false;
-	}
-	dir.rmdirs();
-	return true;
-}
-
-
-function listFiles(path, filter){
-	var dir = new Dir(path);
-	var files = dir.entryList(filter).sort();
-	if(filter == "*"){
-		files.shift();
-		files.shift();
-	}
-	return files;
-}
-
-function fileExists(path){
-	var file = new File(path);
-	return file.exists;
-}
-
-function createDirectory(path){
-	var save_dir = new Dir(path);
-	if(!save_dir.exists){
+	
+	this.run_python_script = function(){
+		this.clean_temp();
+		Print("[BIRDOAPP] Rodando script update animatic em python...");
 		try{
-			save_dir.mkdirs();
+			var python = this.proj_data.birdoApp + "venv/Scripts/python.exe";
+			var pyFile = this.proj_data.birdoApp + "app/utils/update_animatic.py";
+			var scene_name = this.proj_data.entity.name;
+			var start = Process2(
+				python, 
+				pyFile, 
+				this.proj_data.id, 
+				scene_name, 
+				this.get_next_version(), 
+				this.img_format, 
+				this.audio_format, 
+				this.temp_folder
+			);
+			var ret = start.launch();
+			return ret;
+		} catch (e){
+			Print(e);
+			return false;
 		}
-		catch(error){ 
-			Print( error);
-			return false;	
+	}
+	
+	this.update = function(){//runs update animatic
+		var update = true;
+		try{
+			if(!this.get_temp_files()){
+				Print("[ERRROR EXPORTING IMAGE SEQUENCE!]");
+				update = false;
+			}
+			if(!this.create_animatic_node()){
+				Print("[ERRROR CREATING ANIMATIC NODE!]");
+				update = false;
+			}
+			if(!this.update_scene_audio()){
+				Print("ERROR UPDATING SOUND FILE!");
+				update = false;
+			}
+		} catch(e){
+			Print(e);
+			update = false;
 		}
+		if(this.verbose){
+			if(!update){
+				MessageBox.warning("ALGO DEU ERRADO! Falha ao atualizar o Animaic da cena!", 0, 0);
+			} else {
+				MessageBox.information("Animatic Importado com sucesso! Confira a duracao na timeline!");
+			}
+		}
+		return update;
 	}
-	return true;
+	
+	//HELPER FUNCTIONS
+	function Print(msg){
+		if(typeof msg == "object"){
+			var msg = JSON.stringify(msg, null, 2);
+		}
+		MessageLog.trace(msg);
+		System.println(msg);
+	}
+	
+	function getUniqueColumnName(column_prefix){
+		var suffix = 0;
+		var column_name = column_prefix;
+		while(suffix < 2000){
+			if(!column.type(column_name)){
+				break;
+			}
+			  suffix = suffix + 1;
+			  column_name = column_prefix + "_" + suffix;
+		}	
+		return column_name;
+	}
+
+	function path_exists(filePath){
+		var f = new File(filePath);
+		return f.exists;
+	}
+	
+	function copy_file(copyPath, pastePath){//Copia um Arquivo para o caminho dado
+		var fileToCopy = new PermanentFile(copyPath);
+		var copyOfFile = new PermanentFile(pastePath);
+		try {
+			var copy = fileToCopy.copy(copyOfFile);
+			if(!copy){
+				Print("[BIRDOAPP][COPYFILE][ERROR] Fail to copy the file: \n from: " + copyPath + "\n to: " + pastePath);
+			} else {
+				Print("[BIRDOAPP][COPYFILE] File: '" + pastePath + "' Copied!");
+			}
+		} catch (e) {
+			Print(e);
+		}
+		return copy;
+	}
 }
-
-//ATUALIZAR CAMINHO DO FFMPEG
-function convert_mov_to_images(movie, outPutFolder, imageFormat){//converte o mov em seq de pngs  no caminho... prefisa do ffmpeg
-	var ffmpeg = "C:/ffmpeg/bin/ffmpeg.exe";
-
-	if(!fileExists(ffmpeg)){
-		Print("Erro: ffmpeg nao encontrado neste computador!");
-		return false;
-	}
-
-	var images = outPutFolder + "f-%04d." + imageFormat;
-
-	var process = new Process2(ffmpeg, "-i", movie, "-r", 24, "-s", "480x270", images);
-	var ret = process.launch();// let's home this worked.
-
-	if(ret != 0){
-		Print("Erro ao converter movie: " + movie);
-		return false;
-	} else {
-		Print("Image sequence from movie converted!");
-		return true;
-	}
-}
-
-
-function extract_audio(movie, outputFile){//converte o mov para audio (dar nome completo do output file com extencao);
-	var ffmpeg = "C:/ffmpeg/bin/ffmpeg.exe";
-	if(!fileExists(ffmpeg)){
-		Print("Erro: ffmpeg nao encontrado neste computador!");
-		return false;
-	}
-
-	var process = new Process2(ffmpeg, "-i", movie , outputFile);
-	var ret = process.launch();// let's home this worked.
-
-	if(ret != 0){
-		Print("Erro ao extrair audio: " + movie);
-		return false;
-	} else {
-		Print("audio extracted!");
-		return true;
-	}
-}
-
-
-
-function convert_movie(movieFile, extension){//converte o aruquivo e retorna o folder com as imagens
-	var pos = movieFile.lastIndexOf( "." );
-	if(pos < 0){
-		Print("error: invalid mov file: " + movieFile);
-		return null;
-	}
-
-	var image_folder = specialFolders.temp + "/" + column.generateAnonymousName()+"/";
-	createDirectory(image_folder);
-
-	var audio_file = image_folder + "Animatic.wav";
-
-	Print("converting movie to image sequence... ");
-
-	var convertImages = convert_mov_to_images(movieFile, image_folder, extension);
-
-	if(!convertImages){
-		return false;
-	} 
-
-	Print("extracting audio from movie... ");
-
-	var extractAudio = extract_audio(movieFile, audio_file);
-
-	if(!extractAudio){
-		return false;
-	}
-
-	return image_folder;
-
-}
-
-//PRECISA ATUALIZAR PRA USAR O getProjData() do sistema novo
-function getAnimaticMovie(){//retorna o caminho pro animatic da cena
-	var cena = scene.currentScene();
-	var regexCena = /^(MNM_EP\d{3}_SC\d{4})$/;
-	if(!regexCena.test(cena)){
-		Print("nome da cena fora do padrao!");
-		return false;
-	}
-	var ep = cena.split("_")[1];
-	var moviePath = "C:/_BirdoRemoto/PROJETOS/MALUQUINHO/MNM_OMeninoMaluquinho/MNM_EPISODES/MNM_"+ ep + "/MNM_" + ep + "_SCENES/RENDER/ANIMATIC/";
-	var all_movs = listFiles(moviePath, "*.mov");
-	var scene_acnimatics = all_movs.filter(function(x) { return x.indexOf(cena) != -1}); 
-	if(scene_acnimatics.length == 0){
-		return false;
-	}
-	return moviePath + scene_acnimatics[scene_acnimatics.length -1];
-}
-
-
-function Print(msg){
-	if(typeof msg == "object"){
-		var msg = JSON.stringify(msg, null, 2);
-	}
-	MessageLog.trace(msg);
-	System.println(msg);
-}
+exports.Animatic = Animatic;
