@@ -7,10 +7,10 @@ import re
 
 class Path:
     """Classe que junta opcoes para lidar com arquivos e pastas."""
+
     def __init__(self, path):
         self.path = str(path).replace("\\", "/")
         self.name = os.path.basename(path)
-        self.parent = os.path.dirname(path)
         self.suffix = os.path.splitext(path)[-1]
         self.suffixes = os.path.splitext(path)[1:]
         self.stem = os.path.splitext(self.name)[0]
@@ -37,6 +37,9 @@ class Path:
     def exists(self):
         """retorna boolean se o caminho existe"""
         return os.path.exists(self.path)
+
+    def get_parent(self):
+        return Path(os.path.dirname(self.path))
 
     def get_last_modified(self):
         """retorna objeto de datetime com ultima modificacao"""
@@ -83,7 +86,8 @@ class Path:
             dst = dst / self.name
 
         if dst.exists() and not force_copy:
-            ask = raw_input("COPY_FILE: Destiny file {0} already exists. Do you want to override it?\n[y/n]".format(dst))
+            ask = raw_input(
+                "COPY_FILE: Destiny file {0} already exists. Do you want to override it?\n[y/n]".format(dst))
             if not bool(re.match(r"(Y|YEP|YES|YEAH|OUI|SIM|SI|S)", ask.upper())):
                 raise Exception("file copy canceled!")
 
@@ -114,6 +118,7 @@ class Path:
         """
             Copia folder tree para o destino.
             se o destino existir, cria um folder extra com o nome da origem.
+            (retorna caminho copiado)
         """
         # Copy directory
         if not self.is_dir():
@@ -134,7 +139,7 @@ class Path:
         except Exception as e:
             raise e
         print "{0} items copied...".format(counter)
-        return True
+        return dst
 
     def glob(self, pattern):
         """Lista sub arquivos do folder"""
@@ -150,9 +155,19 @@ class Path:
         ]
 
     def remove(self):
+        """deleta o arquivo"""
         if not self.exists():
             raise Exception("Not a existing path to delete!")
         if self.is_dir():
             return shutil.rmtree(self.path)
         else:
             return os.remove(self.path)
+
+    def rename(self, new_name):
+        """renomeia o arquivo para o novo nome.
+        recebe uma string simples somente com o nome, e retorna o Path com o novo nome"""
+        if type(new_name) is not str or bool(re.findall(r'(\\|/)', new_name)):
+            raise Exception("Invalid input name to rename. Must be simple String name, not path!")
+        new_path = self.get_parent() / new_name
+        os.rename(self.path, new_path.path)
+        return new_path
