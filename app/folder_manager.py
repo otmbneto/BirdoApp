@@ -33,6 +33,9 @@ class FolderManager(object):
     """
     def __init__(self, proj_data, local_folder):
 
+        # root do folder de config do projeto
+        self.config_folder = Path(proj_data["config_folder"])
+
         self.regs = proj_data["pattern"]
         self.regs["scene"]["regex"] = proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"])
         self.regs["scene"]["model"] = proj_data["pattern"]["scene"]["model"].replace('PREFIX', proj_data["prefix"])
@@ -272,3 +275,24 @@ class FolderManager(object):
         versions.sort()
         last_v_num = len(versions)
         return publish_folder / "{0}_v{1:02d}.zip".format(scene_name, (1 + last_v_num))
+
+    def get_scene_template(self):
+        """retorna o caminho do template de cena do projeto"""
+        return self.config_folder / "SCENE_template"
+
+    def copy_scene_template(self, destiny_folder):
+        """copia o template de cena do projeto para o 'destiny_folder'
+           OBS: o nome da cena de destino e o nome do volder 'destiny_folder'
+        """
+        dst = Path(str(destiny_folder))
+        if dst.exists():
+            raise Exception("Nao e possivel copiar a cena para o destino: {0} pois ele ja existe!".format(dst))
+        scene_template = self.get_scene_template()
+        scene_name = dst.name
+        scene_copy = scene_template.copy_folder(dst)
+        if not scene_copy:
+            raise Exception("[BIRDOAPP] Falha ao copiar scene template para o destino: {0}".format(dst))
+        for item in scene_copy.glob("*"):
+            if scene_template.name in item.name:
+                print " - arquivo renomeado: {0}".format(item.rename(item.name.replace(scene_template.name, scene_name)))
+        return scene_copy
