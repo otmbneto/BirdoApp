@@ -246,7 +246,6 @@ class OpenScene(QtGui.QWidget):
     def check_local_version(self, server_file_saved_time):
         """checks if local version is more recent than the last version in server"""
         local_file = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]
-        print("LOCAL FILE : " + local_file)
         if not local_file["xstage"]:
             print 'No local file was found!'
             self.ui.checkBox_open_local.setEnabled(False)
@@ -278,28 +277,20 @@ class OpenScene(QtGui.QWidget):
         index = 0
         # LOOPS IN STEP LIST ORDER TO CREATE OBJECT WITH VERSION INFORMATION
         for step in self.steps:
-            print step
             self.ui.progress_bar.setValue(index)
             self.ui.progress_bar.setFormat("searching versions {0}".format(step))
 
             scene_path = self.project_data.paths.get_scene_path("local",scene_name, step).normpath()
-            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step).normpath() #self.root + scene_path + "/PUBLISH"
+            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step) / "PUBLISH" #self.root + scene_path + "/PUBLISH"
             
-            full_list_publish = os.listdir(scene_publish_path) if os.path.exists(scene_publish_path) else []
+            print("SCENE PUBLISH:" + str(scene_publish_path))
             versions_data[step] = {
                 "is_used": False,
                 "local_path": self.get_local_scene(scene_path, scene_name),
                 'versions': {}
             }
 
-            if not full_list_publish or len(full_list_publish) == 0:
-                print "no publishes found at step {0} at scene {1}!".format(step, scene_name)
-                index += 1
-                continue
-            print("full_list_publish:" + str(full_list_publish))
-            # ORGANIZE ZIP LIST FROM SCENE PUBLISH LIST
-            zips = filter(lambda x: x.endswith(".zip"), full_list_publish)
-            zips.sort(key=lambda x: x)
+            zips = scene_publish_path.glob("*.zip$")
 
             if len(zips) == 0:
                 print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
@@ -516,7 +507,7 @@ class OpenScene(QtGui.QWidget):
                     saved_last_version_time = timestamp_from_isodatestr(
                         last_version_obj.get_last_modified().isoformat())
                     self.shot_versions["most_recent"] = self.check_local_version(saved_last_version_time)
-                    version = re.findall(r'v\d+', last_version_obj.get_name())[0]
+                    version = re.findall(r'v\d+', last_version_obj.name)[0]
                 else:
                     version = 'v00'
                     self.shot_versions["most_recent"] = 'server'
@@ -697,7 +688,7 @@ class OpenScene(QtGui.QWidget):
         # DOWNLOAD SCENE FILE...
         self.ui.progress_bar.setFormat("downloading file...")
         self.ui.progress_bar.setValue(2)
-        temp_file = os.path.join(self.temp_open_scene, scene_obj.get_name())
+        temp_file = os.path.join(self.temp_open_scene, scene_obj.name)
         if not os.path.exists(self.temp_open_scene):
             print "creating temp folder...{0}".format(self.temp_open_scene)
             os.makedirs(self.temp_open_scene)
@@ -705,7 +696,7 @@ class OpenScene(QtGui.QWidget):
         print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
         shutil.copyfile(scene_obj.path, temp_file)
         if not os.path.exists(temp_file):
-            print "fail to download scene: {0}".format(scene_obj.get_name())
+            print "fail to download scene: {0}".format(scene_obj.name)
             MessageBox.warning(
                 "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
             return
@@ -731,7 +722,7 @@ class OpenScene(QtGui.QWidget):
                 MessageBox.warning("Falha ao criar bakcup da cena! Verifique se a cena local esta aberta!")
                 return
         else:
-            if not self.project_data.paths.create_local_scene_scheme(selected_scene, current_step):
+            if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
                 print "error creating scene folder scheeme!"
                 MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
                 return
