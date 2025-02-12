@@ -333,8 +333,13 @@ Write-Host "Criando variáveis de ambiente..."
 
 #scripts
 [Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
-#packages
-[Environment]::SetEnvironmentVariable("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER", "$env:APPDATA\BirdoApp\package\harmony20\packages", "User")
+
+Write-Host "As seguintes variáveis de ambiente foram adicionadas:"
+
+$varsTable = "TOONBOOM_GLOBAL_SCRIPT_LOCATION,Scripts de apoio`n"
+$varsTable += "PATH,...; Python`n"
+$varsTable += "PATH,...; Ffmpeg"
+echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 
 
 # 5) Criação de um ambiente virtual Python
