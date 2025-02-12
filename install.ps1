@@ -193,20 +193,20 @@ function Install-Shortcut {
     }
 }
 
+# $greetings = "
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║                                                                      ║
+# ║    ██████╗ ██╗██████╗ ██████╗  ██████╗     █████╗ ██████╗ ██████╗    ║
+# ║    ██╔══██╗██║██╔══██╗██╔══██╗██╔═══██╗   ██╔══██╗██╔══██╗██╔══██╗   ║
+# ║    ██████╔╝██║██████╔╝██║  ██║██║   ██║   ███████║██████╔╝██████╔╝   ║
+# ║    ██╔══██╗██║██╔══██╗██║  ██║██║   ██║   ██╔══██║██╔═══╝ ██╔═══╝    ║
+# ║    ██████╔╝██║██║  ██║██████╔╝╚██████╔╝   ██║  ██║██║     ██║        ║
+# ║    ╚═════╝ ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝  ╚═╝╚═╝     ╚═╝        ║
+# ║                                                                      ║
+# ║                     ASSISTENTE   DE   INSTALAÇÃO                     ║
+# ║                                                                      ║
+# ╚══════════════════════════════════════════════════════════════════════╝
 $greetings = "
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║    ██████╗ ██╗██████╗ ██████╗  ██████╗     █████╗ ██████╗ ██████╗    ║
-║    ██╔══██╗██║██╔══██╗██╔══██╗██╔═══██╗   ██╔══██╗██╔══██╗██╔══██╗   ║
-║    ██████╔╝██║██████╔╝██║  ██║██║   ██║   ███████║██████╔╝██████╔╝   ║
-║    ██╔══██╗██║██╔══██╗██║  ██║██║   ██║   ██╔══██║██╔═══╝ ██╔═══╝    ║
-║    ██████╔╝██║██║  ██║██████╔╝╚██████╔╝   ██║  ██║██║     ██║        ║
-║    ╚═════╝ ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝  ╚═╝╚═╝     ╚═╝        ║
-║                                                                      ║
-║                     ASSISTENTE   DE   INSTALAÇÃO                     ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-
    Bem vindo ao assistente de instalação do BirdoApp, um conjunto
    de scripts e programas que auxiliam produções de animações 2D.
    Pressione ENTER para continuar."
@@ -319,7 +319,7 @@ Download-Ffmpeg "$birdoApp"
 # 7) Criação de variáveis de ambiente
 
 #scripts
-[Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
+[Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\harmony", "User")
 
 Write-Host "As seguintes variáveis de ambiente foram adicionadas:"
 
