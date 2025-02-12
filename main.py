@@ -24,7 +24,7 @@ if __name__ == "__main__":
         DevTools().show_version()
     else:
         print ">>iniciando interface do birdoapp..."
-        app = QtGui.QApplication.instance()
+        app = QtGui.QApplication([])
         MainWindow = BirdoApp()
         MainWindow.show()
         sys.exit(app.exec_())
