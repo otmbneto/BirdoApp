@@ -77,7 +77,7 @@ function Download-Ffmpeg($app_folder){
 
     # Check if the folder exists, if not create it
     if (-not (Test-Path $ffmpegInstall)) {
-        Write-Host "Criando pasta $ffmpegInstall"
+        # Write-Host "Criando pasta $ffmpegInstall"
         New-Item -ItemType Directory -Force -Path $ffmpegInstall > $null
     }
 
@@ -85,7 +85,7 @@ function Download-Ffmpeg($app_folder){
     $zipFile = $returnedObject[$returnedObject.length - 1]
 
     # Expand the archive using PowerShell's System.IO.Compression.FileSystem
-    Write-Host "Descompactando arquivo"
+    # Write-Host "Descompactando arquivo"
     [IO.Compression.ZipFile]::ExtractToDirectory($zipFile, $ffmpegInstall)
 
     # Delete the zip file after extraction
@@ -106,8 +106,6 @@ function Download-Ffmpeg($app_folder){
     # Add the ffmpeg binaries to the system PATH (permanently for all users)
     $ffmpegPath = "$ffmpegInstall\windows\bin"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::User)
-
-    Write-Host "Ffmpeg instalado e variável PATH atualizada"
 }
 
 function Download-Python {
@@ -151,18 +149,17 @@ function Init-Venv($venv,$base,$python){
 
     if(-Not (Is-Virtualenv)){
 
-        Write-Host "Instalando módulo 'virtualenv'"
+        Write-Host "⠟ Instalando módulo 'virtualenv'..."
         & $python -m pip install virtualenv > $logdir\installVenvMod.log 2> $logdir\installVenvErrMod.log
 
     }
 
     if(-Not (Find-Venv "$venv" $base)){
 
-        Write-Host "Criando ambiente virtual"
+        Write-Host "⠽ Criando ambiente virtual..."
         Set-Location -Path $base
         & $python -m virtualenv "$venv" > $logdir\createVenv.log 2> $logdir\createVenvErr.log
         Set-Location -Path "$base\$venv"
-        # virtualenv .
         Update-Venv "$venv" $base
 
     }
@@ -222,7 +219,7 @@ $greetings = "
    de scripts e programas que auxiliam produções de animações 2D.
    Pressione ENTER para continuar."
 
-$licenceA =  "   O BirdoApp é distribuído de forma gratuita através da`n`n"
+$licenceA =  "   O BirdoApp é distribuído de forma gratuita através da`n"
 $licenceA += "   licença MIT, descrita nos termos a seguir:`n"
 $licenceB = 'Copyright (c) 2025 BirdoStudios
 
@@ -325,11 +322,9 @@ Move-Item -Path "$birdoTemp\$unzip" -Destination "$birdoApp"
 Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
 
 # 3) Download do programa Ffmpeg
-Write-Host "Baixando Ffmpeg..."
 Download-Ffmpeg "$birdoApp"
 
 # 7) Criação de variáveis de ambiente
-Write-Host "Criando variáveis de ambiente..."
 
 #scripts
 [Environment]::SetEnvironmentVariable("TOONBOOM_GLOBAL_SCRIPT_LOCATION", "$env:APPDATA\BirdoApp\package\harmony20", "User")
@@ -344,13 +339,11 @@ echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 
 # 5) Criação de um ambiente virtual Python
 # 6) Instalação das dependências
-Write-Host "Criando ambiente virtual..."
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
 
-
 # 8) Atalho do BirdoApp na Área de Trabalho
-Write-Host "Criando atalho na área de trabalho..."
+Write-Host "⠷ Criando atalho na área de trabalho..."
 
 Set-Location $currentFolder
 $birdoapp = "$env:APPDATA/BirdoApp"
