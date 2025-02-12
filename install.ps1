@@ -94,9 +94,6 @@ function Download-Ffmpeg($app_folder){
     # Change the directory to the installation folder
     Set-Location -Path $ffmpegInstall
 
-    # Optional: Wait for a few seconds (equivalent to timeout /t 5)
-    Start-Sleep -Seconds 5
-
     # Rename the extracted folder to 'windows'
     Rename-Item -Path "$ffmpegInstall\ffmpeg-master-latest-win64-gpl" -NewName "windows"
 
