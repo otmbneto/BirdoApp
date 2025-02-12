@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from utils.birdo_json import read_json_file, write_json_file
 from utils.birdo_pathlib import Path
 from utils.MessageBox import CreateMessageBox
@@ -182,7 +183,7 @@ class ConfigInit(object):
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
-            self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
+            self.mb.warning("O caminho {0} de config do server não existe ou está indisponível. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
         for proj in os.listdir(self.config_data["server_projects"]):
             p = os.path.join(self.config_data["server_projects"], proj)

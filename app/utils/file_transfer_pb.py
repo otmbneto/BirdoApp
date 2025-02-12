@@ -1,7 +1,8 @@
+#!/usr/bin/python 2.7
+# -*- coding: utf-8 -*-
 import os
 from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout
 from PySide import QtCore, QtGui
-from MessageBox import CreateMessageBox
 import argparse
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -57,9 +58,6 @@ class FileDialog(QDialog):
 
         # birdoapp data
         self.birdoapp = birdo_config
-
-        # message widget
-        self.message = CreateMessageBox()
 
         # set window
         self.setFixedWidth(400)
@@ -144,7 +142,7 @@ class FileDialog(QDialog):
             self.worker_thread.terminate()
 
         if not result:
-            self.message.warning("Algo deu errado com a Copia do arquivo!")
+            self.birdoapp.mb.warning("Algo deu errado com a Cópia do arquivo!")
             self.close()
         else:
             print("[BIRDOAPP] - File Process - Arquivo processado com sucesso!")
@@ -154,7 +152,7 @@ class FileDialog(QDialog):
 
     def on_cancel(self):
         self.worker_thread.terminate()
-        self.message.warning("CANCELADO! Verifique se o arquivo de destino nao esta corrompido!")
+        self.birdoapp.mb.warning("CANCELADO! Verifique se o arquivo de destino não está corrompido!")
         print("[BIRDOAPP] - File transder canceled by the user...")
         self.close()
 

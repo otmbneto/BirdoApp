@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 import argparse
 from zipfile import ZipFile, ZIP_DEFLATED
-from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout
-from PySide import QtCore, QtGui
-from MessageBox import CreateMessageBox
+from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout, QIcon, QMovie
+from PySide import QtCore
 from system import get_short_path_name
 from birdo_json import read_json_file
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -87,9 +87,6 @@ class DialogPublish(QDialog):
         self.files_relative = rel_list
         self.publish_file = dst_file
 
-        # message widget
-        self.message = CreateMessageBox()
-
         # bool com valor de sucesso da operacao
         self.copy = None
         self.zip = None
@@ -98,7 +95,7 @@ class DialogPublish(QDialog):
         self.setFixedWidth(400)
         self.setFixedHeight(240)
         self.setWindowTitle("File Transfer")
-        self.setWindowIcon(QtGui.QIcon(self.birdoapp.icons["logo"]))
+        self.setWindowIcon(QIcon(self.birdoapp.icons["logo"]))
         self.setStyleSheet(self.birdoapp.css_style)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.setWindowTitle("PUBLISH SCENE: {0}".format(self.scene_name))
@@ -123,7 +120,7 @@ class DialogPublish(QDialog):
         self.setLayout(self.v_layout)
 
         # animation movie
-        self.movie = QtGui.QMovie(self.birdoapp.icons["file_transfer"])
+        self.movie = QMovie(self.birdoapp.icons["file_transfer"])
         self.movie.setScaledSize(QtCore.QSize(213, 120))
         self.movie.setSpeed(80)
         self.display_label.setMovie(self.movie)
@@ -178,7 +175,7 @@ class DialogPublish(QDialog):
         self.pb.reset()
 
         if not zip_result:
-            self.message.warning("BIRDOAPP PUBLISH: ERRO ao compactar o arquivo para o temp!")
+            self.birdoapp.mb.warning("BIRDOAPP PUBLISH: ERRO ao compactar o arquivo para o temp!")
             return
 
         # update dialog label
@@ -195,17 +192,17 @@ class DialogPublish(QDialog):
             self.worker_thread.terminate()
 
         if not result:
-            self.message.warning("Algo deu errado com a Copia do arquivo!")
+            self.birdoapp.mb.warning("Algo deu errado com a Cópia do arquivo!")
             self.close()
         else:
-            self.message.information("Cena {0} publicada com sucesso!".format(self.publish_file.stem))
+            self.birdoapp.mb.information("Cena {0} publicada com sucesso!".format(self.publish_file.stem))
             print("[BIRDOAPP_py] - Cena {0} publicada com sucesso!".format(self.publish_file.stem))
 
         self.close()
 
     def on_cancel(self):
         self.worker_thread.terminate()
-        self.message.warning("CANCELADO! Verifique se o arquivo de destino nao esta corrompido!")
+        self.birdoapp.mb.warning("CANCELADO! Verifique se o arquivo de destino não está corrompido!")
         print("[BIRDOAPP_py] - File transder canceled by the user...")
         self.close()
 
