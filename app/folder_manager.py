@@ -28,8 +28,6 @@ class FolderManager(object):
         a dictionary with all the server path information (from project server_DATA.json)
     local_folder : string
         caminho do folder local do projeto
-    messagebox : object
-        widget class object created with CreateMessageBox function in utils
     """
     def __init__(self, proj_data, local_folder):
 
