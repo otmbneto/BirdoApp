@@ -178,7 +178,7 @@ class FolderManager(object):
 
     def list_scenes_from_animatics(self, ep):
         """Lista as cenas baseadas nos animatics do ep."""
-        return map(lambda x: re.findall(self.regs["scene"]["regex"], x.name), self.list_project_animatics(ep))
+        return map(lambda x: re.findall(self.regs["scene"]["regex"], x.name)[0], self.list_project_animatics(ep))
 
     def get_next_animatic_version(self, scene_name):
         """Retorna a proxima versao de animatic para cena 'scene_name'"""
