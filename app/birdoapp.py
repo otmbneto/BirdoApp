@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 from config import ConfigInit
-from utils.MessageBox import CreateMessageBox
 from utils.birdo_json import read_json_file
 from utils.birdo_pathlib import Path
 from utils.harmony_utils import ToonBoomHarmony
@@ -8,9 +8,6 @@ import os
 import subprocess
 from time import sleep
 # TODO: usar o birdo_pathlib Path() aqui (depois de testar todos metodos dele!)
-
-# cria um objeto de messabox
-MessageBox = CreateMessageBox()
 
 
 class BirdoApp(QtGui.QMainWindow):
@@ -268,7 +265,7 @@ class BirdoApp(QtGui.QMainWindow):
     def plugin_selected(self, plugin, project_code):
         plugin_name = os.path.basename(plugin).replace(".py", "")
         self.update_foot_label("Abrindo plugin: {0}".format(plugin_name), self.green_color)
-        subprocess.Popen([self.app.python, plugin, str(project_code), ""], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        subprocess.Popen([self.app.python, plugin, str(project_code)])
 
     def validate_plugin(self, path):
         """funcao para validar se o plugin tem permissao para abrir pro usuario"""
@@ -285,7 +282,6 @@ class BirdoApp(QtGui.QMainWindow):
     def get_plugins(self):
         """Lista os plugins validos para o tipo role do usuario"""
         plugin_path = self.app.get_plugins_folder()
-        plugins = []
         plugins = filter(self.validate_plugin,
                          [os.path.join(plugin_path, f, f + ".py").replace("\\", "/") for f in
                           os.listdir(plugin_path)])
@@ -304,7 +300,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def credits(self):
         msg = '\n'.join(["{0}:\t{1}".format(item, self.app.data[item]) for item in sorted(self.app.data.keys())])
-        MessageBox.information(msg)
+        self.app.mb.information(msg)
 
     def update_foot_label(self, txt, color):
         self.ui.loading_label.setText(txt)
@@ -326,8 +322,8 @@ class BirdoApp(QtGui.QMainWindow):
             if harmony_path:
                 harmony = ToonBoomHarmony(harmony_path)
                 if not harmony.is_installed():
-                    MessageBox.warning("O caminho fornecido de instalacao do Harmony nao e valido!")
-                    self.update_foot_label("Caminho invalido de instalacao do Harmony...", self.red_color)
+                    self.app.mb.warning("O caminho fornecido de instalação do Harmony não é válido!")
+                    self.update_foot_label("Caminho inválido de instalação do Harmony...", self.red_color)
                     return False
         else:
             harmony_path = harmony.get_fullpath()
@@ -337,7 +333,7 @@ class BirdoApp(QtGui.QMainWindow):
         for item in update_data:
             if not update_data[item]:
                 msg = "Preencha o campo '{0}' antes de continuar!".format(item)
-                MessageBox.warning(msg)
+                self.app.mb.warning(msg)
                 self.update_foot_label(msg, self.red_color)
                 return False
             self.app.config_data[item] = update_data[item]
@@ -360,18 +356,18 @@ class BirdoApp(QtGui.QMainWindow):
 
         # verifica se os valores dos campos estao corretos
         if not local_folder.exists():
-            MessageBox.warning("O caminho escolhido para 'folder local' do projeto, nao e valido pois ele nao existe!")
-            self.update_foot_label("Folder local invalido...", self.red_color)
+            self.app.mb.warning("O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
+            self.update_foot_label("Folder local inválido...", self.red_color)
             return False
 
         if local_folder.path == self.project_data.paths.root["server"].path:
-            MessageBox.warning("Voce escolheu o folder do projeto no servidor do estudio."
+            self.app.mb.warning("Você escolheu o folder do projeto no servidor do estudio."
                                "Forneca o seu folder LOCAL do projeto, "
-                               "onde vc ira salvar as cenas no seu computador.")
+                               "onde você irá salvar as cenas no seu computador.")
             return False
         if not user_proj["user_role"]:
-            MessageBox.warning("Escolha sua funcao, valida para o projeto!")
-            self.update_foot_label("Escolha sua funcao no projeto...", self.red_color)
+            self.app.mb.warning("Escolha sua função, válida para o projeto!")
+            self.update_foot_label("Escolha sua função no projeto...", self.red_color)
             return False
 
         # update user projects list in app.config_data
