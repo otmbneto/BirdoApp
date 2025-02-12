@@ -1,3 +1,7 @@
+/*
+	Este script roda a atualização do SETUP em modo batch
+*/
+
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
@@ -8,7 +12,7 @@ function BAT_UpdateSETUP(){
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
-		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		Print("[BIRDOAPP][ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return;
 	}
 	
@@ -19,5 +23,5 @@ function BAT_UpdateSETUP(){
 	}catch(e){
 		Print(e);
 	}
-	Print("END BATCH UPDATE SETUP!");
+	Print("[BIRDOAPP] END BATCH UPDATE SETUP!");
 }
