@@ -346,3 +346,6 @@ Write-Host "⠷ Criando atalho na área de trabalho..."
 Set-Location $currentFolder
 $birdoapp = "$env:APPDATA/BirdoApp"
 Install-Shortcut -ShortcutName "birdo_app" -Arguments "BirdoApp.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.ico"
+
+echo "Instalação concluída."
+echo "Caso necessário, verifique os arquivos em '$logdir'"
