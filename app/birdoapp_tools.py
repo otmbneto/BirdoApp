@@ -3,6 +3,7 @@ import os
 import sys
 from config import ConfigInit
 from utils.birdo_pathlib import Path
+from utils.birdo_zip import compact_folder
 
 
 def convert_type(a, b):
@@ -221,7 +222,7 @@ class DevTools:
 
     def show_ep_page(self, ep):
         """mostra o menu CLI do ep"""
-        opts = ["Importar animatics", "Criar setup basico das cenas", "[VOLTAR]"]
+        opts = ["Importar animatics", "Criar setup basico", "[VOLTAR]"]
         r = self.cli_input("Escolha o que deseja fazer com o ep: {0}".format(ep), options=opts)
         if r == "[VOLTAR]":
             self.back_page()
@@ -236,10 +237,49 @@ class DevTools:
             self.project.paths.import_animatics_to_ep(animatics, ep)
             self.pause()
 
-        if r == "Criar setup basico das cenas":
-            scenes = self.project.paths.list_scenes_from_animatics(ep)
+        if r == "Criar setup basico":
+            sr = self.cli_input("Criar Setup Basico: {0}".format(ep), options=["Lista de Cenas", "Todo Episodio"])
+            counter = {"errors": 0, "done": 0}
+            if sr == "[VOLTAR]":
+                self.back_page()
+                return
+            if sr == "Lista de Cenas":
+                input_scenes = self.cli_input("Insira lista de cenas para criar o setup (cenas no padrao de cenas 'SCXXXX', separados por virgula ou espaco)")
+                if not input_scenes:
+                    raise Exception("Lista de cenas invalida.")
+                in_sc = [x.rstrip() for x in re.split(r"\s|,", input_scenes) if bool(re.findall(self.project.paths.regs["sc"]["regex"], x))]
+                scenes = [self.project.paths.regs["scene"]["model"].format(int(re.findall(r'\d+', ep)[0]), int(re.findall(r'\d+', x)[0])) for x in in_sc]
+            else:
+                scenes = self.project.paths.list_scenes_from_animatics(ep)
             for item in scenes:
-                print item
+                temp_folder = self.app.get_temp_folder("create_setup", clean=True)
+                publish_zip = self.project.paths.get_publish_file(item, "SETUP")
+                if "v01" not in publish_zip.name:
+                    print " -- CENA {0} ja tem setup basico!".format(item)
+                    counter["errors"] += 1
+                    continue
+                temp_scene = temp_folder / item
+                if not self.project.paths.copy_scene_template(temp_scene):
+                    print "ERRO criando copia da cena {0} no temp...".format(item)
+                    counter["errors"] += 1
+                    continue
+                import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
+                if not self.project.harmony.compile_script(import_animatic_js.path, self.project.harmony.get_xstage_last_version(temp_scene.path)):
+                    print "ERRO rodando o script compile de animatic no arquivo temp..."
+                    counter["errors"] += 1
+                    continue
+                temp_zip = temp_folder / "_temp.zip"
+                if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
+                    print "ERRO ao compactar cena no temp zip"
+                    counter["errors"] += 1
+                    continue
+                if not temp_zip.copy_file(publish_zip):
+                    print "ERRO ao copiar o temp zip para o server!"
+                    counter["errors"] += 1
+                    continue
+                counter["done"] += 1
+
+            print "Criar Setup basico terminou com {0} cena(s) publicada(s) e {1} error(s)".format(counter["done"], counter["errors"])
             self.pause()
         # volta para pagina anterior
         self.back_page()
