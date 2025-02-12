@@ -115,11 +115,6 @@ function Download-Python {
     }
     Remove-Item "$PWD\python27.msi"
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
-
-    downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$PWD\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
-
-    & C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
-
 }
 
 function Is-Virtualenv {
@@ -338,6 +333,12 @@ echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 
 
 # 5) Criação de um ambiente virtual Python
+downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$logdir\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
+echo "⠻ Instalando gerenciador de dependências Pip..."
+& C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
+& $gum style --border=double --align=center --padding="1 4" "Pip instalado!"
+rm $logdir\get-pip.py
+
 # 6) Instalação das dependências
 $currentFolder = ($PWD).path
 Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
