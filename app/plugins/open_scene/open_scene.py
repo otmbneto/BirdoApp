@@ -246,6 +246,7 @@ class OpenScene(QtGui.QWidget):
     def check_local_version(self, server_file_saved_time):
         """checks if local version is more recent than the last version in server"""
         local_file = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]
+        print("LOCAL FILE : " + local_file)
         if not local_file["xstage"]:
             print 'No local file was found!'
             self.ui.checkBox_open_local.setEnabled(False)
@@ -295,6 +296,7 @@ class OpenScene(QtGui.QWidget):
                 print "no publishes found at step {0} at scene {1}!".format(step, scene_name)
                 index += 1
                 continue
+            print("full_list_publish:" + str(full_list_publish))
             # ORGANIZE ZIP LIST FROM SCENE PUBLISH LIST
             zips = filter(lambda x: x.endswith(".zip"), full_list_publish)
             zips.sort(key=lambda x: x)
@@ -486,8 +488,8 @@ class OpenScene(QtGui.QWidget):
         # UPDATES THE VERSION DICT WITH THE MOV ANIMATIC
         if current_step == "ANIM":
             self.shot_versions["ANIMATIC"]["versions"]["SETUP_NOT_FOUND!"] = None
-        else:
-            self.shot_versions["ANIMATIC"]["versions"]["CREATE_SETUP"] = shot_animatic_mov
+        #else:
+        #    self.shot_versions["ANIMATIC"]["versions"]["CREATE_SETUP"] = shot_animatic_mov
 
         # CREATE NEW LIST OF STEPS INCLUDING THE ANIMATIC
         new_step_list = self.steps + ["ANIMATIC"]
@@ -547,6 +549,7 @@ class OpenScene(QtGui.QWidget):
 
         print "ROOT:" + self.root
         path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"]#.replace(self.project_data.paths.root["local"].normpath(), "")
+        
         print " >> full path: " + path
         self.ui.explorer_path.setText(path)
 
@@ -556,11 +559,12 @@ class OpenScene(QtGui.QWidget):
             self.ui.open_button.setEnabled(False)
             return
 
+        """
         if selected_version == "CREATE_SETUP":
             print "selected CREATE SETUP..."
             self.ui.open_button.setEnabled(True)
             return
-
+        """
         step_open = self.shot_versions["step_to_open"]
         scene_obj = self.shot_versions[step_open]["versions"][selected_version]
 
@@ -668,6 +672,7 @@ class OpenScene(QtGui.QWidget):
             print "Error selection! Cant find scene setup!!!"
             return
 
+        """
         # IF CREATE SETUP
         if selected_version == "CREATE_SETUP" and not self.ui.checkBox_open_local.isChecked():
             # IF THE SETUP IS NOT CREATED YET, CREATES LOCAL BASIC SETUP FOR THE SELECTED SCENE
@@ -683,6 +688,7 @@ class OpenScene(QtGui.QWidget):
                 self.open_harmony_file(selected_scene, xstage_to_open)
                 print "scene opened: {0}".format(xstage_to_open)
                 return
+        """
 
         # FIND RIGHT STEP TO OPEN
         step_open = self.shot_versions["step_to_open"]
