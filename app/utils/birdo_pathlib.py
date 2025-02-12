@@ -154,6 +154,25 @@ class Path:
             filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
         ]
 
+    def rglob(self, pattern):
+        """lista o conteudo recursivamente do folder"""
+        if self.is_file():
+            raise Exception("Not a folder to list!")
+        if not self.exists():
+            print "folder does not exist... nothing to list."
+            return []
+        final_list = []
+        reg = re.compile(pattern.replace("*", r".+"))
+
+        def recurse(root):
+            for item in root.glob("*"):
+                if bool(reg.match(item.name)):
+                    final_list.append(item)
+                if item.is_dir():
+                    recurse(item)
+        recurse(self)
+        return final_list
+
     def remove(self):
         """deleta o arquivo"""
         if not self.exists():
