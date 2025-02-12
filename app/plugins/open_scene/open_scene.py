@@ -277,27 +277,20 @@ class OpenScene(QtGui.QWidget):
         index = 0
         # LOOPS IN STEP LIST ORDER TO CREATE OBJECT WITH VERSION INFORMATION
         for step in self.steps:
-            print step
             self.ui.progress_bar.setValue(index)
             self.ui.progress_bar.setFormat("searching versions {0}".format(step))
 
             scene_path = self.project_data.paths.get_scene_path("local",scene_name, step).normpath()
-            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step).normpath() #self.root + scene_path + "/PUBLISH"
+            scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step) / "PUBLISH" #self.root + scene_path + "/PUBLISH"
             
-            full_list_publish = os.listdir(scene_publish_path) if os.path.exists(scene_publish_path) else []
+            print("SCENE PUBLISH:" + str(scene_publish_path))
             versions_data[step] = {
                 "is_used": False,
                 "local_path": self.get_local_scene(scene_path, scene_name),
                 'versions': {}
             }
 
-            if not full_list_publish or len(full_list_publish) == 0:
-                print "no publishes found at step {0} at scene {1}!".format(step, scene_name)
-                index += 1
-                continue
-            # ORGANIZE ZIP LIST FROM SCENE PUBLISH LIST
-            zips = filter(lambda x: x.endswith(".zip"), full_list_publish)
-            zips.sort(key=lambda x: x)
+            zips = scene_publish_path.glob("*.zip$")
 
             if len(zips) == 0:
                 print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
@@ -486,8 +479,8 @@ class OpenScene(QtGui.QWidget):
         # UPDATES THE VERSION DICT WITH THE MOV ANIMATIC
         if current_step == "ANIM":
             self.shot_versions["ANIMATIC"]["versions"]["SETUP_NOT_FOUND!"] = None
-        else:
-            self.shot_versions["ANIMATIC"]["versions"]["CREATE_SETUP"] = shot_animatic_mov
+        #else:
+        #    self.shot_versions["ANIMATIC"]["versions"]["CREATE_SETUP"] = shot_animatic_mov
 
         # CREATE NEW LIST OF STEPS INCLUDING THE ANIMATIC
         new_step_list = self.steps + ["ANIMATIC"]
@@ -514,7 +507,7 @@ class OpenScene(QtGui.QWidget):
                     saved_last_version_time = timestamp_from_isodatestr(
                         last_version_obj.get_last_modified().isoformat())
                     self.shot_versions["most_recent"] = self.check_local_version(saved_last_version_time)
-                    version = re.findall(r'v\d+', last_version_obj.get_name())[0]
+                    version = re.findall(r'v\d+', last_version_obj.name)[0]
                 else:
                     version = 'v00'
                     self.shot_versions["most_recent"] = 'server'
@@ -547,6 +540,7 @@ class OpenScene(QtGui.QWidget):
 
         print "ROOT:" + self.root
         path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"]#.replace(self.project_data.paths.root["local"].normpath(), "")
+        
         print " >> full path: " + path
         self.ui.explorer_path.setText(path)
 
@@ -556,11 +550,12 @@ class OpenScene(QtGui.QWidget):
             self.ui.open_button.setEnabled(False)
             return
 
+        """
         if selected_version == "CREATE_SETUP":
             print "selected CREATE SETUP..."
             self.ui.open_button.setEnabled(True)
             return
-
+        """
         step_open = self.shot_versions["step_to_open"]
         scene_obj = self.shot_versions[step_open]["versions"][selected_version]
 
@@ -619,7 +614,7 @@ class OpenScene(QtGui.QWidget):
         print "reset widgets with version shot info..."
 
     def on_open_scene(self):
-        print '*******************--OPEN FILE--********************'
+        print('*******************--OPEN FILE--********************')
         current_step = self.ui.comboStep.currentText()
         selected_scene = self.ui.listScenes.currentItem().text()
 
@@ -642,16 +637,11 @@ class OpenScene(QtGui.QWidget):
                     "Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
                         selected_scene))
 
-            if not local_scene["xstage"] or not os.path.exists(local_scene["xstage"]):
+            xstage_file = local_scene["xstage"]
+            if not xstage_file or not os.path.exists(xstage_file):
                 self.ui.progress_bar.setFormat("ERROR! File not found!")
                 self.ui.progress_bar.setValue(3)
                 MessageBox.warning("Error! Cant find the local scene to open!")
-                return
-            else:
-                print "running update setup script..."
-                self.project_data.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
-                print "opening local scene {0}...".format(local_scene["xstage"])
-                self.open_harmony_file(selected_scene, local_scene["xstage"])
                 return
         else:
             if self.shot_versions["most_recent"] == 'local':
@@ -660,110 +650,102 @@ class OpenScene(QtGui.QWidget):
                 if not ask:
                     return
 
-        selected_version = self.ui.listVersions.currentItem().text()
+            selected_version = self.ui.listVersions.currentItem().text()
 
-        # IF NO SETUP FOUND
-        if selected_version == "SETUP_NOT_FOUND" or not selected_version:
-            # IN CASE THIS OPTION IS SELECTED (SHOULD BE DISABLED!)
-            print "Error selection! Cant find scene setup!!!"
-            return
-
-        # IF CREATE SETUP
-        if selected_version == "CREATE_SETUP" and not self.ui.checkBox_open_local.isChecked():
-            # IF THE SETUP IS NOT CREATED YET, CREATES LOCAL BASIC SETUP FOR THE SELECTED SCENE
-            self.ui.progress_bar.setFormat("creating SETUP[0/3]")
-            print "creating SETUP[0/4]"
-            xstage_to_open = self.create_base_setup(selected_scene, selected_version, current_step)
-            if not xstage_to_open:
-                print "error creting scene setup.. canceling!"
+            # IF NO SETUP FOUND
+            if selected_version == "SETUP_NOT_FOUND" or not selected_version:
+                # IN CASE THIS OPTION IS SELECTED (SHOULD BE DISABLED!)
+                print "Error selection! Cant find scene setup!!!"
                 return
+
+            # FIND RIGHT STEP TO OPEN
+            step_open = self.shot_versions["step_to_open"]
+            scene_obj = self.shot_versions[step_open]["versions"][selected_version]
+
+            # DOWNLOAD SCENE FILE...
+            self.ui.progress_bar.setFormat("downloading file...")
+            self.ui.progress_bar.setValue(2)
+            temp_file = os.path.join(self.temp_open_scene, scene_obj.name)
+            if not os.path.exists(self.temp_open_scene):
+                print "creating temp folder...{0}".format(self.temp_open_scene)
+                os.makedirs(self.temp_open_scene)
+
+            print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
+            shutil.copyfile(scene_obj.path, temp_file)
+            if not os.path.exists(temp_file):
+                print "fail to download scene: {0}".format(scene_obj.name)
+                MessageBox.warning(
+                    "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
+                return
+
+            # CHECK IF NEED BACKUP
+            self.ui.progress_bar.setFormat("checking backup...")
+            self.ui.progress_bar.setValue(3)
+            if os.path.exists(local_scene["path"]):
+                print "Ja existe uma versao local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
+                backup_folder = os.path.join(os.path.dirname(local_scene["path"]), "_backup", get_current_datetime_string())
+                backup_zip = os.path.join(backup_folder, selected_scene + ".zip")
+                print "--scene backup: {0};\n--zip: {1}".format(backup_folder, backup_zip)
+                os.makedirs(backup_folder)
+
+                self.ui.progress_bar.setFormat("creating backup...")
+                try:
+                    if compact_folder(local_scene["path"], backup_zip):
+                        shutil.rmtree(local_scene["path"], ignore_errors=True)
+                    else:
+                        print 'fail to create backup scene bakcup from original local file'
+                except:
+                    print "fail to create local scene to backup zip.. canceling open operation!"
+                    MessageBox.warning("Falha ao criar bakcup da cena! Verifique se a cena local esta aberta!")
+                    return
             else:
-                print "opening scene: {0} in 3 seconds...".format(xstage_to_open)
-                time.sleep(3)
-                self.open_harmony_file(selected_scene, xstage_to_open)
-                print "scene opened: {0}".format(xstage_to_open)
+                if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
+                    print "error creating scene folder scheeme!"
+                    MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
+                    return
+
+            # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
+            self.ui.progress_bar.setFormat("unpacking scene...")
+            self.ui.progress_bar.setValue(4)
+            print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file, local_scene["path"])
+            if not extract_zipfile(temp_file, os.path.dirname(local_scene["path"])):
+                print "error extracting scene zip!"
+                MessageBox.warning("Erro descompactando versao da cena baixada! Avise a direcao tecnica!")
                 return
 
-        # FIND RIGHT STEP TO OPEN
-        step_open = self.shot_versions["step_to_open"]
-        scene_obj = self.shot_versions[step_open]["versions"][selected_version]
+            # DELETING TEMP ZIP FILE
+            print "deleting temp file: {0}".format(temp_file)
+            os.remove(temp_file)
 
-        # DOWNLOAD SCENE FILE...
-        self.ui.progress_bar.setFormat("downloading file...")
-        self.ui.progress_bar.setValue(2)
-        temp_file = os.path.join(self.temp_open_scene, scene_obj.get_name())
-        if not os.path.exists(self.temp_open_scene):
-            print "creating temp folder...{0}".format(self.temp_open_scene)
-            os.makedirs(self.temp_open_scene)
-
-        print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
-        shutil.copyfile(scene_obj.path, temp_file)
-        if not os.path.exists(temp_file):
-            print "fail to download scene: {0}".format(scene_obj.get_name())
-            MessageBox.warning(
-                "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
-            return
-
-        # CHECK IF NEED BACKUP
-        self.ui.progress_bar.setFormat("checking backup...")
-        self.ui.progress_bar.setValue(3)
-        if os.path.exists(local_scene["path"]):
-            print "Ja existe uma versao local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
-            backup_folder = os.path.join(os.path.dirname(local_scene["path"]), "_backup", get_current_datetime_string())
-            backup_zip = os.path.join(backup_folder, selected_scene + ".zip")
-            print "--scene backup: {0};\n--zip: {1}".format(backup_folder, backup_zip)
-            os.makedirs(backup_folder)
-
-            self.ui.progress_bar.setFormat("creating backup...")
-            try:
-                if compact_folder(local_scene["path"], backup_zip):
-                    shutil.rmtree(local_scene["path"], ignore_errors=True)
-                else:
-                    print 'fail to create backup scene bakcup from original local file'
-            except:
-                print "fail to create local scene to backup zip.. canceling open operation!"
-                MessageBox.warning("Falha ao criar bakcup da cena! Verifique se a cena local esta aberta!")
-                return
-        else:
-            if not self.project_data.paths.create_local_scene_scheme(selected_scene, current_step):
-                print "error creating scene folder scheeme!"
-                MessageBox.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
+            # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
+            if not os.path.exists(local_scene["path"]):
+                print "error! Cant find unpacked version scene folder!"
+                MessageBox.warning(
+                    "Erro! Nao foi possivel encontrar o folder da cena descompactada! Avise a Direcao Tecnica!")
                 return
 
-        # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
-        self.ui.progress_bar.setFormat("unpacking scene...")
-        self.ui.progress_bar.setValue(4)
-        print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file, local_scene["path"])
-        if not extract_zipfile(temp_file, os.path.dirname(local_scene["path"])):
-            print "error extracting scene zip!"
-            MessageBox.warning("Erro descompactando versao da cena baixada! Avise a direcao tecnica!")
-            return
+            # OPEN SCENE DOWNLOADED
+            self.ui.progress_bar.setFormat("opening scene...")
+            self.ui.progress_bar.setValue(5)
+            xstage_file = self.project_data.harmony.get_xstage_last_version(local_scene["path"])
+            if not xstage_file:
+                MessageBox.warning("Erro! Arquivo xstage da versao baixada nao encontrado!")
+                print "fail to find xstage file to scene: {0}".format(local_scene['path'])
+                return
 
-        # DELETING TEMP ZIP FILE
-        print "deleting temp file: {0}".format(temp_file)
-        os.remove(temp_file)
 
-        # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
-        if not os.path.exists(local_scene["path"]):
-            print "error! Cant find unpacked version scene folder!"
-            MessageBox.warning(
-                "Erro! Nao foi possivel encontrar o folder da cena descompactada! Avise a Direcao Tecnica!")
-            return
+        sceneOpenedScript = os.path.join(birdo_app_root,"harmony","birdoPack","_scene_scripts","TB_sceneOpened.js")
+        sceneScriptPath = os.path.join(local_scene["path"],"scripts")
+        if not os.path.exists(sceneScriptPath):
+            os.makedirs(sceneScriptPath)
+        print("copying {0} to script folder".format("TB_sceneOpened.js"))
+        shutil.copyfile(sceneOpenedScript,os.path.join(sceneScriptPath,os.path.basename(sceneOpenedScript)))
 
-        # OPEN SCENE DOWNLOADED
-        self.ui.progress_bar.setFormat("opening scene...")
-        self.ui.progress_bar.setValue(5)
 
-        xstage_file = self.project_data.harmony.get_xstage_last_version(local_scene["path"])
-        if not xstage_file:
-            MessageBox.warning("Erro! Arquivo xstage da versao baixada nao encontrado!")
-            print "fail to find xstage file to scene: {0}".format(local_scene['path'])
-            return
-        else:
-            print "running update setup script..."
-            self.project_data.harmony.compile_script(self.update_setup_script, xstage_file)
-            print "opening scene: {0}".format(xstage_file)
-            self.open_harmony_file(selected_scene, xstage_file)
+        print "running update setup script..."
+        self.project_data.harmony.compile_script(self.update_setup_script, xstage_file)
+        print "opening scene: {0}".format(xstage_file)
+        self.open_harmony_file(selected_scene, xstage_file)
         print "scene opened: {0}".format(xstage_file)
 
     def set_scene_opened(self):
