@@ -116,7 +116,7 @@ function Download-Python {
 
 function Is-Virtualenv {
 
-    $pythonInstall -m virtualenv --version > $logdir\testVenv.log 2> $logdir\testVenvErr.log
+    & $pythonInstall -m virtualenv --version > $logdir\testVenv.log 2> $logdir\testVenvErr.log
     return ($LASTEXITCODE -eq 0)
 
 }
@@ -132,7 +132,7 @@ function Update-Venv($venv,$base){
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
-    $pythonInstall -m pip install -r "requirement.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
+    & $pythonInstall -m pip install -r "requirement.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
     deactivate
 
 }
