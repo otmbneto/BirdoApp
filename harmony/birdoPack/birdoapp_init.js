@@ -317,7 +317,21 @@ function BirdoAppConfig(config_data, project_data){
 	this.getWriteNodeAtt = function(step){//retorna o atributo do write node para o step ('pre_comp' ou 'comp')
 		return this.write_node_att[step.toLowerCase()];
 	}
-		
+	
+	this.createTempFolder = function(subfolder, clean){
+		var temp = this.systemTempFolder + "/" + subfolder;
+		if(dirExist(temp)){
+			if(clean){
+				removeDirs(temp);				
+			} else {
+				MessageLog.trace("[BIRDOAPP] Nao foi necessario deletar o folder: " + temp);
+				return temp;
+			}
+		}
+		makeDir(temp);
+		return temp;
+	}
+	
 	//funcoes complementares//
 	function fileExists(filePath){//check if file exis
 		var f = new File(filePath);
@@ -326,5 +340,35 @@ function BirdoAppConfig(config_data, project_data){
 	function dirExist(dirPath){
 		var dir = new Dir(dirPath);
 		return dir.exists;
+	}
+	function removeDirs(dirPath){
+		var dir = new Dir;
+		dir.path = dirPath;
+		if(!dir.exists){
+			MessageLog.trace("[REMOVEDIR] Diretorio nao encontrado: " + dirPath);
+			return false;
+		}
+		try {
+			dir.rmdirs();
+			MessageLog.trace("[REMOVEDIR] Diretorio removido..." + dirPath);
+		} catch (err){
+			Print(err);
+			return false;
+		}
+		return true;
+	}
+	function makeDir(dirPath){
+		var myDir = new Dir;
+		myDir.path = dirPath;
+		if(!myDir.exists){
+			try {
+				myDir.mkdirs(dirPath);
+			} catch (e){
+				Print(e);
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 }
