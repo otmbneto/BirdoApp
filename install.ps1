@@ -47,7 +47,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
         $tag = $response.tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
-        $msg = "Baixando arquivos do repositó do BirdoApp..." #FIXME weird :|
+        $msg = "Baixando arquivos do repositório do BirdoApp..." #FIXME weird :|
         $end = "Arquivos do BirdoApp baixados!"  #FIXME weird :|
     }
     elseif($type -eq "Binary"){
