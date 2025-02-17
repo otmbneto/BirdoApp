@@ -259,3 +259,23 @@ class ConfigInit(object):
             index of the project
         """
         return final_class
+
+    def list_valid_plugins(self, proj_user_role):
+        """cria uma lista de dicionário com informações dos plugins instalados"""
+        plugins_root = Path(self.get_plugins_folder())
+        plugins = []
+        for item in filter(lambda x: x.is_dir(), plugins_root.glob("*")):
+            p = self.get_plugin_data(item)
+            if proj_user_role in p["permissions"]:
+                plugins.append(p)
+        return plugins
+
+    def get_plugin_data(self, plugin_root):
+        """retorna um dicionario com informacoes do plugin"""
+        plugin_json = plugin_root / "setup.json"
+        if not plugin_json.exists():
+            print "[BIRDOAPP] Plugin invalido: {0}".format(plugin_root.name)
+            return None
+        data = read_json_file(plugin_json.path)
+        data["root"] = plugin_root
+        return data

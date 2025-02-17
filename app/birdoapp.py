@@ -16,10 +16,10 @@ class BirdoApp(QtGui.QMainWindow):
     def __init__(self):
         super(BirdoApp, self).__init__()
         # config init object wth app main features
-        self.app = ConfigInit()
+        self.birdoapp = ConfigInit()
 
         # load gui file
-        self.ui = self.load_ui(self.app.gui_file)
+        self.ui = self.load_ui(self.birdoapp.gui_file)
 
         # set gui geometry
         w, h = 450, 760
@@ -34,16 +34,16 @@ class BirdoApp(QtGui.QMainWindow):
         self.plugins = None
 
         # SETS ICONS
-        logo = QtGui.QIcon(self.app.icons["logo"])
+        logo = QtGui.QIcon(self.birdoapp.icons["logo"])
         self.setWindowIcon(logo)
         self.ui.home_button.setIcon(logo)
-        folder_logo = QtGui.QIcon(self.app.icons["folder"])
+        folder_logo = QtGui.QIcon(self.birdoapp.icons["folder"])
         self.ui.open_folder_server.setIcon(folder_logo)
         self.ui.harmony_folder_button.setIcon(folder_logo)
         self.ui.local_folder_button.setIcon(folder_logo)
 
         # SETS THE APP VERSION
-        self.ui.label_version.setText(self.app.data["release"])
+        self.ui.label_version.setText(self.birdoapp.data["release"])
 
         # setup connections
         self.setup_connections()
@@ -87,7 +87,7 @@ class BirdoApp(QtGui.QMainWindow):
         """vai para pagina inicial
         (se tiver valido o config, vai pros projetos, se nao vai pra config page)
         """
-        if not self.app.is_ready():
+        if not self.birdoapp.is_ready():
             self.load_config_app_page()
         else:
             self.load_projects_page()
@@ -96,7 +96,7 @@ class BirdoApp(QtGui.QMainWindow):
         """Abre pagina inicial de projetos do estudio (index 0)"""
         self.ui.progressBar.setValue(0)
         # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config do app)
-        if not self.app.check_server_path():
+        if not self.birdoapp.check_server_path():
             self.load_config_app_page()
             return
 
@@ -106,15 +106,15 @@ class BirdoApp(QtGui.QMainWindow):
         # muda para o index da pagina (0)
         self.ui.stackedWidget.setCurrentIndex(0)
 
-        self.ui.header.setText(self.app.config_data["studio_name"])
-        self.update_foot_label("Bem vind@ {0}...".format(self.app.config_data["user_name"]), self.green_color)
+        self.ui.header.setText(self.birdoapp.config_data["studio_name"])
+        self.update_foot_label("Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
         self.ui.proj_logo_label.clear()
         self.clean_layout(self.ui.projects_layout)
         self.ui.projects_layout.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
 
         # cria botoes dos projetos
         column_num = 3
-        for i, project in enumerate(self.app.projects):
+        for i, project in enumerate(self.birdoapp.projects):
             btn = self.create_project_button(project)
             self.ui.projects_layout.addWidget(btn, i / column_num, i % column_num)
             i += 1
@@ -131,13 +131,13 @@ class BirdoApp(QtGui.QMainWindow):
         self.update_foot_label("Loading BirdoApp...", self.green_color)
 
         # ADD BIRDOAPP LOGO
-        self.ui.anim_logo_label.setPixmap(self.app.icons["logo"])
+        self.ui.anim_logo_label.setPixmap(self.birdoapp.icons["logo"])
 
         # segura 2 segundos pra dar um chaume... heheh
         sleep(2)
 
         # Checa se o config do app esta ok
-        if not self.app.is_ready():
+        if not self.birdoapp.is_ready():
             self.load_config_app_page()
         else:
             self.load_projects_page()
@@ -153,19 +153,19 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.header.setText("BIRDOAPP CONFIG...")
 
         # ATUALIZA OS CAMPOS COM OS DADOS EXISTENTES
-        if self.app.config_data["user_name"]:
-            self.ui.username_line.setText(self.app.config_data["user_name"])
-        if self.app.config_data["studio_name"]:
-            self.ui.studio_name_label.setText(self.app.config_data["studio_name"])
-        if self.app.config_data["server_projects"]:
-            self.ui.server_path_label.setText(self.app.config_data["server_projects"])
+        if self.birdoapp.config_data["user_name"]:
+            self.ui.username_line.setText(self.birdoapp.config_data["user_name"])
+        if self.birdoapp.config_data["studio_name"]:
+            self.ui.studio_name_label.setText(self.birdoapp.config_data["studio_name"])
+        if self.birdoapp.config_data["server_projects"]:
+            self.ui.server_path_label.setText(self.birdoapp.config_data["server_projects"])
 
         # ATUALIZA OS CAMPOS DE CONFIG DE SOFTWARE
         self.ui.harmony_versions.clear()
-        for harmony in self.app.harmony_versions:
+        for harmony in self.birdoapp.harmony_versions:
             self.ui.harmony_versions.addItem(harmony.get_name(), harmony)
-        self.ui.harmony_folder_line.setEnabled(len(self.app.harmony_versions) == 0)
-        self.ui.harmony_folder_button.setEnabled(len(self.app.harmony_versions) == 0)
+        self.ui.harmony_folder_line.setEnabled(len(self.birdoapp.harmony_versions) == 0)
+        self.ui.harmony_folder_button.setEnabled(len(self.birdoapp.harmony_versions) == 0)
 
         # SETS THE LOADING LABEL
         self.update_foot_label("Configure o BirdoApp para iniciar...", self.green_color)
@@ -178,7 +178,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.update_button.show()
 
         # SETS THE CURRENT HEADER
-        header = "".format(self.app.config_data["studio_name"], self.app.config_data["user_name"])
+        header = "".format(self.birdoapp.config_data["studio_name"], self.birdoapp.config_data["user_name"])
         self.ui.header.setText(header)
 
         # ATUALIZA O COMBO DOS CARGOS DO PROJETO
@@ -193,8 +193,8 @@ class BirdoApp(QtGui.QMainWindow):
             self.ui.combo_funcao.setCurrentIndex(self.project_data.roles.index(self.project_data.user_role))
 
         # SETS THE LOADING LABEL
-        self.update_foot_label("Ola {0}. Configure seus dados do projeto {1}".format(
-            self.app.config_data["user_name"], self.project_data.name),
+        self.update_foot_label("Olá {0}. Configure seus dados do projeto {1}".format(
+            self.birdoapp.config_data["user_name"], self.project_data.name),
             self.green_color
         )
 
@@ -212,13 +212,12 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.proj_logo_label.setPixmap(QtGui.QPixmap(proj_icon))
 
         self.ui.stackedWidget.setCurrentIndex(4)
-        self.plugins = self.get_plugins()
+        self.plugins = self.birdoapp.list_valid_plugins(self.project_data.user_role)
         self.clean_layout(self.ui.plugin_layout)
         self.ui.plugin_layout.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         column_num = 3
         i = 0
         for plugin in self.plugins:
-            print plugin
             btn = self.create_plugin_btn(plugin, self.project_data.id)
             self.ui.plugin_layout.addWidget(btn, i / column_num, i % column_num)
             i += 1
@@ -236,7 +235,7 @@ class BirdoApp(QtGui.QMainWindow):
         return button
 
     def project_selected(self, project):
-        self.project_data = self.app.get_project_data(project["id"])
+        self.project_data = self.birdoapp.get_project_data(project["id"])
         if not self.project_data:
             print "get project data failed to complete!"
             self.close()
@@ -252,10 +251,10 @@ class BirdoApp(QtGui.QMainWindow):
 
     def create_plugin_btn(self, plugin, project_code):
         button = QtGui.QToolButton()
-        plugin_name = os.path.basename(plugin).replace(".py", "")
-        button.setToolTip(plugin_name)
-        button.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(plugin), "plugin.ico")))
+        button.setToolTip(plugin["name"])
+        button.setIcon(QtGui.QIcon((plugin["root"] / plugin["icon"]).path))
         button.setIconSize(QtCore.QSize(100, 100))
+        button.setToolTip("{0} {1}\n{2}".format(plugin["name"], plugin["version"], plugin["description"]))
         BUTTON_SIZE = QtCore.QSize(115, 115)
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
@@ -263,9 +262,8 @@ class BirdoApp(QtGui.QMainWindow):
         return button
 
     def plugin_selected(self, plugin, project_code):
-        plugin_name = os.path.basename(plugin).replace(".py", "")
-        self.update_foot_label("Abrindo plugin: {0}".format(plugin_name), self.green_color)
-        subprocess.Popen([self.app.python, plugin, str(project_code)])
+        self.update_foot_label("Abrindo plugin: {0}".format(plugin["name"]), self.green_color)
+        subprocess.Popen([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
 
     def validate_plugin(self, path):
         """funcao para validar se o plugin tem permissao para abrir pro usuario"""
@@ -279,14 +277,6 @@ class BirdoApp(QtGui.QMainWindow):
         icon = os.path.join(os.path.dirname(path), "plugin.ico").replace("\\", "/")
         return os.path.exists(path) and os.path.exists(icon) and user_type in permissions
 
-    def get_plugins(self):
-        """Lista os plugins validos para o tipo role do usuario"""
-        plugin_path = self.app.get_plugins_folder()
-        plugins = filter(self.validate_plugin,
-                         [os.path.join(plugin_path, f, f + ".py").replace("\\", "/") for f in
-                          os.listdir(plugin_path)])
-        return plugins
-
     def showEvent(self, event):
         # do stuff here
         event.accept()
@@ -294,13 +284,13 @@ class BirdoApp(QtGui.QMainWindow):
 
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()
-        dialog.setDirectory(self.app.system.user_home.path)
+        dialog.setDirectory(self.birdoapp.system.user_home.path)
         folder = dialog.getExistingDirectory()
         edit_line.setText(folder)
 
     def credits(self):
-        msg = '\n'.join(["{0}:\t{1}".format(item, self.app.data[item]) for item in sorted(self.app.data.keys())])
-        self.app.mb.information(msg)
+        msg = '\n'.join(["{0}:\t{1}".format(item, self.birdoapp.data[item]) for item in sorted(self.birdoapp.data.keys())])
+        self.birdoapp.mb.information(msg)
 
     def update_foot_label(self, txt, color):
         self.ui.loading_label.setText(txt)
@@ -310,7 +300,7 @@ class BirdoApp(QtGui.QMainWindow):
         """Pega as infos das widgets do config_app page e atualiza o app.config_data"""
         print "updating app config..."
         # get data to update
-        update_data = dict.fromkeys(self.app.config_data.keys())
+        update_data = dict.fromkeys(self.birdoapp.config_data.keys())
         update_data.pop("user_projects", None)  # remove a key 'user_projects' pois nao vamos precisar nesse check
         update_data["user_name"] = self.ui.username_line.text()
         update_data["studio_name"] = self.ui.studio_name_label.text()
@@ -322,7 +312,7 @@ class BirdoApp(QtGui.QMainWindow):
             if harmony_path:
                 harmony = ToonBoomHarmony(harmony_path)
                 if not harmony.is_installed():
-                    self.app.mb.warning("O caminho fornecido de instalação do Harmony não é válido!")
+                    self.birdoapp.mb.warning("O caminho fornecido de instalação do Harmony não é válido!")
                     self.update_foot_label("Caminho inválido de instalação do Harmony...", self.red_color)
                     return False
         else:
@@ -333,13 +323,13 @@ class BirdoApp(QtGui.QMainWindow):
         for item in update_data:
             if not update_data[item]:
                 msg = "Preencha o campo '{0}' antes de continuar!".format(item)
-                self.app.mb.warning(msg)
+                self.birdoapp.mb.warning(msg)
                 self.update_foot_label(msg, self.red_color)
                 return False
-            self.app.config_data[item] = update_data[item]
-        if self.app.update_config_json():
+            self.birdoapp.config_data[item] = update_data[item]
+        if self.birdoapp.update_config_json():
             # update a lista de projetos depois do config...
-            self.app.get_projects()
+            self.birdoapp.get_projects()
             return True
         return False
 
@@ -356,27 +346,27 @@ class BirdoApp(QtGui.QMainWindow):
 
         # verifica se os valores dos campos estao corretos
         if not local_folder.exists():
-            self.app.mb.warning("O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
+            self.birdoapp.mb.warning("O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
             self.update_foot_label("Folder local inválido...", self.red_color)
             return False
 
         if local_folder.path == self.project_data.paths.root["server"].path:
-            self.app.mb.warning("Você escolheu o folder do projeto no servidor do estudio."
+            self.birdoapp.mb.warning("Você escolheu o folder do projeto no servidor do estudio."
                                "Forneca o seu folder LOCAL do projeto, "
                                "onde você irá salvar as cenas no seu computador.")
             return False
         if not user_proj["user_role"]:
-            self.app.mb.warning("Escolha sua função, válida para o projeto!")
+            self.birdoapp.mb.warning("Escolha sua função, válida para o projeto!")
             self.update_foot_label("Escolha sua função no projeto...", self.red_color)
             return False
 
         # update user projects list in app.config_data
-        self.app.config_data["user_projects"].append(user_proj)
+        self.birdoapp.config_data["user_projects"].append(user_proj)
 
         # updates self.project_data.paths.local_folder
         self.project_data.paths.update_local_root(user_proj["local_folder"])
 
-        return self.app.update_config_json()
+        return self.birdoapp.update_config_json()
 
     def on_update_button(self):
         """callback do botao update que atualiza os dados finais recolhidos no config.json"""
