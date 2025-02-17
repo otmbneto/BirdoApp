@@ -1,6 +1,7 @@
 import os
 import sys
 from PySide.QtGui import*
+from PySide import QtCore
 
 
 class CreateMessageBox:
@@ -17,6 +18,7 @@ class CreateMessageBox:
         self.birdoLogo = os.path.join(os.path.dirname(__file__).replace('utils', 'icons'), 'logo.png') #pega o caminho do png icon da birdo
         self.msg.setWindowIcon(QIcon(self.birdoLogo))
         self.msg.setStyleSheet("QWidget{\nbackground: rgb(91, 91, 91);\n}QLabel {\ncolor: lightgray;\n}QPushButton {\n	color: #444444;\nborder: 2px solid white;\nborder-radius: 6px;\nbackground-color: rgb(180, 180, 180);\n	min-height: 25px;\n	min-width: 80px;\n}\nQPushButton:pressed {\ncolor: white;\nborder: 2px solid darkblue;\nbackground-color: #05B8CC;\nfont-size: 7pt;\n}\nQPushButton:hover{\nborder: 2px solid #05B8CC;\ncolor: black;\n}\n")
+        self.msg.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
     def information(self, text):
         print text
