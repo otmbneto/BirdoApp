@@ -47,7 +47,7 @@ function Get-GitRelease($repo,$dst,$type,$file){
         $tag = $response.tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
-        $msg = "Baixando arquivos do repositó do BirdoApp..." #FIXME weird :|
+        $msg = "Baixando arquivos do repositório do BirdoApp..." #FIXME weird :|
         $end = "Arquivos do BirdoApp baixados!"  #FIXME weird :|
     }
     elseif($type -eq "Binary"){
@@ -116,7 +116,7 @@ function Download-Python {
 
 function Is-Virtualenv {
 
-    python -m virtualenv --version > $logdir\testVenv.log 2> $logdir\testVenvErr.log
+    & $pythonInstall -m virtualenv --version > $logdir\testVenv.log 2> $logdir\testVenvErr.log
     return ($LASTEXITCODE -eq 0)
 
 }
@@ -132,7 +132,7 @@ function Update-Venv($venv,$base){
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
-    python -m pip install -r "requirement.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
+    & $pythonInstall -m pip install -r "requirement.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
     deactivate
 
 }
@@ -193,20 +193,20 @@ function Install-Shortcut {
     }
 }
 
-# $greetings = "
-# ╔══════════════════════════════════════════════════════════════════════╗
-# ║                                                                      ║
-# ║    ██████╗ ██╗██████╗ ██████╗  ██████╗     █████╗ ██████╗ ██████╗    ║
-# ║    ██╔══██╗██║██╔══██╗██╔══██╗██╔═══██╗   ██╔══██╗██╔══██╗██╔══██╗   ║
-# ║    ██████╔╝██║██████╔╝██║  ██║██║   ██║   ███████║██████╔╝██████╔╝   ║
-# ║    ██╔══██╗██║██╔══██╗██║  ██║██║   ██║   ██╔══██║██╔═══╝ ██╔═══╝    ║
-# ║    ██████╔╝██║██║  ██║██████╔╝╚██████╔╝   ██║  ██║██║     ██║        ║
-# ║    ╚═════╝ ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝  ╚═╝╚═╝     ╚═╝        ║
-# ║                                                                      ║
-# ║                     ASSISTENTE   DE   INSTALAÇÃO                     ║
-# ║                                                                      ║
-# ╚══════════════════════════════════════════════════════════════════════╝
 $greetings = "
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║    ██████╗ ██╗██████╗ ██████╗  ██████╗     █████╗ ██████╗ ██████╗    ║
+║    ██╔══██╗██║██╔══██╗██╔══██╗██╔═══██╗   ██╔══██╗██╔══██╗██╔══██╗   ║
+║    ██████╔╝██║██████╔╝██║  ██║██║   ██║   ███████║██████╔╝██████╔╝   ║
+║    ██╔══██╗██║██╔══██╗██║  ██║██║   ██║   ██╔══██║██╔═══╝ ██╔═══╝    ║
+║    ██████╔╝██║██║  ██║██████╔╝╚██████╔╝   ██║  ██║██║     ██║        ║
+║    ╚═════╝ ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝  ╚═╝╚═╝     ╚═╝        ║
+║                                                                      ║
+║                     ASSISTENTE   DE   INSTALAÇÃO                     ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
    Bem vindo ao assistente de instalação do BirdoApp, um conjunto
    de scripts e programas que auxiliam produções de animações 2D.
    Pressione ENTER para continuar."
@@ -237,8 +237,6 @@ $gum = ($env:TEMP + "\gum_0.15.0_Windows_x86_64\gum.exe")
 function AskYesNo ($question){
     & $gum confirm --no-show-help --affirmative="Sim" --negative="Não" $question
     return $LASTEXITCODE
-}
-
 }
 
 #### MAIN ROUTINE ####
@@ -332,7 +330,7 @@ echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 # 5) Criação de um ambiente virtual Python
 downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$logdir\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
 echo "⠻ Instalando gerenciador de dependências Pip..."
-& C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
+& C:\Python27\python.exe "$logdir\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
 & $gum style --border=double --align=center --padding="1 4" "Pip instalado!"
 rm $logdir\get-pip.py
 
@@ -345,7 +343,7 @@ Write-Host "⠷ Criando atalho na área de trabalho..."
 
 Set-Location $currentFolder
 $birdoapp = "$env:APPDATA/BirdoApp"
-Install-Shortcut -ShortcutName "BirdoApp" -Arguments "BirdoApp.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.ico"
+Install-Shortcut -ShortcutName "BirdoApp" -Arguments "main.py" -WorkingDir "$birdoapp" -PythonPath "$birdoapp/venv/Scripts/python.exe" -Icon "$birdoapp/app/icons/birdoAPPLogo.png"
 & $gum style --border=double --align=center --padding="1 4" "Atalho criado!"
 
 echo "Instalação concluída."
