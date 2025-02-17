@@ -1,46 +1,54 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 from PySide import QtCore, QtGui, QtUiTools
 import shutil
 import tempfile
 import uploaderItem as upi
+import argparse
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
-ui_path = os.path.join(curr_dir, 'ui')
-birdo_app_root = os.path.dirname(os.path.dirname(os.path.dirname(curr_dir)))
+sys.path.append(os.path.dirname(os.path.dirname(curr_dir)))
+from config import ConfigInit
+from utils.birdo_json import read_json_file
+from utilos.birdo_pathlib import Path
 
-sys.path.append(ui_path)
-sys.path.append(birdo_app_root)
-from app.config import ConfigInit
-from app.utils.MessageBox import CreateMessageBox
-MessageBox = CreateMessageBox()
 
 class Uploader(QtGui.QMainWindow):
-    
-    def __init__(self, project_data):
-        
+    """classe principal com a interface do uploader."""
+
+    def __init__(self, birdoapp_config, project_data, plugin_data):
         super(Uploader, self).__init__()
+
+        # define parametros importantes de config
+        self.birdoapp = birdoapp_config
         self.project_data = project_data
         self.listOfWidgets = []
-        self.app_root = os.path.dirname(os.path.realpath(__file__))
-        ui_path = os.path.join(self.app_root, "ui/uploader.ui").replace("\\", "/")
-        self.ui = self.load_page(ui_path)
+        self.episodes = [""]
+        self.steps = [""]
+
+        # set ui
+        self.ui = self.load_page((plugin_data["root"] / plugin_data["ui_file"]).path)
         w = self.ui.frameGeometry().width()
         h = self.ui.frameGeometry().height()
-        ################################################################################
+
+        # cria widget para scrool area
         widget = QtGui.QWidget()
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setAlignment(QtCore.Qt.AlignTop)
         widget.setLayout(self.verticalLayout)
         self.ui.scrollArea.setWidget(widget)
-        ################################################################################
+
+        # seta interface
         self.setCentralWidget(self.ui)
         self.resize(w, h)
         self.set_logic()
         self.setAcceptDrops(True)
+        # set window icon
+        self.setWindowIcon(QtGui.QIcon((plugin_data["root"] / plugin_data["icon"]).path))
 
     def get_template_item(self, path, episodes):
-        template_item = upi.uiItem(path, episodes,self.project_data)
+        template_item = upi.uiItem(path, episodes, self)
         return template_item
 
     def load_page(self, ui_path):
@@ -59,7 +67,6 @@ class Uploader(QtGui.QMainWindow):
         self.ui.cleanBtn.clicked.connect(self.clean_scroll_list)
         self.ui.cancelBtn.clicked.connect(self.close)
         self.ui.checkDecimal.stateChanged.connect(self.checkDecimal)
-        return
 
     def checkDecimal(self):
         print "decimal changed to : {0}".format(self.ui.checkDecimal.isChecked())
@@ -77,8 +84,6 @@ class Uploader(QtGui.QMainWindow):
                 item.setStep(value)
 
     def get_project_episodes(self):
-        self.episodes = [""]
-        self.steps = [""]
         folder = self.project_data.paths.get_episodes_folder("server").normpath()
         self.episodes += [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder, f))]
         self.steps += self.project_data.paths.steps.keys()
@@ -91,7 +96,6 @@ class Uploader(QtGui.QMainWindow):
         self.ui.cleanBtn.setEnabled(False)
         self.ui.progressBar.setVisible(False)
         self.ui.progressBar.setValue(0)
-        return
 
     def clean_layout(self, layout):
         for i in reversed(range(layout.count())):
@@ -118,15 +122,12 @@ class Uploader(QtGui.QMainWindow):
             self.incrementProgress(progression)
 
         self.setProgress(100)
-        MessageBox.information("Copias feitas com sucesso!")
-
-        return
+        self.birdoapp.mb.information("Cópias feitas com sucesso!")
 
     def getProgress(self):
         return self.ui.progressBar.value()
 
     def setProgress(self, value):
-
         self.ui.progressBar.setValue(value)
 
     def incrementProgress(self, increment):
@@ -135,23 +136,19 @@ class Uploader(QtGui.QMainWindow):
 
     # The following three methods set up dragging and dropping for the app
     def dragEnterEvent(self, e):
-
         if e.mimeData().hasUrls:
             e.accept()
         else:
             e.ignore()
 
     def dragMoveEvent(self, e):
-
         if e.mimeData().hasUrls:
             e.accept()
         else:
             e.ignore()
 
     def dropEvent(self, e):
-
         if e.mimeData().hasUrls:
-
             e.setDropAction(QtCore.Qt.CopyAction)
             e.accept()
             urls = e.mimeData().urls()
@@ -177,25 +174,24 @@ class Uploader(QtGui.QMainWindow):
 
 # main script
 if __name__ == "__main__":
-    
-    args = sys.argv
-    if not len(args) == 3:
-        print("Numero de argumentos invalidos!")
-        sys.exit("error: wrong number of arguments!")
+    parser = argparse.ArgumentParser(description='Uploader')
+    parser.add_argument('proj_id', help='Project id')
+    args = parser.parse_args()
 
-    project_index = int(args[1])
+    project_index = int(args.proj_id)
 
-    app = QtGui.QApplication.instance()  # TODO: understand why is this returning None.
+    app = QtGui.QApplication.instance()
     if app is None:
         app = QtGui.QApplication([''])
 
     config = ConfigInit()
     p_data = config.get_project_data(project_index)
     if not p_data:
-        MessageBox.critical("ERRO Ao pegar informacoes do projeto!")
+        config.mb.critical("ERRO Ao pegar informacoes do projeto!")
         sys.exit(app.exec_())
 
-    appWindow = Uploader(p_data)
+    plugin_data = config.get_plugin_data(curr_dir)
+    appWindow = Uploader(config, p_data, plugin_data)
 
     appWindow.show()
     sys.exit(app.exec_())

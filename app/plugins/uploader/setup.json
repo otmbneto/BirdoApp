@@ -1,0 +1,17 @@
+{
+	"name": "Uploader",
+	"version": "2.0",
+	"description": "Este plugin tem como finalidade subir cenas de harmony e arquivos de video\nde animatic para a estrutura de pastas do servidor do projeto.",
+	"author": "ottoni_bastos@birdo",
+	"icon": "plugin.ico",
+	"main_script": "uploader.py",
+	"ui_file": "/ui/uploader.ui",
+	"extra_files": null,
+	"arguments": [],
+	"permissions": [
+		"SETUP",
+		"COMP",
+		"DT"
+	]
+}
+
