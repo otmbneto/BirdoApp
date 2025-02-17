@@ -15,10 +15,7 @@ venv/
 
 # Ignore node_modules folder
 node_modules
-
-# Ignore all text files
-*.txt
-
+s
 # Ignore files related to API keys
 .env
 
