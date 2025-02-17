@@ -239,8 +239,6 @@ function AskYesNo ($question){
     return $LASTEXITCODE
 }
 
-}
-
 #### MAIN ROUTINE ####
 
 echo $greetings
