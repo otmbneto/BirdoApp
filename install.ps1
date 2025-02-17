@@ -330,7 +330,7 @@ echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 # 5) Criação de um ambiente virtual Python
 downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$logdir\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
 echo "⠻ Instalando gerenciador de dependências Pip..."
-& C:\Python27\python.exe "$PWD\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
+& C:\Python27\python.exe "$logdir\get-pip.py" > $logdir\installPip.log 2> $logdir\installPipErr.log
 & $gum style --border=double --align=center --padding="1 4" "Pip instalado!"
 rm $logdir\get-pip.py
 
