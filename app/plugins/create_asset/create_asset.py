@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Este script serve para abrir o arquivo template de asset e abrir interface com opcoes
     para criacao do arquivo setup para o ASSET desejado.
@@ -5,6 +6,7 @@
 """
 import sys
 import os
+import argparse
 sys.path.append(os.curdir)
 from app.config import ConfigInit
 
@@ -20,18 +22,16 @@ def main(proj_data):
 
 
 if __name__ == "__main__":
-    args = sys.argv
+    parser = argparse.ArgumentParser(description='Create Asset')
+    parser.add_argument('proj_id', help='Project id')
+    args = parser.parse_args()
 
-    project_index = int(args[1])
+    project_index = int(args.proj_id)
 
-    birdoapp = ConfigInit()
-    if not birdoapp.is_ready():
-        sys.exit("BirdoApp config is not complete!")
-
-    project_data = birdoapp.get_project_data(project_index)
-    if not project_data:
-        sys.exit("error opening project data!")
-
-    main(project_data)
+    config = ConfigInit()
+    p_data = config.get_project_data(project_index)
+    if not p_data:
+        config.mb.critical("ERRO Ao pegar informaçõs do projeto!")
+    main(p_data)
 
     sys.exit("Create Asset End!")

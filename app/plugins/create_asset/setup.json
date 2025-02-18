@@ -1,0 +1,17 @@
+{
+	"name": "Create Asset",
+	"version": "2.0",
+	"description": "Este plugin cria um arquivo de harmony de asset vazio, configurado para o projeto.",
+	"author": "leobazao@birdo",
+	"icon": "plugin.ico",
+	"main_script": "create_asset.py",
+	"ui_file": null,
+	"extra_files": null,
+	"arguments": [],
+	"permissions": [
+		"RIG",
+        "DESIGN",
+        "DT"
+	]
+}
+

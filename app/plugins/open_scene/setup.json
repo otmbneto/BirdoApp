@@ -1,0 +1,19 @@
+{
+	"name": "Open Scene",
+	"version": "2.0",
+	"description": "Este plugin gerencia as cenas de harmony do projeto. Pela interface e possivel abrir\nas cenas (baixar do server do projeto para seu folder local do projeto).",
+	"author": "leobazao@birdo e ottoni@birdo",
+	"icon": "plugin.png",
+	"main_script": "open_scene.py",
+	"ui_file": "ui/dialog.ui",
+	"extra_files": null,
+	"arguments": [],
+	"permissions": [
+		"SETUP",
+        "ANIM",
+        "ANIM_LEAD",
+        "COMP",
+        "DT"
+	]
+}
+

@@ -5,7 +5,7 @@
 	"author": "ottoni_bastos@birdo",
 	"icon": "plugin.ico",
 	"main_script": "uploader.py",
-	"ui_file": "/ui/uploader.ui",
+	"ui_file": "ui/uploader.ui",
 	"extra_files": null,
 	"arguments": [],
 	"permissions": [

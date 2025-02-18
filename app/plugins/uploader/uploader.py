@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+    Uploader é um plugin do birdoapp para subir cenas 'offline' para a estrutura de pastas de um projeto.
+    (Usado pela Direção Técnica ou produção)
+"""
 import os
 import sys
 from PySide import QtCore, QtGui, QtUiTools
@@ -6,12 +10,10 @@ import shutil
 import tempfile
 import uploaderItem as upi
 import argparse
-
 curr_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.dirname(os.path.dirname(curr_dir)))
-from config import ConfigInit
-from utils.birdo_json import read_json_file
-from utilos.birdo_pathlib import Path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
+from app.config import ConfigInit
+from app.utils.birdo_pathlib import Path
 
 
 class Uploader(QtGui.QMainWindow):
@@ -46,6 +48,7 @@ class Uploader(QtGui.QMainWindow):
         self.setAcceptDrops(True)
         # set window icon
         self.setWindowIcon(QtGui.QIcon((plugin_data["root"] / plugin_data["icon"]).path))
+        self.setWindowTitle("BirdaApp - Uploader")
 
     def get_template_item(self, path, episodes):
         template_item = upi.uiItem(path, episodes, self)
@@ -187,10 +190,10 @@ if __name__ == "__main__":
     config = ConfigInit()
     p_data = config.get_project_data(project_index)
     if not p_data:
-        config.mb.critical("ERRO Ao pegar informacoes do projeto!")
-        sys.exit(app.exec_())
+        config.mb.critical("ERRO Ao pegar informações do projeto!")
+        sys.exit("ERROR getting project data")
 
-    plugin_data = config.get_plugin_data(curr_dir)
+    plugin_data = config.get_plugin_data(Path(curr_dir))
     appWindow = Uploader(config, p_data, plugin_data)
 
     appWindow.show()
