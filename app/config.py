@@ -174,7 +174,7 @@ class ConfigInit(object):
         pdata["paths"]["root"] = create_data["04_server_root"]
         #atualiza o project json
         write_json_file(new_json.path, pdata)
-        pdata["config_folder"] = config_path
+        pdata["config_folder"] = config_path.path
         pdata["proj_json"] = new_json.path
         # aciciona projeto criado a lista de projetos
         self.projects.append(pdata)
