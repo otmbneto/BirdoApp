@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from tqdm import tqdm
 from utils.birdo_timeout import timeout
@@ -256,7 +257,8 @@ class FolderManager(object):
         scene = self.get_scene_path(root, scene_name, step)
         for item in self.steps[step][root]:
             f = scene / item
-            f.make_dirs()
+            if not f.exists():
+                f.make_dirs()
         return scene
 
     def get_publish_file(self, scene_name, step):
