@@ -3,7 +3,7 @@
     "prefix": "NON",
     "name": "NoNoNoNoNo",
     "sub_name": "NoNoNoNoNo",
-    "icon": "NoNoNo",
+    "icon": "icon.png",
 	"render_farm": false,
     "roles": [
         "RIG",
