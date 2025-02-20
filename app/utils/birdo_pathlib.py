@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 from tqdm import tqdm
@@ -178,7 +179,7 @@ class Path:
         if not self.exists():
             raise Exception("Not a existing path to delete!")
         if self.is_dir():
-            return shutil.rmtree(self.path)
+            return shutil.rmtree(self.path, ignore_errors=True)
         else:
             return os.remove(self.path)
 

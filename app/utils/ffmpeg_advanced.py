@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Classe com metodos avancados para processar acoes do ffmpeg
     usando tqdm progress e salvando logs das acoes no temp
