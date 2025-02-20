@@ -9,7 +9,6 @@ import sys
 import argparse
 from PySide import QtGui, QtCore, QtUiTools
 from threading import Thread
-import shutil
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
@@ -188,39 +187,18 @@ class OpenScene(QtGui.QWidget):
         """returns object with local scene information"""
         current_step = self.ui.comboStep.currentText()
         scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK" / scene_name
+        xsxtage = self.project_data.harmony.get_xstage_last_version(scene_local_path.path)
         local_scene_data = {
-            "path": scene_local_path.path,
-            "xstage": self.project_data.harmony.get_xstage_last_version(scene_local_path)
+            "path": scene_local_path,
+            "xstage": xsxtage if not bool(xsxtage) else Path(xsxtage)
         }
         return local_scene_data
-
-    def check_local_version(self, server_file_saved_time):
-        """checks if local version is more recent than the last version in server"""
-        local_file = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]
-        if not local_file["xstage"]:
-            print 'No local file was found!'
-            self.ui.checkBox_open_local.setEnabled(False)
-            self.ui.checkBox_open_local.setChecked(False)
-            return "server"
-        else:
-            local_file_mod_time = os.path.getmtime(local_file["xstage"])
-            time_difference = (local_file_mod_time - server_file_saved_time) * 1000
-            if time_difference > 60:
-                print 'Local file has been modified after last published version on server!'
-                self.ui.checkBox_open_local.setEnabled(True)
-                self.ui.checkBox_open_local.setChecked(True)
-                return "local"
-            else:
-                print 'There is a local file that is older than the newer version on the server!'
-                self.ui.checkBox_open_local.setEnabled(True)
-                self.ui.checkBox_open_local.setChecked(False)
-                return "server"
 
     def list_scene_versions(self, scene_name):
         """updates shot_versions data with scene versions"""
         versions_data = {
             "scene_exists": False,
-            "most_recent": "",
+            "most_recent": "-",
             "ANIMATIC": {"is_used": True, "versions": {}}
         }
         # SET PROGRESSBAR
@@ -232,7 +210,6 @@ class OpenScene(QtGui.QWidget):
             self.ui.progress_bar.setFormat("searching versions {0}".format(step))
 
             scene_publish_path = self.project_data.paths.get_scene_path("server", scene_name, step) / "PUBLISH"
-
             print "[BIRDOAPP] SCENE PUBLISH PATH: {0}".format(scene_publish_path)
             versions_data[step] = {
                 "is_used": False,
@@ -241,7 +218,6 @@ class OpenScene(QtGui.QWidget):
             }
 
             zips = scene_publish_path.glob("*.zip$")
-
             if len(zips) == 0:
                 print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
                 index += 1
@@ -302,16 +278,13 @@ class OpenScene(QtGui.QWidget):
         self.ui.listScenes.clear()
         self.ui.listVersions.clear()
         self.ui.checkBox_open_local.setEnabled(False)
-        path = self.project_data.paths.get_scenes_path("server", item.text(),
-                                                       self.ui.comboStep.currentText()).normpath()
-        self.ui.explorer_path.setText(path)
+        open_path = self.project_data.paths.get_scenes_path("server", item.text(), self.ui.comboStep.currentText())
+        self.ui.explorer_path.setText(open_path.path)
 
         shot_list = self.episodes_data[item.text()].keys()
         shot_list.sort()
-        row = 0
-        for shot in shot_list:
-            self.ui.listScenes.insertItem(row, shot)
-            row += 1
+        for i, shot in enumerate(shot_list):
+            self.ui.listScenes.insertItem(i, shot)
 
     def open_harmony_file(self, scene_name, xstage_file):
         """This function open the harmony file in a subprocess and adds the process to the open list object"""
@@ -343,94 +316,66 @@ class OpenScene(QtGui.QWidget):
         """callback function when select scene"""
         self.ui.listVersions.clear()
         self.ui.open_button.setEnabled(False)
-        shot_name = item.text()
+        scene_name = item.text()
         current_step = self.ui.comboStep.currentText()
 
-        path = self.project_data.paths.get_scene_path("server", shot_name, self.ui.comboStep.currentText()).normpath()
-        self.ui.explorer_path.setText(path)
-        self.check_if_scene_is_opened(shot_name)
+        scene_server_path = self.project_data.paths.get_scene_path("server", scene_name, current_step)
+        self.ui.explorer_path.setText(scene_server_path.path)
+        self.check_if_scene_is_opened(scene_name)
 
         # UPDATES MAIN KEY VERSION OBJECT VALUE WITH CURRENT SCENE SELECTED
-        self.shot_versions = self.list_scene_versions(shot_name)
+        self.shot_versions = self.list_scene_versions(scene_name)
 
-        # UPDATES THE VERSION DICT WITH THE MOV ANIMATIC
-        if current_step == "ANIM":
-            self.shot_versions["ANIMATIC"]["versions"]["SETUP_NOT_FOUND!"] = None
+        # current scene selected data
+        scene_data = self.shot_versions[current_step]
 
-        # CREATE NEW LIST OF STEPS INCLUDING THE ANIMATIC
-        new_step_list = self.steps + ["ANIMATIC"]
-
-        # IF STEP IS ANIM, CHECK IN ANIM FOLDER, IF DONT FIND FILES, LOOK IN SETUP AND SO ON...
-        i = new_step_list.index(current_step)
-        while i < len(new_step_list):
-
-            print "creating step {0} data...".format(new_step_list[i])
-            # IF THE STEP IS USED
-            if self.shot_versions[new_step_list[i]]["is_used"]:
-                version_list = self.shot_versions[new_step_list[i]]['versions'].keys()
-                version_list.sort()
-                row = 0
-
-                print("VERSIONS: " + str(version_list))
-                for version in version_list:
-                    self.ui.listVersions.insertItem(row, version)
-                    row += 1
-
-                if new_step_list[i] != "ANIMATIC":
-                    # IF ITS NOT ANIMATIC
-                    last_version_obj = self.shot_versions[new_step_list[i]]['versions'][version_list[-1]]
-                    saved_last_version_time = timestamp_from_isodatestr(
-                        last_version_obj.get_last_modified().isoformat())
-                    self.shot_versions["most_recent"] = self.check_local_version(saved_last_version_time)
-                    version = re.findall(r'v\d+', last_version_obj.name)[0]
-                else:
-                    version = 'v00'
-                    self.shot_versions["most_recent"] = 'server'
-
-                    # IF IT HAS A LOCAL VERSION, CHECKS THE OPEN LOCAL VERSION
-                    if self.shot_versions["SETUP"]["local_path"]["xstage"]:
-                        print "cant find a version for this scene at the server, but found at local path"
-                        self.ui.checkBox_open_local.setEnabled(True)
-                        self.ui.checkBox_open_local.setChecked(True)
-                    else:
-                        self.ui.checkBox_open_local.setEnabled(False)
-                        self.ui.checkBox_open_local.setChecked(False)
-
-                self.ui.label_info.setText('version: {0}\nstep: {1}\nfile: {2}'.format(version, new_step_list[i],
-                                                                                       self.shot_versions[
-                                                                                           "most_recent"]))
-                # MARK STEP THAT CONTAINS THE RIGHT VERSION TO OPEN WITH THIS KEY
-                self.shot_versions["step_to_open"] = new_step_list[i]
-                break
-            i += 1
+        # Procura um step abaixo caso nao existe cena no step atual
+        if not scene_data["is_used"]:
+            for item in self.steps:
+                if self.shot_versions[item]["is_used"]:
+                    scene_data = self.shot_versions[item]
+                    current_step = item
 
         # IF IT DONT HAVE ANY VERSION CREATED
-        if not self.shot_versions["scene_exists"]:
+        if not self.shot_versions["scene_exists"] or not scene_data["is_used"]:
             self.ui.checkBox_all_versions.setEnabled(False)
+            self.ui.listVersions.insertItem(0, "- SEM SETUP -")
+            return
 
+        version_list = scene_data['versions'].keys()
+        # update list version with scene data
+        for i, version in enumerate(version_list):
+            print "Scene version found: {0}".format(version)
+            self.ui.listVersions.insertItem(i, version)
+
+        if len(version_list) > 0 and bool(scene_data["local_path"]["xstage"]):
+            server_lm = scene_data['versions'][version_list[-1]].get_last_modified()
+            local_lm = scene_data["local_path"]["xstage"].get_last_modified()
+            self.shot_versions["most_recent"] = "server" if server_lm > local_lm else "local"
+        version = 'v00' if len(version_list) == 0 else re.findall(r'v\d+', version_list[-1])[0]
+
+        self.ui.checkBox_open_local.setEnabled(bool(scene_data["local_path"]["xstage"]))
+        self.ui.checkBox_open_local.setChecked(self.shot_versions["most_recent"] == "local")
+
+        self.ui.label_info.setText('version: {0}\nstep: {1}\nfile: {2}'.format(version, current_step, self.shot_versions["most_recent"]))
+        # MARK STEP THAT CONTAINS THE RIGHT VERSION TO OPEN WITH THIS KEY
+        self.shot_versions["step_to_open"] = current_step
         self.on_check_all_versions()
 
     def on_select_version(self, item):
         selected_version = item.text()
-
-        path = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"]
-
-        print "[BIRDOAPP] >> full path: " + path
-        self.ui.explorer_path.setText(path)
-
-        if selected_version == "SETUP_NOT_FOUND" or selected_version == "SCENE_IS_OPEN":
+        if selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA":
             # IF VERSION IS NOT AVAILABLE
             print "[BIRDOAPP] versão não encontrada da cena..."
             self.ui.open_button.setEnabled(False)
             return
 
+        local_scene = self.shot_versions[self.ui.comboStep.currentText()]["local_path"]["path"]
+        print "[BIRDOAPP] >> scene full path: " + local_scene.path
+        self.ui.explorer_path.setText(local_scene.path)
         step_open = self.shot_versions["step_to_open"]
         scene_obj = self.shot_versions[step_open]["versions"][selected_version]
-
-        if scene_obj:
-            self.ui.open_button.setEnabled(True)
-        else:
-            self.ui.open_button.setEnabled(False)
+        self.ui.open_button.setEnabled(bool(scene_obj))
         print "selected version: {0}\n - path: {1}".format(selected_version, scene_obj.path)
 
     def on_check_all_versions(self):
@@ -490,13 +435,20 @@ class OpenScene(QtGui.QWidget):
         self.ui.progress_bar.setFormat("checking local file...")
         self.ui.progress_bar.setValue(1)
 
+        # IF NO SETUP FOUND
+        selected_version = self.ui.listVersions.currentItem().text()
+        if selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA" or not selected_version:
+            print "Error selection! Cant find scene setup!!!"
+            return
+
         # GETS THE LOCAL SCENE PATH
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
             if self.shot_versions["most_recent"] == 'server':
                 ask = self.birdoapp.mb.question(
                     "Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(
-                        selected_scene))
+                        selected_scene)
+                )
                 if not ask:
                     return
             else:
@@ -504,8 +456,7 @@ class OpenScene(QtGui.QWidget):
                     "Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
                         selected_scene))
 
-            xstage_file = local_scene["xstage"]
-            if not xstage_file or not os.path.exists(xstage_file):
+            if not local_scene["xstage"] or not local_scene["xstage"].exists():
                 self.ui.progress_bar.setFormat("ERROR! File not found!")
                 self.ui.progress_bar.setValue(3)
                 self.birdoapp.mb.warning("Error! Cant find the local scene to open!")
@@ -517,14 +468,6 @@ class OpenScene(QtGui.QWidget):
                 if not ask:
                     return
 
-            selected_version = self.ui.listVersions.currentItem().text()
-
-            # IF NO SETUP FOUND
-            if selected_version == "SETUP_NOT_FOUND" or not selected_version:
-                # IN CASE THIS OPTION IS SELECTED (SHOULD BE DISABLED!)
-                print "Error selection! Cant find scene setup!!!"
-                return
-
             # FIND RIGHT STEP TO OPEN
             step_open = self.shot_versions["step_to_open"]
             scene_obj = self.shot_versions[step_open]["versions"][selected_version]
@@ -532,88 +475,77 @@ class OpenScene(QtGui.QWidget):
             # DOWNLOAD SCENE FILE...
             self.ui.progress_bar.setFormat("downloading file...")
             self.ui.progress_bar.setValue(2)
-            temp_file = os.path.join(self.temp_open_scene, scene_obj.name)
-            if not os.path.exists(self.temp_open_scene):
-                print "creating temp folder...{0}".format(self.temp_open_scene)
-                os.makedirs(self.temp_open_scene)
-
-            print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file)
-            shutil.copyfile(scene_obj.path, temp_file)
-            if not os.path.exists(temp_file):
+            temp_file = self.temp_open_scene / scene_obj.name
+            print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file.path)
+            scene_obj.copy_file(temp_file)
+            if not temp_file.exists():
                 print "fail to download scene: {0}".format(scene_obj.name)
-                self.birdoapp.mb.warning(
-                    "Falha ao fazer o download da versao escolhida da cena do server! Avise a supervisao tecnica!")
+                self.birdoapp.mb.warning("Falha ao fazer o download da versão da cena do server para o folder temporário!")
                 return
 
             # CHECK IF NEED BACKUP
             self.ui.progress_bar.setFormat("checking backup...")
             self.ui.progress_bar.setValue(3)
-            if os.path.exists(local_scene["path"]):
-                print "Ja existe uma versao local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
-                backup_folder = os.path.join(os.path.dirname(local_scene["path"]), "_backup",
-                                             get_current_datetime_string())
-                backup_zip = os.path.join(backup_folder, selected_scene + ".zip")
-                print "--scene backup: {0};\n--zip: {1}".format(backup_folder, backup_zip)
-                os.makedirs(backup_folder)
+            if local_scene["path"].exists():
+                print "[BIRDOAPP] Já existe uma versão local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
+                backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string()
+                backup_zip = backup_folder / selected_scene / ".zip"
+                print "--scene backup: {0};\n--zip: {1}".format(backup_folder.path, backup_zip.path)
+                backup_folder.make_dirs()
 
                 self.ui.progress_bar.setFormat("creating backup...")
                 try:
-                    if compact_folder(local_scene["path"], backup_zip):
-                        shutil.rmtree(local_scene["path"], ignore_errors=True)
+                    if compact_folder(local_scene["path"].path, backup_zip.path):
+                        local_scene["path"].remove()
                     else:
                         print 'fail to create backup scene bakcup from original local file'
-                except:
-                    print "fail to create local scene to backup zip.. canceling open operation!"
-                    self.birdoapp.mb.warning("Falha ao criar bakcup da cena! Verifique se a cena local esta aberta!")
+                except Exception as e:
+                    print e
+                    self.birdoapp.mb.warning("Falha ao criar bakcup da cena! Verifique se a cena local está aberta!")
                     return
             else:
                 if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
                     print "error creating scene folder scheeme!"
-                    self.birdoapp.mb.warning("Erro criando folders locais da cena! Avise a Direcao Tecnica!")
+                    self.birdoapp.mb.warning("Erro criando diretórios locais da cena!")
                     return
 
             # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
             self.ui.progress_bar.setFormat("unpacking scene...")
             self.ui.progress_bar.setValue(4)
-            print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file, local_scene["path"])
-            if not extract_zipfile(temp_file, os.path.dirname(local_scene["path"])):
+            print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
+            if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
                 print "error extracting scene zip!"
-                self.birdoapp.mb.warning("Erro descompactando versao da cena baixada! Avise a direcao tecnica!")
+                self.birdoapp.mb.warning("Erro descompactando versão da cena baixada!")
                 return
-
-            # DELETING TEMP ZIP FILE
-            print "deleting temp file: {0}".format(temp_file)
-            os.remove(temp_file)
-
+            local_scene["xstage"] = self.project_data.harmony.get_xstage_last_version(local_scene["path"].path)
             # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
-            if not os.path.exists(local_scene["path"]):
+            if not local_scene["path"].exists():
                 print "error! Cant find unpacked version scene folder!"
-                self.birdoapp.mb.warning(
-                    "Erro! Nao foi possivel encontrar o folder da cena descompactada! Avise a Direcao Tecnica!")
+                self.birdoapp.mb.warning("Erro! Não foi possível encontrar o folder da cena descompactada!")
                 return
 
             # OPEN SCENE DOWNLOADED
             self.ui.progress_bar.setFormat("opening scene...")
             self.ui.progress_bar.setValue(5)
-            xstage_file = self.project_data.harmony.get_xstage_last_version(local_scene["path"])
-            if not xstage_file:
-                self.birdoapp.mb.warning("Erro! Arquivo xstage da versao baixada nao encontrado!")
-                print "fail to find xstage file to scene: {0}".format(local_scene['path'])
+            if not local_scene["xstage"]:
+                self.birdoapp.mb.warning("Erro! Arquivo xstage da versão baixada não encontrado!")
+                print "fail to find xstage file to scene: {0}".format(local_scene['path'].path)
                 return
 
-        sceneOpenedScript = os.path.join(self.birdoapp.root, "harmony", "birdoPack", "_scene_scripts",
-                                         "TB_sceneOpened.js")
-        sceneScriptPath = os.path.join(local_scene["path"], "scripts")
-        if not os.path.exists(sceneScriptPath):
-            os.makedirs(sceneScriptPath)
-        print("copying {0} to script folder".format("TB_sceneOpened.js"))
-        shutil.copyfile(sceneOpenedScript, os.path.join(sceneScriptPath, os.path.basename(sceneOpenedScript)))
+        scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+        scene_script_path = local_scene["path"] / "scripts"
+        if not scene_script_path.exists():
+            scene_script_path.make_dirs()
+        print("copying {0} to script folder".format(scene_opened_script.name))
+        if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
+            print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
+            self.birdoapp.mb.warning("Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcinoar.")
+            return
 
         print "running update setup script..."
-        self.project_data.harmony.compile_script(self.update_setup_script, xstage_file)
-        print "opening scene: {0}".format(xstage_file)
-        self.open_harmony_file(selected_scene, xstage_file)
-        print "scene opened: {0}".format(xstage_file)
+        self.project_data.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
+        print "opening scene: {0}".format(local_scene["xstage"])
+        self.project_data.harmony.open_harmony_scene(local_scene["xstage"])
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
@@ -623,7 +555,7 @@ class OpenScene(QtGui.QWidget):
         self.ui.listVersions.setEnabled(False)
         self.ui.open_button.setEnabled(False)
         self.ui.listVersions.clear()
-        self.ui.listVersions.insertItem(0, "SCENE_IS_OPEN")
+        self.ui.listVersions.insertItem(0, "CENA ABERTA")
         self.ui.progress_bar.setFormat("")
         self.ui.progress_bar.setValue(0)
 
