@@ -130,7 +130,7 @@ class ToonBoomHarmony(object):
             print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
             return False
         cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable,
-                                                         os.path.normpath(harmony_file),
+                                                         harmony_file.normpath(),
                                                          script.replace("/", "\\\\"))
         return subprocess.call(shlex.split(cmd)) == 0
 
@@ -158,7 +158,7 @@ class ToonBoomHarmony(object):
             caminho do xstage da cena de harmony
         RETURN : object
         """
-        return subprocess.Popen([self.executable, os.path.normpath(xstage_file)])
+        return subprocess.Popen([self.executable, xstage_file.normpath()])
 
 
 def get_available_harmony_installations():

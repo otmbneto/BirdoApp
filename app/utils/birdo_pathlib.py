@@ -27,6 +27,10 @@ class Path:
     def normpath(self):
         return os.path.normpath(self.path)
 
+    def endswith(self,suffix):
+
+        return self.path.endswith(suffix)
+
     def is_dir(self):
         """retorna boolean se o caminho e um folder"""
         return os.path.isdir(self.path)
