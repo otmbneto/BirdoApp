@@ -435,12 +435,6 @@ class OpenScene(QtGui.QWidget):
         self.ui.progress_bar.setFormat("checking local file...")
         self.ui.progress_bar.setValue(1)
 
-        # IF NO SETUP FOUND
-        selected_version = self.ui.listVersions.currentItem().text()
-        if selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA" or not selected_version:
-            print "Error selection! Cant find scene setup!!!"
-            return
-
         # GETS THE LOCAL SCENE PATH
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
@@ -462,6 +456,13 @@ class OpenScene(QtGui.QWidget):
                 self.birdoapp.mb.warning("Error! Cant find the local scene to open!")
                 return
         else:
+
+            # IF NO SETUP FOUND
+            selected_version = self.ui.listVersions.currentItem().text() if self.ui.listVersions.currentItem() is not None else None 
+            if selected_version is None or selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA":
+                print "Error selection! Cant find scene setup!!!"
+                return
+
             if self.shot_versions["most_recent"] == 'local':
                 ask = self.birdoapp.mb.question(
                     "Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)")
