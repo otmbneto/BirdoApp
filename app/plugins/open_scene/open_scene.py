@@ -13,6 +13,7 @@ from threading import Thread
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
 from app.config import ConfigInit
+from app.utils.MessageBox import CreateMessageBox
 from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_string
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.birdo_pathlib import Path
@@ -25,6 +26,10 @@ class CustomSignal(QtCore.QObject):
     progress_made = QtCore.Signal(object)
     progress_format = QtCore.Signal(object)
     progress_range_set = QtCore.Signal(object)
+    sendWarningMessage = QtCore.Signal(object)
+    sendInformationMessage = QtCore.Signal(object)
+    sendQuestionMessage = QtCore.Signal(object)
+    sendResponseMessage = QtCore.Signal(object)
 
 
 class OpenScene(QtGui.QWidget):
@@ -37,13 +42,14 @@ class OpenScene(QtGui.QWidget):
         self.birdoapp = config_birdoapp
         self.project_data = project_data
         self.episodes_data = {}
+        self.wait = False
+        self.response = False
 
         # setup ui
         self.ui = self.load_page((plugin_data["root"] / plugin_data["ui_file"]).path)
         self.ui.resize(800, 600)
         self.ui.setWindowIcon(QtGui.QIcon((plugin_data["root"] / plugin_data["icon"]).path))
         self.ui.setWindowTitle("BirdoApp - Open Scene")
-
         # set project logo
         self.ui.logoProj.setPixmap(QtGui.QPixmap(os.path.join(self.project_data.config_folder, self.project_data.icon)))
 
@@ -89,7 +95,7 @@ class OpenScene(QtGui.QWidget):
     def setup_connections(self):
         # WIDGET CONNECTIONS
         self.ui.cancel_button.clicked.connect(self.on_close)
-        self.ui.open_button.clicked.connect(self.on_open_scene)
+        self.ui.open_button.clicked.connect(self.execute)
         self.ui.listEpisodes.itemClicked.connect(self.on_select_ep)
         self.ui.listScenes.itemClicked.connect(self.on_select_scene)
         self.ui.listVersions.itemClicked.connect(self.on_select_version)
@@ -105,6 +111,11 @@ class OpenScene(QtGui.QWidget):
         self.signals.progress_format.connect(self.format_progress)
         self.signals.progress_reseted.connect(self.reset_progress)
         self.signals.progress_range_set.connect(self.set_progress_range)
+        self.signals.sendWarningMessage.connect(self.warnUser)
+        self.signals.sendInformationMessage.connect(self.informUser)
+        self.signals.sendQuestionMessage.connect(self.askUser)
+        self.signals.sendResponseMessage.connect(self.checkResponse)
+
 
     def update_server_status(self):
         self.project_data.paths.check_connection()
@@ -156,6 +167,7 @@ class OpenScene(QtGui.QWidget):
 
     def get_progress(self):
         return self.ui.progress_bar.value()
+
 
     def get_episode_data(self, episode):
         episode_data = None
@@ -240,13 +252,13 @@ class OpenScene(QtGui.QWidget):
         episode = args[0]
         row = self.ui.listEpisodes.count()
         self.ui.listEpisodes.insertItem(row, episode.keys()[0])
-        print("EPISODE: " + str(episode))
         self.episodes_data.update(episode)
 
     @QtCore.Slot(object)
     def increment_progress(self, args):
         value = self.get_progress()
-        self.ui.progress_bar.setValue(value + 1)
+        increment = args[0] if len(args) > 0 else 1
+        self.ui.progress_bar.setValue(value + increment)
 
     @QtCore.Slot(object)
     def format_progress(self, args):
@@ -262,6 +274,29 @@ class OpenScene(QtGui.QWidget):
     def set_progress_range(self, args):
         self.ui.progress_bar.setRange(args[0], args[-1])
         return
+
+    @QtCore.Slot(object)
+    def warnUser(self,args):
+
+        self.birdoapp.mb.warning(args[0])
+
+    @QtCore.Slot(object)
+    def askUser(self,args):
+
+        answer = self.birdoapp.mb.question(args[0])
+        self.signals.sendResponseMessage.emit([answer])
+
+
+    @QtCore.Slot(object)
+    def checkResponse(self,args):
+
+        self.response = args[0]
+        self.wait = False
+
+    @QtCore.Slot(object)
+    def informUser(self,args):
+
+        self.birdoapp.mb.information(args[0])
 
     def list_episodes(self):
         """add episodes to ep listWidget"""
@@ -425,35 +460,50 @@ class OpenScene(QtGui.QWidget):
             self.ui.explorer_path.setText(path)
         print "reset widgets with version shot info..."
 
+    def execute(self):
+
+        execute_thread = Thread(target=self.on_open_scene)
+        execute_thread.start()
+
     def on_open_scene(self):
+
         print('*******************--OPEN FILE--********************')
         current_step = self.ui.comboStep.currentText()
         selected_scene = self.ui.listScenes.currentItem().text()
 
         # SETS LOADING PROGRESS BAR
-        self.ui.progress_bar.setRange(0, 6)
-        self.ui.progress_bar.setFormat("checking local file...")
-        self.ui.progress_bar.setValue(1)
+        #self.ui.progress_bar.setRange(0, 6)
+        self.signals.progress_range_set.emit([0, 6])
+        #self.ui.progress_bar.setFormat("checking local file...")
+        self.signals.progress_format.emit(["checking local file..."])
+        #self.ui.progress_bar.setValue(1)
+        self.signals.progress_made.emit([])
 
         # GETS THE LOCAL SCENE PATH
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
             if self.shot_versions["most_recent"] == 'server':
-                ask = self.birdoapp.mb.question(
-                    "Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(
-                        selected_scene)
-                )
+                self.signals.sendQuestionMessage.emit([
+                    "[question]Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(selected_scene)])
+                self.wait = True
+                while(self.wait):
+                    continue
+                ask = self.response
+                self.response = None
                 if not ask:
                     return
             else:
-                self.birdoapp.mb.information(
-                    "Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
-                        selected_scene))
+                self.signals.sendInformationMessage.emit(["[info]Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
+                        selected_scene)])
 
             if not local_scene["xstage"] or not local_scene["xstage"].exists():
-                self.ui.progress_bar.setFormat("ERROR! File not found!")
-                self.ui.progress_bar.setValue(3)
-                self.birdoapp.mb.warning("Error! Cant find the local scene to open!")
+                #self.ui.progress_bar.setFormat("ERROR! File not found!")
+                self.signals.progress_format.emit(["ERROR! File not found!"])
+                #self.ui.progress_bar.setValue(3)
+                self.signals.progress_made.emit([])
+                self.signals.progress_made.emit([])
+                #self.signals.progress_made.emit([])
+                self.signals.sendWarningMessage.emit(["Error! Cant find the local scene to open!"])
                 return
         else:
 
@@ -464,72 +514,87 @@ class OpenScene(QtGui.QWidget):
                 return
 
             if self.shot_versions["most_recent"] == 'local':
-                ask = self.birdoapp.mb.question(
-                    "Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)")
+                self.signals.sendQuestionMessage.emit([
+                    "Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)"])
+                self.wait = True
+                while(self.wait):
+                    continue
+                ask = self.response
+                self.response = None
                 if not ask:
                     return
-
             # FIND RIGHT STEP TO OPEN
             step_open = self.shot_versions["step_to_open"]
             scene_obj = self.shot_versions[step_open]["versions"][selected_version]
-
             # DOWNLOAD SCENE FILE...
-            self.ui.progress_bar.setFormat("downloading file...")
-            self.ui.progress_bar.setValue(2)
+            #self.ui.progress_bar.setFormat("downloading file...")
+            #self.ui.progress_bar.setValue(2)
+            self.signals.progress_format.emit(["downloading file..."])
+            self.signals.progress_made.emit([])
+            #self.signals.progress_made.emit([])
             temp_file = self.temp_open_scene / scene_obj.name
             print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file.path)
             scene_obj.copy_file(temp_file)
             if not temp_file.exists():
                 print "fail to download scene: {0}".format(scene_obj.name)
-                self.birdoapp.mb.warning("Falha ao fazer o download da versão da cena do server para o folder temporário!")
+                self.signals.sendWarningMessage.emit(["Falha ao fazer o download da versão da cena do server para o folder temporário!"])
                 return
 
             # CHECK IF NEED BACKUP
-            self.ui.progress_bar.setFormat("checking backup...")
-            self.ui.progress_bar.setValue(3)
+            #self.ui.progress_bar.setFormat("checking backup...")
+            #self.ui.progress_bar.setValue(3)
+            self.signals.progress_format.emit(["checking backup..."])           
+            self.signals.progress_made.emit([])
+            #self.signals.progress_made.emit([])
+            #self.signals.progress_made.emit([])
             if local_scene["path"].exists():
                 print "[BIRDOAPP] Já existe uma versão local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
-                backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string()
-                backup_zip = backup_folder / selected_scene / ".zip"
+                backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string() / selected_scene
+                backup_zip = backup_folder / "backup.zip"
                 print "--scene backup: {0};\n--zip: {1}".format(backup_folder.path, backup_zip.path)
                 backup_folder.make_dirs()
 
-                self.ui.progress_bar.setFormat("creating backup...")
                 try:
+                    print(local_scene["path"].path)
+                    print(backup_zip.path)
                     if compact_folder(local_scene["path"].path, backup_zip.path):
                         local_scene["path"].remove()
                     else:
                         print 'fail to create backup scene bakcup from original local file'
                 except Exception as e:
                     print e
-                    self.birdoapp.mb.warning("Falha ao criar bakcup da cena! Verifique se a cena local está aberta!")
+                    self.signals.sendWarningMessage.emit(["Falha ao criar bakcup da cena! Verifique se a cena local está aberta!"])
                     return
             else:
                 if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
                     print "error creating scene folder scheeme!"
-                    self.birdoapp.mb.warning("Erro criando diretórios locais da cena!")
+                    self.signals.sendWarningMessage.emit(["Erro criando diretórios locais da cena!"])
                     return
 
             # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
-            self.ui.progress_bar.setFormat("unpacking scene...")
-            self.ui.progress_bar.setValue(4)
+            #self.ui.progress_bar.setFormat("unpacking scene...")
+            #self.ui.progress_bar.setValue(4)
+            self.signals.progress_format.emit(["unpacking scene..."]) 
+            self.signals.progress_made.emit([])
             print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
             if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
                 print "error extracting scene zip!"
-                self.birdoapp.mb.warning("Erro descompactando versão da cena baixada!")
+                self.signals.sendWarningMessage.emit(["Erro descompactando versão da cena baixada!"])
                 return
-            local_scene["xstage"] = self.project_data.harmony.get_xstage_last_version(local_scene["path"].path)
+            local_scene["xstage"] = Path(self.project_data.harmony.get_xstage_last_version(local_scene["path"].path))
             # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
             if not local_scene["path"].exists():
                 print "error! Cant find unpacked version scene folder!"
-                self.birdoapp.mb.warning("Erro! Não foi possível encontrar o folder da cena descompactada!")
+                self.signals.sendWarningMessage.emit(["Erro! Não foi possível encontrar o folder da cena descompactada!"])
                 return
 
             # OPEN SCENE DOWNLOADED
-            self.ui.progress_bar.setFormat("opening scene...")
-            self.ui.progress_bar.setValue(5)
+            #self.ui.progress_bar.setFormat("opening scene...")
+            #self.ui.progress_bar.setValue(5)
+            self.signals.progress_format.emit(["opening scene..."])
+            self.signals.progress_made.emit([]) 
             if not local_scene["xstage"]:
-                self.birdoapp.mb.warning("Erro! Arquivo xstage da versão baixada não encontrado!")
+                self.signals.sendWarningMessage.emit(["Erro! Arquivo xstage da versão baixada não encontrado!"])
                 print "fail to find xstage file to scene: {0}".format(local_scene['path'].path)
                 return
 
@@ -540,7 +605,7 @@ class OpenScene(QtGui.QWidget):
         print("copying {0} to script folder".format(scene_opened_script.name))
         if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
             print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
-            self.birdoapp.mb.warning("Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcinoar.")
+            self.signals.sendWarningMessage.emit(["Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcionar."])
             return
 
         print "running update setup script..."
