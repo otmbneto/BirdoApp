@@ -285,8 +285,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             os.remove(compressed)
         else:
-            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,
-                                                                self.stepBox.currentText()).normpath()
+            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
             self.incrementProgress(10)
             temp_dir = os.path.join(temp, scene_name)
             scene_name += "_" + self.getVersion(scene_name, scene_path)
@@ -300,7 +299,7 @@ class uiItem(QtGui.QGroupBox):
             if not os.path.exists(temp_dir):
                 return
             self.incrementProgress(20)
-            xstage = self.uploader.project_data.harmony.get_xstage_last_version(temp_dir)
+            xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(temp_dir)
             compress_script = os.path.join(self.uploader.birdoapp.root, "batch", "BAT_CompactScene.js")
             if (not xstage) or (not os.path.exists(xstage) or not os.path.exists(compress_script)):
                 print("[BIRDOAPP] ERROR: can't compile because files were not found")

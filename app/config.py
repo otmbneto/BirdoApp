@@ -80,6 +80,9 @@ class ConfigInit(object):
                 "user_projects": []
             }
 
+        # define harmony class
+        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"])
+
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
 
@@ -115,6 +118,7 @@ class ConfigInit(object):
 
     def update_config_json(self):
         """Atualiza o config.json"""
+        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"])
         return write_json_file(self.config_json, self.config_data, op_code="wb", encoding="utf-8", ensure_ascii=False)
 
     def get_plugins_folder(self):
@@ -245,9 +249,6 @@ class ConfigInit(object):
 
         # define paths object
         project_data["paths"] = FolderManager(project_data, local_folder)
-
-        # define harmony class
-        project_data["harmony"] = ToonBoomHarmony(self.config_data["harmony_path"])
 
         final_class = CreateProjectClass(project_data)
         final_class.__doc__ = """
