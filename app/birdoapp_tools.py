@@ -264,7 +264,7 @@ class DevTools:
                     counter["errors"] += 1
                     continue
                 import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
-                if not self.project.harmony.compile_script(import_animatic_js.path, self.project.harmony.get_xstage_last_version(temp_scene.path)):
+                if not self.app.harmony.compile_script(import_animatic_js.path, self.app.harmony.get_xstage_last_version(temp_scene.path)):
                     print "ERRO rodando o script compile de animatic no arquivo temp..."
                     counter["errors"] += 1
                     continue
