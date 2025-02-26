@@ -205,7 +205,7 @@ class OpenScene(QtGui.QWidget):
         """returns object with local scene information"""
         current_step = self.ui.comboStep.currentText()
         scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK" / scene_name
-        xsxtage = self.project_data.harmony.get_xstage_last_version(scene_local_path.path)
+        xsxtage = self.birdoapp.harmony.get_xstage_last_version(scene_local_path.path)
         local_scene_data = {
             "path": scene_local_path,
             "xstage": xsxtage if not bool(xsxtage) else Path(xsxtage)
@@ -329,7 +329,7 @@ class OpenScene(QtGui.QWidget):
 
     def open_harmony_file(self, scene_name, xstage_file):
         """This function open the harmony file in a subprocess and adds the process to the open list object"""
-        self.opened_scenes[scene_name] = self.project_data.harmony.open_harmony_scene(xstage_file)
+        self.opened_scenes[scene_name] = self.birdoapp.harmony.open_harmony_scene(xstage_file)
         self.set_scene_opened()
         print self.opened_scenes
 
@@ -585,7 +585,7 @@ class OpenScene(QtGui.QWidget):
                 print "error extracting scene zip!"
                 self.signals.sendWarningMessage.emit(["Erro descompactando versão da cena baixada!"])
                 return
-            local_scene["xstage"] = Path(self.project_data.harmony.get_xstage_last_version(local_scene["path"].path))
+            local_scene["xstage"] = Path(self.birdoapp.harmony.get_xstage_last_version(local_scene["path"].path))
             # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
             if not local_scene["path"].exists():
                 print "error! Cant find unpacked version scene folder!"
@@ -613,9 +613,9 @@ class OpenScene(QtGui.QWidget):
             return
 
         print "running update setup script..."
-        self.project_data.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
+        self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
         print "opening scene: {0}".format(local_scene["xstage"])
-        self.project_data.harmony.open_harmony_scene(local_scene["xstage"])
+        self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
 
         if len(self.recently_open) >= 10:
             self.recently_open = self.recently_open[1:]
