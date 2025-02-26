@@ -644,7 +644,7 @@ QProgressBar::chunk{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -1066,6 +1066,55 @@ QPushButton:pressed {
            <item>
             <widget class="QWidget" name="widget" native="true">
              <layout class="QGridLayout" name="gridLayout_4">
+              <item row="6" column="0" colspan="3">
+               <widget class="QLabel" name="label_3">
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <property name="text">
+                 <string>Escolha aqui o caminho LOCAL do projeto no seu computador, e sua função no projeto (que deve ser indicada pelo Estúdio).</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+                <property name="margin">
+                 <number>5</number>
+                </property>
+                <property name="indent">
+                 <number>5</number>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QLabel" name="funcao_label">
+                <property name="text">
+                 <string>Funcao no Projeto:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="3">
+               <widget class="QLabel" name="label_4">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Project Info:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="local_folder_label">
+                <property name="text">
+                 <string>Local Folder:</string>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="2">
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
@@ -1134,14 +1183,14 @@ QPushButton:pressed {
                 </item>
                </layout>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="local_folder_label">
-                <property name="text">
-                 <string>Local Folder:</string>
+              <item row="4" column="2">
+               <widget class="QComboBox" name="combo_funcao">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Escolha a sua funcao no projeto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
-              <item row="6" column="0" colspan="3">
+              <item row="7" column="0" colspan="3">
                <spacer name="verticalSpacer_4">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -1153,55 +1202,6 @@ QPushButton:pressed {
                  </size>
                 </property>
                </spacer>
-              </item>
-              <item row="4" column="2">
-               <widget class="QComboBox" name="combo_funcao">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Escolha a sua funcao no projeto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" colspan="3">
-               <widget class="QLabel" name="label_4">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Project Info:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0" colspan="2">
-               <widget class="QLabel" name="funcao_label">
-                <property name="text">
-                 <string>Funcao no Projeto:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0" colspan="3">
-               <widget class="QLabel" name="label_3">
-                <property name="frameShape">
-                 <enum>QFrame::Box</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
-                <property name="text">
-                 <string>Escolha aqui o caminho LOCAL do projeto no seu computador, e sua função no projeto (que deve ser indicada pelo Estúdio).</string>
-                </property>
-                <property name="wordWrap">
-                 <bool>true</bool>
-                </property>
-                <property name="margin">
-                 <number>5</number>
-                </property>
-                <property name="indent">
-                 <number>5</number>
-                </property>
-               </widget>
               </item>
              </layout>
             </widget>
@@ -1248,6 +1248,118 @@ QToolButton:pressed {
              <number>5</number>
             </property>
            </layout>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="standalonePage">
+          <widget class="QWidget" name="widget_2" native="true">
+           <property name="geometry">
+            <rect>
+             <x>9</x>
+             <y>19</y>
+             <width>401</width>
+             <height>451</height>
+            </rect>
+           </property>
+           <widget class="QGroupBox" name="recentGrp">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>300</y>
+              <width>391</width>
+              <height>141</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Abertos recentemente</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="createAssetBtn">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>20</y>
+              <width>180</width>
+              <height>200</height>
+             </rect>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>180</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Create asset</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="createSceneBtn">
+            <property name="geometry">
+             <rect>
+              <x>210</x>
+              <y>20</y>
+              <width>180</width>
+              <height>200</height>
+             </rect>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>180</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Create scene</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="standaloneFolderPath">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>230</y>
+              <width>331</width>
+              <height>22</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="standaloneExplorerBtn">
+            <property name="geometry">
+             <rect>
+              <x>340</x>
+              <y>230</y>
+              <width>51</width>
+              <height>28</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="standaloneOpenBtn">
+            <property name="geometry">
+             <rect>
+              <x>90</x>
+              <y>260</y>
+              <width>93</width>
+              <height>28</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Abrir</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="standaloneCancelBtn">
+            <property name="geometry">
+             <rect>
+              <x>210</x>
+              <y>260</y>
+              <width>93</width>
+              <height>28</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Cancelar</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </widget>

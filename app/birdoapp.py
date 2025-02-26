@@ -13,11 +13,12 @@ from time import sleep
 class BirdoApp(QtGui.QMainWindow):
     """Main BirdoApp interface"""
 
-    def __init__(self):
+    def __init__(self,standalone = False):
         super(BirdoApp, self).__init__()
         # config init object wth app main features
         self.birdoapp = ConfigInit()
 
+        self.standalone = standalone
         # load gui file
         self.ui = self.load_ui(self.birdoapp.gui_file)
 
@@ -33,6 +34,9 @@ class BirdoApp(QtGui.QMainWindow):
         # Empty plugin value to start
         self.plugins = None
 
+        #file_menu = QtGui.QMenu("Recentes", self)
+        #self.ui.menu.addMenu(file_menu)
+
         # SETS ICONS
         logo = QtGui.QIcon(self.birdoapp.icons["logo"])
         self.setWindowIcon(logo)
@@ -45,12 +49,41 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE APP VERSION
         self.ui.label_version.setText(self.birdoapp.data["release"])
 
+        # Create the QListWidget and add items to it
+        self.recent_list = QtGui.QListWidget()
+
         # setup connections
         self.setup_connections()
 
         # useful colors
         self.red_color = "color: rgb(255, 100, 74);"
         self.green_color = ""
+        self.recently_open = []
+        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        if self.recently_open_log.exists():
+            with open(self.recently_open_log.normpath(),"r") as rec_open_log:
+                self.recently_open = list(set([line.replace("\n","") for line in rec_open_log.readlines()]))
+
+        recent_layout = QtGui.QVBoxLayout()
+        self.ui.recentGrp.setLayout(recent_layout)
+        recent_layout.addWidget(self.recent_list)
+
+        for rec in self.recently_open:
+            #new_action = QtGui.QAction(os.path.basename(rec),self)
+            #new_action.triggered.connect(lambda: self.birdoapp.harmony.open_harmony_scene(Path(rec)))
+            #file_menu.addAction(new_action)
+            self.recent_list.addItem(rec)
+
+
+    def onOpenFileStandalone(self):
+
+        f = self.ui.standaloneFolderPath.text()
+        if len(f) > 0  and os.path.exists(f):
+            self.birdoapp.harmony.open_harmony_scene(Path(f))
+        else:
+            print("ERROR: File not selected")
+
+        return
 
     def load_ui(self, ui_file):
         """carreag o arquivo ui na classe"""
@@ -71,12 +104,26 @@ class BirdoApp(QtGui.QMainWindow):
         # HOME BUTTON
         self.ui.home_button.clicked.connect(self.go_home)
 
+        self.ui.standaloneOpenBtn.clicked.connect(self.onOpenFileStandalone)
+        self.ui.standaloneCancelBtn.clicked.connect(self.close)
+
         # CONFIG APP WIDGETS
         self.ui.harmony_folder_button.clicked.connect(lambda: self.get_folder(self.ui.harmony_folder_line))
         self.ui.open_folder_server.clicked.connect(lambda: self.get_folder(self.ui.server_path_label))
 
         # CONFIG PROJECTS WIDGETS
         self.ui.local_folder_button.clicked.connect(lambda: self.get_folder(self.ui.localFolder_line))
+        self.ui.standaloneExplorerBtn.clicked.connect(lambda: self.getXstageFile(self.ui.standaloneFolderPath))
+        self.recent_list.itemDoubleClicked.connect(self.onDoubleClick)
+
+    def onDoubleClick(self):
+
+        print("clicked")
+        selected = self.recent_list.selectedItems()
+        if len(selected) > 0:
+            f = selected[0].text()
+            self.birdoapp.harmony.open_harmony_scene(Path(f))
+        return
 
     def clean_layout(self, layout):
         """remove widgets from layout"""
@@ -136,9 +183,13 @@ class BirdoApp(QtGui.QMainWindow):
         # segura 2 segundos pra dar um chaume... heheh
         sleep(2)
 
+        #print(self.birdoapp.is_ready())
+        #print(self.standalone)
         # Checa se o config do app esta ok
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
+        elif self.standalone:
+            self.ui.stackedWidget.setCurrentIndex(5)
         else:
             self.load_projects_page()
 
@@ -281,6 +332,11 @@ class BirdoApp(QtGui.QMainWindow):
         # do stuff here
         event.accept()
         self.load_splash_page()
+
+    def getXstageFile(self,edit_line):
+        self.get_folder(edit_line)
+        xstage = self.birdoapp.harmony.get_xstage_last_version(edit_line.text())
+        edit_line.setText(xstage)
 
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()
