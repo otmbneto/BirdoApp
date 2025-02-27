@@ -132,6 +132,22 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.standaloneExplorerBtn.clicked.connect(lambda: self.getXstageFile(self.ui.standaloneFolderPath))
         self.recent_list.itemDoubleClicked.connect(self.onDoubleClick)
 
+        self.ui.createSceneBtn.clicked.connect(self.onSceneTemplateOpen)
+        self.ui.createAssetBtn.clicked.connect(self.onAssetTemplateOpen)
+
+
+    def onSceneTemplateOpen(self):
+
+        scene_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'SCENE_template')
+        xstage = self.birdoapp.harmony.get_xstage_last_version(scene_template)
+        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
+        
+    def onAssetTemplateOpen(self):
+
+        asset_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'ASSET_template')
+        xstage = self.birdoapp.harmony.get_xstage_last_version(asset_template)
+        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
+
     def onDoubleClick(self):
 
         selected = self.recent_list.selectedItems()
