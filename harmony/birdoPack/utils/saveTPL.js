@@ -1,12 +1,6 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-/*TODO : mudar o checkRig version para a UI (fazer checar a versao do rig e ja sugerir na Ui e bloquear a troca de versao com reconhecer uma versao de rig existente)
-	
-	[ ] testar pq esta travando na funcao de rename nodes na hora de renomear o grupo do rig de fora (sem ser o full)
-	[ ] tirar as funcoes de MC aqui desses dois scripts e criar um require util so pra MC separado com mais opções.
-	versao do vpn para salvar assets no birdoASSETS (com Master Controllers);
-*/	
 function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 	var assetInfo = assetInfoFromOtherScript;
@@ -24,7 +18,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 	self.ui.progressBar.show();
 	Print("Start...");	
-	var temp_folder = specialFolders.temp + "/BirdoApp/" + projectDATA.server.type + "/BirdoASSET/";
+	var temp_folder = projectDATA.createTempFolder("saveTPL", true);
 	var server_birdoasset_type = projectDATA.getTBLIB("server") + "BirdoASSET/" + assetInfo["typeFullName"] + "/";
 	var asset_main_list = assetInfo["assetsList"];
 
@@ -35,25 +29,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	}
 	
 	var main_assetfolder = server_birdoasset_type + main_folder_name + "/";
-
-	if(BD1_DirExist(temp_folder)){//limpa o temp antes de comecar
-		try {
-			BD1_RemoveDirs(temp_folder);
-			Print("Temp folder removed!");
-		} catch (e) {
-			Print("[SAVETPL][ERROR] Fail to clean temp folder!");
-			MessageBox.warning("[SAVETPL][ERROR] Fail to clean temp folder!",0,0);
-			return false;
-		}
-	}
-	
-	if(!BD1_createDirectoryREDE(temp_folder)){
-		Print("fail to create temp folder : " + temp_folder);
-		MessageBox.warning("Error creating temp folder!");
-		return false;
-	}
-	Print("Temp folder created! : " + temp_folder);
-	
+		
 	self.ui.progressBar.setRange(0, 8);
 	self.ui.progressBar.setValue(0);
 	self.ui.progressBar.format = "...searching rig version";
@@ -95,7 +71,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	// cria esquema de pastas no temporario
 	if(!create_folderSchema(asset_server_folder)){
 		MessageBox.warning("Error creating folder scheeme in server!",0,0);
-		return false;		
+		return false;
 	}
 
 	self.ui.progressBar.format = "...renaming assets...";
@@ -224,7 +200,6 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		
 		return files_list != new_files_att || ui_att_raw != new_att_data;
 	}
-	
 	
 	function getMainASSETFolder(prefixo, assetName, assetsList, assetfolder){//retorna o nome da pasta principal do asset na estrutura do BirdoASSETs
 		if(prefixo == "MI"){
@@ -523,5 +498,334 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		return rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y;
 	}		
 }
-
 exports.saveTPL = saveTPL;
+
+
+function checkMCnodes(nodes){//checa se existem MC nodes no rig e retorna ojbeto com info do mc
+	var mcnodes = nodes.filter(function(element){ return node.type(element) == "MasterController";});
+	var mcObject = {
+		"checkbox": [],
+		"mastercontrollers": [],
+		"extra_scripts": []
+	};
+	if(mcnodes.length > 0){
+		for(var i=0; i<mcnodes.length; i++){
+			var mcnode = mcnodes[i];
+			
+			//add main mc checkbox node
+			if(node.getName(mcnode) == "mc_Function"){
+				mcObject["checkbox"].push(mcnode);
+				continue;
+			}
+			
+			//create mc data object
+			var mcdata = {
+				"node": mcnode,
+				"tbStateFiles": []
+			};
+			var col = node.linkedColumn(mcnode, "FILES");
+			var files_list = column.getEntry(col, 1, 1).split("\n");
+			files_list.forEach(function(f){ 
+				var fname = BD1_fileBasename(f);
+				var fullpath = scene.currentProjectPath() + "/" + f;
+				if(!BD1_FileExists(fullpath)){
+					var msg = "Arquivo de MC nao encontrado na pasta da cena: " + fullpath + "\nEncontre o arquivo ou acerte o MC antes de continuar!";
+					MessageBox.warning(msg, 0,0);
+					Print(msg);
+					return false;
+				}
+				if(BD1_file_extension(f) == "tbState"){
+					mcdata["tbStateFiles"].push(fullpath);
+				}
+				if(BD1_file_extension(f) == "js" && fname.slice(0,3) == "BD_" && mcObject.extra_scripts.indexOf(fullpath) == -1){
+					mcObject["extra_scripts"].push(fullpath);
+				}
+			});
+			mcObject["mastercontrollers"].push(mcdata);
+		}
+		return mcObject;
+	}
+	return false;
+}
+exports.checkMCnodes = checkMCnodes;
+
+
+function getAssetsProjectData(projData){
+	var pythonPath = BD2_FormatPathOS(projData.birdoApp + "venv/Scripts/python");
+	var pyFile = BD2_FormatPathOS(projData.proj_confg_root + "_pipeline/assets_data.py");
+	var tempfolder = projectDATA.createTempFolder("saveTPL", false);
+	
+	var jsonFile = tempfolder + "/info" + new Date().getTime() + ".json";
+	
+	var loadingScreen = BD2_loadingBirdo(projData.birdoApp, 15000, "geting_project_asset_information...");
+	var assetTypeName = projData.getAssetTypeFullName();
+	var project_index = projData.id;
+
+	var commands = [];
+	commands.push(pythonPath);
+	commands.push(pyFile);
+	commands.push(project_index);
+	commands.push(assetTypeName);
+	commands.push(jsonFile);		
+	Print("Chamada Python1: " + commands);
+
+	var ret = Process.execute(commands);
+	if(ret != 0){
+		loadingScreen.terminate();
+		Print("[GETASSETSDATA][ERROR] Fail to run python script!");
+		return false;
+	}
+
+	if(loadingScreen.isAlive()){
+		Print("closing loading screen...");
+		loadingScreen.terminate();
+	}
+	
+	if(BD1_FileExists(jsonFile)){
+		return BD1_ReadJSONFile(jsonFile);
+	} else {
+		Print("Falha ao pegar informacoes dos assets do Projeto!");
+		return false;
+	}
+}
+exports.getAssetsProjectData = getAssetsProjectData;
+
+
+function getSelection(assetType, birdo_data){
+	var nodes_sel = {};
+	var selected_nodes = selection.selectedNodes();
+	var is_anim_library = false;
+	var regex_rig = birdo_data.pattern.asset;
+	var regex_rig_full = new RegExp(birdo_data.prefix + "\.\w+-v\d{2}");
+
+	if(selected_nodes.length == 1){
+		is_anim_library = is_anim_selection(selected_nodes);
+		if(!is_anim_library){
+			MessageBox.warning("Selecao de nodes invalida para banco de ANIM. Selecione o grupo do rig fechado na timeline, com a selecao de frames da animacao a ser salva!",0 ,0);
+			Print("[SAVEASSET][ERROR]Animation selection invalid!");
+			return false;
+		}
+	} else if(selected_nodes.length != 2){
+		MessageBox.warning("A Selecao de nodes na NodeView nao esta correta!\nSelecione apenas o ASSET e sua PEG!\n\n-Se For RIG, lembre de selecionar o BackDrop!\n-Se somente existe o Node Drawing do asset sem PEG,\ncrie uma PEG!\n\nSelecione corretamente e tente de novo!", 0,0);
+		Print("[SAVEASSET][ERROR] Invalid Node selection!");
+		return false; 
+	}
+	
+	var nodeASSET = selected_nodes[0];
+	var nodePEG = is_anim_library ? false : selected_nodes[1];
+	
+	if(!is_anim_library){
+		if(node.srcNode(selection.selectedNode(1), 0) == selection.selectedNode(0)){//troca se ele nao ler certo a selecao [0] e [1]
+			nodeASSET = selection.selectedNode(1);
+			nodePEG = selection.selectedNode(0);
+		}
+	}
+	
+	nodes_sel["peg"] = nodePEG;
+	nodes_sel["asset"] = nodeASSET;
+	
+	//is is animation
+	if(is_anim_library){
+		nodes_sel["rigFull"] = getFullRigGroup(nodeASSET);
+		nodes_sel["rigTypeList"] = ["ANIM"];
+	} else {
+	
+		if(assetType == "CH" && node.type(nodeASSET) == "GROUP"){//se for um CHAR e grupo
+			nodes_sel["rigFull"] = getFullRigGroup(nodeASSET);
+		} else {
+			nodes_sel["rigFull"] = null;				
+		}
+		nodes_sel["rigTypeList"] = nodes_sel["rigFull"] ? ["FULL", "SIMPLE"] : ["SIMPLE"];
+	}
+	
+	nodes_sel["is_animation_lib"] = is_anim_library;
+	nodes_sel["asset_name"] = is_anim_library ? node.getName(nodeASSET).replace(/(-|_)\d$/, "") : projectDATA.entity.name;
+	return nodes_sel;
+
+	////funcao extra///
+	function getFullRigGroup(rigGroup){//acha o grupo do rigfull dentro do grupo externo do rig
+		var subs = node.subNodes(rigGroup).filter(function(x) {return node.isGroup(x)});
+		var regex_peg = /DESLOC|PATH/;
+		if(subs.length == 1 && regex_peg.test(node.getName(node.srcNode(subs[0], 0)))){
+			return subs[0];
+		} else {
+			for(var i=0; i< subs.length; i++){
+				if(regex_rig_full.test(node.getName(subs[i]))){
+					return subs[i];	
+				}
+			}
+		}		
+		return false;
+	}
+	function is_anim_selection(selNodes){//return true if node selection is anim node valid
+		return selection.isSelectionRange() && node.isGroup(selNodes[0]) && regex_rig.test(node.getName(selNodes[0])) && selNodes.length == 1;	
+	}
+}
+exports.getSelection = getSelection;
+
+
+function checkASSET(asset_sel, asset_name, node_list){//funcao para verificar se o ASSET esta pronto para gerar TPL
+	var tipo = node.type(asset_sel.asset);
+	var numFrames = frame.numberOf();
+
+	if(tipo == "READ"){//se for um prop simples (somente um drawing)
+		var colunaD = node.linkedColumn(asset_sel.asset,"DRAWING.ELEMENT");
+		var drawingsIn = column.getDrawingTimings(colunaD);
+		if(drawingsIn.indexOf("Zzero") == -1){
+			MessageBox.information("Falta criar o 'Zzero' para este ASSET!\nUse o Script BD_Zzero!");
+			return false;
+		}
+		if(numFrames  < drawingsIn.length -1){
+			MessageBox.information("Deixe este arquivo da seguinte forma antes de continuar:\n -Todos Drawings Expostos na Timeline (exeto o 'Zzero');\n - Somente os Drawings q serao usados na Library (Use o BD_CleanLibrary para apagar os nao usados);\n -A duracao dos frames acabando junto com os drawings expostos na Timeline;\nOBS: Se vc esta fazendo uma atualizacao de vistas novas para um prop existente, mantenha todos os drawings expostos na timeline, incluindo as poses novas e antigas!");
+			return false;
+		}
+	} else if(tipo == "GROUP" && asset_name.substring(0, 2) == "CH"){//se for um RIG de personagem
+		if(!reviewRIG(node_list)){
+			return false;
+		}
+	}
+
+	if(node.getTextAttr(asset_sel.peg, 1,"PIVOT.X") == 0 && node.getTextAttr(asset_sel.peg, 1,"PIVOT.Y") == 0){// check pivot da PEG
+		if(!warningAsk("O Pivot da peg STAGE parece errado!\nDeseja continuar?!")){
+			return false;
+		}
+	}
+	return true;
+}
+exports.checkASSET = checkASSET;
+
+
+function reviewRIG(node_list){//verifica os drawings com nome no padrao, se contem os nodes FULL, se contem grupos com -G no nome
+	var counter_number = 0;
+	var counter_empty = 0;
+	var counter_Zzero = 0;
+
+	var regex_sujeira = /(-G)$/;
+	var regex_FULL = /FULL/;
+	var isNamesOk = true;
+	var isFullOK = false;
+	var drawing_list = [];
+
+	for(var i=0; i<node_list.length; i++){
+		drawing_list = [];
+		
+		node.setShowTimelineThumbnails(node_list[i], false);//desliga o show thumbnail do node na timeline
+
+		if(regex_sujeira.test(node_list[i]) && node.type(node_list[i]) == "GROUP"){
+			Print("[SAVEASSET]Node com sujeira no nome: " + node_list[i]);
+			isNamesOk = false;
+		}
+
+		if(regex_FULL.test(node_list[i])){
+			isFullOK = true;
+		}
+	
+		if(node.type(node_list[i]) != "READ"){
+			continue;
+		}
+
+		var coluna = node.linkedColumn(node_list[i], "DRAWING.ELEMENT");
+
+		if(!checkExposicao(coluna)){
+			Print("node: " + node_list[i]);
+			counter_empty++;
+		}
+	
+		var timmings = column.getDrawingTimings(coluna);
+
+		if(timmings.indexOf("Zzero") == -1){
+			counter_Zzero++;
+		}
+
+		for(var j =0; j<timmings.length; j++){//pega os que tem nome q comeca com numero
+			if(!isNaN(timmings[j][0])){
+				drawing_list.push(timmings[j]);
+			}
+		}
+
+		if(drawing_list.length > 0){
+			Print("[SAVEASSET]o node contem drawings com nome fora do padrao: " + node_list[i] + " ===> drawings: " + drawing_list);
+			counter_number++;
+		}
+
+	}
+	
+	if(!isFullOK){
+		if(!warningAsk("Este RIG nao contem os nodes FULL que deveria!!\nDeseja continhar mesmo assim??")){
+			return false;
+		}
+	}
+
+	if(counter_number > 0){
+		if(!warningAsk("Este RIG contem "  + counter_number + " nodes com desenhos fora do padrao de nome!\nDeseja continhar??")){
+			return false;
+		}
+	}
+	
+	if(counter_empty > 0){
+		MessageBox.warning("Este RIG contem "  + counter_empty + " nodes com exposicao vazia! Use o script 'EmptyToZzero' na timeline para resolver isso! Ou acerte o tamanho da timeline, deixe somente as poses necessarias expostas na timeline!", 0, 0);
+		return false;
+	}
+			
+	if(counter_Zzero > 0){
+		MessageBox.warning("Este RIG contem "  + counter_Zzero + " nodes sem o Zzero criado! Acerte isso antes de gerar o TPL!", 0,0);
+		return false;
+	}
+	
+	if(!isNamesOk){
+		if(!warningAsk("Este RIG contem grupos com nome sujo ('-G') no final!\nDeseja continhar mesmo assim??")){
+			return false;
+		}
+	}
+
+	return true;
+
+
+	function checkExposicao(drawing_colun){//check se o drawing contem exposicao vazia
+		var allFrames = frame.numberOf();
+		for(var i=1; i<=allFrames; i++){
+			var exp = column.getEntry(drawing_colun, 1, i);
+			if(exp == ""){
+				Print("[NODE COM EXP VAZIA] : " + column.getDisplayName(drawing_colun) + " no frame : " + i);
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+
+function checkPallets(pltList){/*roda o resultado do script checkNodesPallet;
+	[0] - nodeArray;
+	[1] - drawArray;
+	[2] - colorArray - subArray cores usadas por draw;
+	[3] - PaletteAttay - subArray Palettas usadas por draw;
+	*/
+	var readNodes = pltList[0];
+	var drawList = pltList[1];
+	var corList = pltList[2];
+	var nodesPalett = pltList[3];
+	var usedPal = [];
+
+	for(var i=0; i<nodesPalett.length; i++){
+		for(var y=0; y<nodesPalett[i].length; y++){
+			if(usedPal.indexOf(nodesPalett[i][y]) != -1){
+				continue;	
+			}
+			usedPal.push(nodesPalett[i][y]);
+		}
+	}
+
+	if(usedPal.length > 1){
+		var mensagem = "Este ASSET utiliza mais de uma Palette: \n";
+		for(item in usedPal){
+			mensagem += (" -" + usedPal[item] + "\n");
+		}
+		mensagem += "Deseja criar o TPL mesmo assim?\n";
+		if(!warningAsk(mensagem)){
+			return false;
+		}
+	}
+	return true;
+}	
+exports.checkPallets = checkPallets;

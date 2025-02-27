@@ -393,7 +393,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <item row="0" column="2">
       <widget class="QLabel" name="label_11">
        <property name="text">
-        <string>BirdoAssets v2.0</string>
+        <string>BirdoAssets v2.1</string>
        </property>
       </widget>
      </item>
@@ -486,7 +486,9 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Escolha um nome de asset existente na lista de assets do projeto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="styleSheet">
-        <string notr="true"/>
+        <string notr="true">QComboBox::drop-down {
+    width: 0;
+}</string>
        </property>
       </widget>
      </item>
