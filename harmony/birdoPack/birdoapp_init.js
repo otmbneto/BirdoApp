@@ -34,7 +34,6 @@ function birdoapp_init(scripts_path){
 	//se prefixo é valido, importa os dados do projeto da cena, se nao, importa o template json
 	var root_path = [config_data["server_projects"], prefix].join("/") + "/";
 	var proj_root = (Boolean(prefix) && BD1_DirExist(root_path)) ? root_path : birdoapp_root + "/template/project_template/";
-
 	var proj_data = BD1_ReadJSONFile(proj_root + "project_data.json");
 	var find_proj_data = config_data["user_projects"].filter(function(item){ return item["id"] == proj_data["id"]});
 	proj_data["proj_confg_root"] = proj_root;
@@ -87,7 +86,7 @@ function BirdoAppConfig(config_data, project_data){
 	this.birdoApp = config_data["birdoapp"];
 	this.appdata = config_data["appdata"];
 	this.systemTempFolder = config_data["systemTempFolder"];
-	
+		
 	//define se a config e valida
 	this.valid = config_data["valid"];
 	
@@ -101,7 +100,7 @@ function BirdoAppConfig(config_data, project_data){
 	this.entity = {};
 	this.systemPath = config_data["appdata"];
 	this.scripts_path = config_data["scripts_path"];
-	this.proj_confg_root = config_data["proj_confg_root"];
+	this.proj_confg_root = project_data["proj_confg_root"];
 	this.paths = project_data["paths"];
 	
 	//cria os objetos de regex
@@ -155,7 +154,7 @@ function BirdoAppConfig(config_data, project_data){
 	this.getTBLIB = function(root){//retorna caminho da tblib (root = server ou local)
 		var tb_root = "";
 		if(root == "server"){
-			tb_root = this.paths["root"];
+			tb_root = this.paths["root"] + "/";
 		} else if(root == "local"){
 			tb_root = this.getLocalRoot();
 		}
@@ -319,17 +318,32 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.createTempFolder = function(subfolder, clean){
-		var temp = this.systemTempFolder + "/" + subfolder;
+		if(subfolder){
+			var temp = this.systemTempFolder + "/BirdoApp/" + subfolder + "/";
+		} else {
+			var temp = this.systemTempFolder + "/BirdoApp/";
+		}
 		if(dirExist(temp)){
 			if(clean){
-				removeDirs(temp);				
+				removeDirs(temp);
 			} else {
 				MessageLog.trace("[BIRDOAPP] Nao foi necessario deletar o folder: " + temp);
 				return temp;
 			}
+			return temp;
 		}
 		makeDir(temp);
 		return temp;
+	}
+	
+	this.getAppIcon = function(icon_name){
+		var icons_root = this.birdoApp + "app/icons/";
+		var icons = list_files(icons_root, "*" + icon_name + ".png");
+		if(icons.length == 0){
+			MessageLog.trace("icone " + icon_name + " não encontrado!");
+			return false;
+		}
+		return icons_root + icons[0];
 	}
 	
 	//funcoes complementares//
@@ -351,8 +365,8 @@ function BirdoAppConfig(config_data, project_data){
 		try {
 			dir.rmdirs();
 			MessageLog.trace("[REMOVEDIR] Diretorio removido..." + dirPath);
-		} catch (err){
-			Print(err);
+		} catch (e){
+			MessageLog.trace(JSON.stringify(e, null, 2));
 			return false;
 		}
 		return true;
@@ -364,11 +378,16 @@ function BirdoAppConfig(config_data, project_data){
 			try {
 				myDir.mkdirs(dirPath);
 			} catch (e){
-				Print(e);
+				MessageLog.trace(JSON.stringify(e, null, 2));
 				return false;
 			}
 			return true;
 		}
 		return false;
+	}
+	function list_files(path, filter){
+		var dir = new Dir(path);
+		var files = dir.entryList(filter).sort();
+		return files.filter(function isTrash(value) {return value != "." && value != ".."});
 	}
 }
