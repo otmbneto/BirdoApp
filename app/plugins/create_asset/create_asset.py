@@ -13,7 +13,7 @@ from app.config import ConfigInit
 
 def main(birdoapp_data, proj_data):
     project_template = os.path.join(proj_data.config_folder, 'ASSET_template')
-    xstage_file = proj_data.harmony.get_xstage_last_version(project_template)
+    xstage_file = birdoapp_data.harmony.get_xstage_last_version(project_template)
 
     process = birdoapp_data.harmony.open_harmony_scene(xstage_file)
     print "--template asset harmony opened for project: {0}, with pid: {1}".format(proj_data.prefix, process.pid)
