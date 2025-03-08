@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import shlex
+from birdo_pathlib import Path
 
 
 class ToonBoomHarmony(object):
@@ -81,15 +82,16 @@ class ToonBoomHarmony(object):
             caminho do folder da cena de harmony
         RETURN : string
         """
-        if not os.path.exists(harmony_file_folder):
-            print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(harmony_file_folder)
+        h_folder = Path(str(harmony_file_folder))
+        if not h_folder.exists():
+            print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder)
             return False
-        xstage_files = filter(lambda x: x.endswith('.xstage'), os.listdir(harmony_file_folder))
+        xstage_files = h_folder.glob('*.xstage')
         if len(xstage_files) == 0:
-            print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(harmony_file_folder)
+            print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder)
             return False
-        last_version = sorted(xstage_files)[-1]
-        return os.path.join(harmony_file_folder, last_version).replace('\\', '/')
+        last_version = sorted(xstage_files, key=lambda x: x.get_last_modified())[-1]
+        return last_version.path
 
     def render_scene(self, harmony_scene, pre_render_script=None):
         """
@@ -103,14 +105,13 @@ class ToonBoomHarmony(object):
             caminho do script para rodar no pre-render (default is None)
         RETURN : bool
         """
-        if not harmony_scene.endswith(".xstage"):
+        h_sc = Path(str(harmony_scene))
+        if h_sc.suffix != ".xstage":
             print "[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
             return False
-        cmd = '"{0}" -batch -scene "{1}"'.format(self.executable, os.path.normpath(harmony_scene))
+        cmd = '"{0}" -batch -scene "{1}"'.format(self.executable, h_sc.path)
         if pre_render_script:
-            cmd = '"{0}" -batch -scene "{1}" -preRenderScript "{2}"'.format(self.executable,
-                                                                          os.path.normpath(harmony_scene),
-                                                                          pre_render_script)
+            cmd = '"{0}" -batch -scene "{1}" -preRenderScript "{2}"'.format(self.executable, h_sc.path, str(pre_render_script))
         render = subprocess.call(shlex.split(cmd))
         return render == 0 or render == 12
 
@@ -126,12 +127,11 @@ class ToonBoomHarmony(object):
             caminho do xstage da cena de harmony
         RETURN : bool
         """
-        if not harmony_file.endswith(".xstage"):
+        script_p, h_file = Path(str(script)), Path(str(harmony_file))
+        if h_file.suffix != ".xstage":
             print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
             return False
-        cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable,
-                                                         harmony_file.normpath(),
-                                                         script.replace("/", "\\\\"))
+        cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable, h_file.path, script_p.path)
         return subprocess.call(shlex.split(cmd)) == 0
 
     def create_thumbnails(self, harmony_tpl):
@@ -144,8 +144,8 @@ class ToonBoomHarmony(object):
             caminho do template (folder .tpl)
         RETURN : bool
         """
-        cmd = '"{0}" -batch -template "{1}" -thumbnails -readonly'.format(self.executable,
-                                                                        os.path.normpath(harmony_tpl))
+        tpl = Path(str(harmony_tpl))
+        cmd = '"{0}" -batch -template "{1}" -thumbnails -readonly'.format(self.executable, tpl.path)
         return subprocess.call(shlex.split(cmd)) == 0
 
     def open_harmony_scene(self, xstage_file):
@@ -158,7 +158,8 @@ class ToonBoomHarmony(object):
             caminho do xstage da cena de harmony
         RETURN : object
         """
-        return subprocess.Popen([self.executable, xstage_file.normpath()])
+        xstege = Path(str(xstage_file))
+        return subprocess.Popen([self.executable, xstege.path])
 
 
 def get_available_harmony_installations():
