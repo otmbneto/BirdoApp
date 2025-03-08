@@ -305,7 +305,7 @@ class uiItem(QtGui.QGroupBox):
                 print("[BIRDOAPP] ERROR: can't compile because files were not found")
                 return
             self.incrementProgress(20)
-            self.uploader.project_data.harmony.compile_script(compress_script, xstage)
+            self.uploader.birdoapp.harmony.compile_script(compress_script, xstage)
             self.renamefiles(scene_name, [os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if
                                           f.endswith((".xstage", ".xstage~", "aux", "aux~"))])
             zip_file = compact_folder(temp_dir, temp_dir + ".zip")

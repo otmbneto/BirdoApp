@@ -24,6 +24,10 @@ class Path:
             return Path(self.path)
         return Path(os.path.join(self.path, str(other)))
 
+    def __len__(self):
+
+        return len(self.path)
+
     def normpath(self):
         return os.path.normpath(self.path)
 

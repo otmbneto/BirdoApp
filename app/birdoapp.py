@@ -51,7 +51,6 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
-
         # setup connections
         self.setup_connections()
 
@@ -68,18 +67,35 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.recentGrp.setLayout(recent_layout)
         recent_layout.addWidget(self.recent_list)
 
-        for rec in self.recently_open:
-            #new_action = QtGui.QAction(os.path.basename(rec),self)
-            #new_action.triggered.connect(lambda: self.birdoapp.harmony.open_harmony_scene(Path(rec)))
-            #file_menu.addAction(new_action)
-            self.recent_list.addItem(rec)
+        for i in range(len(self.recently_open)):
+            self.recent_list.addItem(self.recently_open[i])
+            self.recent_list.item(i).setForeground(QtCore.Qt.white)
 
 
     def onOpenFileStandalone(self):
 
-        f = self.ui.standaloneFolderPath.text()
-        if len(f) > 0  and os.path.exists(f):
-            self.birdoapp.harmony.open_harmony_scene(Path(f))
+        f = Path(self.ui.standaloneFolderPath.text())
+        if len(f) > 0  and f.exists():
+            
+            scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+            scene_script_path = f.get_parent() / "scripts"
+            if not scene_script_path.exists():
+                scene_script_path.make_dirs()
+            print("copying {0} to script folder".format(scene_opened_script.name))
+            if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
+                print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
+                return
+
+            self.birdoapp.harmony.open_harmony_scene(f)
+            self.updateRecentlyOpen(f)
+            '''
+            if len(self.recently_open) >= 10:
+                self.recently_open = list(set(self.recently_open[1:]))
+            self.recently_open.append(f.normpath())
+            self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+            with open(self.recently_open_log.normpath(),"w") as rec_open_log:
+                rec_open_log.write("\n".join(self.recently_open))
+            '''
         else:
             print("ERROR: File not selected")
 
@@ -116,14 +132,40 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.standaloneExplorerBtn.clicked.connect(lambda: self.getXstageFile(self.ui.standaloneFolderPath))
         self.recent_list.itemDoubleClicked.connect(self.onDoubleClick)
 
+        self.ui.createSceneBtn.clicked.connect(self.onSceneTemplateOpen)
+        self.ui.createAssetBtn.clicked.connect(self.onAssetTemplateOpen)
+
+
+    def onSceneTemplateOpen(self):
+
+        scene_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'SCENE_template')
+        xstage = self.birdoapp.harmony.get_xstage_last_version(scene_template)
+        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
+        
+    def onAssetTemplateOpen(self):
+
+        asset_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'ASSET_template')
+        xstage = self.birdoapp.harmony.get_xstage_last_version(asset_template)
+        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
+
     def onDoubleClick(self):
 
-        print("clicked")
         selected = self.recent_list.selectedItems()
         if len(selected) > 0:
-            f = selected[0].text()
-            self.birdoapp.harmony.open_harmony_scene(Path(f))
+            f = Path(selected[0].text())
+            self.birdoapp.harmony.open_harmony_scene(f)
+            self.updateRecentlyOpen(f)
         return
+
+
+    def updateRecentlyOpen(self,f):
+
+        if len(self.recently_open) >= 10:
+            self.recently_open = list(set(self.recently_open[1:]))
+        self.recently_open.append(f.normpath())
+        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        with open(self.recently_open_log.normpath(),"w") as rec_open_log:
+            rec_open_log.write("\n".join(self.recently_open))
 
     def clean_layout(self, layout):
         """remove widgets from layout"""
