@@ -4,11 +4,9 @@ include("BD_2-ScriptLIB_Geral.js");
 function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 	var assetInfo = assetInfoFromOtherScript;
-	if(assetInfo.isAnim){
-		MessageBox.warning("Por enquanto salvar animacao neste script esta desabilitado!", 0,0);
-		return false;
-	}
-
+	Print("TESTE asset info saveTPL.js:");
+	Print(assetInfo);
+	Print("------------------------------------------------");
 	var libs = find_lib_groups(assetInfo.fullNode);
 	if(!libs){
 		Print("Canceled to check libs groups name...");
@@ -29,11 +27,10 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	}
 	
 	var main_assetfolder = server_birdoasset_type + main_folder_name + "/";
-		
 	self.ui.progressBar.setRange(0, 8);
 	self.ui.progressBar.setValue(0);
 	self.ui.progressBar.format = "...searching rig version";
-
+	Print("teste MAIN ASSET FOLDER: " + main_assetfolder);
 	if(!BD1_DirExist(main_assetfolder)){//se nao existir ainda o main folder
 		if(!BD1_createDirectoryREDE(main_assetfolder)){
 			Print("Error creating main folder in server!",0,0);
@@ -75,19 +72,17 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	}
 
 	self.ui.progressBar.format = "...renaming assets...";
-	if(!assetInfo.isAnim){
-		updateColorNames();//change color names to UPPDERCASE
+	updateColorNames();//change color names to UPPDERCASE
 
-		var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
-		
-		if(!updatedAssetInfo){
-			MessageBox.warning("Error updating node names!",0,0);
-			return false;
-		}
+	var updatedAssetInfo = renameNodesAsset(assetInfo, projectDATA.prefix, temp_folder);
+	
+	if(!updatedAssetInfo){
+		MessageBox.warning("Error updating node names!",0,0);
+		return false;
 	}
 	
 	self.ui.progressBar.format = "...creating version json";	
-	if(assetInfo.fullNode && !assetInfo.isAnim){//se e um CHAR, confere na BirdoLib se esta versao esta correta
+	if(assetInfo.fullNode){//se e um CHAR, confere na BirdoLib se esta versao esta correta
 		var rigJson = create_rig_version_json(BD1_dirname(asset_server_folder), temp_folder, assetInfo, libs);
 		if(!rigJson){
 			Print("[ERROR] Falha ao criar o arquivo json da versao!");
@@ -100,7 +95,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		
 	self.ui.progressBar.setValue(1);
 	self.ui.progressBar.format = "...Saving TEMPLATE...";
-	var tpl_name = assetInfo.isAnim ? assetInfo.assetName : assetInfo.assetName + "." + assetInfo.version;
+	var tpl_name = assetInfo.assetName + "." + assetInfo.version;
 
 	var save_tpl = copyPaste.createTemplateFromSelection(tpl_name, temp_folder);//cria o template e retorna o caminho
 	
@@ -114,7 +109,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		Print("[SAVETPL] template criado: " + save_tpl);
 	}
 	
-	var tplTempPath = temp_folder + save_tpl;
+	var tplTempPath = temp_folder + "/" + save_tpl;
 	
 	var data_rede = asset_server_folder + "/DATA/";
 	self.ui.progressBar.setValue(2);
@@ -206,10 +201,14 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 			Print("Tipo Misc... definindo main folder");
 			return "MISCELANIA";
 		}
+		
 		var char_list = BD1_ListFolders(assetfolder).filter(function(x){ return x.indexOf(prefixo) != -1;});
-
 		if(char_list.length != 0){
 			return char_list[0];
+		}
+		
+		if(!BD1_DirExist(assetfolder)){
+			BD1_createDirectoryREDE(assetfolder);
 		}
 		
 		//retira as poses da lista
@@ -342,7 +341,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		}
 
 		var this_verion_nodes = BD2_ListNodesInGroup(mainNode, "", false);
-		var char_json = temp_folder + "_rigINFO." + asset_obj.version + ".json";
+		var char_json = temp_folder + "/_rigINFO." + asset_obj.version + ".json";
 		var server_json = server_folder + "/" + BD1_fileBasename(char_json);
 		
 		if(BD1_FileExists(server_json)){
@@ -353,7 +352,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		var rig_verion_info = {
 			"nodes" : this_verion_nodes, 
 			"banco": {}
-			};
+		};
 		
 		for(var i=0; i<libs.length; i++){
 			if(libs[i] == asset_obj.fullNode){
@@ -415,9 +414,8 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		
 		var versions = BD1_ListFolders(main_folder);
 		var output = {"version": null, "exists": false};
-		
-		if(assetInfo.prefixo.slice(0,2) != "CH" || assetInfo.isAnim || !assetInfo.fullNode){
-			Print("Rig is not entitle to lib version parameters! Will save as v00...");
+		if(assetInfo.prefixo.slice(0,2) != "CH" || !assetInfo.fullNode){
+			Print("[BIRDOAPP] Este Rig não necessita de versionamento. Vamos trata-lo como v00");
 			output["version"] = "v00";
 			output["exists"] = BD1_DirExist(main_folder + output["version"]);
 			return output;
@@ -425,7 +423,6 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		
 		var rig_nodes = BD2_ListNodesInGroup(assetInfo.fullNode, "", false);
 		rig_nodes.sort();
-		
 		if(versions.length == 0){
 			output["version"] = "v01";
 			output["exists"] = BD1_DirExist(main_folder + output["version"]);
@@ -559,12 +556,10 @@ function getAssetsProjectData(projData){
 	
 	var loadingScreen = BD2_loadingBirdo(projData.birdoApp, 15000, "geting_project_asset_information...");
 	var assetTypeName = projData.getAssetTypeFullName();
-	var project_index = projData.id;
 
 	var commands = [];
 	commands.push(pythonPath);
 	commands.push(pyFile);
-	commands.push(project_index);
 	commands.push(assetTypeName);
 	commands.push(jsonFile);		
 	Print("Chamada Python1: " + commands);
@@ -594,52 +589,32 @@ exports.getAssetsProjectData = getAssetsProjectData;
 function getSelection(assetType, birdo_data){
 	var nodes_sel = {};
 	var selected_nodes = selection.selectedNodes();
-	var is_anim_library = false;
 	var regex_rig = birdo_data.pattern.asset;
 	var regex_rig_full = new RegExp(birdo_data.prefix + "\.\w+-v\d{2}");
 
-	if(selected_nodes.length == 1){
-		is_anim_library = is_anim_selection(selected_nodes);
-		if(!is_anim_library){
-			MessageBox.warning("Selecao de nodes invalida para banco de ANIM. Selecione o grupo do rig fechado na timeline, com a selecao de frames da animacao a ser salva!",0 ,0);
-			Print("[SAVEASSET][ERROR]Animation selection invalid!");
-			return false;
-		}
-	} else if(selected_nodes.length != 2){
+	if(selected_nodes.length != 2){
 		MessageBox.warning("A Selecao de nodes na NodeView nao esta correta!\nSelecione apenas o ASSET e sua PEG!\n\n-Se For RIG, lembre de selecionar o BackDrop!\n-Se somente existe o Node Drawing do asset sem PEG,\ncrie uma PEG!\n\nSelecione corretamente e tente de novo!", 0,0);
 		Print("[SAVEASSET][ERROR] Invalid Node selection!");
 		return false; 
 	}
 	
 	var nodeASSET = selected_nodes[0];
-	var nodePEG = is_anim_library ? false : selected_nodes[1];
+	var nodePEG = selected_nodes[1];
 	
-	if(!is_anim_library){
-		if(node.srcNode(selection.selectedNode(1), 0) == selection.selectedNode(0)){//troca se ele nao ler certo a selecao [0] e [1]
-			nodeASSET = selection.selectedNode(1);
-			nodePEG = selection.selectedNode(0);
-		}
+	if(node.srcNode(selection.selectedNode(1), 0) == selection.selectedNode(0)){//troca se ele nao ler certo a selecao [0] e [1]
+		nodeASSET = selection.selectedNode(1);
+		nodePEG = selection.selectedNode(0);
 	}
 	
 	nodes_sel["peg"] = nodePEG;
 	nodes_sel["asset"] = nodeASSET;
 	
-	//is is animation
-	if(is_anim_library){
+	if(assetType == "CH" && node.type(nodeASSET) == "GROUP"){//se for um CHAR e grupo
 		nodes_sel["rigFull"] = getFullRigGroup(nodeASSET);
-		nodes_sel["rigTypeList"] = ["ANIM"];
 	} else {
-	
-		if(assetType == "CH" && node.type(nodeASSET) == "GROUP"){//se for um CHAR e grupo
-			nodes_sel["rigFull"] = getFullRigGroup(nodeASSET);
-		} else {
-			nodes_sel["rigFull"] = null;				
-		}
-		nodes_sel["rigTypeList"] = nodes_sel["rigFull"] ? ["FULL", "SIMPLE"] : ["SIMPLE"];
-	}
-	
-	nodes_sel["is_animation_lib"] = is_anim_library;
-	nodes_sel["asset_name"] = is_anim_library ? node.getName(nodeASSET).replace(/(-|_)\d$/, "") : projectDATA.entity.name;
+		nodes_sel["rigFull"] = null;				
+	}	
+	nodes_sel["asset_name"] = projectDATA.entity.name;
 	return nodes_sel;
 
 	////funcao extra///
@@ -656,9 +631,6 @@ function getSelection(assetType, birdo_data){
 			}
 		}		
 		return false;
-	}
-	function is_anim_selection(selNodes){//return true if node selection is anim node valid
-		return selection.isSelectionRange() && node.isGroup(selNodes[0]) && regex_rig.test(node.getName(selNodes[0])) && selNodes.length == 1;	
 	}
 }
 exports.getSelection = getSelection;

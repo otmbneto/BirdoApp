@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BIRDO_2020</string>
+   <string>Asset Library</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QLabel {
@@ -116,7 +116,7 @@ QListWidget::item:selected:!active {
           </font>
          </property>
          <property name="text">
-          <string>BIRDO ASSET LIBRARY</string>
+          <string>ASSET LIBRARY</string>
          </property>
         </widget>
        </item>
@@ -180,7 +180,7 @@ QListWidget::item:selected:!active {
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,2,1,1,0">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,2,0,4">
        <item>
         <widget class="QLabel" name="search_label">
          <property name="text">
@@ -190,9 +190,15 @@ QListWidget::item:selected:!active {
        </item>
        <item>
         <widget class="QLineEdit" name="search_text">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>16777215</width>
+           <width>10000</width>
            <height>27</height>
           </size>
          </property>
@@ -216,61 +222,21 @@ QListWidget::item:selected:!active {
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Type:</string>
+        <widget class="QPushButton" name="clearSearchButton">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="typeCombo">
          <property name="styleSheet">
-          <string notr="true">
-QComboBox {
-	color: black;
-    border: 2px solid white;
-    border-radius: 6px;
-    padding: 1px 18px 1px 3px;
-    min-width: 6em;
-}
-
-QComboBox:!editable, QComboBox::drop-down:editable {
-     background: lightgray;
-}
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 3px;
-    padding-left: 4px;
-}
-
-QComboBox::drop-down {
-    width: 20px;
-	background-color: rgb(194, 194, 194);
-    border-left-width: 2px;
-    border-left-color: white;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox:hover{
-    border: 2px solid #05B8CC;
-    color: gray;
-}
-
-QComboBox QAbstractItemView{
-    border: 2px solid white;
-	border-radius: 10px;
-    color: gray;
-	background-color: lightgray;
-    selection-background-color: #05B8CC;
-	selection-color: white;
-	selection-item-border-radius: 2px;
-	padding: 3px 3px ;
+          <string notr="true">QPushButton {
+	border: null;
+	background: transparent;
 }</string>
+         </property>
+         <property name="text">
+          <string>X</string>
          </property>
         </widget>
        </item>
@@ -280,7 +246,7 @@ QComboBox QAbstractItemView{
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -308,7 +274,7 @@ QComboBox QAbstractItemView{
             </font>
            </property>
            <property name="text">
-            <string>Main ASSETs:</string>
+            <string>Tipos de Assets</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -327,7 +293,7 @@ QComboBox QAbstractItemView{
             </font>
            </property>
            <property name="text">
-            <string>Sub ASSETs:</string>
+            <string>Assets</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -346,7 +312,7 @@ QComboBox QAbstractItemView{
             </font>
            </property>
            <property name="text">
-            <string>Import List:</string>
+            <string>Assets Selecionados</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -429,66 +395,7 @@ QTreeWidget::item:selected:!active {
           </spacer>
          </item>
          <item row="2" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <item>
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Name Display: </string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="nameButton">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>120</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QPushButton {
-	color: rgb(72, 72, 72);
-    border: 2px solid white;
-    border-radius: 6px;
-	background-color: lightgray;
-    min-width: 80px;
-}
-
-QPushButton:checked {
-	color: white;
-	border-color: white;
-    background-color: #05B8CC;
-}
-
-QPushButton:hover{
-    border: 2px solid #05B8CC;
-    color: gray;
-}
-
-QPushButton:disabled {
-	color: gray;
-    border: 2px solid lightgray;
-	background-color: darkgray;
-}</string>
-             </property>
-             <property name="text">
-              <string>Full Name</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <layout class="QHBoxLayout" name="horizontalLayout_5"/>
          </item>
         </layout>
        </item>
@@ -658,7 +565,7 @@ QPushButton::disabled {
 }</string>
            </property>
            <property name="text">
-            <string>Clear Cache</string>
+            <string>Limpar Cache</string>
            </property>
           </widget>
          </item>
@@ -678,7 +585,7 @@ QPushButton::disabled {
             <enum>QFrame::WinPanel</enum>
            </property>
            <property name="text">
-            <string>  Selecione o tipo de asset e o Nome principal do Asset na coluna da esquerda, escolha os assets para importar adicionando para 'Import List' com duplo-clique, e aperte 'IMPORT'! Lembre-se de organizar a nodeview apos importar os ASSETs!</string>
+            <string>Selecione o tipo de asset e o Nome principal do Asset na coluna da esquerda, escolha os assets para importar com duplo-clique, e aperte 'IMPORT'! Lembre-se de organizar a nodeview apos importar os ASSETs!</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -734,7 +641,7 @@ QPushButton::disabled {
           </size>
          </property>
          <property name="text">
-          <string>@leobazao - Birdo 2021</string>
+          <string>@leobazao - Birdo 2025</string>
          </property>
         </widget>
        </item>
