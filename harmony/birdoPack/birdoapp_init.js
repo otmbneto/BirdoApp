@@ -318,22 +318,15 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.createTempFolder = function(subfolder, clean){
-		if(subfolder){
-			var temp = this.systemTempFolder + "/BirdoApp/" + subfolder + "/";
-		} else {
-			var temp = this.systemTempFolder + "/BirdoApp/";
+		var temp = Boolean(subfolder) ? this.systemTempFolder + "/BirdoApp/" + subfolder : this.systemTempFolder + "/BirdoApp";
+		MessageLog.trace("TESTE temp path: " + temp);
+		if(clean && dirExist(temp)){
+			removeDirs(temp);
+		} 
+		if(!dirExist(temp)){
+			makeDir(temp);
 		}
-		if(dirExist(temp)){
-			if(clean){
-				removeDirs(temp);
-			} else {
-				MessageLog.trace("[BIRDOAPP] Nao foi necessario deletar o folder: " + temp);
-				return temp;
-			}
-			return temp;
-		}
-		makeDir(temp);
-		return temp;
+		return temp + "/";
 	}
 	
 	this.getAppIcon = function(icon_name){

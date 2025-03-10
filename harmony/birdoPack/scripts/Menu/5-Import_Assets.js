@@ -70,22 +70,7 @@ function createInterface(projectDATA, base_folder, utils){
 		var leaf = new QTreeWidgetItem(this.ui.file_tree, [this.roots[i]]);
 		null_item = new QTreeWidgetItem(leaf,["null"]);
 	}
-	
-	//connect widget to callbacks
-    this.ui.file_tree.itemExpanded.connect(this, this.onItemExpand);
-    this.ui.file_tree.itemCollapsed.connect(this, this.onItemCollapse);
-	this.ui.file_tree.clicked.connect(this, this.onClick);
-	this.ui.groupPreview.thumbnail_slider.valueChanged.connect(this, this.updateFrame);
-	this.ui.clearCacheButtton.clicked.connect(this, this.onClearCache);
-	this.ui.search_text.textChanged.connect(this, this.onTextChange);
-	this.ui.clearSearchButton.clicked.connect(this, this.onClearSearch);
-	this.ui.list_widget.itemClicked.connect(this, this.onItemClick);
-	this.ui.selected_items_list.itemClicked.connect(this, this.onItemClick);
-	this.ui.list_widget.itemDoubleClicked.connect(this, this.onAddDoubleClick);
-	this.ui.selected_items_list.itemDoubleClicked.connect(this, this.onRmvDoubleClick);
-	this.ui.import_button.clicked.connect(this, this.importTemplates);
-	this.ui.cancel_button.clicked.connect(this, this.onClose);
-	
+		
 	////CALL BACK FUNCTIONS////
 	this.onClearCache = function(){
 		utils.clear_cache(this);
@@ -241,14 +226,29 @@ function createInterface(projectDATA, base_folder, utils){
 		} else {
 			MessageBox.information(this.output_import["status"]);
 		}
-	}
+	}	
+	
+	//connect widget to callbacks
+    this.ui.file_tree.itemExpanded.connect(this, this.onItemExpand);
+    this.ui.file_tree.itemCollapsed.connect(this, this.onItemCollapse);
+	this.ui.file_tree.clicked.connect(this, this.onClick);
+	this.ui.groupPreview.thumbnail_slider.valueChanged.connect(this, this.updateFrame);
+	this.ui.clearCacheButtton.clicked.connect(this, this.onClearCache);
+	this.ui.search_text.textChanged.connect(this, this.onTextChange);
+	this.ui.clearSearchButton.clicked.connect(this, this.onClearSearch);
+	this.ui.list_widget.itemClicked.connect(this, this.onItemClick);
+	this.ui.selected_items_list.itemClicked.connect(this, this.onItemClick);
+	this.ui.list_widget.itemDoubleClicked.connect(this, this.onAddDoubleClick);
+	this.ui.selected_items_list.itemDoubleClicked.connect(this, this.onRmvDoubleClick);
+	this.ui.import_button.clicked.connect(this, this.importTemplates);
+	this.ui.cancel_button.clicked.connect(this, this.onClose);
 
 	///helper functions//////////////////
 	function Print(msg){
 		if(typeof msg == "object"){
 			var msg = JSON.stringify(msg, null, 2);
 		}
-		Print(msg);
+		MessageLog.trace(msg);
 	}
 	function file_basename(filepath){//retorna o nome do arquivo (sem extencao)
 		var file = new File(filepath);
