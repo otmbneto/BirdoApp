@@ -27,7 +27,7 @@ exports.styles = styles;
 creates temp folder for the library
 */
 function getTempFolder(){
-	var tempFolder = BD1_normalize_path(specialFolders.temp + "/_birdoLibrary/");	
+	var tempFolder = BD1_normalize_path(specialFolders.temp + "/BirdoApp/_birdoLibrary/");
 	if(!BD1_DirExist(tempFolder)){
 		Print("creating temp folder for BirdoLibrary!");
 		if(!BD1_createDirectoryREDE(tempFolder)){
@@ -69,7 +69,7 @@ function validateTimelineSelection(rig_group_node){
 	for(var i=0; i<readNodes.length; i++){
 		progressDlg.setValue(i);
 		if(progressDlg.wasCanceled){
-			MessageBox.information("Peidou!");
+			MessageBox.information("Cancelado!");
 			progressDlg.close();
 			return false;
 		}
@@ -204,7 +204,7 @@ exports.validateTimelineSelection = validateTimelineSelection;
 function changeStatus(item_name, status_name, lib_json){
 	//make copy of
 	if(!BD1_CopyFile(lib_json, (lib_json + "~"))){
-		MessageBox.warning("ERROR! Fail to create bakcup lib_json file!",0,0);
+		MessageBox.warning("Erro criando arquivo de backup da lib!",0,0);
 		Print("Fail to create backup lib json file!");
 		return false;
 	}
@@ -276,7 +276,7 @@ function updateFavoriteFlagJson(itemId, newValue){
 	var json_fav_data = BD1_ReadJSONFile(json_favorites);
 	
 	if(!json_fav_data){
-		MessageBox.warning("Fail to read information from _favorite_flags.json local file!!!",0,0);
+		MessageBox.warning("Erro lendo arquivo com fav tags!",0,0);
 		return false;
 	}
 	
@@ -344,30 +344,30 @@ function edit_item(self, lib_path, item_data, user_data){
 	
 	//creates temp folder
 	self.updateProgressBar();
-	self.ui.progressBar.format = "creating temp folder...";
+	self.ui.progressBar.format = "criando temp folder...";
 	var temp_folder = getTempFolder();
 	if(!temp_folder){
-		MessageBox.warning("Error creating temp folder!",0,0);
+		MessageBox.warning("Erro criando temp folder!!",0,0);
 		return false;
 	}
 	temp_folder = temp_folder + "_edit_item/";
 	if(BD1_DirExist(temp_folder)){
 		if(!BD1_RemoveDirs(temp_folder)){
-			MessageBox.warning("Error cleaning temp folder!",0,0);
+			MessageBox.warning("Erro deletando os arquivos temporários!",0,0);
 			return false;
 		}
 	}
 	if(!BD1_createDirectoryREDE(temp_folder)){
-		MessageBox.warning("Error creating temp folder!",0,0);
+		MessageBox.warning("Erro criando o temp folder!!",0,0);
 		return false;
 	}
 	Print("edit: temp folder creted.");
 
 	//unzip tpl
 	self.updateProgressBar();
-	self.ui.progressBar.format = "unziping temp tpl...";
+	self.ui.progressBar.format = "descompactando temp tpl...";
 	if(!BD1_UnzipFile(item_tpl, temp_folder)){
-		MessageBox.warning("Error unziping item template in temp folder!",0,0);
+		MessageBox.warning("Erro descompactando arquivo no temp folder!",0,0);
 		return false;
 	}
 	var temp_tpl = temp_folder + BD1_fileBasename(item_tpl).replace(".zip", ".tpl");
@@ -375,56 +375,56 @@ function edit_item(self, lib_path, item_data, user_data){
 
 	//open tpl file
 	self.updateProgressBar();
-	self.ui.progressBar.format = "opening template...";
+	self.ui.progressBar.format = "arbrindo tpl...";
 	
 	//make sleep for 1 sec before continue...
 	BD1_sleep(1);
 	
 	if(!BD1_FileExists(temp_tpl)){
-		MessageBox.warning("Error! Temp .tpl file not found in temp folder!",0,0);
+		MessageBox.warning("Erro! Não foi possível encontrar o arquivo tpl no temp folder!",0,0);
 		Print("Error! Can`t find the tpl temp unziped file!");	
 		return false;
 	}
 	if(!open_template_file(temp_tpl)){
-		MessageBox.information("Template was not changed!");
-		self.ui.progressBar.format = "edit canceled...";
+		MessageBox.information("Erro ao abrir template para edição!!");
+		self.ui.progressBar.format = "edit cancelada...";
 		return false;
 	}
 	
 	//update tpl thumbnails
 	self.updateProgressBar();
-	self.ui.progressBar.format = "generating thumbnails...";
+	self.ui.progressBar.format = "gerando thumbnails...";
 	//run script to generate thumbnails
 	if(!BD2_createThumbnails(temp_tpl)){
-		MessageBox.warning("Fail to generate Thumbnails editing the tpl!",0,0);
-		Print("ERROR! fail to create thumbs!");
+		MessageBox.warning("Falha ao gerar thumbnails para o template!",0,0);
+		Print("[BIRDOAPP] Falha ao gerar thumbnails para o template!");
 		return false;
 	}
 	self.updateProgressBar();
-	self.ui.progressBar.format = "zipping thumbnails";
+	self.ui.progressBar.format = "compactando thumbnails";
 	//create zip for the created thumbnails
 	var thumb_folder = temp_tpl + "/.thumbnails";
 	var zip_thumbs_temp = BD2_ZipFilesInFolder(thumb_folder, "thumbs", temp_folder);
 	if(!zip_thumbs_temp){
-		self.ui.progressBar.format = "error ziping thumbs...";
+		self.ui.progressBar.format = "error compactando thumbs...";
 		return false;
 	}
 	//clean item thumbs folder
 	if(!BD1_RemoveDirs(item_thumbs)){
-		MessageBox.warning("Fail to delete old thumb folder!",0,0);
+		MessageBox.warning("Falha ao limpar pasta de thumbnails!!",0,0);
 		return false;
 	}
 	if(!BD1_createDirectoryREDE(item_thumbs)){
-		MessageBox.warning("ERROR creating item thumbs folder!",0,0);
+		MessageBox.warning("Erro ao criar thumbnail folder!",0,0);
 		return false;
 	}
 	var item_thumbs_zip = item_thumbs + "thumbs.zip";
 	if(!BD1_CopyFile(zip_thumbs_temp, item_thumbs_zip)){
-		MessageBox.warning("Error copying thumbs zip file to item folder!",0,0);
+		MessageBox.warning("Erro copiando thumbnails para o folder do item!",0,0);
 		return false;
 	}
 	self.updateProgressBar();
-	self.ui.progressBar.format = "unziping thumbs in server...";
+	self.ui.progressBar.format = "descompactando thumbs no server...";
 	//unzip thumb files in server
 	if(!BD1_UnzipFile(zip_thumbs_temp, item_thumbs)){
 		Print("error unziping thumbs in server!");
@@ -433,32 +433,32 @@ function edit_item(self, lib_path, item_data, user_data){
 
 	//create backup from old item
 	self.updateProgressBar();
-	self.ui.progressBar.format = "copying backup file...";
+	self.ui.progressBar.format = "copiando backup file...";
 	var backup_zip = get_deleted_copy_name();
 	if(!backup_zip){
 		Print("fail to create backup copy");
 		return false;
 	}
 	if(!BD1_CopyFile(item_tpl, backup_zip)){
-		MessageBox.warning("Fail to copy backup file!", 0, 0);
+		MessageBox.warning("Falha ao criar backup file!", 0, 0);
 		return false;
 	}
 	if(!BD1_RemoveFile(item_tpl)){
-		MessageBox.warning("Error replacing old item zip!",0,0);
+		MessageBox.warning("Erro deletando item temporario de tpl!!",0,0);
 		return false;
 	}
 	
 	//create new item modified zip
 	self.updateProgressBar();
-	self.ui.progressBar.format = "ziping new edited tpl...";
+	self.ui.progressBar.format = "compactando tpl editado...";
 	if(!BD1_ZipFile(temp_tpl, item_zip_name, BD1_dirname(item_tpl))){
-		MessageBox.warning("Error ziping item tpl!",0,0);
+		MessageBox.warning("Erro criando zip do tpl!",0,0);
 		return false;
 	}
 	
 	//edit data json file
 	self.updateProgressBar();
-	self.ui.progressBar.format = "saving edit data...";
+	self.ui.progressBar.format = "salvando metadados do edit...";
 	var old_data = BD1_ReadJSONFile(item_data_json);
 	if("edit" in old_data){
 		old_data["edit"].push({"user": user_data["name"], "time": new Date()});
@@ -466,12 +466,12 @@ function edit_item(self, lib_path, item_data, user_data){
 		old_data["edit"] = [{"user": user_data["name"], "time": new Date()}];
 	}
 	if(!BD1_WriteJsonFile(old_data, item_data_json)){
-		MessageBox.warning("fail to save new edit data into json item!",0,0);
+		MessageBox.warning("Falha ao criar item metadata json!",0,0);
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "edit done!";
+	self.ui.progressBar.format = "Edit comcluido!";
 	return true;
 	
 	///FUNCTION EXTRAS
@@ -496,7 +496,7 @@ function edit_item(self, lib_path, item_data, user_data){
 		var deleted_folder = BD1_dirname(item_tpl) + "/.deleted/";
 		if(!BD1_DirExist(deleted_folder)){//cretates .deleted folder for backup
 			if(!BD1_createDirectoryREDE(deleted_folder)){
-				MessageBox.warning("Error creating bakcup folder!",0,0);
+				MessageBox.warning("Erro criando backup folder!",0,0);
 				return false;
 			}
 		}
@@ -518,13 +518,13 @@ function getUserData(projectDATA, libRoot){
 	var permission_file = config_folder + "_permissions.json";
 	
 	if(!BD1_FileExists(permission_file)){
-		MessageBox.warning("ERROR! Cant't find the permissions file!",0,0);
+		MessageBox.warning("ERRO! Não foi possível encontrar os arquivos de configuração da BirdoLib!",0,0);
 		return false;
 	}
 	var permission_data = BD1_ReadJSONFile(permission_file);
 	
 	if(!permission_data){
-		MessageBox.warning("Fail to read information from _permissions.json file!!!",0,0);
+		MessageBox.warning("Arquivo de configuração de permissões inválido!!",0,0);
 		return false;
 	}
 	
@@ -545,13 +545,13 @@ function get_main_tag_list(lib_root){
 	var tags_file = config_folder + "_tags.json"; 	
 	
 	if(!BD1_FileExists(tags_file)){
-		MessageBox.warning("ERROR! Cant't find the tags json file!",0,0);
+		MessageBox.warning("ERRO! Não foi encontrado o tag file de configuração!",0,0);
 		return false;
 	}
 	var tags_data = BD1_ReadJSONFile(tags_file);
 	
 	if(!tags_data){
-		MessageBox.warning("Fail to read information from _tags.json file!!!",0,0);
+		MessageBox.warning("Falha ao acessar o arquivo de tags da configuração!",0,0);
 		return false;
 	}
 	return tags_data;
@@ -566,32 +566,32 @@ function update_json_tag(lib_root, tags_data){
 	var tag_lock = config_folder + "_lock.json";
 	
 	if(!BD1_FileExists(tags_file)){
-		MessageBox.warning("ERROR! Cant't find the tags json file!",0,0);
+		MessageBox.warning("Erro! Não foi possível encontrar o arquivo e tags!",0,0);
 		return false;
 	}	
 		
 	if(BD1_FileExists(tag_lock)){
 		var lock_data = BD1_ReadJSONFile(tag_lock);
-		MessageBox.warning("Tag file is locked by user: " + lock_data["user"] + "!", 0, 0);
+		MessageBox.warning("O arquivo de tags está em uso pelo usuário: " + lock_data["user"] + "!", 0, 0);
 		Print("tag json file is locked by user: " + lock_data["user"]);
 		return false;
 	} else {
 		//make backup copy for tags json file
 		if(!BD1_CopyFile(tags_file, (tags_file + "~"))){
-			MessageBox.warning("ERROR! Fail to create bakcup tags json file!",0,0);
+			MessageBox.warning("Falha ao criar arquivo de backup das tags!",0,0);
 			Print("Fail to create backup tags_file file!");
 			return false;
 		}	
 		var lock_data = {"user": user_data["name"]};
 		if(!BD1_WriteJsonFile(lock_data, tag_lock)){
-			MessageBox.warning("Error writing lock json file!",0 ,0);
+			MessageBox.warning("Erro gerando lock file!", 0, 0);
 			return false;
 		}
 		Print("Lock for tag files created!");
 	}
 	
 	if(!BD1_WriteJsonFile(tags_data, tags_file)){
-		MessageBox.warning("Error writing tags json file!",0 ,0);
+		MessageBox.warning("Erro criando o tag file!",0 ,0);
 		BD1_RemoveFile(tag_lock);
 		return false;
 	}
@@ -641,13 +641,13 @@ function getRigthsToModifyLib(lib_path, user_data){
 		if(lock_data["user"] == user_data["name"]){
 			Print("Library is already locked by this user...");
 		} else {
-			MessageBox.warning("This library is locked by: " + lock_data["user"] + "\nWait and try again later...",0,0);
+			MessageBox.warning("Esta library está travada pelo usuário: " + lock_data["user"] + "\nEspere e tente novamente depois...",0,0);
 			Print(lock_data);
 			return false;
 		}
 	} else {
 		if(!BD1_WriteJsonFile(lock_data, lock_file)){
-			MessageBox.warning("Error creating _lock file!",0,0);
+			MessageBox.warning("Erro criando o lock file!",0,0);
 			return false;
 		}
 	}
@@ -668,7 +668,7 @@ function releaseRigthToModifyLib(lib_path, user_data){
 	
 		//ensure it's YOUR lock file
 		if(user_data["name"] != lock_data["user"]){
-			MessageBox.warning("Something went wrong!! This folder is already Locked by other user: " + lock_data["user"] + "\nPlease check with the TD team what went wrong!",0,0);
+			MessageBox.warning("Algo deu errado. O folder já está em uso pelo usuário: " + lock_data["user"] + "\nConverse com a supervisão!",0,0);
 			return false;
 		}
 	}
@@ -683,7 +683,7 @@ function check_library_lock(lib_path){
 	var lock_file = lib_path + "_lock.json";
 	if(BD1_FileExists(lock_file)){
 		var lock_data = BD1_ReadJSONFile(lock_file);
-		MessageBox.warning("This library: " + lib_path + "\nis Locked by user: " + lock_data["user"] + "\nTry again later!!",0,0);
+		MessageBox.warning("Esta library: " + lib_path + "\nestá em uso pelo usuário: " + lock_data["user"] + "\nTente novamente mais tarde!",0,0);
 		Print(lock_data);
 		return false;
 	} else {
@@ -707,11 +707,11 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 		}
 		Print("creating main rig lib folder...");
 		if(!BD1_createDirectoryREDE(lib_path)){
-			MessageBox.warning("Error creating main lib folder!",0,0);
+			MessageBox.warning("Erro criando folder principal do asset!",0,0);
 			return false;
 		}
 		if(!create_rig_version(lib_path, rig_data)){
-			MessageBox.warning("Errro creating the rig version json data!",0,0);
+			MessageBox.warning("Erro criando o arquivo de info do asset!",0,0);
 			return false;
 		}
 		BD1_sleep(2);
@@ -719,7 +719,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	
 	//sets the progressBar max
 	self.ui.progressBar.setMaximum(11);
-	self.ui.progressBar.format = "saving tpl...";
+	self.ui.progressBar.format = "salvando tpl...";
 
 	//gets rigth to modify library
 	if(!getRigthsToModifyLib(lib_path, user_data)){
@@ -737,7 +737,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	var item_name = get_next_item_name(lib_path);
 		
 	self.updateProgressBar();
-	self.ui.progressBar.format = "creating tpl...";
+	self.ui.progressBar.format = "criando tpl...";
 	//save temporary template
 	var temp_tpl = save_template(temp_folder, item_name);
 	
@@ -747,37 +747,37 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "cleaning temp tpl...";
+	self.ui.progressBar.format = "limpando temp tpl...";
 	//run the compile script to clean the saved tpl
 	var cleanTPL_script = projectDATA.birdoApp + "batch/BAT_BL_CleanTPL.js";
 	if(!BD2_CompileScript(temp_tpl + "/scene.xstage", cleanTPL_script)){
-		self.ui.progressBar.format = "FAIL to run compile script!!";
-		MessageBox.warning("Fail to run compile script to clean the temp tpl!",0,0);
+		self.ui.progressBar.format = "Falha ao compilar script!";
+		MessageBox.warning("Erro rodando o script para limpar o tpl!",0,0);
 		Print("fail to clean temporary template!");
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "generating thumbnails...";
+	self.ui.progressBar.format = "gerando thumbnails...";
 	//run script to generate thumbnails
 	if(!createThumbnails(temp_tpl, projectDATA, rig_data["needs_special_thumbs"])){
-		MessageBox.warning("Fail to generate Thumbnails for the saves temp tpl!",0,0);
+		MessageBox.warning("Falha ao criar thumbnails para o template!", 0, 0);
 		Print("ERROR! fail to create thumbs!");
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "zipping thumbnails";
+	self.ui.progressBar.format = "zipando thumbnails";
 	//create zip for the created thumbnails
 	var thumb_folder = temp_tpl + "/.thumbnails";
 	var zip_thumbs_temp = BD2_ZipFilesInFolder(thumb_folder, "thumbs", temp_folder);
 	if(!zip_thumbs_temp){
-		self.ui.progressBar.format = "error ziping thumbs...";
+		self.ui.progressBar.format = "erro compactando thumbs...";
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "ziping tpl...";
+	self.ui.progressBar.format = "zipando tpl...";
 	//create temp zip for tpl
 	var temp_tpl_zip = BD1_ZipFile(temp_tpl, item_name, temp_folder);
 	if(!temp_tpl_zip){
@@ -786,34 +786,34 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "creating folders...";
+	self.ui.progressBar.format = "criando folders...";
 	//create item folders
 	if(!createItemFolderScheeme(lib_path, item_name)){
-		MessageBox.warning("Error creating item folders in library!",0,0);
+		MessageBox.warning("Erro criando o folder da library!!",0,0);
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "sending template to server...";
+	self.ui.progressBar.format = "enviando template para o server...";
 	//copying template file
 	if(!BD1_CopyFile(temp_tpl_zip, (lib_path + item_name + "/" + item_name + ".zip"))){
-		MessageBox.warning("Error copying the tpl zip file!",0,0);
-		Print("Error copying tpl zip file to server!");
+		MessageBox.warning("Erro copiando o arquivo tpl!",0,0);
+		Print("[BIRDOAPP] Erro copiando o arquivo para o server!!");
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "sending thumbs to server...";
+	self.ui.progressBar.format = "enviando thumbs para o server...";
 	//copying thumbs files
 	var thumbs_path = lib_path + item_name + "/THUMBS/";
 	if(!BD1_CopyFile(zip_thumbs_temp, (thumbs_path + "thumbs.zip"))){
-		MessageBox.warning("Error copying the thumbs file!",0,0);
+		MessageBox.warning("Erro copiando os arquivos de thumbnails!", 0, 0);
 		Print("Error copying tpl zip file to server!");
 		return false;
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "unziping thumbs in server...";
+	self.ui.progressBar.format = "descompactando thumbs no server...";
 	//unzipin thumb files in server
 	if(!BD1_UnzipFile(zip_thumbs_temp, thumbs_path)){
 		Print("error unziping thumbs in server!");
@@ -821,7 +821,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "creating json DATA items...";
+	self.ui.progressBar.format = "cirando arquivo com metadata...";
 	//create json DATA items in library
 	var json_tags = lib_path + item_name + "/DATA/template_tags.json";
 	if(!BD1_WriteJsonFile(selected_tags, json_tags)){
@@ -831,7 +831,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 
 	//saves item library metadata 
 	if(!saveItemMetadata(user_data, lib_path + item_name, description_text)){
-		MessageBox.warning("error creating item saved metadata!",0,0);
+		MessageBox.warning("Erro criando item metadata!",0,0);
 		Print("Fail to create item metadata!");
 		return false;
 	}
@@ -849,7 +849,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 	}
 	
 	self.updateProgressBar();
-	self.ui.progressBar.format = "Item: " + item_name + " saved in library!";	
+	self.ui.progressBar.format = "Item: " + item_name + " salvo n library!";	
 	
 	return true;
 	
@@ -913,7 +913,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 		copyPaste.useCreateTemplateSpecial(false, false, true, false);//avoid scanning for additional files.
 		var tpl = copyPaste.createTemplateFromSelection(tpl_name, tpl_path);
 		if(!tpl){
-			MessageBox.warning("ERROR saving the temporary tpl!",0,0);
+			MessageBox.warning("Erro salvando o tpl temporário!",0,0);
 			return false;
 		}
 		var tplFullpath = tpl_path + tpl;
@@ -936,7 +936,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 		if(rig_data["lib_exists"]){
 			var lib_curr_data = BD1_ReadJSONFile(lib_json);
 			if(!lib_curr_data){
-				MessageBox.warning("Fail to read current lib json data!",0,0);
+				MessageBox.warning("Erro ao ler as informações da library!", 0, 0);
 				return false;
 			}
 			
@@ -945,8 +945,8 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 			
 			//make copy of
 			if(!BD1_CopyFile(lib_json, (lib_json + "~"))){
-				MessageBox.warning("ERROR! Fail to create bakcup lib_json file!",0,0);
-				Print("Fail to create backup lib json file!");
+				MessageBox.warning("Falha ao criar o arquivo de backup!!",0,0);
+				Print("[BIRDOAPP] Falha ao criar o arquivo de backup!!");
 				return false;
 			}
 			
@@ -960,7 +960,7 @@ function saveTpl(self, projectDATA, item_status, user_data, rig_data, selected_t
 		}
 		
 		if(!BD1_WriteJsonFile(lib_curr_data, lib_json)){
-			MessageBox.warning("Error updating library json!",0,0);
+			MessageBox.warning("Erro atualizando a lib data!",0,0);
 			return false;
 		} else {
 			return true;
@@ -1032,17 +1032,17 @@ function apply_selected_template(self, user_data, lib_path, item_list, rig_group
 		Print("applying... " + template_zip);
 		
 		self.updateProgressBar();
-		self.ui.progressBar.format = "downloading item zip...";
+		self.ui.progressBar.format = "baixando item...";
 		//downloading lib zip
 		var temp_zip = temp_folder + "_temp.zip";
 		if(!BD1_CopyFile(template_zip, temp_zip)){
-			MessageBox.warning("Fail to copy the zip file to temp folder..",0,0);
+			MessageBox.warning("Erro copiando temp zip file!",0,0);
 			Print("Fail copy from : " + template_zip + " to " + temp_zip);
 			return false;
 		}
 			
 		self.updateProgressBar();
-		self.ui.progressBar.format = "uncompressing item...";
+		self.ui.progressBar.format = "descompactando item...";
 		//unpacking item
 		if(!BD1_UnzipFile(temp_zip, temp_folder)){
 			Print("Unzip file failed... canceling..");
@@ -1050,7 +1050,7 @@ function apply_selected_template(self, user_data, lib_path, item_list, rig_group
 		}
 		
 		self.updateProgressBar();
-		self.ui.progressBar.format = "applying template...";
+		self.ui.progressBar.format = "aplicando template...";
 		//apply template
 		var tplName = BD1_fileBasename(template_zip).replace(".zip", ".tpl");
 		var temp_template = temp_folder + tplName;
@@ -1072,7 +1072,7 @@ function apply_selected_template(self, user_data, lib_path, item_list, rig_group
 	
 	
 	Print(apply_counter + " Templates applyed with succsess, and " + count_error + " with error!");
-	self.ui.progressBar.format = "(" + apply_counter + ") library items applyed!!";
+	self.ui.progressBar.format = "(" + apply_counter + ") itens aplicados!!";
 	
 	scene.endUndoRedoAccum();
 

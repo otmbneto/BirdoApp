@@ -15,8 +15,6 @@ Copyright:   @leobazao
 -------------------------------------------------------------------------------
 */
 // TODO:
-//	 tirar os sardinha do codigo - OK
-//   adaptar textos de mensagens MessageBox para portugues!
 //   tentar incluir edicao das tags dos items na funcao do edit items (mto dificil... se rolar, blz!!)
 //        
 //   descobrir a forma de pegar o usuario do database e melhorar a funcao do getPaths para quando for database e offline (completar o path da lib com o env no final)
@@ -39,17 +37,11 @@ function BD_BirdoLibrary(){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return false;
 	}
-	
-	if(!projectDATA.usesBirdoLib()){
-		MessageBox.warning("Este projeto nao usa BirdoLibrary!",0,0);
-		Print("Birdo library is not used in this project!");
-		return;			
-	}
-	
+		
 	var initial_node = selection.selectedNode(0);
 	
 	if(initial_node == ""){
-		MessageBox.warning("Select one node in the Rig to access the Library for this Rig!",0,0);
+		MessageBox.warning("Selecione um node do Rig para ter acesso a library desse Rig!",0,0);
 		return;
 	}
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/BirdoLibraryUtils.js");
@@ -59,14 +51,14 @@ function BD_BirdoLibrary(){
 	//gets user data 
 	var user_data = utils.getUserData(projectDATA, library_root);
 	if(!user_data){
-		MessageBox.warning("Error to create userdata object!",0,0);
+		MessageBox.warning("Erro criando userdata!",0,0);
 		Print("fail to get user data... canceling");
 		return;
 	}
 	
 	
 	if(!BD1_DirExist(library_root)){
-		MessageBox.information("This Computer does't have access to the library folder!");
+		MessageBox.information("Este computador está sem acesso a library do projeto!");
 		return;		
 	}
 	
@@ -86,21 +78,20 @@ function BD_BirdoLibrary(){
 	function get_rig_data(library_root, selected_node, utils){//return object with selected rig information for the library
 
 		var rig_data = {};
-		var char_name_regex = /CH\d+_\w+/;//regex do padrao de nome de rig (nome do char)
-		var rig_group_regex = /\w{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
+		var char_name_regex = /[a-zA-Z]{2}\d+_\w+/;//regex do padrao de nome de rig (nome do char)
+		var rig_group_regex = /[a-zA-Z]{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
 		var index_regex = /(_\d+)$/; //numero de nodes duplicados na nodeview '_1, 2, 3 ...'
 		var version_regex = /v\d+/;
 		var name_split = selected_node.split("/");
-
 		if(!rig_group_regex.test(selected_node)){
-			MessageBox.warning("It's not a valid Library Rig!",0,0);
+			MessageBox.warning("Não é um Rig válido!",0,0);
 			return false;
 		}
 		
 		//mudanca: agora define o nome do rig por um regex, e nao pelo index do caminho como tava antes!
 		var char_name = first_match_in_array(char_name_regex, name_split);
 		if(!char_name){
-			MessageBox.warning("This rig is not a valid library rig!",0,0);
+			MessageBox.warning("Este Rig não é um Rig válido de library!",0,0);
 			Print("cant find rig char name!");
 			return false;
 		}
@@ -108,7 +99,7 @@ function BD_BirdoLibrary(){
 		var rig_node_name = first_match_in_array(rig_group_regex, name_split);
 		
 		if(!rig_node_name){
-			MessageBox.warning("Invalid Rig Selection!",0,0);
+			MessageBox.warning("Seleção de Rig inválida!",0,0);
 			return false;
 		}
 		
@@ -153,7 +144,7 @@ function BD_BirdoLibrary(){
 		
 		//checks if exists library for the found lib groups in the Rig
 		if(!has_extra_lib && !main_rig_lib){
-			MessageBox.information("No library found for the selected Rig!");
+			MessageBox.information("Nenhuma Library encontrada para o Rig selecionado!");
 			Print("No library for the character: " + rig_data["char_name"]);
 			return false;
 		} else if(has_extra_lib && !main_rig_lib){
@@ -207,8 +198,8 @@ function BD_BirdoLibrary(){
 				var version_json = lib_path + "_rig_version.json";
 				var version_lib_data = BD1_ReadJSONFile(version_json);
 				if(!version_lib_data){
-					MessageBox.warning("Fail to read the rig version json file!", 0, 0);
-					Print("Error reding json file: " + rig_data["rig_version_json"]);
+					MessageBox.warning("Falha para ler as informações de versão do Rig!", 0, 0);
+					Print("[BIRDOAPP] Error reding json file: " + rig_data["rig_version_json"]);
 					return false;
 				}
 				//gets the match version information 
@@ -440,7 +431,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 				main_data["libs"][that.ui.tabWidget.currentIndex]["data"]["library"][currentItemMenu]["status"] = item;
 				var json_lib = main_data["libs"][that.ui.tabWidget.currentIndex]["lib_json"];
 				if(!utils.changeStatus(currentItemMenu, item, json_lib)){
-					MessageBox.warning("Error updating status json file!",0,0);
+					MessageBox.warning("Erro atualizando status json file!!",0,0);
 					Print("Fail to update status!");
 				} else {
 					Print("Status updated!");
@@ -473,7 +464,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 			this.ui.enabled = false;
 			if(utils.edit_item(this, lib_path, itemRigthClicked, user_data)){
 				Print("item edit completed!");
-				MessageBox.information("Edit completed! To update library thumbnail with new changes, restart the Library ui!");
+				MessageBox.information("Edição completa! Para atualizar a interface com a nova edição, reinicie o script!");
 			} else {
 				Print("edit failed!");
 			}
@@ -487,7 +478,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 		deleteItem.triggered.connect(this, function(){
 			Print("Deleting item : " + currentItemMenu);
 			if(!utils.delete_item(main_data["libs"][this.ui.tabWidget.currentIndex]["lib_path"], currentItemMenu)){
-				MessageBox.warning("Error deleting item: " + currentItemMenu, 0, 0);
+				MessageBox.warning("Erro deletando item: " + currentItemMenu, 0, 0);
 				return;
 			} else {
 				main_data["libs"][this.ui.tabWidget.currentIndex]["data"]["library"][currentItemMenu]["deleted"] = true;
@@ -662,7 +653,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 			}
 			
 			if(first_run_rigth_modify){
-				MessageBox.warning("Check it to lock this library! Until you uncheck this box, no one will have access to this Library for save or import items. Make sure to unlock it before closing this window!",0,0);
+				MessageBox.warning("Marque este checkbox para travar esta library! Até ser desmarcado, ninguém vai poder editar ou acessar esta library.", 0, 0);
 			}
 			
 			main_tab_widget.styleSheet = rigth_modify_checkB.checked ? utils.styles.tab_edit.on : utils.styles.tab_edit.off;
@@ -819,7 +810,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 	
 	this.clearSelected = function(){//clear the selected items
 		if(first_run_change_tab && selected_items){
-			MessageBox.warning("Selected items and filters will be lost when change the tab!",0,0);
+			MessageBox.warning("Itens e tags selecionados se perderão se trocar de aba!", 0, 0);
 			first_run_change_tab = false;
 		}
 		selected_items = null;
@@ -853,7 +844,7 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 		var rig_group = main_data["libs"][this.ui.tabWidget.currentIndex].root_node[this.ui.comboNode.currentIndex];
 
 		if(!selected_items){
-			MessageBox.information("No item selected!");
+			MessageBox.information("Nenhum item selecionado!");
 			Print("No item selected!");
 			return;
 		}
@@ -871,9 +862,9 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 		var applyTpl = utils.apply_selected_template(this, user_data, root_path, selected_items, rig_group, options);
 		
 		if(!applyTpl){
-			MessageBox.warning("Fail to apply the selected node!",0,0);
+			MessageBox.warning("Falha ao aplicar o tpl!",0,0);
 		} else {
-			MessageBox.information("Library applyed!! :D");
+			MessageBox.information("Lib aplicada! :D");
 		}
 		this.ui.close();
 	}

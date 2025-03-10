@@ -34,14 +34,7 @@ function BD_BirdoLib_Save(){
 		return false;
 	}
 	
-	if(!projectDATA.usesBirdoLib()){
-		MessageBox.warning("Este projeto nao usa BirdoLibrary!",0,0);
-		Print("Birdo library is not used in this project!");
-		return;			
-	}
-	
 	var selected = selection.selectedNodes();
-	
 	if(selected.length != 1){
 		MessageBox.warning("Wrong selection! Select the Rig Group in the timeline with the disired Pose, or Anim frames to send it to the Library!",0 ,0);
 		return;
@@ -92,7 +85,7 @@ function BD_BirdoLib_Save(){
 	//EXTRA FUNCTIONS
 	function get_selection_data(sel_node, root_path){//check if selections is valid and return rig data
 		
-		var regex_rig = /\w{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
+		var regex_rig = /[a-zA-Z]{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
 		var regex_version = /v\d{2}/;
 		var lib_type = selection.isSelectionRange() ? "ANIM" : "POSE";
 		
