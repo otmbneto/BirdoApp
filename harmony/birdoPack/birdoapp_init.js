@@ -309,10 +309,6 @@ function BirdoAppConfig(config_data, project_data){
 		return this.getTBLIB("server") + "BirdoLib/";
 	}
 	
-	this.usesBirdoLib = function(){//testa se o projeto usa birdoLib
-		return dirExist(this.getLibPath());	
-	}
-	
 	this.getWriteNodeAtt = function(step){//retorna o atributo do write node para o step ('pre_comp' ou 'comp')
 		return this.write_node_att[step.toLowerCase()];
 	}
