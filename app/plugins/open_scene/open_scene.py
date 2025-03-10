@@ -13,8 +13,7 @@ from threading import Thread
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(curr_dir))))
 from app.config import ConfigInit
-from app.utils.MessageBox import CreateMessageBox
-from app.utils.birdo_datetime import timestamp_from_isodatestr, get_current_datetime_string
+from app.utils.birdo_datetime import get_current_datetime_string
 from app.utils.birdo_zip import extract_zipfile, compact_folder
 from app.utils.birdo_pathlib import Path
 
@@ -122,7 +121,6 @@ class OpenScene(QtGui.QWidget):
         self.signals.sendQuestionMessage.connect(self.askUser)
         self.signals.sendResponseMessage.connect(self.checkResponse)
 
-
     def update_server_status(self):
         self.project_data.paths.check_connection()
         status = self.project_data.paths.server_status
@@ -173,7 +171,6 @@ class OpenScene(QtGui.QWidget):
 
     def get_progress(self):
         return self.ui.progress_bar.value()
-
 
     def get_episode_data(self, episode):
         episode_data = None
@@ -274,34 +271,27 @@ class OpenScene(QtGui.QWidget):
     def reset_progress(self, args):
         self.ui.progress_bar.setFormat("")
         self.ui.progress_bar.setValue(0)
-        return
 
     @QtCore.Slot(object)
     def set_progress_range(self, args):
         self.ui.progress_bar.setRange(args[0], args[-1])
-        return
 
     @QtCore.Slot(object)
-    def warnUser(self,args):
-
+    def warnUser(self, args):
         self.birdoapp.mb.warning(args[0])
 
     @QtCore.Slot(object)
-    def askUser(self,args):
-
+    def askUser(self, args):
         answer = self.birdoapp.mb.question(args[0])
         self.signals.sendResponseMessage.emit([answer])
 
-
     @QtCore.Slot(object)
-    def checkResponse(self,args):
-
+    def checkResponse(self, args):
         self.response = args[0]
         self.wait = False
 
     @QtCore.Slot(object)
-    def informUser(self,args):
-
+    def informUser(self, args):
         self.birdoapp.mb.information(args[0])
 
     def list_episodes(self):
@@ -467,32 +457,26 @@ class OpenScene(QtGui.QWidget):
         print "reset widgets with version shot info..."
 
     def execute(self):
-
         execute_thread = Thread(target=self.on_open_scene)
         execute_thread.start()
 
     def on_open_scene(self):
-
         print('*******************--OPEN FILE--********************')
         current_step = self.ui.comboStep.currentText()
         selected_scene = self.ui.listScenes.currentItem().text()
 
         # SETS LOADING PROGRESS BAR
-        #self.ui.progress_bar.setRange(0, 6)
         self.signals.progress_range_set.emit([0, 6])
-        #self.ui.progress_bar.setFormat("checking local file...")
         self.signals.progress_format.emit(["checking local file..."])
-        #self.ui.progress_bar.setValue(1)
         self.signals.progress_made.emit([])
 
         # GETS THE LOCAL SCENE PATH
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
             if self.shot_versions["most_recent"] == 'server':
-                self.signals.sendQuestionMessage.emit([
-                    "[question]Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(selected_scene)])
+                self.signals.sendQuestionMessage.emit(["[question]Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(selected_scene)])
                 self.wait = True
-                while(self.wait):
+                while self.wait:
                     continue
                 ask = self.response
                 self.response = None
@@ -503,12 +487,8 @@ class OpenScene(QtGui.QWidget):
                         selected_scene)])
 
             if not local_scene["xstage"] or not local_scene["xstage"].exists():
-                #self.ui.progress_bar.setFormat("ERROR! File not found!")
                 self.signals.progress_format.emit(["ERROR! File not found!"])
-                #self.ui.progress_bar.setValue(3)
                 self.signals.progress_made.emit([])
-                self.signals.progress_made.emit([])
-                #self.signals.progress_made.emit([])
                 self.signals.sendWarningMessage.emit(["Error! Cant find the local scene to open!"])
                 return
         else:
@@ -520,10 +500,10 @@ class OpenScene(QtGui.QWidget):
                 return
 
             if self.shot_versions["most_recent"] == 'local':
-                self.signals.sendQuestionMessage.emit([
-                    "Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\nDeseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)"])
+                self.signals.sendQuestionMessage.emit(["Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\n"
+                                                       "Deseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)"])
                 self.wait = True
-                while(self.wait):
+                while self.wait:
                     continue
                 ask = self.response
                 self.response = None
@@ -533,11 +513,8 @@ class OpenScene(QtGui.QWidget):
             step_open = self.shot_versions["step_to_open"]
             scene_obj = self.shot_versions[step_open]["versions"][selected_version]
             # DOWNLOAD SCENE FILE...
-            #self.ui.progress_bar.setFormat("downloading file...")
-            #self.ui.progress_bar.setValue(2)
             self.signals.progress_format.emit(["downloading file..."])
             self.signals.progress_made.emit([])
-            #self.signals.progress_made.emit([])
             temp_file = self.temp_open_scene / scene_obj.name
             print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file.path)
             scene_obj.copy_file(temp_file)
@@ -547,12 +524,8 @@ class OpenScene(QtGui.QWidget):
                 return
 
             # CHECK IF NEED BACKUP
-            #self.ui.progress_bar.setFormat("checking backup...")
-            #self.ui.progress_bar.setValue(3)
-            self.signals.progress_format.emit(["checking backup..."])           
+            self.signals.progress_format.emit(["checking backup..."])
             self.signals.progress_made.emit([])
-            #self.signals.progress_made.emit([])
-            #self.signals.progress_made.emit([])
             if local_scene["path"].exists():
                 print "[BIRDOAPP] Já existe uma versão local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
                 backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string() / selected_scene
@@ -571,14 +544,12 @@ class OpenScene(QtGui.QWidget):
                     return
             else:
                 if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
-                    print "error creating scene folder scheeme!"
+                    print "error creating scene folder scheme!"
                     self.signals.sendWarningMessage.emit(["Erro criando diretórios locais da cena!"])
                     return
 
             # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
-            #self.ui.progress_bar.setFormat("unpacking scene...")
-            #self.ui.progress_bar.setValue(4)
-            self.signals.progress_format.emit(["unpacking scene..."]) 
+            self.signals.progress_format.emit(["unpacking scene..."])
             self.signals.progress_made.emit([])
             print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
             if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
@@ -593,8 +564,6 @@ class OpenScene(QtGui.QWidget):
                 return
 
             # OPEN SCENE DOWNLOADED
-            #self.ui.progress_bar.setFormat("opening scene...")
-            #self.ui.progress_bar.setValue(5)
             self.signals.progress_format.emit(["opening scene..."])
             self.signals.progress_made.emit([]) 
             if not local_scene["xstage"]:
@@ -616,7 +585,6 @@ class OpenScene(QtGui.QWidget):
         self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
         print "opening scene: {0}".format(local_scene["xstage"])
         self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
-
         if len(self.recently_open) >= 10:
             self.recently_open = self.recently_open[1:]
         
