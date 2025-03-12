@@ -742,7 +742,7 @@ QProgressBar::chunk{
                <enum>QFrame::Raised</enum>
               </property>
               <property name="text">
-               <string>Seu nome de usuario. (O estúdio pode fornecer um para você)</string>
+               <string>Seu nome de usuario. Este nome será usado para identificar algumas ações.</string>
               </property>
               <property name="margin">
                <number>5</number>
@@ -769,152 +769,6 @@ QProgressBar::chunk{
              </spacer>
             </item>
             <item row="3" column="0">
-             <widget class="QLabel" name="server_title_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Estudio:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="server_login_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Nome:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QLineEdit" name="studio_name_label">
-              <property name="toolTip">
-               <string>login do server</string>
-              </property>
-              <property name="placeholderText">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="server_pw_label">
-              <property name="text">
-               <string>Caminho Projetos</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QLineEdit" name="server_path_label"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="open_folder_server">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>40</width>
-                  <height>40</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;show password&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QPushButton {
-	background: none;
-	border: 2px solid #666666;
-	border-radius: 5px;	
-}
-
-QPushButton:hover {
-	background-color: #777777;
-	border: none;
-}
-
-QPushButton:pressed {
-	background-color: rgb(90, 90, 90);
-	border-top: 2px solid #444444;
-	border-left: 2px solid #444444;
-	border-bottom: none;
-	border-right: none;
-}
-</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="6" column="0" colspan="2">
-             <widget class="QLabel" name="label_2">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <property name="text">
-               <string>Este campo deve ser preenchido com a informação que o Estúdio te forneceu. Se tiver acesso ao servidor agora, pode selecionar o caminho pelo botão ao lado.</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-              <property name="margin">
-               <number>5</number>
-              </property>
-              <property name="indent">
-               <number>5</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0" colspan="2">
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>10</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="8" column="0">
              <widget class="QLabel" name="label_5">
               <property name="font">
                <font>
@@ -927,17 +781,17 @@ QPushButton:pressed {
               </property>
              </widget>
             </item>
-            <item row="10" column="0">
+            <item row="5" column="0">
              <widget class="QLabel" name="harmony_versions_lbl">
               <property name="text">
                <string>Harmony Versions:</string>
               </property>
              </widget>
             </item>
-            <item row="10" column="1">
+            <item row="5" column="1">
              <widget class="QComboBox" name="harmony_versions"/>
             </item>
-            <item row="11" column="0">
+            <item row="6" column="0">
              <widget class="QLabel" name="harmony_label">
               <property name="enabled">
                <bool>true</bool>
@@ -947,7 +801,7 @@ QPushButton:pressed {
               </property>
              </widget>
             </item>
-            <item row="11" column="1">
+            <item row="6" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QLineEdit" name="harmony_folder_line">
@@ -1020,7 +874,29 @@ QPushButton:pressed {
               </item>
              </layout>
             </item>
-            <item row="13" column="0" colspan="2">
+            <item row="7" column="0" colspan="2">
+             <widget class="QLabel" name="label_6">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="text">
+               <string>Se nenhuma versão do Harmony aparecer na lista &quot;Harmony Version&quot;, escolha o caminho de instalação no seu computador. Esta versão do Harmony será usada para todas ferramentas do BirdoApp.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="margin">
+               <number>5</number>
+              </property>
+              <property name="indent">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0" colspan="2">
              <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -1035,28 +911,6 @@ QPushButton:pressed {
                </size>
               </property>
              </spacer>
-            </item>
-            <item row="12" column="0" colspan="2">
-             <widget class="QLabel" name="label_6">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <property name="text">
-               <string>Se nenhuma versao do Harmony aparecer na lista &quot;Harmony Version&quot;, escolha o caminho de instalação no seu computador.</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-              <property name="margin">
-               <number>5</number>
-              </property>
-              <property name="indent">
-               <number>5</number>
-              </property>
-             </widget>
             </item>
            </layout>
           </widget>
@@ -1251,116 +1105,337 @@ QToolButton:pressed {
           </widget>
          </widget>
          <widget class="QWidget" name="standalonePage">
-          <widget class="QWidget" name="widget_2" native="true">
-           <property name="geometry">
-            <rect>
-             <x>9</x>
-             <y>19</y>
-             <width>401</width>
-             <height>451</height>
-            </rect>
-           </property>
-           <widget class="QGroupBox" name="recentGrp">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>300</y>
-              <width>391</width>
-              <height>141</height>
-             </rect>
-            </property>
-            <property name="title">
-             <string>Abertos recentemente</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="createAssetBtn">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>20</y>
-              <width>180</width>
-              <height>200</height>
-             </rect>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>180</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Create asset</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="createSceneBtn">
-            <property name="geometry">
-             <rect>
-              <x>210</x>
-              <y>20</y>
-              <width>180</width>
-              <height>200</height>
-             </rect>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>180</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Create scene</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="standaloneFolderPath">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>230</y>
-              <width>331</width>
-              <height>22</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="standaloneExplorerBtn">
-            <property name="geometry">
-             <rect>
-              <x>340</x>
-              <y>230</y>
-              <width>51</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="standaloneOpenBtn">
-            <property name="geometry">
-             <rect>
-              <x>90</x>
-              <y>260</y>
-              <width>93</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Abrir</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="standaloneCancelBtn">
-            <property name="geometry">
-             <rect>
-              <x>210</x>
-              <y>260</y>
-              <width>93</width>
-              <height>28</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Cancelar</string>
-            </property>
-           </widget>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="0">
+            <widget class="QWidget" name="widget_2" native="true">
+             <property name="styleSheet">
+              <string notr="true">QPushButton:hover {
+	color: #05B8CC;
+}
+
+QPushButton {
+	color: white;
+}</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,0,0,0,0,0">
+              <item row="0" column="0" colspan="2">
+               <widget class="QLabel" name="label_7">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>15</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Criar Arquivo Novo Baseado em Um Template:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="2">
+               <widget class="QLabel" name="label_8">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>15</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Abrir Arquivo de Harmony Existente no Computador:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" colspan="2">
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QPushButton" name="createSceneBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>180</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Criar Template Cena</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="createAssetBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>180</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Criar Template Asset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" colspan="2">
+               <widget class="QPushButton" name="standaloneOpenBtn">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Abrir Arquivo</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0" colspan="2">
+               <widget class="QGroupBox" name="recentGrp">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>150</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>De um clique duplo na cena que deseja abrir!</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QGroupBox {
+	color: white;
+}
+
+QListWidget {
+	border: null;
+}
+
+QListWidget::Item {
+	color: rgb(200, 255, 200);
+}
+
+
+QListWidget::Item:hover {
+	color: rgb(100, 255, 100);
+}</string>
+                </property>
+                <property name="title">
+                 <string>Abertos recentemente</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_2">
+          <layout class="QGridLayout" name="gridLayout_5" columnstretch="0,0">
+           <item row="4" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item alignment="Qt::AlignTop">
+              <widget class="QLineEdit" name="server_path_label"/>
+             </item>
+             <item alignment="Qt::AlignTop">
+              <widget class="QPushButton" name="open_folder_server">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;show password&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	background: none;
+	border: 2px solid #666666;
+	border-radius: 5px;	
+}
+
+QPushButton:hover {
+	background-color: #777777;
+	border: none;
+}
+
+QPushButton:pressed {
+	background-color: rgb(90, 90, 90);
+	border-top: 2px solid #444444;
+	border-left: 2px solid #444444;
+	border-bottom: none;
+	border-right: none;
+}
+</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="0" alignment="Qt::AlignTop">
+            <widget class="QLabel" name="server_pw_label">
+             <property name="text">
+              <string>Caminho Projetos</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="server_login_label">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Nome:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="2" alignment="Qt::AlignTop">
+            <widget class="QLabel" name="label_2">
+             <property name="frameShape">
+              <enum>QFrame::Box</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <property name="text">
+              <string>Esta página deve ser preenchida com as informações que o Estúdio te forneceu. Se este computador tiver acesso ao servidor, pode selecionar o caminho pelo botão ao lado.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+             <property name="margin">
+              <number>5</number>
+             </property>
+             <property name="indent">
+              <number>5</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="studio_name_label">
+             <property name="toolTip">
+              <string>login do server</string>
+             </property>
+             <property name="placeholderText">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="server_title_label">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Estudio:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>391</width>
+               <height>50</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Preferred</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
@@ -1520,7 +1595,7 @@ QScrollBar:arrow{
 </string>
       </property>
       <property name="text">
-       <string>Update</string>
+       <string>Salvar</string>
       </property>
      </widget>
     </item>
@@ -1539,6 +1614,7 @@ QScrollBar:arrow{
     <property name="title">
      <string>|||</string>
     </property>
+    <addaction name="actionConfigurar_Estudio"/>
     <addaction name="actionCredits"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -1557,12 +1633,22 @@ QScrollBar:arrow{
   </action>
   <action name="actionCredits">
    <property name="text">
-    <string>Credits...</string>
+    <string>Creditos</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionConfigurar_Est_dio">
+   <property name="text">
+    <string>Configurar Estudio</string>
+   </property>
+  </action>
+  <action name="actionConfigurar_Estudio">
+   <property name="text">
+    <string>Configurar Estudio</string>
    </property>
   </action>
  </widget>

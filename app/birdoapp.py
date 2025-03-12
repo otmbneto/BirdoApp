@@ -7,18 +7,15 @@ from PySide import QtCore, QtGui, QtUiTools
 import os
 import subprocess
 from time import sleep
-# TODO: usar o birdo_pathlib Path() aqui (depois de testar todos metodos dele!)
 
 
 class BirdoApp(QtGui.QMainWindow):
     """Main BirdoApp interface"""
-
-    def __init__(self,standalone = False):
+    def __init__(self):
         super(BirdoApp, self).__init__()
         # config init object wth app main features
         self.birdoapp = ConfigInit()
 
-        self.standalone = standalone
         # load gui file
         self.ui = self.load_ui(self.birdoapp.gui_file)
 
@@ -33,9 +30,6 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Empty plugin value to start
         self.plugins = None
-
-        #file_menu = QtGui.QMenu("Recentes", self)
-        #self.ui.menu.addMenu(file_menu)
 
         # SETS ICONS
         logo = QtGui.QIcon(self.birdoapp.icons["logo"])
@@ -56,50 +50,23 @@ class BirdoApp(QtGui.QMainWindow):
 
         # useful colors
         self.red_color = "color: rgb(255, 100, 74);"
-        self.green_color = ""
+        self.green_color = "color: rgb(100, 255, 100);"
         self.recently_open = []
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
         if self.recently_open_log.exists():
-            with open(self.recently_open_log.normpath(),"r") as rec_open_log:
-                self.recently_open = list(set([line.replace("\n","") for line in rec_open_log.readlines()]))
-
+            self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
+            self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
         recent_layout = QtGui.QVBoxLayout()
         self.ui.recentGrp.setLayout(recent_layout)
         recent_layout.addWidget(self.recent_list)
 
-        for i in range(len(self.recently_open)):
-            self.recent_list.addItem(self.recently_open[i])
-            self.recent_list.item(i).setForeground(QtCore.Qt.white)
-
-
-    def onOpenFileStandalone(self):
-
-        f = Path(self.ui.standaloneFolderPath.text())
-        if len(f) > 0  and f.exists():
-            
-            scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
-            scene_script_path = f.get_parent() / "scripts"
-            if not scene_script_path.exists():
-                scene_script_path.make_dirs()
-            print("copying {0} to script folder".format(scene_opened_script.name))
-            if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
-                print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
-                return
-
-            self.birdoapp.harmony.open_harmony_scene(f)
-            self.updateRecentlyOpen(f)
-            '''
-            if len(self.recently_open) >= 10:
-                self.recently_open = list(set(self.recently_open[1:]))
-            self.recently_open.append(f.normpath())
-            self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-            with open(self.recently_open_log.normpath(),"w") as rec_open_log:
-                rec_open_log.write("\n".join(self.recently_open))
-            '''
-        else:
-            print("ERROR: File not selected")
-
-        return
+        for i, f in enumerate(self.recently_open):
+            item = QtGui.QListWidgetItem()
+            item.setText(f.name)
+            # item.setForeground(QtCore.Qt.green)
+            item.setData(3, f.path)
+            item.setToolTip(f.path)
+            self.recent_list.addItem(item)
 
     def load_ui(self, ui_file):
         """carreag o arquivo ui na classe"""
@@ -112,6 +79,7 @@ class BirdoApp(QtGui.QMainWindow):
         """faz os connects das widgets"""
         # MENU ACTIONS
         self.ui.actionCredits.triggered.connect(self.credits)
+        self.ui.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
         self.ui.actionExit.triggered.connect(self.close)
 
         # MAIN UPDATE BUTTON
@@ -120,52 +88,75 @@ class BirdoApp(QtGui.QMainWindow):
         # HOME BUTTON
         self.ui.home_button.clicked.connect(self.go_home)
 
-        self.ui.standaloneOpenBtn.clicked.connect(self.onOpenFileStandalone)
-        self.ui.standaloneCancelBtn.clicked.connect(self.close)
-
         # CONFIG APP WIDGETS
         self.ui.harmony_folder_button.clicked.connect(lambda: self.get_folder(self.ui.harmony_folder_line))
         self.ui.open_folder_server.clicked.connect(lambda: self.get_folder(self.ui.server_path_label))
 
         # CONFIG PROJECTS WIDGETS
         self.ui.local_folder_button.clicked.connect(lambda: self.get_folder(self.ui.localFolder_line))
-        self.ui.standaloneExplorerBtn.clicked.connect(lambda: self.getXstageFile(self.ui.standaloneFolderPath))
-        self.recent_list.itemDoubleClicked.connect(self.onDoubleClick)
+        self.recent_list.itemDoubleClicked.connect(self.double_click_recent)
 
+        # CONFIG STANDALONE WIDGETS
         self.ui.createSceneBtn.clicked.connect(self.onSceneTemplateOpen)
         self.ui.createAssetBtn.clicked.connect(self.onAssetTemplateOpen)
+        self.ui.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
 
+    def on_open_standalone(self):
+        initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
+        xstage = QtGui.QFileDialog().getOpenFileName(
+            self, "Escolha Arquivo xstage",
+            initial_dir,
+            "Harmony Files (*.xstage)"
+        )
+        if not xstage:
+            print "canceled..."
+            return
+        f = Path(str(xstage[0]))
+        if f.exists():
+            scene_opened_script = Path(
+                self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+            scene_script_path = f.get_parent() / "scripts"
+            if not scene_script_path.exists():
+                scene_script_path.make_dirs()
+            print("copying {0} to script folder".format(scene_opened_script.name))
+            if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
+                print "[BIRDOAPP] Falha ao copiar o arquivo TB_sceneOpnece.js para o script da cena escolhida!"
+                return
+            self.birdoapp.harmony.open_harmony_scene(f)
+            self.update_recently_open(f)
+        else:
+            print("[BIRDOAPP] arquivo escolhido invalido!")
 
     def onSceneTemplateOpen(self):
-
         scene_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'SCENE_template')
         xstage = self.birdoapp.harmony.get_xstage_last_version(scene_template)
         self.birdoapp.harmony.open_harmony_scene(Path(xstage))
         
     def onAssetTemplateOpen(self):
-
         asset_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'ASSET_template')
         xstage = self.birdoapp.harmony.get_xstage_last_version(asset_template)
         self.birdoapp.harmony.open_harmony_scene(Path(xstage))
 
-    def onDoubleClick(self):
-
+    def double_click_recent(self):
         selected = self.recent_list.selectedItems()
         if len(selected) > 0:
-            f = Path(selected[0].text())
+            f = Path(selected[0].data(3))
             self.birdoapp.harmony.open_harmony_scene(f)
-            self.updateRecentlyOpen(f)
-        return
+            self.update_recently_open(f)
 
-
-    def updateRecentlyOpen(self,f):
-
+    def update_recently_open(self, f):
+        if f.path in [x.path for x in self.recently_open]:
+            self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
         if len(self.recently_open) >= 10:
             self.recently_open = list(set(self.recently_open[1:]))
-        self.recently_open.append(f.normpath())
+        self.recently_open.append(f.path)
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        with open(self.recently_open_log.normpath(),"w") as rec_open_log:
-            rec_open_log.write("\n".join(self.recently_open))
+        self.recently_open_log.write_text("\n".join([str(x) for x in self.recently_open]))
+        item = QtGui.QListWidgetItem()
+        item.setText(f.name)
+        item.setData(3, f.path)
+        item.setToolTip(f.path)
+        self.recent_list.addItem(item)
 
     def clean_layout(self, layout):
         """remove widgets from layout"""
@@ -178,7 +169,10 @@ class BirdoApp(QtGui.QMainWindow):
         """
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
-        else:
+
+        if self.birdoapp.get_user_type() == "STANDALONE":
+            self.load_standalone_page()
+        elif self.birdoapp.get_user_type() == "STUDIO":
             self.load_projects_page()
 
     def load_projects_page(self):
@@ -225,15 +219,26 @@ class BirdoApp(QtGui.QMainWindow):
         # segura 2 segundos pra dar um chaume... heheh
         sleep(2)
 
-        #print(self.birdoapp.is_ready())
-        #print(self.standalone)
         # Checa se o config do app esta ok
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
-        elif self.standalone:
-            self.ui.stackedWidget.setCurrentIndex(5)
-        else:
+
+        # define o user type e inicia a pagina necessaria
+        if self.birdoapp.get_user_type() == "STANDALONE":
+            self.load_standalone_page()
+        elif self.birdoapp.get_user_type() == "STUDIO":
             self.load_projects_page()
+
+    def load_standalone_page(self):
+        self.ui.stackedWidget.setCurrentIndex(5)
+
+        # HIDE update button
+        self.ui.update_button.hide()
+
+        # SETS THE CURRENT HEADER
+        self.ui.header.setText("BIRDOAPP")
+
+        self.update_foot_label("Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
 
     def load_config_app_page(self):
         self.ui.stackedWidget.setCurrentIndex(2)
@@ -248,10 +253,6 @@ class BirdoApp(QtGui.QMainWindow):
         # ATUALIZA OS CAMPOS COM OS DADOS EXISTENTES
         if self.birdoapp.config_data["user_name"]:
             self.ui.username_line.setText(self.birdoapp.config_data["user_name"])
-        if self.birdoapp.config_data["studio_name"]:
-            self.ui.studio_name_label.setText(self.birdoapp.config_data["studio_name"])
-        if self.birdoapp.config_data["server_projects"]:
-            self.ui.server_path_label.setText(self.birdoapp.config_data["server_projects"])
 
         # ATUALIZA OS CAMPOS DE CONFIG DE SOFTWARE
         self.ui.harmony_versions.clear()
@@ -262,6 +263,24 @@ class BirdoApp(QtGui.QMainWindow):
 
         # SETS THE LOADING LABEL
         self.update_foot_label("Configure o BirdoApp para iniciar...", self.green_color)
+
+    def load_config_studio_page(self):
+        self.ui.stackedWidget.setCurrentIndex(6)
+        self.ui.progressBar.setValue(0)
+
+        # SETS THE CURRENT HEADER
+        self.ui.header.setText("ESTUDIO CONFIG...")
+
+        # SHOW update button
+        self.ui.update_button.show()
+
+        if self.birdoapp.config_data["studio_name"]:
+            self.ui.studio_name_label.setText(self.birdoapp.config_data["studio_name"])
+        if self.birdoapp.config_data["server_projects"]:
+            self.ui.server_path_label.setText(self.birdoapp.config_data["server_projects"])
+
+        # SETS THE LOADING LABEL
+        self.update_foot_label(u"Configure as informações que o estúdio te forneceu!", self.green_color)
 
     def load_config_project_page(self):
         self.ui.stackedWidget.setCurrentIndex(3)
@@ -375,11 +394,6 @@ class BirdoApp(QtGui.QMainWindow):
         event.accept()
         self.load_splash_page()
 
-    def getXstageFile(self,edit_line):
-        self.get_folder(edit_line)
-        xstage = self.birdoapp.harmony.get_xstage_last_version(edit_line.text())
-        edit_line.setText(xstage)
-
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()
         dialog.setDirectory(self.birdoapp.system.user_home.path)
@@ -394,15 +408,36 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.loading_label.setText(txt)
         self.ui.loading_label.setStyleSheet(color)
 
+    def update_studio_config(self):
+        """Pega as infos das widgets do config studio page e atualiza o app.config_data"""
+        print "updating studio config..."
+        # get data to update
+        update_data = {
+            "studio_name": self.ui.studio_name_label.text(),
+            "server_projects": self.ui.server_path_label.text()
+        }
+        # update items
+        for item in update_data:
+            if not update_data[item]:
+                msg = "Preencha o campo '{0}' antes de continuar!".format(item)
+                self.birdoapp.mb.warning(msg)
+                self.update_foot_label(msg, self.red_color)
+                return False
+            self.birdoapp.config_data[item] = update_data[item]
+        if self.birdoapp.update_config_json():
+            # update a lista de projetos depois do config...
+            self.birdoapp.get_projects()
+            return True
+        return False
+
     def update_app_config(self):
         """Pega as infos das widgets do config_app page e atualiza o app.config_data"""
         print "updating app config..."
         # get data to update
-        update_data = dict.fromkeys(self.birdoapp.config_data.keys())
-        update_data.pop("user_projects", None)  # remove a key 'user_projects' pois nao vamos precisar nesse check
-        update_data["user_name"] = self.ui.username_line.text()
-        update_data["studio_name"] = self.ui.studio_name_label.text()
-        update_data["server_projects"] = self.ui.server_path_label.text()
+        update_data = {
+            "user_name": self.ui.username_line.text()
+        }
+        # get harmony selected
         harmony = self.ui.harmony_versions.itemData(self.ui.harmony_versions.currentIndex())
         if not harmony:
             harmony_path = self.ui.harmony_folder_line.text()
@@ -425,11 +460,7 @@ class BirdoApp(QtGui.QMainWindow):
                 self.update_foot_label(msg, self.red_color)
                 return False
             self.birdoapp.config_data[item] = update_data[item]
-        if self.birdoapp.update_config_json():
-            # update a lista de projetos depois do config...
-            self.birdoapp.get_projects()
-            return True
-        return False
+        return self.birdoapp.update_config_json()
 
     def update_proj_config(self):
         """Pega as infos das widgets do config proj page e atualiza o app.config_data"""
@@ -475,6 +506,15 @@ class BirdoApp(QtGui.QMainWindow):
                 return
             print "update app config done!"
             self.go_home()
+
+        # se estiver aberta a config studio page (index 6)
+        elif self.ui.stackedWidget.currentIndex() == 6:
+            if not self.update_studio_config():
+                print "error updating config app!"
+                return
+            print "update project config done!"
+            self.go_home()
+
         # se estiver aberta a config proj page (index 3)
         elif self.ui.stackedWidget.currentIndex() == 3:
             if not self.update_proj_config():

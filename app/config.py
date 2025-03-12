@@ -81,7 +81,7 @@ class ConfigInit(object):
             }
 
         # define harmony class
-        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"])
+        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
 
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
@@ -110,7 +110,14 @@ class ConfigInit(object):
 
     def is_ready(self):
         """Metodo para checar se os dados do config.json sao validos"""
-        return not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"], self.config_data["user_name"], self.config_data["harmony_path"]])
+        return not any(not bool(x) for x in [self.config_data["user_name"], self.config_data["harmony_path"]])
+
+    def get_user_type(self):
+        """retorna se o usertype e 'STANDALONE' ou 'STUDIO'"""
+        if not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]]):
+            return "STUDIO"
+        else:
+            return "STANDALONE"
 
     def check_server_path(self):
         """Metodo para verificar se o caminho config do server e valido."""
