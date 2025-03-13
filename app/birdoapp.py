@@ -63,7 +63,6 @@ class BirdoApp(QtGui.QMainWindow):
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
             item.setText(f.name)
-            # item.setForeground(QtCore.Qt.green)
             item.setData(3, f.path)
             item.setToolTip(f.path)
             self.recent_list.addItem(item)
@@ -169,6 +168,7 @@ class BirdoApp(QtGui.QMainWindow):
         """
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
+            return
 
         if self.birdoapp.get_user_type() == "STANDALONE":
             self.load_standalone_page()
@@ -178,9 +178,10 @@ class BirdoApp(QtGui.QMainWindow):
     def load_projects_page(self):
         """Abre pagina inicial de projetos do estudio (index 0)"""
         self.ui.progressBar.setValue(0)
-        # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config do app)
+        # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config studio)
         if not self.birdoapp.check_server_path():
-            self.load_config_app_page()
+            self.birdoapp.mb("Falha ao conectar o caminho do servidor do Estudio. Confira se o caminho está correto, e se tem acesso a pasta.")
+            self.load_config_studio_page()
             return
 
         # hide update button
@@ -210,24 +211,13 @@ class BirdoApp(QtGui.QMainWindow):
         # hide update button
         self.ui.update_button.hide()
 
+        # sets header
+        self.ui.header.setText(u"Boas Vindas!!!")
+
         # SETS THE CURRENT HEADER
-        self.update_foot_label("Loading BirdoApp...", self.green_color)
+        self.update_foot_label("Bem Vind@ ao BirdoApp...", self.green_color)
 
-        # ADD BIRDOAPP LOGO
-        self.ui.anim_logo_label.setPixmap(self.birdoapp.icons["logo"])
-
-        # segura 2 segundos pra dar um chaume... heheh
-        sleep(2)
-
-        # Checa se o config do app esta ok
-        if not self.birdoapp.is_ready():
-            self.load_config_app_page()
-
-        # define o user type e inicia a pagina necessaria
-        if self.birdoapp.get_user_type() == "STANDALONE":
-            self.load_standalone_page()
-        elif self.birdoapp.get_user_type() == "STUDIO":
-            self.load_projects_page()
+        self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
 
     def load_standalone_page(self):
         self.ui.stackedWidget.setCurrentIndex(5)
@@ -389,10 +379,10 @@ class BirdoApp(QtGui.QMainWindow):
         icon = os.path.join(os.path.dirname(path), "plugin.ico").replace("\\", "/")
         return os.path.exists(path) and os.path.exists(icon) and user_type in permissions
 
-    def showEvent(self, event):
-        # do stuff here
-        event.accept()
-        self.load_splash_page()
+    # def showEvent(self, event):
+    #     # do stuff here
+    #     event.accept()
+    #     self.load_splash_page()
 
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()

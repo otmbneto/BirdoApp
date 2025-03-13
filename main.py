@@ -27,4 +27,6 @@ if __name__ == "__main__":
         app = QtGui.QApplication([])
         MainWindow = BirdoApp()
         MainWindow.show()
+        # init splash page
+        MainWindow.load_splash_page()
         sys.exit(app.exec_())
