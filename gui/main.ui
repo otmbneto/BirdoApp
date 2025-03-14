@@ -644,7 +644,7 @@ QProgressBar::chunk{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -1122,21 +1122,15 @@ QPushButton {
 	color: white;
 }</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,0,0,0,0,0">
-              <item row="0" column="0" colspan="2">
-               <widget class="QLabel" name="label_7">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>15</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Criar Arquivo Novo Baseado em Um Template:</string>
+             <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,0,0,0,0,0,0">
+              <item row="3" column="0" colspan="3">
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
-              <item row="3" column="0" colspan="2">
+              <item row="4" column="0" colspan="3">
                <widget class="QLabel" name="label_8">
                 <property name="maximumSize">
                  <size>
@@ -1149,70 +1143,7 @@ QPushButton {
                 </property>
                </widget>
               </item>
-              <item row="2" column="0" colspan="2">
-               <widget class="Line" name="line">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QPushButton" name="createSceneBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>180</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Criar Template Cena</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QPushButton" name="createAssetBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>180</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>50</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Criar Template Asset</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0" colspan="2">
+              <item row="5" column="0" colspan="3">
                <widget class="QPushButton" name="standaloneOpenBtn">
                 <property name="minimumSize">
                  <size>
@@ -1237,7 +1168,35 @@ QPushButton {
                 </property>
                </widget>
               </item>
-              <item row="5" column="0" colspan="2">
+              <item row="1" column="0">
+               <widget class="QLabel" name="standaloneLocationLabel">
+                <property name="text">
+                 <string>Local:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="standaloneCreateBtn">
+                <property name="text">
+                 <string>Create Scene</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="standaloneTemplateLabel">
+                <property name="text">
+                 <string>Template:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="standaloneNameLabel">
+                <property name="text">
+                 <string>Nome:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0" colspan="3">
                <widget class="QGroupBox" name="recentGrp">
                 <property name="minimumSize">
                  <size>
@@ -1270,6 +1229,22 @@ QListWidget::Item:hover {
                  <string>Abertos recentemente</string>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="standaloneNameLine"/>
+              </item>
+              <item row="1" column="2">
+               <widget class="QPushButton" name="standaloneFolderBtn">
+                <property name="text">
+                 <string>Browse...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="standaloneLocationLine"/>
+              </item>
+              <item row="2" column="1" colspan="2">
+               <widget class="QComboBox" name="standaloneTemplateBox"/>
               </item>
              </layout>
             </widget>

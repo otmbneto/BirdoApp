@@ -96,9 +96,43 @@ class BirdoApp(QtGui.QMainWindow):
         self.recent_list.itemDoubleClicked.connect(self.double_click_recent)
 
         # CONFIG STANDALONE WIDGETS
-        self.ui.createSceneBtn.clicked.connect(self.onSceneTemplateOpen)
-        self.ui.createAssetBtn.clicked.connect(self.onAssetTemplateOpen)
+        self.ui.standaloneCreateBtn.clicked.connect(self.on_create_scene)
+        self.ui.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
         self.ui.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+
+    def on_create_scene(self):
+
+        location = str(self.ui.standaloneLocationLine.text())
+        scene_name = str(self.ui.standaloneNameLine.text())
+        if len(location) == 0:
+            print("ERROR: No location was selected")
+            return
+
+        if not os.path.exists(location):
+            print("ERROR: Location not found")
+            return
+
+        if len(scene_name) == 0:
+            print("ERROR: you must choose a name for the new scene")
+            return
+
+        template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.ui.standaloneTemplateBox.currentText()))
+        print(scene_name)
+        print(type(scene_name))
+        template = template.copy_folder(location).rename(scene_name)
+        
+        print(self.birdoapp.harmony.get_xstage_last_version(template.normpath()))
+        xstage = Path(self.birdoapp.harmony.get_xstage_last_version(template.normpath())).rename(scene_name + ".xstage")
+        scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+        scene_script_path = xstage.get_parent() / "scripts"
+        if not scene_script_path.exists():
+            scene_script_path.make_dirs()
+        print("copying {0} to script folder".format(scene_opened_script.name))
+        if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
+            print "[BIRDOAPP] Falha ao copiar o arquivo TB_sceneOpnece.js para o script da cena escolhida!"
+            return
+
+        self.birdoapp.harmony.open_harmony_scene(xstage.normpath())
 
     def on_open_standalone(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
@@ -170,7 +204,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.load_config_app_page()
             return
 
-        if self.birdoapp.get_user_type() == "STANDALONE":
+        if True or self.birdoapp.get_user_type() == "STANDALONE":
             self.load_standalone_page()
         elif self.birdoapp.get_user_type() == "STUDIO":
             self.load_projects_page()
@@ -219,8 +253,15 @@ class BirdoApp(QtGui.QMainWindow):
 
         self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
 
+    def choose_standalone_directory(self):
+        input_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:')
+        self.ui.standaloneLocationLine.setText(input_dir)
+
     def load_standalone_page(self):
         self.ui.stackedWidget.setCurrentIndex(5)
+
+        for item in ["ASSET_template","SCENE_template"]:
+            self.ui.standaloneTemplateBox.addItem(item)
 
         # HIDE update button
         self.ui.update_button.hide()
