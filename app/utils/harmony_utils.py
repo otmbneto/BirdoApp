@@ -86,7 +86,7 @@ class ToonBoomHarmony(object):
         if not h_folder.exists():
             print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder)
             return False
-        xstage_files = h_folder.glob('*.xstage')
+        xstage_files = h_folder.glob('*.xstage$')
         if len(xstage_files) == 0:
             print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder)
             return False
