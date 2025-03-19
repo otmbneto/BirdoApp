@@ -204,7 +204,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.load_config_app_page()
             return
 
-        if True or self.birdoapp.get_user_type() == "STANDALONE":
+        if self.birdoapp.get_user_type() == "STANDALONE":
             self.load_standalone_page()
         elif self.birdoapp.get_user_type() == "STUDIO":
             self.load_projects_page()
