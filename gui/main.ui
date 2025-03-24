@@ -644,7 +644,7 @@ QProgressBar::chunk{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -669,7 +669,7 @@ QProgressBar::chunk{
          <widget class="QWidget" name="loading_page">
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QLabel" name="labelWelcome">
+            <widget class="QLabel_changed" name="labelWelcome">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -1632,6 +1632,13 @@ QScrollBar:arrow{
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QLabel_changed</class>
+   <extends>QLabel</extends>
+   <header>qlabel2.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

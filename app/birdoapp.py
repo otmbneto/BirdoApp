@@ -9,6 +9,15 @@ import subprocess
 from time import sleep
 
 
+class QLabel_changed(QtGui.QLabel):
+    clicked= QtCore.Signal()
+    def __init(self, parent):
+        QtGui.QLabel.__init__(self, QMouseEvent)
+
+    def mousePressEvent(self,args):
+        self.clicked.emit()
+
+
 class BirdoApp(QtGui.QMainWindow):
     """Main BirdoApp interface"""
     def __init__(self):
@@ -72,11 +81,14 @@ class BirdoApp(QtGui.QMainWindow):
         ui = QtCore.QFile(ui_file)
         ui.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
+        loader.registerCustomWidget(QLabel_changed)
         return loader.load(ui)
 
     def setup_connections(self):
         """faz os connects das widgets"""
         # MENU ACTIONS
+
+        self.ui.labelWelcome.clicked.connect(self.go_home)
         self.ui.actionCredits.triggered.connect(self.credits)
         self.ui.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
         self.ui.actionExit.triggered.connect(self.close)
@@ -99,6 +111,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.standaloneCreateBtn.clicked.connect(self.on_create_scene)
         self.ui.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
         self.ui.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+
 
     def on_create_scene(self):
 
