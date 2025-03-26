@@ -148,6 +148,7 @@ class BirdoApp(QtGui.QMainWindow):
             return
 
         self.birdoapp.harmony.open_harmony_scene(xstage.normpath())
+        self.update_recently_open(xstage)
 
     def on_open_standalone(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
