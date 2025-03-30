@@ -194,6 +194,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.update_recently_open(f)
 
     def update_recently_open(self, f):
+
         if f.path in [x.path for x in self.recently_open]:
             self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
         if len(self.recently_open) >= 10:
@@ -201,11 +202,15 @@ class BirdoApp(QtGui.QMainWindow):
         self.recently_open.append(f.path)
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
         self.recently_open_log.write_text("\n".join([str(x) for x in self.recently_open]))
-        item = QtGui.QListWidgetItem()
-        item.setText(f.name)
-        item.setData(3, f.path)
-        item.setToolTip(f.path)
-        self.recent_list.addItem(item)
+        
+        self.recent_list.clear()
+        for p in self.recently_open:
+            file = Path(p)
+            item = QtGui.QListWidgetItem()
+            item.setText(file.name)
+            item.setData(3, file.path)
+            item.setToolTip(file.path)
+            self.recent_list.addItem(item)
 
     def clean_layout(self, layout):
         """remove widgets from layout"""
