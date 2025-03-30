@@ -241,7 +241,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.stackedWidget.setCurrentIndex(0)
 
         self.ui.header.setText(self.birdoapp.config_data["studio_name"])
-        self.update_foot_label("Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
+        self.update_foot_label(u"Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
         self.ui.proj_logo_label.clear()
         self.clean_layout(self.ui.projects_layout)
         self.ui.projects_layout.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
@@ -265,7 +265,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.header.setText(u"Boas Vindas!!!")
 
         # SETS THE CURRENT HEADER
-        self.update_foot_label("Bem Vind@ ao BirdoApp...", self.green_color)
+        self.update_foot_label(u"Bem Vind@ ao BirdoApp...", self.green_color)
 
         self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
         #self.ui.labelWelcome.linkActivated.connect(self.foo)
@@ -290,7 +290,7 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT HEADER
         self.ui.header.setText("BIRDOAPP")
 
-        self.update_foot_label("Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
+        self.update_foot_label(u"Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
 
     def load_config_app_page(self):
         self.ui.stackedWidget.setCurrentIndex(2)
@@ -300,7 +300,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.update_button.show()
 
         # SETS THE CURRENT HEADER
-        self.ui.header.setText("BIRDOAPP CONFIG...")
+        self.ui.header.setText(u"BIRDOAPP CONFIG...")
 
         # ATUALIZA OS CAMPOS COM OS DADOS EXISTENTES
         if self.birdoapp.config_data["user_name"]:
@@ -314,14 +314,14 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.harmony_folder_button.setEnabled(len(self.birdoapp.harmony_versions) == 0)
 
         # SETS THE LOADING LABEL
-        self.update_foot_label("Configure o BirdoApp para iniciar...", self.green_color)
+        self.update_foot_label(u"Configure o BirdoApp para iniciar...", self.green_color)
 
     def load_config_studio_page(self):
         self.ui.stackedWidget.setCurrentIndex(6)
         self.ui.progressBar.setValue(0)
 
         # SETS THE CURRENT HEADER
-        self.ui.header.setText("ESTUDIO CONFIG...")
+        self.ui.header.setText(u"ESTUDIO CONFIG...")
 
         # SHOW update button
         self.ui.update_button.show()
@@ -357,7 +357,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.ui.combo_funcao.setCurrentIndex(self.project_data.roles.index(self.project_data.user_role))
 
         # SETS THE LOADING LABEL
-        self.update_foot_label("Olá {0}. Configure seus dados do projeto {1}".format(
+        self.update_foot_label(u"Olá {0}. Configure seus dados do projeto {1}".format(
             self.birdoapp.config_data["user_name"], self.project_data.name),
             self.green_color
         )
@@ -426,7 +426,7 @@ class BirdoApp(QtGui.QMainWindow):
         return button
 
     def plugin_selected(self, plugin, project_code):
-        self.update_foot_label("Abrindo plugin: {0}".format(plugin["name"]), self.green_color)
+        self.update_foot_label(u"Abrindo plugin: {0}".format(plugin["name"]), self.green_color)
         subprocess.Popen([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
 
     def validate_plugin(self, path):
@@ -471,7 +471,7 @@ class BirdoApp(QtGui.QMainWindow):
         # update items
         for item in update_data:
             if not update_data[item]:
-                msg = "Preencha o campo '{0}' antes de continuar!".format(item)
+                msg = u"Preencha o campo '{0}' antes de continuar!".format(item)
                 self.birdoapp.mb.warning(msg)
                 self.update_foot_label(msg, self.red_color)
                 return False
@@ -498,7 +498,7 @@ class BirdoApp(QtGui.QMainWindow):
                 harmony = ToonBoomHarmony(harmony_path)
                 if not harmony.is_installed():
                     self.birdoapp.mb.warning("O caminho fornecido de instalação do Harmony não é válido!")
-                    self.update_foot_label("Caminho inválido de instalação do Harmony...", self.red_color)
+                    self.update_foot_label(u"Caminho inválido de instalação do Harmony...", self.red_color)
                     return False
         else:
             harmony_path = harmony.get_fullpath()
@@ -507,7 +507,7 @@ class BirdoApp(QtGui.QMainWindow):
         # update items
         for item in update_data:
             if not update_data[item]:
-                msg = "Preencha o campo '{0}' antes de continuar!".format(item)
+                msg = u"Preencha o campo '{0}' antes de continuar!".format(item)
                 self.birdoapp.mb.warning(msg)
                 self.update_foot_label(msg, self.red_color)
                 return False
@@ -528,7 +528,7 @@ class BirdoApp(QtGui.QMainWindow):
         # verifica se os valores dos campos estao corretos
         if not local_folder.exists():
             self.birdoapp.mb.warning("O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
-            self.update_foot_label("Folder local inválido...", self.red_color)
+            self.update_foot_label(u"Folder local inválido...", self.red_color)
             return False
 
         if local_folder.path == self.project_data.paths.root["server"].path:
@@ -538,7 +538,7 @@ class BirdoApp(QtGui.QMainWindow):
             return False
         if not user_proj["user_role"]:
             self.birdoapp.mb.warning("Escolha sua função, válida para o projeto!")
-            self.update_foot_label("Escolha sua função no projeto...", self.red_color)
+            self.update_foot_label(u"Escolha sua função no projeto...", self.red_color)
             return False
 
         # update user projects list in app.config_data
