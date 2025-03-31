@@ -9,6 +9,15 @@ import subprocess
 from time import sleep
 
 
+class QLabel_changed(QtGui.QLabel):
+    clicked= QtCore.Signal()
+    def __init(self, parent):
+        QtGui.QLabel.__init__(self, QMouseEvent)
+
+    def mousePressEvent(self,args):
+        self.clicked.emit()
+
+
 class BirdoApp(QtGui.QMainWindow):
     """Main BirdoApp interface"""
     def __init__(self):
@@ -72,11 +81,14 @@ class BirdoApp(QtGui.QMainWindow):
         ui = QtCore.QFile(ui_file)
         ui.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
+        loader.registerCustomWidget(QLabel_changed)
         return loader.load(ui)
 
     def setup_connections(self):
         """faz os connects das widgets"""
         # MENU ACTIONS
+
+        self.ui.labelWelcome.clicked.connect(self.go_home)
         self.ui.actionCredits.triggered.connect(self.credits)
         self.ui.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
         self.ui.actionExit.triggered.connect(self.close)
@@ -100,6 +112,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
         self.ui.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
 
+
     def on_create_scene(self):
 
         location = str(self.ui.standaloneLocationLine.text())
@@ -117,10 +130,12 @@ class BirdoApp(QtGui.QMainWindow):
             return
 
         template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.ui.standaloneTemplateBox.currentText()))
-        print(scene_name)
-        print(type(scene_name))
         template = template.copy_folder(location).rename(scene_name)
-        
+        for script in ["TB_sceneOpenPreUI.js","createASSET.ui"]:
+            script_path = template / "scripts" / script
+            if script_path.exists():
+                script_path.remove()
+
         print(self.birdoapp.harmony.get_xstage_last_version(template.normpath()))
         xstage = Path(self.birdoapp.harmony.get_xstage_last_version(template.normpath())).rename(scene_name + ".xstage")
         scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
@@ -133,6 +148,7 @@ class BirdoApp(QtGui.QMainWindow):
             return
 
         self.birdoapp.harmony.open_harmony_scene(xstage.normpath())
+        self.update_recently_open(xstage)
 
     def on_open_standalone(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
@@ -252,6 +268,11 @@ class BirdoApp(QtGui.QMainWindow):
         self.update_foot_label("Bem Vind@ ao BirdoApp...", self.green_color)
 
         self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
+        #self.ui.labelWelcome.linkActivated.connect(self.foo)
+
+    def foo(self):
+
+        print("fooooooooooooooooooo")
 
     def choose_standalone_directory(self):
         input_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:')
