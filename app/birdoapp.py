@@ -217,7 +217,9 @@ class BirdoApp(QtGui.QMainWindow):
         for i in reversed(range(layout.count())):
             layout.itemAt(i).widget().setParent(None)
 
+    #TODO: Nao deixar o mesmo projeto ser setado duas vezes
     def go_home(self):
+        self.ui.actionConfigurar_Estudio.setVisible(True)
         """vai para pagina inicial
         (se tiver valido o config, vai pros projetos, se nao vai pra config page)
         """
@@ -322,8 +324,10 @@ class BirdoApp(QtGui.QMainWindow):
         self.update_foot_label(u"Configure o BirdoApp para iniciar...", self.green_color)
 
     def load_config_studio_page(self):
+
         self.ui.stackedWidget.setCurrentIndex(6)
         self.ui.progressBar.setValue(0)
+        self.ui.actionConfigurar_Estudio.setVisible(False)
 
         # SETS THE CURRENT HEADER
         self.ui.header.setText(u"ESTUDIO CONFIG...")
