@@ -10,7 +10,7 @@ Usage:		Selecione o node de peg para copiar pressionando shift e depois aperte o
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	junho, 2023;
+Created:	junho, 2023 (março, 2025. update mensagem para portugues!);
             
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ function BD_CopyPegPivot(){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return false;
 	}
-	
+	Print("TESTE " + projectDATA["paths"]["birdoPackage"] + "utils/fadeOutMessage.js");
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/fadeOutMessage.js");
 
 	var sel_nodes = selection.selectedNodes().filter(function(item){ return node.type(item) == "PEG"});
@@ -50,7 +50,7 @@ function BD_CopyPegPivot(){
 		preferences.setString("COPYPIVOTPEG", JSON.stringify(pegdata));
 		Print("Pivot peg COPIED: ");
 		Print(pegdata);
-		utils.fadeOutMessage(projectDATA, "Pivot Copied...");
+		utils.fadeOutMessage(projectDATA, "Pivot Copiado...");
 
 	} else {
 		//paste pivots
@@ -74,7 +74,7 @@ function BD_CopyPegPivot(){
 		
 		Print("Pivot Data: ");
 		Print(pivotData);
-		utils.fadeOutMessage(projectDATA, "Pasted pivots to " + sel_nodes.length + " peg(s)");
+		utils.fadeOutMessage(projectDATA, "Copiado pivot para" + sel_nodes.length + " peg(s)");
 		scene.endUndoRedoAccum();
 	}
 	
