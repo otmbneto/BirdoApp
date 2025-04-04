@@ -1,15 +1,19 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 
 
-def read_json_file(json_file, op_code="r"):
+def read_json_file(json_file, op_code="r", encoding=None):
     """Le um arquivo json e retorna um dicionario"""
     if not os.path.exists(json_file):
         print("file does not exist: {0}".format(json_file))
         return False
     with open(json_file, op_code) as fp:
         try:
-            obj = json.load(fp)
+            if encoding:
+                obj = json.load(fp, encoding=encoding)
+            else:
+                obj = json.load(fp)
         except Exception as e:
             print "error reading json file: {0}\n{1}".format(json_file, e)
             return False

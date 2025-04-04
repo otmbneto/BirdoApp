@@ -48,7 +48,7 @@ class ConfigInit(object):
         self.verbose = verbose
         self.root = os.path.dirname(os.path.dirname(__file__))
         self.app_json = os.path.join(self.root, "app.json")
-        self.data = read_json_file(self.app_json)
+        self.data = read_json_file(self.app_json, encoding="UTF-8")
 
         # define widget message box class
         self.mb = CreateMessageBox()

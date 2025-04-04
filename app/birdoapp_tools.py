@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import os
 import sys
@@ -39,7 +40,7 @@ class DevTools:
 
     def show_version(self):
         """Printa no terminal info do release do birdoApp"""
-        msg = ["{0}: {1}".format(x, self.app.data[x]) for x in self.app.data]
+        msg = [u"{0}: {1}".format(x, self.app.data[x]) for x in self.app.data]
         print "\n - ".join(msg)
 
     def pause(self):
