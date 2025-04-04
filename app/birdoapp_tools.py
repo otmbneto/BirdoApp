@@ -171,6 +171,8 @@ class DevTools:
             if not self.cli_input(">>icone fornecido e invalido. Precisa ser de formato PNG ou ICO.\n"
                                   "Deseja fornecer outro?", is_question=True):
                 create_data["05_icon"] = False
+            else:
+                create_data["05_icon"] = self.cli_input("Escolha um Arquivo de imagem (png ou ico) com logo do projeto.")
 
         if self.app.create_project(create_data):
             print "Projeto {0} criado!".format(create_data["01_prefix"])
