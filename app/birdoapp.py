@@ -187,7 +187,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.update_button.clicked.connect(self.on_update_button)
 
         # HOME BUTTON
-        self.ui.home_button.clicked.connect(self.go_home)
+        self.ui.home_button.clicked.connect(self.load_splash_page)
 
         # CONFIG APP WIDGETS
         self.ui.harmony_folder_button.clicked.connect(lambda: self.get_folder(self.ui.harmony_folder_line))
