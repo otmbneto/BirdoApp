@@ -176,8 +176,8 @@ QPushButton::menu-indicator {
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_5">
-    <item>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
      <widget class="QFrame" name="frame_title">
       <property name="maximumSize">
        <size>
@@ -358,7 +358,7 @@ QPushButton:pressed {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="1" column="0">
      <widget class="QFrame" name="frame_header">
       <property name="font">
        <font>
@@ -574,7 +574,7 @@ QScrollBar:arrow{
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="2" column="0">
      <widget class="Line" name="line_title">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -587,7 +587,7 @@ QScrollBar:arrow{
       </property>
      </widget>
     </item>
-    <item>
+    <item row="3" column="0">
      <widget class="QFrame" name="mainFrame">
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -605,7 +605,7 @@ QScrollBar:arrow{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>5</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -1069,222 +1069,7 @@ QToolButton:pressed {
          <widget class="QWidget" name="standalonePage">
           <layout class="QGridLayout" name="gridLayout_7">
            <item row="0" column="0">
-            <widget class="QWidget" name="widget_2" native="true">
-             <property name="styleSheet">
-              <string notr="true">QPushButton:hover {
-	color: #05B8CC;
-}
-
-QPushButton {
-	color: white;
-}</string>
-             </property>
-             <widget class="QWidget" name="">
-              <property name="geometry">
-               <rect>
-                <x>11</x>
-                <y>11</y>
-                <width>391</width>
-                <height>431</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_4">
-               <item>
-                <widget class="QGroupBox" name="createSceneGrp">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                 <widget class="QWidget" name="">
-                  <property name="geometry">
-                   <rect>
-                    <x>-1</x>
-                    <y>19</y>
-                    <width>371</width>
-                    <height>91</height>
-                   </rect>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_6">
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="standaloneLocationLabel">
-                     <property name="text">
-                      <string>Local:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QPushButton" name="standaloneFolderBtn">
-                     <property name="text">
-                      <string>Browse...</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QLineEdit" name="standaloneLocationLine"/>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="standaloneNameLabel">
-                     <property name="text">
-                      <string>Nome:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLineEdit" name="standaloneNameLine"/>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QPushButton" name="standaloneCreateBtn">
-                     <property name="text">
-                      <string>Create Scene</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="standaloneTemplateLabel">
-                     <property name="text">
-                      <string>Template:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QLabel" name="label_7">
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QComboBox" name="standaloneTemplateBox"/>
-                   </item>
-                  </layout>
-                 </widget>
-                 <zorder>standaloneTemplateBox</zorder>
-                 <zorder>standaloneNameLine</zorder>
-                 <zorder>standaloneFolderBtn</zorder>
-                 <zorder>standaloneNameLabel</zorder>
-                 <zorder>standaloneLocationLabel</zorder>
-                 <zorder>standaloneCreateBtn</zorder>
-                 <zorder>standaloneLocationLine</zorder>
-                 <zorder>standaloneTemplateLabel</zorder>
-                 <zorder>openSceneGrp</zorder>
-                 <zorder>line</zorder>
-                 <zorder>label_7</zorder>
-                 <zorder>openSceneGrp</zorder>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="openSceneGrp">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                 <widget class="QWidget" name="">
-                  <property name="geometry">
-                   <rect>
-                    <x>0</x>
-                    <y>20</y>
-                    <width>371</width>
-                    <height>231</height>
-                   </rect>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_3">
-                   <item>
-                    <widget class="QLabel" name="label_8">
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>15</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Abrir Arquivo de Harmony Existente no Computador:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="standaloneOpenBtn">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>50</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>50</height>
-                      </size>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <weight>75</weight>
-                       <bold>true</bold>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Abrir Arquivo</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QGroupBox" name="recentGrp">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>150</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>De um clique duplo na cena que deseja abrir!</string>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">QGroupBox {
-	color: white;
-}
-
-QListWidget {
-	border: null;
-}
-
-QListWidget::Item {
-	color: rgb(200, 255, 200);
-}
-
-
-QListWidget::Item:hover {
-	color: rgb(100, 255, 100);
-}</string>
-                     </property>
-                     <property name="title">
-                      <string>Abertos recentemente</string>
-                     </property>
-                     <zorder>createSceneGrp</zorder>
-                     <zorder>createSceneGrp</zorder>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                 <zorder>recentGrp</zorder>
-                 <zorder>label_8</zorder>
-                 <zorder>standaloneOpenBtn</zorder>
-                 <zorder>recentGrp</zorder>
-                 <zorder>label_8</zorder>
-                 <zorder>standaloneOpenBtn</zorder>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </widget>
+            <layout class="QVBoxLayout" name="v_lay"/>
            </item>
           </layout>
          </widget>
@@ -1459,7 +1244,7 @@ QPushButton:pressed {
       </layout>
      </widget>
     </item>
-    <item>
+    <item row="4" column="0">
      <widget class="QPushButton" name="update_button">
       <property name="enabled">
        <bool>true</bool>
@@ -1616,14 +1401,14 @@ QScrollBar:arrow{
       </property>
      </widget>
     </item>
-    <item>
+    <item row="5" column="0">
      <widget class="Line" name="line_bottom">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-    <item>
+    <item row="6" column="0">
      <widget class="QProgressBar" name="progressBar">
       <property name="styleSheet">
        <string notr="true">QProgressBar {
@@ -1645,7 +1430,7 @@ QProgressBar::chunk{
       </property>
      </widget>
     </item>
-    <item>
+    <item row="7" column="0">
      <widget class="QLabel" name="loading_label">
       <property name="text">
        <string>loading label...</string>
@@ -1664,7 +1449,6 @@ QProgressBar::chunk{
    <zorder>line_bottom</zorder>
    <zorder>mainFrame</zorder>
    <zorder>update_button</zorder>
-   <zorder>labelWelcome</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1718,182 +1502,5 @@ QProgressBar::chunk{
   </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneNameLabel</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>293</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>70</x>
-     <y>250</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneNameLine</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>209</x>
-     <y>249</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneCreateBtn</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>363</x>
-     <y>249</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneLocationLabel</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>70</x>
-     <y>280</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneLocationLine</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>209</x>
-     <y>280</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneFolderBtn</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>363</x>
-     <y>279</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneTemplateLabel</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>70</x>
-     <y>311</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>createSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneTemplateBox</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>316</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>249</x>
-     <y>311</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>label_8</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>535</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>219</x>
-     <y>459</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>standaloneOpenBtn</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>535</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>219</x>
-     <y>498</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>openSceneGrp</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>recentGrp</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>535</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>219</x>
-     <y>605</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

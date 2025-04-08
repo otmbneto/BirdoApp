@@ -9,6 +9,84 @@ import subprocess
 from time import sleep
 
 
+class Spoiler(QtGui.QWidget):
+    def __init__(self, parent=None, title='',checked = False,visible = True, animationDuration=100):
+        """
+        References:
+            # Adapted from c++ version
+            http://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
+        """
+        super(Spoiler, self).__init__(parent=parent)
+
+        self.animationDuration = animationDuration
+        self.toggleAnimation = QtCore.QParallelAnimationGroup()
+        self.contentArea = QtGui.QScrollArea()
+        self.headerLine = QtGui.QFrame()
+        self.toggleButton = QtGui.QToolButton()
+        self.mainLayout = QtGui.QGridLayout()
+
+        self.toggleButton.setStyleSheet("QToolButton { border: none; color: white;}")
+        self.toggleButton.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self.toggleButton.setArrowType(QtCore.Qt.RightArrow)
+        self.toggleButton.setText(str(title))
+        self.toggleButton.setCheckable(True)
+        self.toggleButton.setChecked(checked)
+        self.toggleButton.setVisible(visible)
+
+        #self.headerLine.setFrameShape(QtGui.QFrame.HLine)
+        #self.headerLine.setFrameShadow(QtGui.QFrame.Sunken)
+        self.headerLine.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Maximum)
+
+        self.contentArea.setStyleSheet("QScrollArea { background-color: rgb(91, 91, 91); border: none; }")
+        self.contentArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        # start out collapsed
+        self.contentArea.setMaximumHeight(0)
+        self.contentArea.setMinimumHeight(0)
+        # let the entire widget grow and shrink with its content
+        self.toggleAnimation.addAnimation(QtCore.QPropertyAnimation(self, b"minimumHeight"))
+        self.toggleAnimation.addAnimation(QtCore.QPropertyAnimation(self, b"maximumHeight"))
+        self.toggleAnimation.addAnimation(QtCore.QPropertyAnimation(self.contentArea, b"maximumHeight"))
+        # don't waste space
+        self.mainLayout.setVerticalSpacing(0)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        row = 0
+        self.mainLayout.addWidget(self.toggleButton, row, 0, 1, 1, QtCore.Qt.AlignLeft)
+        self.mainLayout.addWidget(self.headerLine, row, 2, 1, 1)
+        row += 1
+        self.mainLayout.addWidget(self.contentArea, row, 0, 1, 3)
+        self.setLayout(self.mainLayout)
+
+        def start_animation():
+            arrow_type = QtCore.Qt.DownArrow if self.toggleButton.isChecked() else QtCore.Qt.RightArrow
+            direction = QtCore.QAbstractAnimation.Forward if self.toggleButton.isChecked() else QtCore.QAbstractAnimation.Backward
+            self.toggleButton.setArrowType(arrow_type)
+            self.toggleAnimation.setDirection(direction)
+            self.toggleAnimation.start()
+
+        self.toggleButton.clicked.connect(start_animation)
+        start_animation()
+    
+    def isOpen(self):
+
+        return self.toggleButton.isChecked()
+
+    def setContentLayout(self, contentLayout):
+        # Not sure if this is equivalent to self.contentArea.destroy()
+        self.contentArea.destroy()
+        self.contentArea.setLayout(contentLayout)
+        collapsedHeight = self.sizeHint().height() - self.contentArea.maximumHeight()
+        contentHeight = contentLayout.sizeHint().height()
+        for i in range(self.toggleAnimation.animationCount()-1):
+            spoilerAnimation = self.toggleAnimation.animationAt(i)
+            spoilerAnimation.setDuration(self.animationDuration)
+            spoilerAnimation.setStartValue(collapsedHeight)
+            spoilerAnimation.setEndValue(collapsedHeight + contentHeight)
+        contentAnimation = self.toggleAnimation.animationAt(self.toggleAnimation.animationCount() - 1)
+        contentAnimation.setDuration(self.animationDuration)
+        contentAnimation.setStartValue(0)
+        contentAnimation.setEndValue(contentHeight)
+
+
 class QLabel_changed(QtGui.QLabel):
     clicked= QtCore.Signal()
     def __init(self, parent):
@@ -54,9 +132,19 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
+
+        #-------------------------------------------------------------
+        self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
+        CreateSceneDropDown = Spoiler(title="CRIAR CENA")
+        CreateSceneDropDown.setContentLayout(self.getCreateSceneLayout())
+        self.ui.v_lay.addWidget(CreateSceneDropDown)
+        OpenSceneDropDown = Spoiler(checked=True,visible = False)
+        OpenSceneDropDown.setContentLayout(self.getOpenSceneLayout())
+        self.ui.v_lay.addWidget(OpenSceneDropDown)
+        #-------------------------------------------------------------
+
         # setup connections
         self.setup_connections()
-
         # useful colors
         self.red_color = "color: rgb(255, 100, 74);"
         self.green_color = "color: rgb(100, 255, 100);"
@@ -65,9 +153,9 @@ class BirdoApp(QtGui.QMainWindow):
         if self.recently_open_log.exists():
             self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
             self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
-        recent_layout = QtGui.QVBoxLayout()
-        self.ui.recentGrp.setLayout(recent_layout)
-        recent_layout.addWidget(self.recent_list)
+        #recent_layout = QtGui.QVBoxLayout()
+        #self.recentGrp.setLayout(recent_layout)
+        #recent_layout.addWidget(self.recent_list)
 
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
@@ -82,6 +170,8 @@ class BirdoApp(QtGui.QMainWindow):
         ui.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
         #loader.registerCustomWidget(QLabel_changed)
+        loader.registerCustomWidget(Spoiler)
+        
         return loader.load(ui)
 
     def setup_connections(self):
@@ -108,16 +198,77 @@ class BirdoApp(QtGui.QMainWindow):
         self.recent_list.itemDoubleClicked.connect(self.double_click_recent)
 
         # CONFIG STANDALONE WIDGETS
-        self.ui.standaloneCreateBtn.clicked.connect(self.on_create_scene)
-        self.ui.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
-        self.ui.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+        self.standaloneCreateBtn.clicked.connect(self.on_create_scene)
+        self.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
+        self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
         self.ui.loadStandaloneBtn.clicked.connect(self.load_standalone_page)
         self.ui.loadStudioBtn.clicked.connect(self.go_home)
 
+    def getCreateSceneLayout(self):
+
+        vLayout = QtGui.QVBoxLayout()
+
+        hLayout = QtGui.QHBoxLayout()
+        standaloneNameLabel = QtGui.QLabel("Nome: ")
+        standaloneNameLabel.setMinimumSize(60,20)
+        self.standaloneNameLine = QtGui.QLineEdit()
+        self.standaloneNameLine.setMinimumSize(200,20)
+        self.standaloneCreateBtn = QtGui.QPushButton("Criar cena")
+        self.standaloneCreateBtn.setStyleSheet("color: white;")
+        self.standaloneCreateBtn.setMinimumSize(65,20)
+        hLayout.addWidget(standaloneNameLabel)
+        hLayout.addWidget(self.standaloneNameLine)
+        hLayout.addWidget(self.standaloneCreateBtn)
+        vLayout.addLayout(hLayout)
+        # -----------------------------
+        hLayout = QtGui.QHBoxLayout()
+        standaloneLocationLabel = QtGui.QLabel("Local: ")
+        standaloneLocationLabel.setMinimumSize(60,20)
+        self.standaloneLocationLine = QtGui.QLineEdit()
+        self.standaloneLocationLine.setMinimumSize(200,20)
+        self.standaloneFolderBtn = QtGui.QPushButton("Navegar")
+        self.standaloneFolderBtn.setStyleSheet("color: white;")
+        self.standaloneFolderBtn.setMinimumSize(65,20)
+        hLayout.addWidget(standaloneLocationLabel)
+        hLayout.addWidget(self.standaloneLocationLine)
+        hLayout.addWidget(self.standaloneFolderBtn)
+        vLayout.addLayout(hLayout)
+        # -----------------------------
+        hLayout = QtGui.QHBoxLayout()
+        standaloneTemplateLabel = QtGui.QLabel("Template: ")
+        standaloneTemplateLabel.setMinimumSize(60,20)
+        standaloneTemplateLabel.setMaximumSize(60,20)
+        self.standaloneTemplateBox = QtGui.QComboBox()
+        self.standaloneTemplateBox.setMinimumSize(200,20)
+        for name in ["ASSET_template","SCENE_template"]:
+            self.standaloneTemplateBox.addItem(name)
+        hLayout.addWidget(standaloneTemplateLabel)
+        hLayout.addWidget(self.standaloneTemplateBox)
+        vLayout.addLayout(hLayout)
+        return vLayout
+
+    def getOpenSceneLayout(self):
+
+        vLayout = QtGui.QVBoxLayout()
+        openSceneLbl = QtGui.QLabel("Abrir arquivo de Harmony existente no computador:")
+        self.standaloneOpenBtn = QtGui.QPushButton("Abrir arquivo")
+        self.standaloneOpenBtn.setStyleSheet("color: white;")
+        self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+        self.recentGrp = QtGui.QGroupBox("Abertos recentemente")
+        self.recentGrp.setStyleSheet("color: white;")
+        recent_layout = QtGui.QVBoxLayout()
+        self.recentGrp.setLayout(recent_layout)
+        recent_layout.addWidget(self.recent_list)
+        vLayout.addWidget(openSceneLbl)
+        vLayout.addWidget(self.standaloneOpenBtn)
+        vLayout.addWidget(self.recentGrp)
+
+        return vLayout
+
     def on_create_scene(self):
 
-        location = str(self.ui.standaloneLocationLine.text())
-        scene_name = str(self.ui.standaloneNameLine.text())
+        location = str(self.standaloneLocationLine.text())
+        scene_name = str(self.standaloneNameLine.text())
         if len(location) == 0:
             print("ERROR: No location was selected")
             return
@@ -130,7 +281,7 @@ class BirdoApp(QtGui.QMainWindow):
             print("ERROR: you must choose a name for the new scene")
             return
 
-        template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.ui.standaloneTemplateBox.currentText()))
+        template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.standaloneTemplateBox.currentText()))
         template = template.copy_folder(location).rename(scene_name)
         for script in ["TB_sceneOpenPreUI.js","createASSET.ui"]:
             script_path = template / "scripts" / script
@@ -200,13 +351,12 @@ class BirdoApp(QtGui.QMainWindow):
             self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
         if len(self.recently_open) >= 10:
             self.recently_open = list(set(self.recently_open[1:]))
-        self.recently_open.append(f.path)
+        self.recently_open.append(f)
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        self.recently_open_log.write_text("\n".join([str(x) for x in self.recently_open]))
+        self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
         
         self.recent_list.clear()
-        for p in self.recently_open:
-            file = Path(p)
+        for file in self.recently_open:
             item = QtGui.QListWidgetItem()
             item.setText(file.name)
             item.setData(3, file.path)
@@ -275,6 +425,8 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT HEADER
         self.update_foot_label(u"Bem Vind@ ao BirdoApp...", self.green_color)
 
+        #print(self.getCreateSceneLayout())
+        #self.ui.tWidget.setContentLayout(self.ui.tWidget.getContentLayout())
         #self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
         #self.ui.labelWelcome.linkActivated.connect(self.foo)
 
@@ -284,20 +436,15 @@ class BirdoApp(QtGui.QMainWindow):
 
     def choose_standalone_directory(self):
         input_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:')
-        self.ui.standaloneLocationLine.setText(input_dir)
+        self.standaloneLocationLine.setText(input_dir)
 
     def load_standalone_page(self):
         self.ui.stackedWidget.setCurrentIndex(5)
 
-        for item in ["ASSET_template","SCENE_template"]:
-            self.ui.standaloneTemplateBox.addItem(item)
-
         # HIDE update button
         self.ui.update_button.hide()
-
         # SETS THE CURRENT HEADER
         self.ui.header.setText("BIRDOAPP")
-
         self.update_foot_label(u"Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.green_color)
 
     def load_config_app_page(self):
