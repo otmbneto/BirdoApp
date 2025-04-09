@@ -22,7 +22,7 @@ def compress_render(input_file, output_file):
     vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
     acodec = "-strict experimental -acodec aac -ab 160k -ac 2"
     log_file = ffmpeg_log / "{0}_{1}.log".format(int(time.time()), os.path.basename(input_file))
-    cmd = "{0} -i {1} {2} {3} -f mp4 {4} 2> {5}".format(
+    cmd = "{0} -i \"{1}\" {2} {3} -f mp4 \"{4}\" 2> {5}".format(
         ffmpeg_path, input_file, vcodec, acodec, output_file, log_file.path
     )
     return os.system(cmd) == 0

@@ -9,7 +9,6 @@ import re
 import os
 from datetime import datetime
 from tqdm import tqdm
-from system import get_short_path_name
 
 
 class ConverterFFMPEG:
@@ -99,7 +98,7 @@ class ConverterFFMPEG:
         """Compressao basica (retirada do shotgun) do render para upload"""
         vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
         acodec = "-strict experimental -acodec aac -ab 160k -ac 2 " if self.check_audio_stream(input_file) else ""
-        self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 {4}".format(
+        self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 \"{4}\"".format(
             self.ffmpeg, input_file, vcodec, acodec, output_file
         )
         total_frames = self.get_video_duration(input_file)
@@ -111,7 +110,7 @@ class ConverterFFMPEG:
         """converte um arquivo de video em uma sequecia de imagem no destino 'output_folder'"""
         img_out = "{0}/f-%04d.{1}".format(output_folder, img_format)
         scale = "-vf scale=iw/{0}:ih/{0} ".format(scale_size) if scale_size is not None else ""
-        self.cmd = "{0} -report -i \"{1}\" {2}{3}".format(
+        self.cmd = "{0} -report -i \"{1}\" {2}\"{3}\"".format(
             self.ffmpeg, input_mov, scale, img_out
         )
         total_frames = self.get_video_duration(input_mov)
@@ -121,7 +120,7 @@ class ConverterFFMPEG:
 
     def extract_audio(self, input_mov_file, output_audio_file):
         """converte o arquivo de video em um arquivo de audio"""
-        self.cmd = "{0} -report -i {1} {2}".format(
+        self.cmd = "{0} -report -i \"{1}\" \"{2}\"".format(
             self.ffmpeg, input_mov_file, output_audio_file
         )
         os.chdir(self.temp_folder.path)
