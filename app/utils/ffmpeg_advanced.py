@@ -63,12 +63,13 @@ class ConverterFFMPEG:
 
     def get_resolution(self, input_file):
         """retorna a resolucao do arquivo em pixels"""
+        format_name = "'{0}'".format(input_file) if bool(re.match(r"\s", input_file)) else input_file
         try:
-            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, input_file), stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, format_name), stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError as exc:
-            res_raw = re.findall(r",\s\d+x\d+,", exc.output)
+            res_raw = re.findall(r",\s\d+x\d+", exc.output)
             if len(res_raw) == 0:
-                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(input_file)
+                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(format_name)
                 return None
             resolution = [int(x) for x in re.findall(r"\d+", res_raw[0])]
             return resolution
@@ -127,3 +128,4 @@ class ConverterFFMPEG:
         r = os.system(self.cmd)
         os.chdir(self.initial_dir)
         return r == 0
+    
