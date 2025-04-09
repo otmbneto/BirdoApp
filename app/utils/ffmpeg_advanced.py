@@ -128,4 +128,3 @@ class ConverterFFMPEG:
         r = os.system(self.cmd)
         os.chdir(self.initial_dir)
         return r == 0
-    

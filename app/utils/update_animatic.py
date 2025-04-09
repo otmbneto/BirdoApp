@@ -32,7 +32,10 @@ def main(birdoapp, scene_name, animatic_version, img_format, audio_format, temp_
 
     # extract images
     res = birdoapp.ffmpeg.get_resolution(animatic_file.path)
-    scale_num = 2 if res[0] > 1000 else None
+    if not res:
+        scale_num = None
+    else:
+        scale_num = 2 if res[0] > 1000 else None
     if not birdoapp.ffmpeg.convert_movie_to_image_seq(animatic_file.path, temp_folder.path, img_format, scale_num):
         print "[BIRDOAPP - Py] Falha ao gerar sequencia de imagens do animatic!"
         sys.exit(2)
