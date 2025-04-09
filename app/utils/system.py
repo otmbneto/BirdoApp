@@ -11,7 +11,7 @@ def get_short_path_name(long_name):
         (windows shortname e um caminho 'reduzido' do original, que o windows reconhece como o proprio caminho
         usado para casos com caminhos com caracteres invalidos como espaco ou acentos)
     """
-    if bool(re.match(r"([^\u0000-\u007F]+|\s)", long_name)):
+    if bool(re.findall(r"([^\u0000-\u007F]+|\s)", long_name)):
         cmd = 'cmd /c for %A in ("{0}") do @echo %~sA'.format(long_name)
         return subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True).strip()
     else:
