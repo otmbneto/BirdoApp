@@ -605,7 +605,7 @@ QScrollBar:arrow{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -631,11 +631,14 @@ QScrollBar:arrow{
           <widget class="QPushButton" name="loadStandaloneBtn">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>50</y>
-             <width>200</width>
-             <height>250</height>
+             <x>10</x>
+             <y>19</y>
+             <width>400</width>
+             <height>220</height>
             </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color:white;</string>
            </property>
            <property name="text">
             <string>Standalone</string>
@@ -644,11 +647,14 @@ QScrollBar:arrow{
           <widget class="QPushButton" name="loadStudioBtn">
            <property name="geometry">
             <rect>
-             <x>210</x>
-             <y>50</y>
-             <width>200</width>
-             <height>250</height>
+             <x>10</x>
+             <y>250</y>
+             <width>400</width>
+             <height>220</height>
             </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color:white;</string>
            </property>
            <property name="text">
             <string>Estúdio</string>
