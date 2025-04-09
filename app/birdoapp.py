@@ -6,11 +6,10 @@ from utils.harmony_utils import ToonBoomHarmony
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import subprocess
-from time import sleep
 
 
 class Spoiler(QtGui.QWidget):
-    def __init__(self, parent=None, title='',checked = False,visible = True, animationDuration=100):
+    def __init__(self, parent=None, title='', checked=False, visible=True, animationDuration=100):
         """
         References:
             # Adapted from c++ version
@@ -33,11 +32,9 @@ class Spoiler(QtGui.QWidget):
         self.toggleButton.setChecked(checked)
         self.toggleButton.setVisible(visible)
 
-        #self.headerLine.setFrameShape(QtGui.QFrame.HLine)
-        #self.headerLine.setFrameShadow(QtGui.QFrame.Sunken)
         self.headerLine.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Maximum)
 
-        self.contentArea.setStyleSheet("QScrollArea { background-color: rgb(91, 91, 91); border: none; }")
+        self.contentArea.setStyleSheet("QScrollArea { background-color: rgb(91, 91, 91); border: none;}")
         self.contentArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         # start out collapsed
         self.contentArea.setMaximumHeight(0)
@@ -65,9 +62,8 @@ class Spoiler(QtGui.QWidget):
 
         self.toggleButton.clicked.connect(start_animation)
         start_animation()
-    
-    def isOpen(self):
 
+    def isOpen(self):
         return self.toggleButton.isChecked()
 
     def setContentLayout(self, contentLayout):
@@ -76,7 +72,7 @@ class Spoiler(QtGui.QWidget):
         self.contentArea.setLayout(contentLayout)
         collapsedHeight = self.sizeHint().height() - self.contentArea.maximumHeight()
         contentHeight = contentLayout.sizeHint().height()
-        for i in range(self.toggleAnimation.animationCount()-1):
+        for i in range(self.toggleAnimation.animationCount() - 1):
             spoilerAnimation = self.toggleAnimation.animationAt(i)
             spoilerAnimation.setDuration(self.animationDuration)
             spoilerAnimation.setStartValue(collapsedHeight)
@@ -85,15 +81,6 @@ class Spoiler(QtGui.QWidget):
         contentAnimation.setDuration(self.animationDuration)
         contentAnimation.setStartValue(0)
         contentAnimation.setEndValue(contentHeight)
-
-
-class QLabel_changed(QtGui.QLabel):
-    clicked= QtCore.Signal()
-    def __init(self, parent):
-        QtGui.QLabel.__init__(self, QMouseEvent)
-
-    def mousePressEvent(self,args):
-        self.clicked.emit()
 
 
 class BirdoApp(QtGui.QMainWindow):
@@ -133,15 +120,15 @@ class BirdoApp(QtGui.QMainWindow):
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
 
-        #-------------------------------------------------------------
+        # -------------------------------------------------------------
         self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
         CreateSceneDropDown = Spoiler(title="CRIAR CENA")
         CreateSceneDropDown.setContentLayout(self.getCreateSceneLayout())
         self.ui.v_lay.addWidget(CreateSceneDropDown)
-        OpenSceneDropDown = Spoiler(checked=True,visible = False)
+        OpenSceneDropDown = Spoiler(checked=True, visible=False)
         OpenSceneDropDown.setContentLayout(self.getOpenSceneLayout())
         self.ui.v_lay.addWidget(OpenSceneDropDown)
-        #-------------------------------------------------------------
+        # -------------------------------------------------------------
 
         # setup connections
         self.setup_connections()
@@ -153,9 +140,6 @@ class BirdoApp(QtGui.QMainWindow):
         if self.recently_open_log.exists():
             self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
             self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
-        #recent_layout = QtGui.QVBoxLayout()
-        #self.recentGrp.setLayout(recent_layout)
-        #recent_layout.addWidget(self.recent_list)
 
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
@@ -169,16 +153,14 @@ class BirdoApp(QtGui.QMainWindow):
         ui = QtCore.QFile(ui_file)
         ui.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
-        #loader.registerCustomWidget(QLabel_changed)
         loader.registerCustomWidget(Spoiler)
-        
+
         return loader.load(ui)
 
     def setup_connections(self):
         """faz os connects das widgets"""
         # MENU ACTIONS
 
-        #self.ui.labelWelcome.clicked.connect(self.go_home)
         self.ui.actionCredits.triggered.connect(self.credits)
         self.ui.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
         self.ui.actionExit.triggered.connect(self.close)
@@ -201,21 +183,46 @@ class BirdoApp(QtGui.QMainWindow):
         self.standaloneCreateBtn.clicked.connect(self.on_create_scene)
         self.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
         self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
-        self.ui.loadStandaloneBtn.clicked.connect(self.load_standalone_page)
-        self.ui.loadStudioBtn.clicked.connect(self.go_home)
+        self.ui.loadStandaloneBtn.clicked.connect(self.onLoadStandAloneBtn)
+        self.ui.loadStudioBtn.clicked.connect(self.onLoadStudioBtn)
+
+    def closeEvent(self, event):
+        print "session terminated!"
+        self.birdoapp.kill_session()
+
+    def go_home(self):
+        """vai para pagina inicial de cada modo
+        """
+        self.ui.actionConfigurar_Estudio.setVisible(True)
+        if not self.birdoapp.is_ready():
+            self.load_config_app_page()
+            return
+        if self.birdoapp.get_current_mode() == "STANDALONE":
+            self.load_standalone_page()
+        elif self.birdoapp.get_current_mode() == "STUDIO":
+            if not self.birdoapp.is_studio_ready():
+                self.load_config_studio_page()
+                return
+            self.load_projects_page()
+
+    def onLoadStudioBtn(self):
+        self.birdoapp.update_session("STUDIO")
+        self.go_home()
+
+    def onLoadStandAloneBtn(self):
+        self.birdoapp.update_session("STANDALONE")
+        self.go_home()
 
     def getCreateSceneLayout(self):
-
         vLayout = QtGui.QVBoxLayout()
-
         hLayout = QtGui.QHBoxLayout()
         standaloneNameLabel = QtGui.QLabel("Nome: ")
-        standaloneNameLabel.setMinimumSize(60,20)
+        standaloneNameLabel.setMinimumSize(60, 20)
         self.standaloneNameLine = QtGui.QLineEdit()
-        self.standaloneNameLine.setMinimumSize(200,20)
+        self.standaloneNameLine.setMinimumSize(200, 20)
         self.standaloneCreateBtn = QtGui.QPushButton("Criar cena")
         self.standaloneCreateBtn.setStyleSheet("color: white;")
-        self.standaloneCreateBtn.setMinimumSize(65,20)
+        self.standaloneCreateBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneNameLabel)
         hLayout.addWidget(self.standaloneNameLine)
         hLayout.addWidget(self.standaloneCreateBtn)
@@ -223,12 +230,12 @@ class BirdoApp(QtGui.QMainWindow):
         # -----------------------------
         hLayout = QtGui.QHBoxLayout()
         standaloneLocationLabel = QtGui.QLabel("Local: ")
-        standaloneLocationLabel.setMinimumSize(60,20)
+        standaloneLocationLabel.setMinimumSize(60, 20)
         self.standaloneLocationLine = QtGui.QLineEdit()
-        self.standaloneLocationLine.setMinimumSize(200,20)
+        self.standaloneLocationLine.setMinimumSize(200, 20)
         self.standaloneFolderBtn = QtGui.QPushButton("Navegar")
         self.standaloneFolderBtn.setStyleSheet("color: white;")
-        self.standaloneFolderBtn.setMinimumSize(65,20)
+        self.standaloneFolderBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneLocationLabel)
         hLayout.addWidget(self.standaloneLocationLine)
         hLayout.addWidget(self.standaloneFolderBtn)
@@ -236,11 +243,11 @@ class BirdoApp(QtGui.QMainWindow):
         # -----------------------------
         hLayout = QtGui.QHBoxLayout()
         standaloneTemplateLabel = QtGui.QLabel("Template: ")
-        standaloneTemplateLabel.setMinimumSize(60,20)
-        standaloneTemplateLabel.setMaximumSize(60,20)
+        standaloneTemplateLabel.setMinimumSize(60, 20)
+        standaloneTemplateLabel.setMaximumSize(60, 20)
         self.standaloneTemplateBox = QtGui.QComboBox()
-        self.standaloneTemplateBox.setMinimumSize(200,20)
-        for name in ["ASSET_template","SCENE_template"]:
+        self.standaloneTemplateBox.setMinimumSize(200, 20)
+        for name in ["ASSET_template", "SCENE_template"]:
             self.standaloneTemplateBox.addItem(name)
         hLayout.addWidget(standaloneTemplateLabel)
         hLayout.addWidget(self.standaloneTemplateBox)
@@ -248,7 +255,6 @@ class BirdoApp(QtGui.QMainWindow):
         return vLayout
 
     def getOpenSceneLayout(self):
-
         vLayout = QtGui.QVBoxLayout()
         openSceneLbl = QtGui.QLabel("Abrir arquivo de Harmony existente no computador:")
         self.standaloneOpenBtn = QtGui.QPushButton("Abrir arquivo")
@@ -262,11 +268,9 @@ class BirdoApp(QtGui.QMainWindow):
         vLayout.addWidget(openSceneLbl)
         vLayout.addWidget(self.standaloneOpenBtn)
         vLayout.addWidget(self.recentGrp)
-
         return vLayout
 
     def on_create_scene(self):
-
         location = str(self.standaloneLocationLine.text())
         scene_name = str(self.standaloneNameLine.text())
         if len(location) == 0:
@@ -283,7 +287,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.standaloneTemplateBox.currentText()))
         template = template.copy_folder(location).rename(scene_name)
-        for script in ["TB_sceneOpenPreUI.js","createASSET.ui"]:
+        for script in ["TB_sceneOpenPreUI.js", "createASSET.ui"]:
             script_path = template / "scripts" / script
             if script_path.exists():
                 script_path.remove()
@@ -332,7 +336,7 @@ class BirdoApp(QtGui.QMainWindow):
         scene_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'SCENE_template')
         xstage = self.birdoapp.harmony.get_xstage_last_version(scene_template)
         self.birdoapp.harmony.open_harmony_scene(Path(xstage))
-        
+
     def onAssetTemplateOpen(self):
         asset_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'ASSET_template')
         xstage = self.birdoapp.harmony.get_xstage_last_version(asset_template)
@@ -346,7 +350,6 @@ class BirdoApp(QtGui.QMainWindow):
             self.update_recently_open(f)
 
     def update_recently_open(self, f):
-
         if f.path in [x.path for x in self.recently_open]:
             self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
         if len(self.recently_open) >= 10:
@@ -354,7 +357,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.recently_open.append(f)
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
         self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
-        
+
         self.recent_list.clear()
         for file in self.recently_open:
             item = QtGui.QListWidgetItem()
@@ -367,21 +370,6 @@ class BirdoApp(QtGui.QMainWindow):
         """remove widgets from layout"""
         for i in reversed(range(layout.count())):
             layout.itemAt(i).widget().setParent(None)
-
-    #TODO: Nao deixar o mesmo projeto ser setado duas vezes
-    def go_home(self):
-        self.ui.actionConfigurar_Estudio.setVisible(True)
-        """vai para pagina inicial
-        (se tiver valido o config, vai pros projetos, se nao vai pra config page)
-        """
-        if not self.birdoapp.is_ready():
-            self.load_config_app_page()
-            return
-
-        if self.birdoapp.get_user_type() == "STANDALONE":
-            self.load_standalone_page()
-        elif self.birdoapp.get_user_type() == "STUDIO":
-            self.load_projects_page()
 
     def load_projects_page(self):
         """Abre pagina inicial de projetos do estudio (index 0)"""
@@ -425,17 +413,8 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT HEADER
         self.update_foot_label(u"Bem Vind@ ao BirdoApp...", self.green_color)
 
-        #print(self.getCreateSceneLayout())
-        #self.ui.tWidget.setContentLayout(self.ui.tWidget.getContentLayout())
-        #self.ui.labelWelcome.setText(u"Bem vind@ ao BirdoApp...\nClique no ícone para Iniciar!")
-        #self.ui.labelWelcome.linkActivated.connect(self.foo)
-
-    def foo(self):
-
-        print("fooooooooooooooooooo")
-
     def choose_standalone_directory(self):
-        input_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:')
+        input_dir = QtGui.QFileDialog.getExistingDirectory(self, 'Select a folder:')
         self.standaloneLocationLine.setText(input_dir)
 
     def load_standalone_page(self):
@@ -560,6 +539,7 @@ class BirdoApp(QtGui.QMainWindow):
         if not self.project_data:
             print "get project data failed to complete!"
             self.close()
+            return
         print "project data is ready!" if self.project_data.ready else "project data is NOT ready!"
         # label do nome do projeto no header
         self.ui.header.setText(project["name"])
@@ -584,7 +564,9 @@ class BirdoApp(QtGui.QMainWindow):
 
     def plugin_selected(self, plugin, project_code):
         self.update_foot_label(u"Abrindo plugin: {0}".format(plugin["name"]), self.green_color)
-        subprocess.Popen([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
+        subprocess.Popen(
+            [self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin[
+                "arguments"])
 
     def validate_plugin(self, path):
         """funcao para validar se o plugin tem permissao para abrir pro usuario"""
@@ -598,11 +580,6 @@ class BirdoApp(QtGui.QMainWindow):
         icon = os.path.join(os.path.dirname(path), "plugin.ico").replace("\\", "/")
         return os.path.exists(path) and os.path.exists(icon) and user_type in permissions
 
-    # def showEvent(self, event):
-    #     # do stuff here
-    #     event.accept()
-    #     self.load_splash_page()
-
     def get_folder(self, edit_line):
         dialog = QtGui.QFileDialog()
         dialog.setDirectory(self.birdoapp.system.user_home.path)
@@ -610,7 +587,8 @@ class BirdoApp(QtGui.QMainWindow):
         edit_line.setText(folder)
 
     def credits(self):
-        msg = '\n'.join(["{0}:\t{1}".format(item, self.birdoapp.data[item]) for item in sorted(self.birdoapp.data.keys())])
+        msg = '\n'.join(
+            ["{0}:\t{1}".format(item, self.birdoapp.data[item]) for item in sorted(self.birdoapp.data.keys())])
         self.birdoapp.mb.information(msg)
 
     def update_foot_label(self, txt, color):
@@ -684,14 +662,15 @@ class BirdoApp(QtGui.QMainWindow):
 
         # verifica se os valores dos campos estao corretos
         if not local_folder.exists():
-            self.birdoapp.mb.warning("O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
+            self.birdoapp.mb.warning(
+                "O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
             self.update_foot_label(u"Folder local inválido...", self.red_color)
             return False
 
         if local_folder.path == self.project_data.paths.root["server"].path:
             self.birdoapp.mb.warning("Você escolheu o folder do projeto no servidor do estudio."
-                               "Forneca o seu folder LOCAL do projeto, "
-                               "onde você irá salvar as cenas no seu computador.")
+                                     "Forneca o seu folder LOCAL do projeto, "
+                                     "onde você irá salvar as cenas no seu computador.")
             return False
         if not user_proj["user_role"]:
             self.birdoapp.mb.warning("Escolha sua função, válida para o projeto!")

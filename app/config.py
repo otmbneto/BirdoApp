@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from utils.birdo_json import read_json_file, write_json_file
 from utils.birdo_pathlib import Path
 from utils.MessageBox import CreateMessageBox
@@ -10,7 +12,6 @@ import copy
 import os
 import re
 import sys
-# TODO: usar o birdo_pathlib Path() aqui (depois de testar todos metodos dele!)
 
 
 class CreateProjectClass(object):
@@ -94,6 +95,10 @@ class ConfigInit(object):
         # system class para lidar com dados do sistema
         self.system = SystemFolders()
 
+        # define json temp file
+        self.json_session = self.system.temp / '_session.json'
+
+
         # cria classe do ffmpeg
         if self.system.mac_or_windows() == "windows":
             ffmpeg_exe = Path(self.root) / "extra" / "ffmpeg" / "windows" / "bin" / "ffmpeg.exe"
@@ -109,15 +114,27 @@ class ConfigInit(object):
         return self.__doc__
 
     def is_ready(self):
-        """Metodo para checar se os dados do config.json sao validos"""
+        """Metodo para checar se os dados basicos do config.json sao validos"""
         return not any(not bool(x) for x in [self.config_data["user_name"], self.config_data["harmony_path"]])
 
-    def get_user_type(self):
+    def is_studio_ready(self):
+        """Metodo para checar se os dados de studio do config.json sao validos"""
+        return not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]])
+
+    def update_session(self, mode):
+        """cria json no temp para guardar o modo de inicio da sessao"""
+        session = {"date": datetime.datetime.now().isoformat(), "mode": mode}
+        write_json_file(self.json_session.path, session)
+
+    def get_current_mode(self):
         """retorna se o usertype e 'STANDALONE' ou 'STUDIO'"""
-        if not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]]):
-            return "STUDIO"
-        else:
-            return "STANDALONE"
+        if not self.json_session.exists():
+            return None
+        session_data = read_json_file(self.json_session.path)
+        return session_data["mode"]
+
+    def kill_session(self):
+        self.json_session.remove()
 
     def check_server_path(self):
         """Metodo para verificar se o caminho config do server e valido."""
@@ -183,6 +200,7 @@ class ConfigInit(object):
         pdata["sub_name"] = create_data["03_sub_name"]
         pdata["icon"] = icon.name
         pdata["paths"]["root"] = create_data["04_server_root"]
+
         #atualiza o project json
         write_json_file(new_json.path, pdata)
         pdata["config_folder"] = config_path.path
