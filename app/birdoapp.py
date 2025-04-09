@@ -153,9 +153,6 @@ class BirdoApp(QtGui.QMainWindow):
         if self.recently_open_log.exists():
             self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
             self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
-        #recent_layout = QtGui.QVBoxLayout()
-        #self.recentGrp.setLayout(recent_layout)
-        #recent_layout.addWidget(self.recent_list)
 
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
