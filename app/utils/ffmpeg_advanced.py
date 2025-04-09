@@ -9,6 +9,7 @@ import re
 import os
 from datetime import datetime
 from tqdm import tqdm
+from system import get_short_path_name
 
 
 class ConverterFFMPEG:
@@ -63,13 +64,12 @@ class ConverterFFMPEG:
 
     def get_resolution(self, input_file):
         """retorna a resolucao do arquivo em pixels"""
-        format_name = "'{0}'".format(input_file) if bool(re.match(r"\s", input_file)) else input_file
         try:
-            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, format_name), stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output("{0} -i \"{1}\"".format(self.ffmpeg, input_file), stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError as exc:
             res_raw = re.findall(r",\s\d+x\d+", exc.output)
             if len(res_raw) == 0:
-                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(format_name)
+                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(input_file)
                 return None
             resolution = [int(x) for x in re.findall(r"\d+", res_raw[0])]
             return resolution
@@ -77,7 +77,7 @@ class ConverterFFMPEG:
     def get_video_duration(self, video_file):
         """retorna a duracao do video em frames"""
         try:
-            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, video_file), stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output("{0} -i \"{1}\"".format(self.ffmpeg, video_file), stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError as exc:
             fps = re.findall(r"\d+\.?\d+\sfps", exc.output)
             duration = re.findall(r"Duration:\s\d{2}:\d{2}:\d+\.?\d+", exc.output)
@@ -91,7 +91,7 @@ class ConverterFFMPEG:
     def check_audio_stream(self, video_file):
         """checa se o arquivo de video tem faixa de audio"""
         try:
-            subprocess.check_output("{0} -i {1}".format(self.ffmpeg, video_file), stderr=subprocess.STDOUT, shell=True)
+            subprocess.check_output("{0} -i \"{1}\"".format(self.ffmpeg, video_file), stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError as exc:
             return bool(re.findall(r"Stream\s.+\sAudio", exc.output))
 
@@ -99,7 +99,7 @@ class ConverterFFMPEG:
         """Compressao basica (retirada do shotgun) do render para upload"""
         vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
         acodec = "-strict experimental -acodec aac -ab 160k -ac 2 " if self.check_audio_stream(input_file) else ""
-        self.cmd = "{0} -report -i {1} {2} {3}-f mp4 {4}".format(
+        self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 {4}".format(
             self.ffmpeg, input_file, vcodec, acodec, output_file
         )
         total_frames = self.get_video_duration(input_file)
@@ -111,7 +111,7 @@ class ConverterFFMPEG:
         """converte um arquivo de video em uma sequecia de imagem no destino 'output_folder'"""
         img_out = "{0}/f-%04d.{1}".format(output_folder, img_format)
         scale = "-vf scale=iw/{0}:ih/{0} ".format(scale_size) if scale_size is not None else ""
-        self.cmd = "{0} -report -i {1} {2}{3}".format(
+        self.cmd = "{0} -report -i \"{1}\" {2}{3}".format(
             self.ffmpeg, input_mov, scale, img_out
         )
         total_frames = self.get_video_duration(input_mov)
