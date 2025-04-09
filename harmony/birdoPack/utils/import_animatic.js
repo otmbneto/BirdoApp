@@ -139,7 +139,10 @@ function Animatic(proj_data, verbose){
 			Print("[BIRDOAPP] importing image: " + image_path);
 			Drawing.create(elemId, timing, true); // create a drawing drawing, 'true' indicate that the file exists.
 			var drawingFilePath = Drawing.filename(elemId, timing);   // get the actual path, in tmp folder.
-
+			if(!drawingFilePath){
+				Print("[BIRDOAPP] Erro pegando o caminho do arquivo do elemento no temp folder: " + timing);
+				continue;
+			}
 			copy_file( image_path, drawingFilePath );
 			column.setEntry(uniqueColumnName, 1, timing, timing);
 		}
