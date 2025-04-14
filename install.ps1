@@ -1,4 +1,4 @@
-Add-Type -Assembly System.IO.Compression.FileSystem
+﻿Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
@@ -127,13 +127,30 @@ function Find-Venv($name,$root){
 
 }
 
+function Test-VenvDependencies(){
+
+    $s = ""
+    foreach($i in (cat .\requirements.txt)){
+        $s += ("import " + $i.split("==")[0] + "`n")
+    }
+    $s = $s.replace("importlib-resources", "importlib_resources")
+    $s = $s.replace("python-dotenv", "dotenv")
+    & python -c $s > $logdir\testDep.log 2> $logdir\testDepErr.log
+    return ($LASTEXITCODE -eq 0)
+
+}
+
 function Update-Venv($venv,$base){
 
     Set-Location "$base\$venv\Scripts"
     .\activate.ps1
     Set-Location "$base"
     & python -m pip install -r "requirements.txt" > $logdir\installReq.log 2> $logdir\installReqErr.log
+    if(-Not (Test-VenvDependencies)){
+        return $False
+    }
     deactivate
+    return $True
 
 }
 
@@ -152,7 +169,18 @@ function Init-Venv($venv,$base,$python){
         Set-Location -Path $base
         & $python -m virtualenv "$venv" > $logdir\createVenv.log 2> $logdir\createVenvErr.log
         Set-Location -Path "$base\$venv"
-        Update-Venv "$venv" $base
+        if(-Not (Update-Venv "$venv" $base)){
+            & $gum style  --foreground "#FF0000" `
+              --border-foreground "#FF0000" `
+              --border=double `
+              --align=center `
+              --padding="1 4" `
+              "Problema ao instalar dependências!"
+            Write-Host "`nPor favor, cheque os arquivos em:"
+            Write-Host ("`n`t" + $logdir)
+            Write-Host "`nO BirdoApp NÃO foi instalado. Encerrando..."
+            Exit
+        }
 
     }
 
