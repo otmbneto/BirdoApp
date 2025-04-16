@@ -8,7 +8,7 @@ include("BD_2-ScriptLIB_Geral.js");
 function fadeOutMessage(projData, message){
 	try{	
 		var pathUI = projData.paths.birdoPackage + "ui/BD_FadeMessage.ui";
-		var dialog = find_interface(pathUI);
+		var dialog = new FadeOutMessage(pathUI);
 		if(!dialog){
 			return;
 		}
@@ -60,6 +60,7 @@ function FadeOutMessage(uifile){
 				this.button_timer.stop();
 				Print("Close...");
 				this.ui.close();
+				return;
 			}
 			this.opacity = this.opacity - 5;
 			this.ui.styleSheet = this.ss.replace("{ALPHA}", this.opacity);
