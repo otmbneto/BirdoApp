@@ -175,14 +175,9 @@ class ConfigInit(object):
                 item.copy_folder(config_path.path)
             elif item.is_file():
                 item.copy_file(config_path.path)
-
-        # copy icon
-        if create_data["05_icon"]:
-            origin_icon = Path(create_data["05_icon"])
-            icon = origin_icon.copy_file(config_path / "icon{0}".format(origin_icon.suffix))
-        else:
-            origin_icon = Path(self.icons["template"])
-            icon = origin_icon.copy_file(config_path / "icon{0}".format(origin_icon.suffix))
+        
+        origin_icon = Path(create_data["05_icon"] if create_data["05_icon"] else self.icons["template"])
+        icon = origin_icon.copy_file(config_path / "icon{0}".format(origin_icon.suffix))
 
         # atualiza o arquivo xstage de asset_setup
         asset_setup = config_path / "ASSET_template" / "ASSET_template.xstage"
