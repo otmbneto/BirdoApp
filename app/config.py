@@ -292,7 +292,7 @@ class ConfigInit(object):
         plugins = []
         for item in filter(lambda x: x.is_dir(), plugins_root.glob("*")):
             p = self.get_plugin_data(item)
-            if proj_user_role in p["permissions"]:
+            if p is not None and proj_user_role in p["permissions"]:
                 plugins.append(p)
         return plugins
 
