@@ -1303,7 +1303,6 @@ function updateSceneMCs(showMCs){
 	//update all mcs show control values
 	scene_mcs.forEach(function(item){ 
 	    node.showControls(item, false);
-		Print("node mc hidden: " + item);
 	});
 	//Action.perform("onActionHideAllControls()");
 	return scene_mcs;
@@ -1410,6 +1409,10 @@ function applyTbStateFile(mcNode, tbStateFile){
 */
 function findServerMCDataZip(projDATA, rig_data){
 	var assetRoot = projDATA.getTBLIB("server") + "BirdoASSET/";
+	if(!BD1_DirExist(assetRoot)){
+		Print("BIRDOASSET folder not found in server!");
+		return false;
+	}
 	var prefix = rig_data.prefix.slice(0, 2);
 	var assetTypeFolder = findAssetTypeFolder();
 	if(!assetTypeFolder){
