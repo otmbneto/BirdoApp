@@ -47,7 +47,12 @@ function Publish(){
 			MessageBox.warning("ERRO ao listar arquivos para compactar!", 0, 0);
 			return;
 		}
-		var sc_json = projectDATA.systemTempFolder + "/BirdoApp/publish_scene/_sc_data.json";
+		var publish_temp = projectDATA.systemTempFolder + "/BirdoApp/publish_scene/";
+		if(!BD1_CleanFolder(publish_temp)){
+			Print("Falha em criar o folder temp!");
+			return;
+		}
+		var sc_json = publish_temp + "_sc_data.json";
 		BD1_WriteJsonFile(compact_version_data, sc_json);
 	} catch(e){
 		Print(e);
