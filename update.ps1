@@ -43,6 +43,19 @@ function Ask-User($question){
 
 }
 
+function Update-Files($repo,$temp,$dst){
+
+    $zipFile = Get-GitRelease $repo $temp "Source"
+    Expand-Archive -Path $zipFile -DestinationPath $temp -Force
+    Remove-Item -Path "$zipFile" -Force
+    $unzip = Get-ChildItem -Path $temp -Name
+    Write-Host "$birdoTemp\$unzip"
+    Copy-item -Force -Recurse -Verbose "$birdoTemp\$unzip\*" -Destination "$birdoApp\"
+    Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
+
+
+}
+
 $birdoTemp = "$env:TEMP\BirdoApp"
 $birdoApp = "$env:APPDATA\BirdoApp"
 if(Test-Path $birdoTemp){ 
@@ -56,33 +69,33 @@ if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
     Write-Host (Get-Date $releaseDate -Format "yyyy-MM-dd hh:mm:ss")
     if ((Get-Date $lastModified.LastWriteTime -Format "yyyy-MM-dd hh:mm:ss") -lt (Get-Date $releaseDate -Format "yyyy-MM-dd hh:mm:ss")){
 
-        $answer = Ask-User("There is a new version of the app available! Do you want to update?")
+        $answer = Ask-User("Existe uma nova versao do app disponivel! Voce quer atualiza-lo?")
         if($answer -eq 6){
 
-            Write-Host "New release found! Donwloading it!"
+            Write-Host "Baixando atualização..."
             $zipFile = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
             Expand-Archive -Path $zipFile -DestinationPath "$birdoTemp" -Force
             Remove-Item -Path "$zipFile" -Force
             $unzip = Get-ChildItem -Path $birdoTemp -Name
             Write-Host "$birdoTemp\$unzip"
             Copy-item -Force -Recurse -Verbose "$birdoTemp\$unzip\*" -Destination "$birdoApp\"
-            Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
+            Write-Output "Atualizado com a build $unzip" >> "$birdoApp\lastUpdated.txt"
 
         }
     }
 }else{
 
-        $answer = Ask-User("Last update was not properly registred! Do you want to try update again?")
+        $answer = Ask-User("A ultima atualização nao foi registrada corretamente! Você que tentar atualizar novamente?")
         if($answer -eq 6){
 
-            Write-Host "New release found! Donwloading it!"
+            Write-Host "Baixando atualização..."
             $zipFile = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
             Expand-Archive -Path $zipFile -DestinationPath "$birdoTemp" -Force
             Remove-Item -Path "$zipFile" -Force
             $unzip = Get-ChildItem -Path $birdoTemp -Name
             Write-Host "$birdoTemp\$unzip"
             Copy-item -Force -Recurse -Verbose "$birdoTemp\$unzip\*" -Destination "$birdoApp\"
-            Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
+            Write-Output "Atualizado com a build $unzip" >> "$birdoApp\lastUpdated.txt"
 
         }
 
