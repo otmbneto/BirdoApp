@@ -272,6 +272,14 @@ function AskYesNo ($question){
 echo $greetings
 $host.UI.ReadLine()
 
+$birdoApp = "$env:APPDATA\BirdoApp"
+#check if birdoapp is already installed and if it is still using git. 
+if((Test-Path $birdoApp) -and (Test-Path "$birdoApp\.git")){
+
+    Remove-Item -Force -Recurse -Path "$birdoApp"
+
+}
+
 if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
     echo "Parece que o BirdoApp já está instalado em seu computador."
     echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
@@ -324,10 +332,10 @@ if(-Not (Test-Path "$pythonInstall")){
 # 1) Downloads dos arquivos do BirdoApp
 Set-Location -Path $env:APPDATA
 $birdoTemp = "$env:TEMP\BirdoApp"
-$birdoApp = "$env:APPDATA\BirdoApp"
 if(Test-Path $birdoTemp){ 
     Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
+
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory" > $null
 $returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
 $gitpath = $returnedObject[$returnedObject.length - 1]
