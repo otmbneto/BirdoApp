@@ -328,6 +328,13 @@ $birdoApp = "$env:APPDATA\BirdoApp"
 if(Test-Path $birdoTemp){ 
     Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
+
+#check if birdoapp is already installed and if it is still using git. 
+if((Test-Path $birdoApp) -and (Test-Path "$birdoApp\.git")){
+
+    Remove-Item -Force -Recurse -Path "$birdoApp"
+
+}
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory" > $null
 $returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
 $gitpath = $returnedObject[$returnedObject.length - 1]
