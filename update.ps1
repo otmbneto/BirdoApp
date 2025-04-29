@@ -85,7 +85,7 @@ if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
     }
 }else{
 
-        $answer = Ask-User("A ultima atualização nao foi registrada corretamente! Você que tentar atualizar novamente?")
+        $answer = Ask-User("A ultima atualizacao nao foi registrada corretamente! Voce que tentar atualizar novamente?")
         if($answer -eq 6){
 
             Write-Host "Baixando atualização..."
