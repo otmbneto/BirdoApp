@@ -719,13 +719,13 @@ QPushButton::disabled {
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>70</width>
          <height>70</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>184</width>
+         <width>70</width>
          <height>70</height>
         </size>
        </property>

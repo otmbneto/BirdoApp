@@ -32,7 +32,7 @@ Copyright:  leobazao_@Birdo
 			MessageLog.trace("JSON File created! " + fileName);
 			return true;
 		} catch (err){
-			MessageBox.warning( "Error while writing Json file:\n" + "File name: " + filename, 1, 0, 0);
+			Print(err);
 		}
 		return false;
 	}
