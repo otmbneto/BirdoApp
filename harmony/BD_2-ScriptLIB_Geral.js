@@ -1306,24 +1306,6 @@ function BD2_FormatPathOS(path){
 }
 
 /*
-	Renomeia o nome de usuario no path se tiver caracter invalido para caminhos (usar em todos caminhos possiveis!)
-	@dirPath => caminho a ser mudado
-*/
-function BD2_updateUserNameInPath(dirPath){
-	var birdo_py = BD1_GetPythonObject();
-	if(!birdo_py){
-		Print("[BIRDOAPP] Nao foi possivel encontrar o Objeto Python do birdoapp");
-		return dirPath;
-	}
-	var shortname = birdo_py.get_short_path(dirPath);
-	if(!shortname){
-		Print("[BIRDOAPP] Erro ao pegar o short name no python!");
-		return dirPath;
-	}
-	return shortname;
-}
-
-/*
 	retorna um nome unico de colum para ser usada na cena, somando um prefixo a um numero unico
 	@column_prefix => nome do prefixo da coluna a ser criada
 */

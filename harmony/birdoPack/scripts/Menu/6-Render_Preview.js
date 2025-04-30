@@ -24,16 +24,16 @@ function RenderPreview(){
 	
 	scene.beginUndoRedoAccum("Render Local");
 
-	var currPath = BD2_updateUserNameInPath(scene.currentProjectPath());
+	var currPath = scene.currentProjectPath();
 	var currScene = scene.currentScene();
 	var projectDATA = BD2_ProjectInfo();
-
 	if(!projectDATA){
 		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
 		return false;
 	}
-
-	if(projectDATA.entity.type != "SHOT"){//checa o tipo de cena, se nao for SHOT nao roda
+	
+	//checa o tipo de cena, se nao for SHOT nao roda
+	if(projectDATA.entity.type != "SHOT"){
 		MessageBox.warning("Este script somente funciona para Shot!", 0, 0);
 		Print("[RENDERLOCAL] ENTITY NAO E SHOT! CANCELADO!");
 		return;

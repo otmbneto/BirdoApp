@@ -7,15 +7,15 @@ import subprocess
 
 def get_short_path_name(long_name):
     """
-        retorna o shortname para o folder 'long_name'
-        (windows shortname e um caminho 'reduzido' do original, que o windows reconhece como o proprio caminho
-        usado para casos com caminhos com caracteres invalidos como espaco ou acentos)
+    Retorna o caminho curto de windows apenas dos folders com caracteres invalidos (espaco ou char non ASCII)
     """
-    if bool(re.findall(r"([^\u0000-\u007F]+|\s)", long_name)):
-        cmd = 'cmd /c for %A in ("{0}") do @echo %~sA'.format(long_name)
-        return subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True).strip()
-    else:
-        return long_name
+    split_path = [x.strip() for x in re.split(r'\\+|/', long_name)]
+    for i in range(1, len(split_path)):
+        if bool(re.findall(r"([^\x00-\x7F]+|\s)", split_path[i])):
+            temp_path = "/".join(split_path[0:i+1])
+            temp_short_path = subprocess.check_output('cmd /c for %A in ("{0}") do @echo %~sA'.format(temp_path), stderr=subprocess.STDOUT, shell=True).strip()
+            split_path[i] = re.split(r'\\+|/', temp_short_path)[-1]
+    return "/".join(split_path)
 
 
 class SystemFolders(object):

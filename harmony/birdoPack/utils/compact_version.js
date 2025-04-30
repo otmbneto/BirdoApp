@@ -27,7 +27,7 @@ function create_compact_file_list(use_progressbar){
 	var elements_ext_exeption_list = ["tga"];//extencoes de arquivos dos elements para NAO adicionar
 	///////////////////////////////////////
 
-	var cenaPath = BD2_updateUserNameInPath(scene.currentProjectPath());
+	var cenaPath = scene.currentProjectPath();
 	var versionName = scene.currentVersionName() + ".";
 	var sceneName = scene.currentScene();
 	var cenaDir = BD1_dirname(cenaPath);//caminho do folder parent da cena
@@ -124,7 +124,7 @@ function create_compact_file_list(use_progressbar){
 				progressDlg.setLabelText(msg + "[" + i + "/" + readList.length + "]");
             }
 			var id = node.getElementId(readList[i]);
-            var folder = BD2_updateUserNameInPath(element.completeFolder(id));
+            var folder = element.completeFolder(id);
 			if(elementList.indexOf(folder) != -1){
 				continue;
 			}
