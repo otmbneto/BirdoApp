@@ -375,9 +375,10 @@ class BirdoApp(QtGui.QMainWindow):
         """Abre pagina inicial de projetos do estudio (index 0)"""
         self.ui.progressBar.setValue(0)
         # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config studio)
-        if not self.birdoapp.check_server_path():
-            self.birdoapp.mb("Falha ao conectar o caminho do servidor do Estudio. Confira se o caminho está correto, e se tem acesso a pasta.")
-            self.load_config_studio_page()
+        if not self.birdoapp.is_server_available():
+            self.birdoapp.mb.warning("Falha ao conectar o caminho do servidor do Estudio. Confira se o caminho esta correto, e se tem acesso a pasta.Caso use VPN,verifique se esta conectada. No momento o modo standalone vai ser iniciado.")
+            #self.load_config_studio_page()
+            self.load_standalone_page()
             return
 
         # hide update button
