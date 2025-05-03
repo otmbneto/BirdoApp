@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from utils.birdo_timeout import timeout
 from utils.birdo_json import read_json_file, write_json_file
 from utils.birdo_pathlib import Path
 from utils.MessageBox import CreateMessageBox
@@ -121,6 +122,7 @@ class ConfigInit(object):
         """Metodo para checar se os dados de studio do config.json sao validos"""
         return not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]])
 
+
     def update_session(self, mode):
         """cria json no temp para guardar o modo de inicio da sessao"""
         session = {"date": datetime.datetime.now().isoformat(), "mode": mode}
@@ -135,6 +137,10 @@ class ConfigInit(object):
 
     def kill_session(self):
         self.json_session.remove()
+
+    @timeout(3)
+    def is_server_available(self):
+        return Path(self.config_data["server_projects"]).exists()
 
     def check_server_path(self):
         """Metodo para verificar se o caminho config do server e valido."""
@@ -207,7 +213,7 @@ class ConfigInit(object):
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
-            self.mb.warning("O caminho {0} de config do server não existe ou está indisponível. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
+            self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
         for proj in os.listdir(self.config_data["server_projects"]):
             p = os.path.join(self.config_data["server_projects"], proj)
