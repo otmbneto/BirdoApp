@@ -140,6 +140,7 @@ function exportASSET(self, projData, export_config, config_json){
 				Print("canceled at frame " + frame);
 				MessageBox.information("Export Canceled!");
 				canceled = true;
+				return false;
 			}
 			Print("Script render frame: " + frame);
 			progressDlg.setLabelText("Rendering frame: " + frame);
@@ -166,7 +167,7 @@ function exportASSET(self, projData, export_config, config_json){
 		
 		if(!canceled){
 			Print("converting images into movie... ");
-			if(!BD1_MakeMovieFromImageSeq(projData.birdoApp, export_data.start_frame, image_pattern, (export_data.end_frame - export_data.start_frame), export_data.fps, mov_path)){
+			if(!BD1_MakeMovieFromImageSeq(projData.birdoApp, image_pattern, export_data.fps, "null", mov_path)){
 				MessageBox.warning("Error compressing images into movie!", 0,0);
 				progressDlg.close();	
 				return false;
