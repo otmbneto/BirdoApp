@@ -29,6 +29,12 @@ class ConverterFFMPEG:
         # curdir original (usado para gambs de salvar os logs no temp)
         self.initial_dir = os.curdir
 
+        # video compress codec
+        self.vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
+
+        # audio compress codec
+        self.acodec = "-strict experimental -acodec aac -ab 160k -ac 2 "
+
     def update_render_progress(self, sterr_lin):
         """update the render progress line stdout."""
         # check for render frame value
@@ -47,7 +53,7 @@ class ConverterFFMPEG:
                                    shell=True,
                                    stderr=subprocess.STDOUT,
                                    stdout=subprocess.PIPE,
-                                   cwd=self.temp_folder.path,
+                                   cwd=str(self.temp_folder),
                                    universal_newlines=True)
 
         for line in process.stdout:
@@ -96,10 +102,9 @@ class ConverterFFMPEG:
 
     def compress_video(self, input_file, output_file):
         """Compressao basica (retirada do shotgun) do render para upload"""
-        vcodec = "-vcodec libx264 -pix_fmt yuv420p -g 30 -vprofile high -bf 0 -crf 23"
-        acodec = "-strict experimental -acodec aac -ab 160k -ac 2 " if self.check_audio_stream(input_file) else ""
+        acodec = self.acodec if self.check_audio_stream(input_file) else ""
         self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 \"{4}\"".format(
-            self.ffmpeg, input_file, vcodec, acodec, output_file
+            self.ffmpeg, input_file, self.vcodec, acodec, output_file
         )
         total_frames = self.get_video_duration(input_file)
         if total_frames:
@@ -116,6 +121,20 @@ class ConverterFFMPEG:
         total_frames = self.get_video_duration(input_mov)
         if total_frames:
             self.pb = tqdm(total=total_frames, leave=True, desc="[BIRDOAPP - ffmpeg] Get Image Sequence ")
+        return self.run_command()
+
+    def create_video_from_images(self, fps, img_pattern, output_mov, audio=None):
+        if audio:
+            self.cmd = "{0} -y -report -framerate {1} -i \"{2}\" -i \"{3}\" {4} {5}\"{6}\"".format(
+                self.ffmpeg, fps, img_pattern, audio, self.vcodec, self.acodec, output_mov
+            )
+        else:
+            self.cmd = "{0} -y -report -framerate {1} -i \"{2}\" {3} \"{4}\"".format(
+                self.ffmpeg, fps, img_pattern, self.vcodec, output_mov
+            )
+        total_frames = len(filter(lambda x: x.endswith(os.path.splitext(img_pattern)), os.listdir(os.path.dirname(img_pattern))))
+        if total_frames:
+            self.pb = tqdm(total=total_frames, leave=True, desc="[BIRDOAPP - ffmpeg] Creating Movie... ")
         return self.run_command()
 
     def extract_audio(self, input_mov_file, output_audio_file):
