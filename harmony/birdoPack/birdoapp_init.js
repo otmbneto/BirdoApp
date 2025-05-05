@@ -251,7 +251,7 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.get_scene_step_folder = function(step_type){//retorna o nome da pasta de step no render
-		return this.paths["step"][step_type]["folder_name"];	
+		return this.paths["steps"][step_type]["folder_name"];	
 	}
 
 	this.getShotPublishFolder = function(step){//retorna o caminho de folder para publish do arquivo aberto para o projeto
