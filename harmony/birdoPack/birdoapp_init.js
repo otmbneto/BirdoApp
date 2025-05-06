@@ -144,11 +144,20 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.getServerRoot = function(){//retorna o caminho root do server
-		return [this.paths["root"], this.paths["projRoot"]].join("/");
+		if(Boolean(this.paths["projRoot"])){
+			var splited = this.paths["root"].split("\\");
+			splited.push(this.paths["projRoot"]);
+			return splited.join("/") + "/";
+		}
+		return this.paths["root"].split("\\").join("/") + "/";
+	}
+	
+	this.check_server = function(){//checa se o server está disponível
+		return dirExist(this.getServerRoot());
 	}
 	
 	this.getLocalRoot = function(){//retorna root do projeto local -OK
-		return this.paths["local_folder"] + "/";
+		return this.paths["local_folder"].split("\\").join("/") + "/";
 	}
 	
 	this.getTBLIB = function(root){//retorna caminho da tblib (root = server ou local)
@@ -273,8 +282,8 @@ function BirdoAppConfig(config_data, project_data){
 			this.paths.ep.cenas.folder, 
 			this.get_scene_step_folder("COMP"),
 			this.entity["name"],
-			this.paths.step.COMP.server.filter(function(item){ return item.toUpperCase().indexOf("RENDER") != -1})[0]
-		].join("/");
+			this.paths.steps.COMP.server.filter(function(item){ return item.toUpperCase().indexOf("RENDER") != -1})[0]
+		].join("/") + "/";
 	}
 	
 	this.getRenderPath = function(root, step){
