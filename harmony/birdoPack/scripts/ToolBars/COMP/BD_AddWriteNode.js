@@ -1,6 +1,6 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
-/*versao adaptada para BirdoAPP
+/*
 -------------------------------------------------------------------------------
 Name:		BD_AddWriteNode.js
 
@@ -10,62 +10,54 @@ Usage:		selecione um node para conectar o write e esoclha o nome no Imput;
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	Janeiro, 2022;
+Created:	Janeiro, 2022; (update junho, 2025)
             
 Copyright:   leobazao_@Birdo
  
 -------------------------------------------------------------------------------
 */
-
-
 function BD_AddWriteNode(){
 	
-
 	var sel = selection.selectedNode(0);
-	var selName = node.getName(sel);
-	var currScene = scene.currentScene();
-
-	var projData = BD2_ProjectInfo();
-
-	if(!projData){
-		MessageBox.information("Erro ao pegar info do projeto!");
-		return;
-	}
-
-	if(!checkUserType(projData)){
-		return;
-	}
-
+	var selName = node.getName(sel);	
 	if(selName== ""){
 		MessageBox.information("Seleione um node!!");
 		return;
 	}
-
+	
+	var projData = BD2_ProjectInfo();
+	if(!projData){
+		MessageBox.information("Erro ao pegar info do projeto!");
+		return;
+	}
+	if(!checkUserType(projData)){
+		return;
+	}
+	
+	var currScene = scene.currentScene();
 	var renderPath = projData.getRenderComp();
-
 	if(!renderPath){
 		MessageBox.warning("Este computador nao reconhece o caminho de render na rede! Avise a DT!",0,0);
 		return;
 	}
 
-	////cria a pasta de render na rede caso ainda nao exista
-	if(!BD1_DirExist(renderPath)){
-		Print("Foi preciso criar a pasta da cena na rede");
-		BD1_createDirectoryREDE(renderPath);
-	}
-	
+	//se tiver acesso ao server, checa se precisa criar o folder de destino caso ainda nao exista
+	if(projData.check_server()){
+		if(!BD1_DirExist(renderPath)){
+			Print("Foi preciso criar a pasta da cena na rede");
+			BD1_createDirectoryREDE(renderPath);
+		}
+	}	
 	renderPath += currScene;//render path Final write
 
 	//escolhe o nome do node e da saida
 	var input_name = Input.getText("Escolha o Nome do Write", selName, "Separar Para Export");
-	
 	if(!input_name){
 		Print("Add WriteNode Canceled...");
 		return;
 	}
 	
 	var writeName = normalizeName(input_name);
-
 	if(!writeName){
 		Print("invalid name... canceling!");
 		return;

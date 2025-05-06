@@ -18,6 +18,11 @@ Copyright:   leobazao_@Birdo
 */
 function comp_render(projectDATA){
 	
+	if(!projectDATA.check_server()){
+		MessageBox.warning("O folder de destino deste projeto está indisponível. Estabeleça conexão antes de fazer o render!",0,0);
+		return false;
+	}
+	
 	//desabilita o write final em caso de ter writes extras
 	var all_writes = node.getNodes(["WRITE"]);
 	var finalWrite = "Top/SETUP/Write_FINAL";
