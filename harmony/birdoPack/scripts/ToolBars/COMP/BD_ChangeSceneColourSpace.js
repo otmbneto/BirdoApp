@@ -8,7 +8,7 @@ Usage:		Usa o SetSpaceColours.js do utils
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	janeiro, 2022.
+Created:	janeiro, 2022. (update junho 2025)
             
 Copyright:   leobazao_@Birdo
  
@@ -19,21 +19,20 @@ include("BD_2-ScriptLIB_Geral.js");
 
 function BD_ChangeSceneColourSpace(){
 	
-	var cs = get_cs();
-	if(!cs){
-		Print("caneled...");
-		return;
-	}
-	
 	var projData = BD2_ProjectInfo();
 	if(!projData){
 		MessageBox.warning("Erro ao logar infos do BirdoApp! Avise a DT!",0,0);
 		return;
 	}
+	
+	var cs = get_cs(projData);
+	if(!cs){
+		Print("caneled...");
+		return;
+	}
 
 	var setCS_script_path = projData.paths.birdoPackage + "utils/setColourSpace.js";
 	var require_script = require(setCS_script_path).setColourSpace(cs);
-	
 	if(!require_script){
 		MessageBox.warning("ERROR CHANGING COLOUR SPACE: " + cs + "\nCheck MessageLog for details!",0,0);
 	} else {
@@ -41,8 +40,14 @@ function BD_ChangeSceneColourSpace(){
 	}
 	
 	//extra function
-	function get_cs(){
-		var cs_list = ["NO_COLOUR_SPACE", "ACES", "sRGB"];
-		return Input.getItem("Choose colour-space:", cs_list, "NO_COLOUR_SPACE", false, "Set Colour-Space", 0);
+	function get_cs(projData){
+		var cs_list = Object.keys(projData.colour_spaces);
+		var label = "Escolha o STEP para o Espaço de Cor desejado:\n\n";
+		cs_list.forEach(function(item){ label += (" [" + item + "] : " + projData.colour_spaces[item] + ";\n")});
+		var choice = Input.getItem(label, cs_list, cs_list[0], false, "Set Colour-Space", 0);
+		if(choice){
+			return projData.colour_spaces[choice];
+		}
+		return false;
 	}
 }
