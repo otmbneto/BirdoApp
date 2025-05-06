@@ -215,10 +215,12 @@ class ConfigInit(object):
         if not os.path.exists(self.config_data["server_projects"]):
             self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
+        print(self.config_data["server_projects"])
         for proj in os.listdir(self.config_data["server_projects"]):
+            print(proj)
             p = os.path.join(self.config_data["server_projects"], proj)
             proj_json = os.path.join(p, "project_data.json")
-            if os.path.exists(proj_json) and bool(re.match(r"^\w{3}$", proj)):
+            if os.path.exists(proj_json):
                 p_data = read_json_file(proj_json)
                 p_data["config_folder"] = p
                 p_data["proj_json"] = proj_json
