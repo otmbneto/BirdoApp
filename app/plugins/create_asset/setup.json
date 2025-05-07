@@ -5,7 +5,7 @@
 	"author": "leobazao@birdo",
 	"icon": "plugin.ico",
 	"main_script": "create_asset.py",
-	"ui_file": null,
+	"ui_file": "ui/dialog.ui",
 	"extra_files": null,
 	"arguments": [],
 	"permissions": [
