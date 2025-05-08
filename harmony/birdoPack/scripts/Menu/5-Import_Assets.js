@@ -193,9 +193,19 @@ function createInterface(projectDATA, base_folder, utils){
 		this.ui.selected_items_list.insertItem(row,new_item);
 	}
 
+	this.onAddItem = function(){
+		var curritem = this.ui.list_widget.currentItem();
+		this.onAddDoubleClick(curritem);
+	}
+
 	this.onRmvDoubleClick = function(item){
 		var row = this.ui.selected_items_list.currentRow;
 		this.ui.selected_items_list.takeItem(row);
+	}
+
+	this.onRemoveItem = function(){
+		var curritem = this.ui.selected_items_list.currentItem();
+		this.onRmvDoubleClick(curritem);
 	}
 
 	this.importTemplates = function(){
@@ -241,6 +251,8 @@ function createInterface(projectDATA, base_folder, utils){
 	this.ui.list_widget.itemDoubleClicked.connect(this, this.onAddDoubleClick);
 	this.ui.selected_items_list.itemDoubleClicked.connect(this, this.onRmvDoubleClick);
 	this.ui.import_button.clicked.connect(this, this.importTemplates);
+	this.ui.addButton.clicked.connect(this, this.onAddItem);
+	this.ui.removeBtn.clicked.connect(this, this.onRemoveItem);
 	this.ui.cancel_button.clicked.connect(this, this.onClose);
 
 	///helper functions//////////////////
