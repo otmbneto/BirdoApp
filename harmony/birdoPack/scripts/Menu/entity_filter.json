@@ -19,7 +19,6 @@
 	"LEAD": [
 		"0-Update_Animatic.js",
 		"3-Publish.js",
-		"4-Save_Asset_tpl.js",
 		"5-Import_Assets.js",
 		"6-Render_Preview.js",
 		"7-Add_Notes.js",
