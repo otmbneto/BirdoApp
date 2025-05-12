@@ -79,6 +79,11 @@ class ConverterFFMPEG:
             resolution = [int(x) for x in re.findall(r"\d+", res_raw[0])]
             return resolution
 
+    def get_aspect_ratio(self, input_file):
+        """retorna o aspect ratio da media"""
+        res = self.get_resolution(input_file)
+        return float(res[0]) / float(res[1])
+
     def get_video_duration(self, video_file):
         """retorna a duracao do video em frames"""
         try:
