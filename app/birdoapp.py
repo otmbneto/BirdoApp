@@ -182,7 +182,7 @@ class BirdoApp(QtGui.QMainWindow):
         # CONFIG STANDALONE WIDGETS
         self.standaloneCreateBtn.clicked.connect(self.on_create_scene)
         self.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
-        self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+        #self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
         self.ui.loadStandaloneBtn.clicked.connect(self.onLoadStandAloneBtn)
         self.ui.loadStudioBtn.clicked.connect(self.onLoadStudioBtn)
 
@@ -313,6 +313,7 @@ class BirdoApp(QtGui.QMainWindow):
             initial_dir,
             "Harmony Files (*.xstage)"
         )
+
         if not xstage:
             print "canceled..."
             return
