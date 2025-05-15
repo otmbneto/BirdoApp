@@ -56,12 +56,13 @@ function Update-Files($repo,$temp,$dst){
 
 }
 
-$birdoTemp = "$env:TEMP\BirdoApp"
+$birdoTemp = "$env:TEMP\BirdoApp_update"
 $birdoApp = "$env:APPDATA\BirdoApp"
 if(Test-Path $birdoTemp){ 
     Remove-Item -Force -Recurse -Path "$birdoTemp"
 }
-New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory"
+
+New-Item -Path "$env:TEMP" -Name "BirdoApp_update" -ItemType "directory"
 if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
     $lastModified = Get-Item "$birdoApp\lastUpdated.txt"
     $releaseDate = Get-RepoReleaseDate "otmbneto/BirdoApp"
