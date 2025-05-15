@@ -149,21 +149,21 @@ QLineEdit {
      <item row="0" column="1">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Scene</string>
+        <string>Cena</string>
        </property>
       </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Episode</string>
+        <string>Episódio</string>
        </property>
       </widget>
      </item>
      <item row="0" column="2">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Version</string>
+        <string>Versão</string>
        </property>
       </widget>
      </item>
@@ -207,7 +207,7 @@ QLineEdit {
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Extra Options</string>
+        <string>Opções extras:</string>
        </property>
       </widget>
      </item>
@@ -236,14 +236,14 @@ QLineEdit {
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>Open Local File</string>
+        <string>Abrir arquivo local</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>Last Version:</string>
+        <string>Ultima versão:</string>
        </property>
       </widget>
      </item>
@@ -300,7 +300,7 @@ QLineEdit {
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Marque para ver todas as versoes da cena selecionada, e nao somente a ultima versao.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Show All Versions</string>
+        <string>Mostrar todas as versões</string>
        </property>
        <property name="checked">
         <bool>false</bool>
@@ -310,7 +310,7 @@ QLineEdit {
      <item>
       <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>Open in Step:</string>
+        <string>Abrir etapa:</string>
        </property>
       </widget>
      </item>
@@ -381,7 +381,7 @@ QComboBox:disabled{
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Server:</string>
+          <string>Servidor:</string>
          </property>
         </widget>
        </item>
@@ -553,7 +553,7 @@ QPushButton::disabled {
 }</string>
        </property>
        <property name="text">
-        <string>Open Scene</string>
+        <string>Abrir cena</string>
        </property>
       </widget>
      </item>
@@ -615,7 +615,7 @@ QPushButton:hover{
 }</string>
        </property>
        <property name="text">
-        <string>Close</string>
+        <string>Fechar</string>
        </property>
       </widget>
      </item>
@@ -669,7 +669,7 @@ QPushButton::disabled {
 }</string>
        </property>
        <property name="text">
-        <string>Open Local Folder</string>
+        <string>Abrir pasta local</string>
        </property>
       </widget>
      </item>
@@ -692,7 +692,7 @@ QPushButton::disabled {
         </font>
        </property>
        <property name="text">
-        <string>Open Scene</string>
+        <string>Abrir cena</string>
        </property>
       </widget>
      </item>
