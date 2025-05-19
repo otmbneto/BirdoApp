@@ -29,7 +29,16 @@ function TB_sceneOpened(){
 	var toolbars_root = projectDATA.paths["birdoPackage"] + "scripts/ToolBars/";
 	var toolbars = BD1_ListFolders(toolbars_root);
 	try{
-		createMenu(projectDATA);
+		if(!createMenu(projectDATA)){
+			if(MessageBox.warning("Erro ao carregar o BirdoApp. Tentar novamente?", 3,4) == 3){
+				var menu_create = createMenu(projectDATA);
+				Print("[BIRDOAPP] Segunda tentativa de iniciar o menu: " + menu_create);
+				if(!menu_create){
+					MessageBox.warning("Erro ao carregar o BirdoApp!");
+					return false;
+				}
+			}
+		}
 		
 		for(var i=0; i<toolbars.length; i++){
 			var tool_b = toolbars[i];
@@ -68,7 +77,12 @@ function createMenu(projDATA){//Cria o Menu na UI do programa
 	var menuScripts = BD1_ListFiles(menuPath, "*.js");
 	
 	//create QApplication menu widget..
-	var menuBar = QApplication.activeWindow().menuBar();
+	var tbWindow = QApplication.activeWindow();
+	if(!tbWindow){
+		Print("[BIRDOAPP] Erro a carregar as ferramentas do Birdoapp");
+		return false;
+	}
+	var menuBar = tbWindow.menuBar();
 	var menu = menuBar.addMenu("BirdoApp");
 	
 	//se a entity for invalida, cria somente o menu com 11-Ajuda
@@ -77,7 +91,7 @@ function createMenu(projDATA){//Cria o Menu na UI do programa
 		ajuda.triggered.connect(this, function(){
 			MessageBox.information("Esta cena não faz parte de um projeto do BirdoApp, mas você ainda pode adicionar os ToolBars do BirdoApp e utilizar as ferramentas disponíveis em cada um.");
 		});
-		return;
+		return true;
 	}
 	
 	//user permissions	
