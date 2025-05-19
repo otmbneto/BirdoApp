@@ -53,18 +53,17 @@ class Spoiler(QtGui.QWidget):
         self.mainLayout.addWidget(self.contentArea, row, 0, 1, 3)
         self.setLayout(self.mainLayout)
 
-        def start_animation():
-            arrow_type = QtCore.Qt.DownArrow if self.toggleButton.isChecked() else QtCore.Qt.RightArrow
-            direction = QtCore.QAbstractAnimation.Forward if self.toggleButton.isChecked() else QtCore.QAbstractAnimation.Backward
-            self.toggleButton.setArrowType(arrow_type)
-            self.toggleAnimation.setDirection(direction)
-            self.toggleAnimation.start()
-
-        self.toggleButton.clicked.connect(start_animation)
-        start_animation()
+        self.toggleButton.clicked.connect(self.start_animation)
 
     def isOpen(self):
         return self.toggleButton.isChecked()
+
+    def start_animation(self):
+        arrow_type = QtCore.Qt.DownArrow if self.toggleButton.isChecked() else QtCore.Qt.RightArrow
+        direction = QtCore.QAbstractAnimation.Forward if self.toggleButton.isChecked() else QtCore.QAbstractAnimation.Backward
+        self.toggleButton.setArrowType(arrow_type)
+        self.toggleAnimation.setDirection(direction)
+        self.toggleAnimation.start()
 
     def setContentLayout(self, contentLayout):
         # Not sure if this is equivalent to self.contentArea.destroy()
@@ -81,6 +80,7 @@ class Spoiler(QtGui.QWidget):
         contentAnimation.setDuration(self.animationDuration)
         contentAnimation.setStartValue(0)
         contentAnimation.setEndValue(contentHeight)
+        self.start_animation()
 
 
 class BirdoApp(QtGui.QMainWindow):
@@ -141,6 +141,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
             self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
 
+        print("The file is being fetched" + str(self.recently_open_log))
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
             item.setText(f.name)
@@ -357,6 +358,7 @@ class BirdoApp(QtGui.QMainWindow):
             self.recently_open = list(set(self.recently_open[1:]))
         self.recently_open.append(f)
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        print("The file is being updated" + str(self.recently_open_log))
         self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
 
         self.recent_list.clear()
