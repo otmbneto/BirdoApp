@@ -30,13 +30,12 @@ function TB_sceneOpened(){
 	var toolbars = BD1_ListFolders(toolbars_root);
 	try{
 		if(!createMenu(projectDATA)){
-			if(MessageBox.warning("Erro ao carregar o BirdoApp. Tentar novamente?", 3,4) == 3){
-				var menu_create = createMenu(projectDATA);
-				Print("[BIRDOAPP] Segunda tentativa de iniciar o menu: " + menu_create);
-				if(!menu_create){
-					MessageBox.warning("Erro ao carregar o BirdoApp!");
-					return false;
-				}
+			MessageBox.warning("O BirdoApp precisa reiniciar o Menu para ser criado. Aguarde alguns segundos, e aperte 'OK'.", 0,0);
+			var menu_create = createMenu(projectDATA);
+			Print("[BIRDOAPP] Segunda tentativa de iniciar o menu: " + menu_create);
+			if(!menu_create){
+				MessageBox.warning("Erro ao carregar o BirdoApp!");
+				return false;
 			}
 		}
 		
