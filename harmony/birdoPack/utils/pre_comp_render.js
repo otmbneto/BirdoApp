@@ -83,7 +83,7 @@ function pre_comp_render(proj_data){
 		Print("Script render frame: " + frame);
 		progressDlg.setLabelText("Rendering frame: " + frame);
 		// Save the image here.
-		var frameformatnumber = ("0000" + frame).slice(-4);
+		var frameformatnumber = ("0000" + (frame - export_data.start_frame)).slice(-4);
 		var image_full_path = image_name.replace("{framenumber}", frameformatnumber);
 		celImage.imageFile(image_full_path);
 		progressDlg.setValue(counter);
