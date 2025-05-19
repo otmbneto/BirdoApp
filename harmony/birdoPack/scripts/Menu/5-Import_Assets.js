@@ -164,7 +164,7 @@ function createInterface(projectDATA, base_folder, utils){
 	}
 	
 	this.onClose = function(){
-		stopPreview();
+		Print("import ASSET interface closed!");
 		this.ui.close();
 	}
 
