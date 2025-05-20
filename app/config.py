@@ -122,7 +122,6 @@ class ConfigInit(object):
         """Metodo para checar se os dados de studio do config.json sao validos"""
         return not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]])
 
-
     def update_session(self, mode):
         """cria json no temp para guardar o modo de inicio da sessao"""
         session = {"date": datetime.datetime.now().isoformat(), "mode": mode}
@@ -308,3 +307,18 @@ class ConfigInit(object):
         data = read_json_file(plugin_json.path)
         data["root"] = plugin_root
         return data
+
+    def open_harmony_file(self, harmony_file):
+        """copia o arquivo .js de init do birdoapp pra pasta scripts do arquivo, e abre com o harmony"""
+        h_file = Path(str(harmony_file))
+        if not h_file.endswith("xstage"):
+            print "harmony open file invalid format input: {0}\nMust be .xstage file.".format(h_file)
+            return False
+        scripts_f = h_file.get_parent() / "scripts"
+        if not scripts_f.exists():
+            scripts_f.make_dirs()
+        sco_script = Path(self.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+        if not sco_script.copy_file(scripts_f / sco_script.name):
+            print "[BIRDOAPP] falha ao copiar arquivo 'TB_sceneOpened.js' para o arquivo de harmony: {0}".format(h_file)
+            return False
+        return self.harmony.open_harmony_scene(h_file.path)
