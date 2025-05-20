@@ -9,7 +9,7 @@ import subprocess
 
 
 class Spoiler(QtGui.QWidget):
-    def __init__(self, parent=None, title='', checked=False, visible=True, animationDuration=100):
+    def __init__(self, parent=None, title='', checked=False, visible=True, anim_duration=100):
         """
         References:
             # Adapted from c++ version
@@ -17,7 +17,7 @@ class Spoiler(QtGui.QWidget):
         """
         super(Spoiler, self).__init__(parent=parent)
 
-        self.animationDuration = animationDuration
+        self.animationDuration = anim_duration
         self.toggleAnimation = QtCore.QParallelAnimationGroup()
         self.contentArea = QtGui.QScrollArea()
         self.headerLine = QtGui.QFrame()
@@ -55,7 +55,7 @@ class Spoiler(QtGui.QWidget):
 
         self.toggleButton.clicked.connect(self.start_animation)
 
-    def isOpen(self):
+    def is_open(self):
         return self.toggleButton.isChecked()
 
     def start_animation(self):
@@ -65,12 +65,12 @@ class Spoiler(QtGui.QWidget):
         self.toggleAnimation.setDirection(direction)
         self.toggleAnimation.start()
 
-    def setContentLayout(self, contentLayout):
+    def set_content_layout(self, content_layout):
         # Not sure if this is equivalent to self.contentArea.destroy()
         self.contentArea.destroy()
-        self.contentArea.setLayout(contentLayout)
+        self.contentArea.setLayout(content_layout)
         collapsedHeight = self.sizeHint().height() - self.contentArea.maximumHeight()
-        contentHeight = contentLayout.sizeHint().height()
+        contentHeight = content_layout.sizeHint().height()
         for i in range(self.toggleAnimation.animationCount() - 1):
             spoilerAnimation = self.toggleAnimation.animationAt(i)
             spoilerAnimation.setDuration(self.animationDuration)
@@ -123,10 +123,10 @@ class BirdoApp(QtGui.QMainWindow):
         # -------------------------------------------------------------
         self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
         CreateSceneDropDown = Spoiler(title="CRIAR CENA")
-        CreateSceneDropDown.setContentLayout(self.getCreateSceneLayout())
+        CreateSceneDropDown.set_content_layout(self.getCreateSceneLayout())
         self.ui.v_lay.addWidget(CreateSceneDropDown)
         OpenSceneDropDown = Spoiler(checked=True, visible=False)
-        OpenSceneDropDown.setContentLayout(self.getOpenSceneLayout())
+        OpenSceneDropDown.set_content_layout(self.getOpenSceneLayout())
         self.ui.v_lay.addWidget(OpenSceneDropDown)
         # -------------------------------------------------------------
 
@@ -155,7 +155,6 @@ class BirdoApp(QtGui.QMainWindow):
         ui.open(QtCore.QFile.ReadOnly)
         loader = QtUiTools.QUiLoader()
         loader.registerCustomWidget(Spoiler)
-
         return loader.load(ui)
 
     def setup_connections(self):
@@ -183,7 +182,6 @@ class BirdoApp(QtGui.QMainWindow):
         # CONFIG STANDALONE WIDGETS
         self.standaloneCreateBtn.clicked.connect(self.on_create_scene)
         self.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
-        #self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
         self.ui.loadStandaloneBtn.clicked.connect(self.onLoadStandAloneBtn)
         self.ui.loadStudioBtn.clicked.connect(self.onLoadStudioBtn)
 
@@ -293,18 +291,8 @@ class BirdoApp(QtGui.QMainWindow):
             if script_path.exists():
                 script_path.remove()
 
-        print(self.birdoapp.harmony.get_xstage_last_version(template.normpath()))
         xstage = Path(self.birdoapp.harmony.get_xstage_last_version(template.normpath())).rename(scene_name + ".xstage")
-        scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
-        scene_script_path = xstage.get_parent() / "scripts"
-        if not scene_script_path.exists():
-            scene_script_path.make_dirs()
-        print("copying {0} to script folder".format(scene_opened_script.name))
-        if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
-            print "[BIRDOAPP] Falha ao copiar o arquivo TB_sceneOpnece.js para o script da cena escolhida!"
-            return
-
-        self.birdoapp.harmony.open_harmony_scene(xstage.normpath())
+        self.birdoapp.open_harmony_file(xstage.path)
         self.update_recently_open(xstage)
 
     def on_open_standalone(self):
@@ -320,16 +308,7 @@ class BirdoApp(QtGui.QMainWindow):
             return
         f = Path(str(xstage[0]))
         if f.exists():
-            scene_opened_script = Path(
-                self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
-            scene_script_path = f.get_parent() / "scripts"
-            if not scene_script_path.exists():
-                scene_script_path.make_dirs()
-            print("copying {0} to script folder".format(scene_opened_script.name))
-            if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
-                print "[BIRDOAPP] Falha ao copiar o arquivo TB_sceneOpnece.js para o script da cena escolhida!"
-                return
-            self.birdoapp.harmony.open_harmony_scene(f)
+            self.birdoapp.open_harmony_file(f.path)
             self.update_recently_open(f)
         else:
             print("[BIRDOAPP] arquivo escolhido invalido!")
@@ -380,7 +359,6 @@ class BirdoApp(QtGui.QMainWindow):
         # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config studio)
         if not self.birdoapp.is_server_available():
             self.birdoapp.mb.warning("Falha ao conectar o caminho do servidor do Estudio. Confira se o caminho esta correto, e se tem acesso a pasta.Caso use VPN,verifique se esta conectada. No momento o modo standalone vai ser iniciado.")
-            #self.load_config_studio_page()
             self.load_standalone_page()
             return
 
