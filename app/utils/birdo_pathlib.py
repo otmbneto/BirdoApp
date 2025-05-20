@@ -25,14 +25,12 @@ class Path:
         return Path(os.path.join(self.path, str(other)))
 
     def __len__(self):
-
         return len(self.path)
 
     def normpath(self):
         return os.path.normpath(self.path)
 
-    def endswith(self,suffix):
-
+    def endswith(self, suffix):
         return self.path.endswith(suffix)
 
     def is_dir(self):
