@@ -23,7 +23,7 @@ class uiItem(QtGui.QGroupBox):
             self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
         self.sceneFound = True
 
-        self.initLogic()
+        #self.initLogic()
 
         # init layout
         self.setMinimumHeight(50)
@@ -45,7 +45,7 @@ class uiItem(QtGui.QGroupBox):
         self.episodes.setMinimumWidth(25)
         self.episodes.setMaximumWidth(25)
 
-        scene_label = QtGui.QLabel("Scene:")
+        scene_label = QtGui.QLabel("Cena:")
         scene_label.setFont(item_font)
         scene_label.setMinimumWidth(50)
         scene_label.setMaximumWidth(50)
@@ -73,7 +73,7 @@ class uiItem(QtGui.QGroupBox):
         self.progress_bar.setMaximumWidth(100)
         self.progress_bar.setValue(0)
 
-        self.status_label = QtGui.QLabel("<font>Ready to go</font>")
+        self.status_label = QtGui.QLabel("<font>Pronto</font>")
         self.status_label.setFont(item_font)
         self.status_label.setStyleSheet("QLabel { color : blue; }")
         self.status_label.setFont(item_font)
@@ -107,7 +107,7 @@ class uiItem(QtGui.QGroupBox):
         self.setBackgroundColor("#233142")
 
         # init logic
-        self.episode = self.uploader.project_data.find_ep(self.filename)
+        self.episode = self.uploader.project_data.paths.find_ep(self.filename)
         self.checkScene()
         if self.episode is not None:
             self.setEpisode(self.findIndexOf(self.episode))
@@ -127,7 +127,6 @@ class uiItem(QtGui.QGroupBox):
 
     def onTypingFinished(self):
         # Trigger action after user stops typing for 1 second
-        print("User stopped typing: {0}".format(self.scene_text.text()))
         if len(self.scene_text.text()) > 0:
             self.setBackgroundColor("#233142")
             self.sceneFound = True
@@ -197,11 +196,11 @@ class uiItem(QtGui.QGroupBox):
         self.episodes.addItems(episodes)
 
     def setDone(self):
-        self.status_label.setText("Done")
+        self.status_label.setText("Feito")
         self.status_label.setStyleSheet("QLabel { color : green; }")
 
     def setError(self):
-        self.status_label.setText("ERROR")
+        self.status_label.setText("ERRO")
         self.status_label.setStyleSheet("QLabel { color : red; }")
 
     def setEnable(self, value):
@@ -240,12 +239,12 @@ class uiItem(QtGui.QGroupBox):
     def upload(self, temp):
         episode_code = self.getCurrentEpisode()
         if episode_code == "":
-            self.setStatus("Nenhum Episódio Escolhido", "red")
+            self.setStatus("Nenhum episodio escolhido", "red")
             return
 
         self.incrementProgress(10)
         if self.scene_text.isEnabled() and len(self.scene_text.text()) == 0:
-            self.setStatus("Cena Não Encontrada", "red")
+            self.setStatus("Cena nao encontrada", "red")
             return
         shot_num = self.uploader.project_data.paths.find_sc(self.filename)
         if not self.scene_text.isEnabled() and shot_num is None:
@@ -302,7 +301,7 @@ class uiItem(QtGui.QGroupBox):
             xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(temp_dir)
             compress_script = os.path.join(self.uploader.birdoapp.root, "batch", "BAT_CompactScene.js")
             if (not xstage) or (not os.path.exists(xstage) or not os.path.exists(compress_script)):
-                print("[BIRDOAPP] ERROR: can't compile because files were not found")
+                print("[BIRDOAPP] ERRO: nao foi possivel compilar pois arquivos nao foram encontrados")
                 return
             self.incrementProgress(20)
             self.uploader.birdoapp.harmony.compile_script(compress_script, xstage)

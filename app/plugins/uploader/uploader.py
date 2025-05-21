@@ -125,7 +125,7 @@ class Uploader(QtGui.QMainWindow):
             self.incrementProgress(progression)
 
         self.setProgress(100)
-        self.birdoapp.mb.information("Cópias feitas com sucesso!")
+        self.birdoapp.mb.information("Copias feitas com sucesso!")
 
     def getProgress(self):
         return self.ui.progressBar.value()
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     config = ConfigInit()
     p_data = config.get_project_data(project_index)
     if not p_data:
-        config.mb.critical("ERRO Ao pegar informações do projeto!")
+        config.mb.critical("ERRO Ao pegar informaçoes do projeto!")
         sys.exit("ERROR getting project data")
 
     plugin_data = config.get_plugin_data(Path(curr_dir))
