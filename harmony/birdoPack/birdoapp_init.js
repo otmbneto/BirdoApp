@@ -1,15 +1,5 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
-/*
-	TODO:
-	[ ] fazer o entity retornar sempre um objeto, se nao achar a entity, faz uma chave "valid" = false
-	[ ] acertar logica dos nomes vindo dos jsons
-		[ ] config.json
-		[ ] project_data.json
-	[ ] revisar metodos da classe
-	
-*/
-
 //main func para criar objeto atravez do arquivo config classe do projeto
 function birdoapp_init(scripts_path){
 	
@@ -344,6 +334,15 @@ function BirdoAppConfig(config_data, project_data){
 		return icons_root + icons[0];
 	}
 	
+	this.getCurrentSession = function(){
+		var session_file = this.systemTempFolder + "/BirdoApp/_session.json";
+		if(!fileExists(session_file)){
+			MessageLog.trace("[BIRDOAPP] Session file not found...");
+			return false;
+		}
+		return read_json(session_file)["mode"];			
+	}
+		
 	//funcoes complementares//
 	function fileExists(filePath){//check if file exis
 		var f = new File(filePath);
@@ -387,5 +386,16 @@ function BirdoAppConfig(config_data, project_data){
 		var dir = new Dir(path);
 		var files = dir.entryList(filter).sort();
 		return files.filter(function isTrash(value) {return value != "." && value != ".."});
+	}
+	function read_json(json_path){
+		var file = new File(json_path);
+		if(!file.exists){
+			MessageLog.trace("Convert JSON to Object ERRO: Arquivo dado como parametro nao existe!");
+			return false;
+		}	
+		file.open(FileAccess.ReadOnly);
+		var json_object = file.read(json_path);
+		file.close();
+		return JSON.parse(json_object);
 	}
 }
