@@ -40,7 +40,7 @@ if __name__ == "__main__":
     duration = int(args[1])
     text = str(args[2]).replace("_", " ")
 
-    birdoapp = ConfigInit()
+    birdoapp = ConfigInit(verbose=False)
     app = QtGui.QApplication.instance()
     loading = loadingDialog(birdoapp)
     loading.start_animation()
