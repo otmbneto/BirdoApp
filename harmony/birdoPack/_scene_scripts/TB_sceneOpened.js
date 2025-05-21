@@ -15,7 +15,13 @@ function TB_sceneOpened(){
 		Print("[BIRDOAPP][ERROR] Loading BirdoApp project paths failed!");
 		return false;
 	}
-
+	
+	var mode = projectDATA.getCurrentSession();
+	if(!mode){
+		Print("[BIRDOAPP] Não foi encontrada uma sessão válida do BirdoApp. Não irá carregar as ferramentas...");
+		return;
+	}
+	
 	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 15000, "Loading_scripts...");
 
 	Print("[BIRDOAPP] BirdoAPP Project DATA:\n");
@@ -29,9 +35,9 @@ function TB_sceneOpened(){
 	var toolbars_root = projectDATA.paths["birdoPackage"] + "scripts/ToolBars/";
 	var toolbars = BD1_ListFolders(toolbars_root);
 	try{
-		if(!createMenu(projectDATA)){
+		if(!createMenu(projectDATA, mode)){
 			MessageBox.warning("O BirdoApp precisa reiniciar o Menu para ser criado. Aguarde alguns segundos, e aperte 'OK'.", 0,0);
-			var menu_create = createMenu(projectDATA);
+			var menu_create = createMenu(projectDATA, mode);
 			Print("[BIRDOAPP] Segunda tentativa de iniciar o menu: " + menu_create);
 			if(!menu_create){
 				MessageBox.warning("Erro ao carregar o BirdoApp!");
@@ -69,7 +75,7 @@ function TB_sceneOpened(){
 
 }
 
-function createMenu(projDATA){//Cria o Menu na UI do programa
+function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 	
 	//Menu paths
 	var menuPath = projDATA.paths["birdoPackage"] + "scripts/Menu/";
@@ -84,25 +90,17 @@ function createMenu(projDATA){//Cria o Menu na UI do programa
 	var menuBar = tbWindow.menuBar();
 	var menu = menuBar.addMenu("BirdoApp");
 	
-	//se a entity for invalida, cria somente o menu com 11-Ajuda
-	if(!projDATA.entity.type){
-		var ajuda = menu.addAction("Ajuda");
-		ajuda.triggered.connect(this, function(){
-			MessageBox.information("Esta cena não faz parte de um projeto do BirdoApp, mas você ainda pode adicionar os ToolBars do BirdoApp e utilizar as ferramentas disponíveis em cada um.");
-		});
-		return true;
-	}
-	
 	//user permissions	
 	var entity_filter_json = menuPath + "entity_filter.json";
 	var entity_filter = BD1_ReadJSONFile(entity_filter_json);
-	var permission = (projDATA.user_type == "DT" || projDATA.user_type == "ANIM_LEAD") ? "LEAD" : "OTHER";
+	var user_permission = (projDATA.user_type == "DT" || projDATA.user_type == "ANIM_LEAD") ? "LEAD" : "ALL";
 
 	//cria os menus
 	var ajuda_msg = "";
 	for(var i=0; i<menuScripts.length; i++){
+		Print("TESTE::: " + menuScripts[i]);
 		
-		if(entity_filter[projDATA.entity.type][permission].indexOf(menuScripts[i]) == -1){
+		if(!check_permission(menuScripts[i], entity_filter, mode, projDATA.entity.type, user_permission)){
 			continue;
 		}
 		
@@ -188,4 +186,11 @@ function createToolBar(toolBar, toolBarFolder, scriptsJs, iconsPath){//Create To
 	ScriptManager.addToolbar(BirdoToolbar);
 	
 	return true;
+}
+
+//valida o arquivo .js com as permissões...
+function check_permission(item, filter_data, mode, file_type, user_type){
+	return filter_data[item]["mode"].indexOf(mode) != -1 && 
+	filter_data[item]["file_type"].indexOf(file_type) != -1 && 
+	filter_data[item]["user_type"] == user_type;
 }

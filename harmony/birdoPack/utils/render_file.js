@@ -5,13 +5,13 @@
 -------------------------------------------------------------------------------
 Name:		RenderPreview.js
 
-Description:	Este Script renderiza a cena na pasta local de render do projeto
+Description:	Este script renderiza o arquivo. 
 
-Usage:		Renderiza uma versao baixa da cena na pasta local de render
+Usage:		Oferece 3 tipos de render do arquivo: sequencia de imagens, GIF e movie;
 
 Author:		Leonardo Bazilio Bentolila
 
-Created:	2020, (setembro 2021)
+Created:	2020, (setembro 2025)
             
 Copyright:   leobazao_@Birdo
 -------------------------------------------------------------------------------
@@ -20,20 +20,8 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
-function ExportAsset(){
+function render_file(projectDATA){
 	
-	//init project data
-	var projectDATA = BD2_ProjectInfo();
-	if(!projectDATA){
-		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
-		return false;
-	}
-	if(projectDATA.entity.type != "ASSET"){//checa o tipo de cena, se nao for SHOT nao roda
-		MessageBox.warning("Este script somente funciona para ASSET!", 0, 0);
-		Print("[EXPORTASSET] ENTITY NAO E ASSET! CANCELADO!");
-		return;
-	}
-
 	//config information
 	var images_format = ["png", "jpeg", "tiff"];//lista de formatos de imagem
 	var displays_nodes = node.getNodes(["DISPLAY"]);
@@ -45,7 +33,7 @@ function ExportAsset(){
 	});
 	var display_names = [];
 	displays_nodes.forEach(function(x){ Print(x); display_names.push(node.getName(x))});
-	var config_json = scene.currentProjectPath() + "/_exportAsset.json";
+	var config_json = scene.currentProjectPath() + "/_renderizar.json";
 	var export_config = {
 		"layers": getLayersNodesFilters(),
 		"output": "images",
@@ -97,12 +85,9 @@ function ExportAsset(){
 			Print("Fail to read memory json file!");
 		}
 	}
-
 	var d = new createInterface(projectDATA, export_config, config_json);
 	d.ui.show();
 	
-
-
 	//Extra functions:
 	function getLayersNodesFilters(){//retorna objeto com info dos nodes de filtro encontrados no setup
 		var layers = {
@@ -129,17 +114,16 @@ function ExportAsset(){
 		});
 		return layers;
 	}
-
 }
 
 
 function createInterface(projData, config_data, config_json){
-	var uiPath = projData.paths.birdoPackage + "ui/BD_ExportASSET.ui";
+	var uiPath = projData.paths.birdoPackage + "ui/BD_RenderFile.ui";
 	this.ui = UiLoader.load(uiPath);
 	this.ui.activateWindow();
 	
 	//fix windows size
-	this.ui.setFixedSize(390, 520);
+	this.ui.setFixedSize(375, 520);
 	
 	//self variables
 	this.obj_radios = {
@@ -174,7 +158,7 @@ function createInterface(projData, config_data, config_json){
 	this.ui.groupOutput.spinEnd.value = config_data.end_frame;
 	
 	//update widgets - output folder and button
-	var folderIcon = projData.birdoApp + "app/icons/folder.png";
+	var folderIcon = projData.getAppIcon("folder");
 	var icon = new QIcon(folderIcon);
 	this.ui.groupOutput.buttonFolder.icon = icon;
 	this.ui.groupOutput.lineEditFolder.text = config_data.folder;
@@ -249,9 +233,9 @@ function createInterface(projData, config_data, config_json){
 		//display
 		config_data["display"]["last"] = this.ui.comboDisplay.currentText;
 
-		var util_export = require(projData.paths.birdoPackage + "utils/exportASSET.js");
+		var util_export = require(projData.paths.birdoPackage + "utils/render_file_utils.js");
 		Print(config_data);
-		util_export.exportASSET(this, projData, config_data, config_json);
+		util_export.render_file(this, projData, config_data, config_json);
 		this.ui.close();
 	}
 	
@@ -260,14 +244,12 @@ function createInterface(projData, config_data, config_json){
 		this.ui.close();
 	}
 	
-
 	//connections
 	this.ui.groupOutput.radioImages.toggled.connect(this, this.updateRadio);
 	this.ui.groupOutput.radioGif.toggled.connect(this, this.updateRadio);
 	this.ui.groupOutput.radioMov.toggled.connect(this, this.updateRadio);
 
 	this.ui.groupOutput.spinStart['valueChanged(QString)'].connect(this, this.updateSpin);
-
 	this.ui.groupOutput.buttonFolder.clicked.connect(this, this.chooseFolder);
 
 	this.ui.buttonExport.clicked.connect(this, this.onExport);
@@ -287,5 +269,4 @@ function createInterface(projData, config_data, config_json){
 		MessageLog.trace(msg);
 	}
 }
-
-exports.ExportAsset = ExportAsset;
+exports.render_file = render_file;

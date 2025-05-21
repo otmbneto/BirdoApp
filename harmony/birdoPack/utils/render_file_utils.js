@@ -1,10 +1,9 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-function exportASSET(self, projData, export_config, config_json){
+function render_file(self, projData, export_config, config_json){
 	
 	Print("Exporting asset..");
-	
 	//display node selected
 	var display_selected = export_config.display.nodes[export_config.display.names.indexOf(export_config.display.last)];
 	
@@ -23,10 +22,8 @@ function exportASSET(self, projData, export_config, config_json){
 			node.setTextAttr(visibility_node, "SOFTRENDER", 1, export_config["layers"]["filters"][item]["checked"]);
 		}
 	}
-
 	self.ui.hide();
 	
-
 	if(export_config.output == "images"){
 		var rendered_images = exportImages(self, export_config);
 		if(rendered_images == "RENDERED_PNG"){
@@ -107,10 +104,8 @@ function exportASSET(self, projData, export_config, config_json){
 	}
 	
 	function exportMov(self, export_data){
-		
 		var mov_path = file_name_path + ".mov";
 		Print("exporting mov: " + mov_path);
-		
 		
 		if(!BD1_CleanFolder(temp_folder)){
 			Print("fail to clean temp folder!");
@@ -173,12 +168,10 @@ function exportASSET(self, projData, export_config, config_json){
 				return false;
 			}	
 		}
-		
 		progressDlg.close();
 		
 		//clean temp folder
 		BD1_RemoveDirs(temp_folder);
-		
 		Print("MOV Export end");
 		return mov_path;
 	}
@@ -247,7 +240,6 @@ function exportASSET(self, projData, export_config, config_json){
 
 		render.renderFinished.disconnect(renderFinished);
 		render.frameReady.disconnect(frameReady);
-
 		return imageList;
 	}		
 	
@@ -269,5 +261,4 @@ function exportASSET(self, projData, export_config, config_json){
 		return false;
 	}
 }
-
-exports.exportASSET = exportASSET;
+exports.render_file = render_file;

@@ -1,40 +1,47 @@
 {
-  "ASSET": {
-	"LEAD": [
-		"1-Export_Asset.js",
-		"4-Save_Asset_tpl.js",
-		"5-Import_Assets.js",
-		"10-Update_Setup.js",
-		"11-Ajuda"
-	  ],
-	"OTHER": [
-		"1-Export_Asset.js",
-		"4-Save_Asset_tpl.js",
-		"5-Import_Assets.js",
-		"10-Update_Setup.js",
-		"11-Ajuda"
-	]
-  }, 		
-  "SHOT": {
-	"LEAD": [
-		"0-Update_Animatic.js",
-		"3-Publish.js",
-		"5-Import_Assets.js",
-		"6-Render_Preview.js",
-		"7-Add_Notes.js",
-		"8-Send_Notes.js",
-		"9-Get_Notes.js",
-		"10-Update_Setup.js",
-		"11-Ajuda"
-	], 
-	"OTHER": [
-		"0-Update_Animatic.js",
-		"3-Publish.js",
-		"5-Import_Assets.js",
-		"6-Render_Preview.js",
-		"9-Get_Notes.js",
-		"10-Update_Setup.js",
-		"11-Ajuda"
-	]
-  } 	
+    "0-Update_Animatic.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["SHOT"],
+        "user_type": "ALL"
+    },
+    "1-Renderizar.js": {
+        "mode": ["STANDALONE", "STUDIO"],
+        "file_type": ["ASSET", "SHOT", null],
+        "user_type": "ALL"
+    },
+    "2-Publish.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["SHOT"],
+        "user_type": "ALL"
+    },
+    "3-Save_Asset_tpl.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["ASSET"],
+        "user_type": "ALL"
+    },
+    "4-Import_Assets.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["ASSET", "SHOT"],
+        "user_type": "ALL"
+    },
+    "5-Add_Notes.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["SHOT"],
+        "user_type": "LEAD"
+    },
+    "6-Send_Notes.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["SHOT"],
+        "user_type": "LEAD"
+    },
+    "7-Get_Notes.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["SHOT"],
+        "user_type": "ALL"
+    },
+    "8-Update_Setup.js": {
+        "mode": ["STUDIO"],
+        "file_type": ["ASSET", "SHOT"],
+        "user_type": "ALL"
+    }
 }
