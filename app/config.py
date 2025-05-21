@@ -135,7 +135,8 @@ class ConfigInit(object):
         return session_data["mode"]
 
     def kill_session(self):
-        self.json_session.remove()
+        if self.json_session.exists():
+            self.json_session.remove()
 
     @timeout(3)
     def is_server_available(self):
