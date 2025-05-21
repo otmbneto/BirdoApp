@@ -313,21 +313,11 @@ class BirdoApp(QtGui.QMainWindow):
         else:
             print("[BIRDOAPP] arquivo escolhido invalido!")
 
-    def onSceneTemplateOpen(self):
-        scene_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'SCENE_template')
-        xstage = self.birdoapp.harmony.get_xstage_last_version(scene_template)
-        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
-
-    def onAssetTemplateOpen(self):
-        asset_template = os.path.join(self.birdoapp.root, 'template', 'project_template', 'ASSET_template')
-        xstage = self.birdoapp.harmony.get_xstage_last_version(asset_template)
-        self.birdoapp.harmony.open_harmony_scene(Path(xstage))
-
     def double_click_recent(self):
         selected = self.recent_list.selectedItems()
         if len(selected) > 0:
             f = Path(selected[0].data(3))
-            self.birdoapp.harmony.open_harmony_scene(f)
+            self.birdoapp.open_harmony_file(f)
             self.update_recently_open(f)
 
     def update_recently_open(self, f):

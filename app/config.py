@@ -213,7 +213,8 @@ class ConfigInit(object):
     def get_projects(self):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
-            self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
+            if self.verbose:
+                self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
         print(self.config_data["server_projects"])
         for proj in os.listdir(self.config_data["server_projects"]):
