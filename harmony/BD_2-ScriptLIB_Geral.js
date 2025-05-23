@@ -149,21 +149,18 @@ function BD2_getTimingsOfSelected(selected){
 /*
 	retorna info do rig do node dado como full node, nome do rig
 */
-function BD2_getNodeRigData(nodeP){
+function BD2_getNodeRigData(nodeP, proj_data){
 	var namesplit = nodeP.split("/");
-	var rig_full_regex = /\w{3}\.(\w|\d)+-v\d+/;
-	var rig_name_regex = /\w{2}\d{3}_(\w|\d)+(_v\d{2})?/;
-	var version_regex = /v\d{2}/;
-	var prefix_regex = /\w{2}\d{3}_/;
-	var index_regex = /_(\d+|\d)$/;
-	var rig_name = rig_name_regex.test(nodeP) ? rig_name_regex.exec(nodeP)[0] : null;
+	var rig_full_regex = new RegExp(proj_data.prefix + "\\.\\w+-v\\d+");
+	var index_regex = /_(\d+|\d)$/;//sujeira no nome do node (sufixo criado pelo harmony)
+	var rig_name = proj_data.pattern.asset.test(nodeP) ? proj_data.pattern.asset.exec(nodeP)[0] : null;
 	var rig_node = rig_name ? namesplit.slice(0, namesplit.indexOf(rig_name)+1).join("/") : null;
 	var fullname =  rig_full_regex.test(nodeP) ? rig_full_regex.exec(nodeP)[0] : null;
 	var fullnode = fullname ? namesplit.slice(0, namesplit.indexOf(fullname)+1).join("/") : null;
-	var version = version_regex.test(nodeP) ? version_regex.exec(nodeP)[0] : null;
+	var version = proj_data.pattern.version.test(nodeP) ? proj_data.pattern.version.exec(nodeP)[0] : null;
 	return {
 		rig_name: rig_name.replace(index_regex, "") ,
-		char_name: rig_name ? rig_name.replace(prefix_regex, "").replace(index_regex, ""): null,
+		char_name: rig_name ? rig_name.replace(rig_name.split("_")[0] + "_", "").replace(index_regex, ""): null,
 		rig_node: rig_node, 
 		full_name: fullname,
 		full_node: fullnode,
