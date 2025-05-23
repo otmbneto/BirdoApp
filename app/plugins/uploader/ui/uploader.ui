@@ -309,7 +309,7 @@ QProgressBar::chunk {
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Episode:</string>
+        <string>Episodio: </string>
        </property>
       </widget>
      </item>
@@ -319,7 +319,7 @@ QProgressBar::chunk {
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Step: </string>
+        <string>Etapa: </string>
        </property>
       </widget>
      </item>
@@ -329,7 +329,7 @@ QProgressBar::chunk {
      <item alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="checkDecimal">
        <property name="text">
-        <string>Force Decilmal</string>
+        <string>Forcar decimal</string>
        </property>
       </widget>
      </item>
@@ -355,7 +355,7 @@ QProgressBar::chunk {
         <x>0</x>
         <y>0</y>
         <width>667</width>
-        <height>320</height>
+        <height>319</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -403,7 +403,7 @@ QProgressBar::chunk {
         </font>
        </property>
        <property name="text">
-        <string>EXECUTE</string>
+        <string>Executar</string>
        </property>
       </widget>
      </item>
@@ -425,7 +425,7 @@ QProgressBar::chunk {
         </size>
        </property>
        <property name="text">
-        <string>Clean</string>
+        <string>Limpar</string>
        </property>
       </widget>
      </item>
@@ -450,7 +450,7 @@ QProgressBar::chunk {
         </font>
        </property>
        <property name="text">
-        <string>Close</string>
+        <string>Fechar</string>
        </property>
       </widget>
      </item>
