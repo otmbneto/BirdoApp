@@ -119,6 +119,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
+        self.recent_list.setStyleSheet("color: black;")
 
         # -------------------------------------------------------------
         self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
@@ -147,6 +148,7 @@ class BirdoApp(QtGui.QMainWindow):
             item.setText(f.name)
             item.setData(3, f.path)
             item.setToolTip(f.path)
+            #item.setStyleSheet("color: black;")
             self.recent_list.addItem(item)
 
     def load_ui(self, ui_file):
