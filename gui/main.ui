@@ -605,7 +605,7 @@ QScrollBar:arrow{
           <string notr="true"/>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="projects_page">
           <widget class="QWidget" name="gridLayoutWidget">
@@ -710,7 +710,10 @@ QScrollBar:arrow{
                <enum>QFrame::Raised</enum>
               </property>
               <property name="text">
-               <string>Seu nome de usuario. Este nome será usado para identificar algumas ações.</string>
+               <string>Seu nome de usuario do BirdoApp.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
               </property>
               <property name="margin">
                <number>5</number>
@@ -851,7 +854,9 @@ QPushButton:pressed {
                <enum>QFrame::Raised</enum>
               </property>
               <property name="text">
-               <string>Se nenhuma versão do Harmony aparecer na lista &quot;Harmony Version&quot;, escolha o caminho de instalação no seu computador. Esta versão do Harmony será usada para todas ferramentas do BirdoApp.</string>
+               <string>Escolha a versão do Harmony instalada no seu computador para usar com o Birdoapp. Somente esta versão escolhida será usada por este toolkit.
+
+OBS: É obrigatório ter o Harmony instalado para usar o Birdoapp.</string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>
