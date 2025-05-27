@@ -7,7 +7,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	Print("TESTE asset info saveTPL.js:");
 	Print(assetInfo);
 	Print("------------------------------------------------");
-	var libs = find_lib_groups(assetInfo.fullNode);
+	var libs = find_lib_groups(assetInfo.fullNode, projectDATA);
 	if(!libs){
 		Print("Canceled to check libs groups name...");
 		return false;
@@ -384,10 +384,10 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		}
 	}
 	
-	function find_lib_groups(main_group){//verifica se os grupos de lib do rig estao com o nome correto, e retorna lista deles
+	function find_lib_groups(main_group, proj_data){//verifica se os grupos de lib do rig estao com o nome correto, e retorna lista deles
 		var allnodes = BD2_ListNodesInGroup(main_group, "", true);
 		var libs = [];
-		var regex_lib = /(\w{3}|\w{4})\.(.+-v\d+)/;
+		var regex_lib = proj_data.get_rig_regex();
 		var lib_nodes = allnodes.filter(function(x){ 
 												return regex_lib.test(node.getName(x))
 											});
@@ -589,8 +589,7 @@ exports.getAssetsProjectData = getAssetsProjectData;
 function getSelection(assetType, birdo_data){
 	var nodes_sel = {};
 	var selected_nodes = selection.selectedNodes();
-	var regex_rig = birdo_data.pattern.asset;
-	var regex_rig_full = new RegExp(birdo_data.prefix + "\.\w+-v\d{2}");
+	var regex_rig_full = birdo_data.get_rig_regex();
 
 	if(selected_nodes.length != 2){
 		MessageBox.warning("A Selecao de nodes na NodeView nao esta correta!\nSelecione apenas o ASSET e sua PEG!\n\n-Se For RIG, lembre de selecionar o BackDrop!\n-Se somente existe o Node Drawing do asset sem PEG,\ncrie uma PEG!\n\nSelecione corretamente e tente de novo!", 0,0);

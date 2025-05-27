@@ -75,7 +75,7 @@ exports.getTimelineRectPosition = getTimelineRectPosition;
 
 
 //add fx grad patch group to rig selection return object with nodes data from patch
-function add_gradient_patch(node_selected){
+function add_gradient_patch(node_selected, proj_data){
 	
 	//patch data
 	var patch = {
@@ -96,13 +96,14 @@ function add_gradient_patch(node_selected){
 		patch["is_rig"] = true;
 		Print("Selection is group node RIG");
 		//test is is full rig
-		var is_full = /(_v\d+)$/.test(node_selected);
+		var is_full = proj_data.pattern.asset.test(node.getName(node_selected));
 		
 		if(!is_full){
 			var multiOut = node.getGroupOutputModule(node_selected, "Multi-Port-Out", 0, 0, 0);
 			var connections = node.numberOfInputPorts(multiOut);
+			var rig_regex = proj_data.get_rig_regex();
 
-			var filter_full = node.subNodes(node_selected).filter(function(item){ return /\w{3}\..+-v\d{2}/.test(node.getName(item));});
+			var filter_full = node.subNodes(node_selected).filter(function(item){ return rig_regex.test(node.getName(item));});
 			if(filter_full.length == 0){
 				Print("Can't find full node!");
 				return false;

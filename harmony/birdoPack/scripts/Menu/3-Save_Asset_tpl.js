@@ -244,18 +244,17 @@ function initiateUI(selectionData, projData, projectAssetData, utils){
 		var finalObj = {};
 		var nameList = [""];
 		var shortNameList = [""];
-		var prefix_regex = new RegExp("^([a-zA-Z]\\d{3}}_)", "i");
 		
 		if(assetTypeName == "Misc"){
 			assetPrefix = "MI";
-			prefix_regex = /MI_/;
 		}
 		
 		var objListFiltered = assetData[assetTypeName].filter(function (obj){ return obj["code"].split("_")[0] == assetPrefix});
 		objListFiltered.sort(sortObjects);
 		objListFiltered.forEach(function (item){ 
-									nameList.push(item["code"].replace(prefix_regex, ""));
-									var shortName = item["short_name"].replace(prefix_regex, "");
+									var prefix_name = item["code"].split("_")[0] + "_";
+									nameList.push(item["code"].replace(prefix_name, ""));
+									var shortName = item["short_name"].replace(prefix_name, "");
 									shortNameList.push(shortName.replace(/(_v\d+)$/, ""));
 									});
 		objListFiltered.unshift("");

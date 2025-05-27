@@ -52,7 +52,7 @@ function BD_BirdoLib_Save(){
 		return;
 	}
 	
-	var rig_data = get_selection_data(sel_node, library_root);
+	var rig_data = get_selection_data(sel_node, library_root, projectDATA);
 	if(!rig_data){
 		Print("Invalid selection! Canceling...");
 		return;
@@ -83,10 +83,10 @@ function BD_BirdoLib_Save(){
 	d.ui.show();
 	
 	//EXTRA FUNCTIONS
-	function get_selection_data(sel_node, root_path){//check if selections is valid and return rig data
+	function get_selection_data(sel_node, root_path, proj_data){//check if selections is valid and return rig data
 		
-		var regex_rig = /[a-zA-Z]{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
-		var regex_version = /v\d{2}/;
+		var regex_rig = proj_data.get_rig_regex();
+		var regex_version = projDATA.pattern.version;
 		var lib_type = selection.isSelectionRange() ? "ANIM" : "POSE";
 		
 		//check node type

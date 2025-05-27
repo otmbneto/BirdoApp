@@ -28,7 +28,7 @@ function Animatic(proj_data, verbose){
 	this.audio_format = "wav";
 	
 	//version reg
-	this.version_reg = new RegExp("v\\d{2}");
+	this.version_reg = proj_data.pattern.version;
 	
 	//define antigo animatic
 	this.old_nodes = node.subNodes(this.group).filter(function(item){ return node.type(item) == "READ"});

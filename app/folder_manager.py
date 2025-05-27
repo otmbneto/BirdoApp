@@ -35,11 +35,16 @@ class FolderManager(object):
         # root do folder de config do projeto
         self.config_folder = Path(proj_data["config_folder"])
 
+        # create project regex strings
         self.regs = proj_data["pattern"]
-        self.regs["scene"]["regex"] = proj_data["pattern"]["scene"]["regex"].replace('PREFIX', proj_data["prefix"])
-        self.regs["scene"]["model"] = proj_data["pattern"]["scene"]["model"].replace('PREFIX', proj_data["prefix"])
-        self.regs["animatic"]["regex"] = proj_data["pattern"]["animatic"]["regex"].replace('PREFIX', proj_data["prefix"])
-        self.regs["animatic"]["model"] = proj_data["pattern"]["animatic"]["model"].replace('PREFIX', proj_data["prefix"])
+        for item in self.regs:
+            for subitem in self.regs[item]:
+                raw_string = self.regs[item][subitem].replace("PREFIX", proj_data["prefix"])
+                for n in proj_data["name_config"]:
+                    raw_string = raw_string.replace(n, proj_data["name_config"][n]["prefix"])
+                    raw_string = raw_string.replace(proj_data["name_config"][n]["digits_ph"], str(proj_data["name_config"][n]["digits"]))
+                self.regs[item][subitem] = raw_string
+                print "{0} created for {1} : {2}".format(subitem, item, raw_string)
 
         self.root = {
             "server": Path(proj_data["paths"]["root"]) / proj_data["paths"]["sub_root"],

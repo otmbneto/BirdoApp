@@ -223,15 +223,16 @@ exports.add_mc = add_mc;
 /*
 	get initial rig selection data 
 */
-function get_rig_selection(){
+function get_rig_selection(projectDATA){
 	var node_sel = selection.selectedNode(0);	
 	if(!node_sel || !node.isGroup(node_sel)){
 		MessageBox.warning("Selecione um rig valido!!",0,0);
 		return false;
 	}
+	var node_name = node.getName(node_sel);
 	var rig_data = {};
-	var rig_full_regex = /\w{3}\.(\w|\d)+-v\d+/;
-	rig_data["rig_name"] = node.getName(node_sel).replace(/\w{2}(\d{3}|\d{4})_/, "");
+	var rig_full_regex = projectDATA.get_rig_regex();
+	rig_data["rig_name"] = node_name.replace(node_name.split("_")[0] + "_", "");
 	var rig_full = node.subNodes(node_sel).filter(function(item){ return rig_full_regex.test(node.getName(item));})[0];
 	
 	rig_data["rig_group"] = rig_full == "" ? node_sel : rig_full;	

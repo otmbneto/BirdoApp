@@ -55,7 +55,7 @@ exports.birdoapp_init = birdoapp_init;
 function find_scene_project_prefix(){
 	var fileName = scene.currentScene();
 	var nameSplit = fileName.split("_");
-	if(/^[a-zA-Z]{3}$/.test(nameSplit[0])){
+	if(/^[0-9A-Z]{3,4}$/.test(nameSplit[0])){
 		return nameSplit[0];
 	} else {
 		var infoProj = "Top/SETUP/proj";
@@ -93,14 +93,20 @@ function BirdoAppConfig(config_data, project_data){
 	this.proj_confg_root = project_data["proj_confg_root"];
 	this.paths = project_data["paths"];
 	
+	//project separation names configuration
+	this.pattern = {};
+	this.name_config = project_data.name_config;
+	
 	//cria os objetos de regex
-	this.pattern = {
-        "asset": new RegExp(project_data["pattern"]["asset"]["regex"]),
-        "scene": new RegExp(project_data["pattern"]["scene"]["regex"].replace("PREFIX", this.prefix)),
-        "animatic": new RegExp(project_data["pattern"]["animatic"]["regex"].replace("PREFIX", this.prefix)), 
-        "ep": new RegExp(project_data["pattern"]["ep"]["regex"]),
-		"sc": new RegExp(project_data["pattern"]["sc"]["regex"])
-    }
+	for(item in project_data["pattern"]){
+		var item_str = project_data["pattern"][item]["regex"].replace("PREFIX", project_data.prefix);
+		for(ph in this.name_config){
+			item_str = item_str.replace(ph, this.name_config[ph]["prefix"]);
+			item_str = item_str.replace(this.name_config[ph]["digits_ph"], this.name_config[ph]["digits"]);	
+		}
+		this.pattern[item] = new RegExp(item_str);
+		MessageLog.trace("Regex created for: " + item);
+	}
 	
 	this.colour_spaces = project_data["colour_spaces"];
 	this.resolution = project_data["resolution"];
@@ -341,6 +347,11 @@ function BirdoAppConfig(config_data, project_data){
 			return false;
 		}
 		return read_json(session_file)["mode"];			
+	}
+	
+	//retorna o regex de nome de grupo de rig (ex: PRJ.NomeChar-v01);
+	this.get_rig_regex = function(){
+		return new RegExp(this.prefix + "\\.\\w+-" + this.name_config.VERSION.prefix + "\\d{" + this.name_config.VERSION.digits + "}");
 	}
 		
 	//funcoes complementares//

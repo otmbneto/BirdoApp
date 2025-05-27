@@ -91,14 +91,13 @@ class ConfigInit(object):
         # lista de projetos do estudio
         self.projects = []
 
-        self.prefix_reg = re.compile(r"^\w{3}$")
+        self.prefix_reg = re.compile(r"^[0-9A-Z]{3,4}$")
 
         # system class para lidar com dados do sistema
         self.system = SystemFolders()
 
         # define json temp file
         self.json_session = self.system.temp / '_session.json'
-
 
         # cria classe do ffmpeg
         if self.system.mac_or_windows() == "windows":

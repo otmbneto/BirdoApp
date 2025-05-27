@@ -44,7 +44,7 @@ function BD_AddGradToSelected(){
 	scene.beginUndoRedoAccum("Add Gradient to Selection");
 	
 	//add patch node
-	var patch = utils.add_gradient_patch(sel);
+	var patch = utils.add_gradient_patch(sel, projData);
 	if(!patch){
 		scene.cancelUndoRedoAccum();
 		MessageBox.warning("Erro ao adicionar patch!",0,0);

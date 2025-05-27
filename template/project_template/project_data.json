@@ -22,27 +22,47 @@
         "PRE_COMP": "NO_COLOUR_SPACE",
         "COMP": "NO_COLOUR_SPACE"
     },
-	"division": "EP",
+	"name_config": {
+		"EP": {
+			"digits_ph": "EDIG",
+			"prefix": "EP",
+			"digits": 3
+		},
+		"SC": {
+			"digits_ph": "SDIG",
+			"prefix": "SC",
+			"digits": 4
+		},
+		"VERSION": {
+			"digits_ph": "VDIG",
+			"prefix": "v",
+			"digits": 2
+		}
+	},
     "pattern": {
         "asset": {
-			"regex": "[a-zA-Z]{2}\\d{3}_\\w+",
-			"model": "{0}{1:03d}_{2}"
+			"regex": "[a-zA-Z]{2}\\d{3}_\\w+(_VERSION\\{VDIG})?",
+			"model": "{0}{1:03d}_VERSION{2:0VDIGd}"
+		},
+		"version": {
+			"regex": "VERSION\\d{VDIG}",
+			"model": "VERSION{0:0VDIGd}"
 		},
         "scene": {
-			"regex": "PREFIX_EP\\d{3}_SC\\d{4}",
-			"model": "PREFIX_EP{0:03d}_SC{1:04d}"
+			"regex": "PREFIX_EP\\d{EDIG}_SC\\d{SDIG}",
+			"model": "PREFIX_EP{0:0EDIGd}_SC{1:0SDIGd}"
 		},
         "animatic": {
-			"regex": "PREFIX_EP\\d{3}_SC\\d{4}_v\\d{2}\\.mov",
-			"model": "PREFIX_EP{0:03d}_SC{1:04d}_v{2:02d}.mov"
+			"regex": "PREFIX_EP\\d{EDIG}_SC\\d{SDIG}_VERSION\\d{VDIG}\\.mov",
+			"model": "PREFIX_EP{0:0EDIGd}_SC{1:0SDIGd}_VERSION{2:0VDIGd}.mov"
 		},
         "ep": {
-			"regex": "EP\\d{3}",
-			"model": "EP{0:03d}"
+			"regex": "EP\\d{EDIG}",
+			"model": "EP{0:0EDIGd}"
 		},
 		"sc": {
-			"regex": "SC\\d{4}",
-			"model": "SC{0:04d}"
+			"regex": "SC\\d{SDIG}",
+			"model": "SC{0:0SDIGd}"
 		}
     },
     "paths": {

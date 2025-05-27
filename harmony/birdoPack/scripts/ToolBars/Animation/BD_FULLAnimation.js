@@ -20,46 +20,54 @@ include("BD_2-ScriptLIB_Geral.js");
 
 function BD_FULLAnimation(){
 	
-	scene.beginUndoRedoAccum("Full Animation");
 	
-	var inNode = selection.selectedNode(0);
-	var char_regex = /\w{2}\d+_\w+(-|_v?\d+)?/;
-	var rig_regex = /\w{3}\.\w-v\d+/;
-	
-	var rig = BD2_substringRegex(inNode, rig_regex);
-	var rigVerssion = BD2_substringRegex(inNode, char_regex);
-
-	if(!rigVerssion && !rig){
-		Print("Nao e possivel encontrar o grupo do rig e da versao! O check de main group nao vai rolar..");
-	}
-
-	var nodeGroup = node.parentNode(inNode);
-
-	if(nodeGroup == rig){
-		MessageBox.information("Este node selecionado esta fora do grupo Principal do RIG!\nSelecione uma Peca dentro do RIG!");
-		return;
+	//inicia o birdoApp
+	var proj_data = BD2_ProjectInfo();
+	if(!proj_data){
+		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		return false;
 	}
 	
-	if(nodeGroup == rigVerssion){
-		if(!BD2_AskQuestion("A peca selecionada esta no GRUPO principal e ira Jogar TODO o RIG para MasterFULL!\Deseja Prosseguir??")){
+	scene.beginUndoRedoAccum("Birdoapp Full Animation");
+	
+	try{
+		var inNode = selection.selectedNode(0);
+		var rig_regex = proj_data.get_rig_regex();
+		var rig = BD2_substringRegex(inNode, rig_regex);
+		var rigVerssion = BD2_substringRegex(inNode, proj_data.pattern.asset);
+
+		if(!rigVerssion && !rig){
+			Print("Nao e possivel encontrar o grupo do rig e da versao! O check de main group nao vai rolar..");
+		}
+
+		var nodeGroup = node.parentNode(inNode);
+		if(nodeGroup == rig){
+			MessageBox.information("Este node selecionado esta fora do grupo Principal do RIG!\nSelecione uma Peca dentro do RIG!");
 			return;
 		}
-	}
+		
+		if(nodeGroup == rigVerssion){
+			if(!BD2_AskQuestion("A peca selecionada esta no GRUPO principal e ira Jogar TODO o RIG para MasterFULL!\Deseja Prosseguir??")){
+				return;
+			}
+		}
 
-	if(nodeGroup == node.root() || node.getName(inNode) == ""){
-		MessageBox.information("Selecione uma peca dentro do RIG no membro que voce quer transformar em FULL!");
-		return;
-	}
+		if(nodeGroup == node.root() || node.getName(inNode) == ""){
+			MessageBox.information("Selecione uma peca dentro do RIG no membro que voce quer transformar em FULL!");
+			return;
+		}
 
-	selection.clearSelection();
-	
-	var toZzero = true;
-	
-	if(KeyModifiers.IsShiftPressed()){
-		toZzero = false;
-	}
+		selection.clearSelection();
+		var toZzero = true;
+		
+		if(KeyModifiers.IsShiftPressed()){
+			toZzero = false;
+		}
 
-	changeToFULL(nodeGroup)
+		changeToFULL(nodeGroup)
+	} catch(e){
+		Print(e);
+	}
 	
 	scene.endUndoRedoAccum();
 

@@ -48,7 +48,7 @@ function BD_UpdateMC(){
 		//copy rig state files to update scene files
 		var rigs = {};
 		for(var i=0; i<scene_mcs.length; i++){
-			var rig_data = BD2_getNodeRigData(scene_mcs[i]);
+			var rig_data = BD2_getNodeRigData(scene_mcs[i], projectDATA);
 			if(!Boolean(rig_data.version)){
 				Print("Mc node " + scene_mcs[i] + " is not inside a rig group!");
 				continue;

@@ -19,6 +19,14 @@ Copyright:   leobazao_@Birdo
 
 function BD_AddFullNodes(){
 	
+	//inicia o birdoApp
+	var proj_data = BD2_ProjectInfo();
+	if(!proj_data){
+		Print("[ERROR] Fail to get BirdoProject paths and data... canceling!");
+		return false;
+	}
+	
+	
 	var current_group = getCurrentNodeViewGroup();
 	if(!current_group){
 		MessageBox.warning("ERRO! Node View nao esta ativa!\nDia a NodeView no Grupo que deseja criar os nodes de 'FULL'!",0,0);
@@ -40,7 +48,7 @@ function BD_AddFullNodes(){
 	}
 	
 	//define nomes
-	var names_data = get_names(current_group, findRigName(current_group));
+	var names_data = get_names(current_group, findRigName(current_group, proj_data));
 	if(!names_data){
 		Print("Canceled..");
 		return;
@@ -65,10 +73,9 @@ function BD_AddFullNodes(){
 	Print("Nodes Full adicionados!");
 
 	//extra functions
-	function findRigName(nodeP){//retorna nome do rig
-		var rigReg = /CH\d+_\w+/;
-		var name = rigReg.exec(nodeP)[0];
-		return name.replace(/CH\d+_/, "").replace(/_v\d+/, "");	
+	function findRigName(nodeP, proj_data){//retorna nome do rig
+		var name = proj_data.pattern.asset.exec(nodeP)[0];
+		return name.replace(name.split("_")[0] + "_", "").replace(/_v\d+/, "");
 	}
 	
 	function getCurrentNodeViewGroup(){//retorna o current group na nodeview
@@ -88,8 +95,7 @@ function BD_AddFullNodes(){
 		d.title = "ADD Full Nodes!";
 		d.addSpace(5);
 
-		var reg_clean = /(\w{3}\.|-v\d+|-G)/g;
-		var group_clean_name = node.getName(group_node).replace(reg_clean, "");
+		var group_clean_name = node.getName(group_node).split(".")[1].split("-v")[0];
 		group_clean_name = group_clean_name.replace(rigName, "");
 
 		var group = new GroupBox;		

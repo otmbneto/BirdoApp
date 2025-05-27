@@ -62,7 +62,7 @@ function BD_BirdoLibrary(){
 		return;		
 	}
 	
-	var rig_data = get_rig_data(library_root, initial_node, utils);
+	var rig_data = get_rig_data(library_root, initial_node, utils, projectDATA);
 	
 	if(!rig_data){
 		Print("[BIRDO_LIBRARY] FAIL to get rig data information!");
@@ -75,13 +75,12 @@ function BD_BirdoLibrary(){
 	d.ui.show();
 	
 	//Main function helper funtions
-	function get_rig_data(library_root, selected_node, utils){//return object with selected rig information for the library
+	function get_rig_data(library_root, selected_node, utils, projDATA){//return object with selected rig information for the library
 
 		var rig_data = {};
-		var char_name_regex = /[a-zA-Z]{2}\d+_\w+/;//regex do padrao de nome de rig (nome do char)
-		var rig_group_regex = /[a-zA-Z]{3}\..+-v\d+/; // padrao nome do grupo versao do RIG : PRJ.NOME-v00
+		var rig_group_regex = projDATA.get_rig_regex();
 		var index_regex = /(_\d+)$/; //numero de nodes duplicados na nodeview '_1, 2, 3 ...'
-		var version_regex = /v\d+/;
+		var version_regex = projDATA.pattern.version;
 		var name_split = selected_node.split("/");
 		if(!rig_group_regex.test(selected_node)){
 			MessageBox.warning("Não é um Rig válido!",0,0);
@@ -89,7 +88,7 @@ function BD_BirdoLibrary(){
 		}
 		
 		//mudanca: agora define o nome do rig por um regex, e nao pelo index do caminho como tava antes!
-		var char_name = first_match_in_array(char_name_regex, name_split);
+		var char_name = first_match_in_array(projDATA.pattern.asset, name_split);
 		if(!char_name){
 			MessageBox.warning("Este Rig não é um Rig válido de library!",0,0);
 			Print("cant find rig char name!");

@@ -31,7 +31,7 @@ function BD_MCManager(){
 	
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/master_controllers_utils.js");
 	
-	var rig_data = utils.get_rig_selection();
+	var rig_data = utils.get_rig_selection(projectDATA);
 	if(!rig_data){
 		Print("[MC_MANAGER] FAIL to get rig data information!");
 		return;
