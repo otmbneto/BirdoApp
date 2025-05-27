@@ -24,8 +24,9 @@ function BD_Select_Up_Node(){
 	var nodeSelected = selection.selectedNode(0);
 	var nextNode = node.srcNode(nodeSelected,0);
 
-	//hide deformers
+	//hide deformers and mcdeformers
 	Action.perform("onActionHideDeformer(QString)","miniPegModuleResponder", nodeSelected);
+	Action.perform("onActionHideAllControls()");
 
 	if(nodeSelected == ""){
 		Print("[BD_SELECTUPNODE] No NODE selections found!");
@@ -38,27 +39,32 @@ function BD_Select_Up_Node(){
 	}
 	
 	if(node.type(nextNode) == "MULTIPORT_IN"){//pula grupos
-		var jump = node.parentNode(nextNode);
-		selection.clearSelection();
-		selection.addNodeToSelection(jump);
-		Action.perform("onActionNaviSelectParent()");
-	}else{
-		if(node.type(nodeSelected) == "READ"){
-			Action.perform("onActionShowSelectedDeformers()","miniPegModuleResponder");
-		}
-		Action.perform("onActionNaviSelectParent()");
+		var nextNode = node.parentNode(nextNode);
+	}
+	if(node.isGroup(nextNode)){
+		nextNode = node.srcNode(nextNode, 0);
 	}
 	
+	//show deformers
+	showDeformation(nodeSelected, nextNode);
+	
+	selection.clearSelection();
+	selection.addNodeToSelection(nextNode);
+	Print("[BIRDOAPP] node UP selected: " + nextNode);
+
 	//EXTRA FUNCTIONS
-	function is_deform_group(nodePath){//cheks if node is deform group
-		if(!node.isGroup(nodePath)){
-			return false;
+	function showDeformation(init_node, next_node){
+		for(var i=0; i<node.numberOfOutputLinks(next_node, 0); i++){
+			var downNode = node.dstNodeInfo(next_node, 0, i);
+			if(/^mcDef/.test(node.getName(downNode.node)) && node.isGroup(downNode.node)){
+				var mcnode = downNode.node + "/mc_DeformerOnDeformer";
+				Print("mcDeform found: " + mcnode);
+				node.showControls(mcnode, true);
+				return true;
+			}
 		}
-		var defTypesList = ["DeformationRootModule","DeformationScaleModule","DeformationSwitchModule","REFRACT","DeformationCompositeModule","WeightedDeform","AutoFoldModule","AutoMuscleModule","FreeFormDeformation","Turbulence","GameBoneModule","BoneModule","BendyBoneModule","CurveModule","GLUE","ArticulationModule","BezierMesh","OffsetModule","DeformTransformOut","KinematicOutputModule","FoldModule","DeformationWaveModule","DeformationUniformScaleModule"];
-		var defNodesList = node.subNodes(nodePath).filter(function(x){
-			var nodeType = node.type(x);
-			return defTypesList.indexOf(nodeType) != -1;
-		});
-		return defNodesList.length > 0;	
-	}	
+		if(node.type(init_node) == "READ"){
+			Action.perform("onActionShowSelectedDeformers()","miniPegModuleResponder");
+		}
+	}
 }
