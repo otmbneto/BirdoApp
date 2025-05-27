@@ -151,7 +151,7 @@ function BD2_getTimingsOfSelected(selected){
 */
 function BD2_getNodeRigData(nodeP, proj_data){
 	var namesplit = nodeP.split("/");
-	var rig_full_regex = new RegExp(proj_data.prefix + "\\.\\w+-v\\d+");
+	var rig_full_regex = proj_data.get_rig_regex();
 	var index_regex = /_(\d+|\d)$/;//sujeira no nome do node (sufixo criado pelo harmony)
 	var rig_name = proj_data.pattern.asset.test(nodeP) ? proj_data.pattern.asset.exec(nodeP)[0] : null;
 	var rig_node = rig_name ? namesplit.slice(0, namesplit.indexOf(rig_name)+1).join("/") : null;
@@ -824,62 +824,6 @@ function BD2_substringRegex(string, regex){
 }
 
 
-/*Retorna um objeto contendo informacoes sobre o rig baseado na selecao
-@selectedNode => node selecioado
-*/
-function BD2_get_Rig_Data(selectedNode){
-
-	var rig_data = {};
-	var version_regex = /(v\d+)/; // versao do rig  'v01'
-	var rig_name_regex = /(CH(\d{3}|\d{4})_\w+)/; // padrao nome do rig completo 'CH000_NOME'
-	var rig_simp_regex = /(CH\d{3}_\w+_v\d+)/; // padrao nome do rig simples CH000_NOME_v00
-	var index_regex = /(_\d+)/; //numero de nodes duplicados na nodeview '_1, 2, 3 ...'
-	var rig_type = null;
-	var regex;// variavel q vai ser definida conforme o SIMPLES ou COMPLETO
-
-	if(!rig_name_regex.test(selectedNode)){
-		MessageBox.information("Nao e um RIG de personagem!!");
-		return false;
-	}
-
-	if(rig_simp_regex.test(selectedNode)){
-		rig_type = "SIMPLES";
-	} else {
-		rig_type = "COMPLETO";
-	}
-
-	if(rig_type == "COMPLETO"){
-		regex = /(\w{3}\.\w+-v\d+)/; // padrao nome do grupo versao do RIG : prj.NOME-v00
-		if(!regex.test(selectedNode)){
-			MessageBox.information("O Rig esta desatualizado! Avise o Leo!");
-			return false;
-		}
-	} else if(rig_type == "SIMPLES"){
-		regex = rig_name_regex;
-	}
-
-	var nodeName = rig_name_regex.exec(selectedNode)[0].replace(index_regex, "");
-	nodeName = nodeName.replace(/(_v\d+)/, "");//limpa versao
-	rig_data["version"] = version_regex.exec(selectedNode)[0];
-	rig_data["name"] = nodeName;
-
-	var buffer = selectedNode.split("/");
-	var path = "";
-	for(var i=0; i<buffer.length; i++){
-		path += buffer[i];
-		if(regex.test(buffer[i])){
-			rig_data["fullPath"] = path;
-			break;
-		}
-		path += "/";
-	}
-	rig_data["selection_name"] = node.getName(selectedNode);
-	rig_data["selection_path"] = selectedNode;
-	rig_data["type"] = rig_type;
-	return rig_data;
-}
-
-
 /*
 formata uma string com zeros a esquerda e.g 01,001,0001,etc...
 */
@@ -887,21 +831,6 @@ function BD2_zerosFill(number, zeros){
 	var dig = zeros.length * -1;
 	zeros += number.toString();
 	return zeros.slice(dig);
-}
-
-/*
-Checa se o nome da cena tem padrao de cena!
-@cena > nome da cena pra checar
-*/
-function BD2_check_padrao_scene(cena){
-	var scene_regex = /(\w{3}_\d{3}_(sc|SC)\d+)$/;// captura substrings com o formato parecido com njn_666_sc0080.
-	
-	if(!scene_regex.test(cena)){
-		MessageBox.information("O nome desta cena não está no padrão.\nAvise o Leo!");
-		return false;
-	}
-	
-	return true;
 }
 
 
