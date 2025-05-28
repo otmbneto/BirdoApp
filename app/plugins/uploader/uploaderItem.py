@@ -5,7 +5,8 @@ import shutil
 import re
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
-from utils.birdo_zip import compact_folder
+from utils.birdo_zip import compact_folder,extract_zipfile
+from utils.birdo_pathlib import Path
 
 
 class uiItem(QtGui.QGroupBox):
@@ -233,6 +234,43 @@ class uiItem(QtGui.QGroupBox):
             shot_num
         ) if shot_num is not None else None
 
+
+    def renameScene(self,zip_file,scene_name):
+
+        temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder = "Temp_" + scene_name, clean=True).normpath()
+        extract_zipfile(zip_file,temp_folder)
+        folders = [os.path.join(temp_folder,f) for f in os.listdir(temp_folder)]
+
+        output = None
+        for folder in folders:
+            if not os.path.isdir(folder):
+                continue
+            xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
+            if xstage:
+                #script = Path(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))) / "batch" / "BAT_CompactScene.js"
+                #print(script)
+                #print(xstage)
+                #self.uploader.birdoapp.harmony.compile_script(script, xstage)
+
+                new_name = None
+                print([xstage,xstage.replace(".xstage",".aux"),xstage + ".thumbnails",folder])
+                for f in [xstage,xstage.replace(".xstage",".aux"),xstage + ".thumbnails",folder]:
+
+                    if os.path.exists(f):
+                        prefix = ".".join([""] + f.split(".")[1:])
+                        new_name = Path(os.path.dirname(f)) / scene_name
+                        print(new_name)
+                        print(f)
+                        os.rename(f,new_name.normpath() + prefix)
+
+                output = new_name.normpath() + ".zip"
+                compact_folder(new_name.normpath(),output)
+
+                break
+
+
+        return output
+
     # TODO: Move the name scene generation to the folder manager
     # TODO: Move the animatic name generation to the folder manager
     # TODO: Define the default format for renders
@@ -254,18 +292,22 @@ class uiItem(QtGui.QGroupBox):
             int(re.sub(r"\D", "", episode_code)), int(re.sub(r"\D", "", shot_num)))
         self.incrementProgress(10)
         if self.filename.endswith(".zip"):
-            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,
-                                                                self.stepBox.currentText()).normpath()
+
+            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,self.stepBox.currentText()) / "PUBLISH"
+            scene_path = scene_path.normpath()
             self.incrementProgress(10)
-            scene_name += "_" + self.getVersion(scene_name, scene_path) + ".zip"
+            scene_name += "_" + self.getVersion(scene_name, scene_path)
+            t_file = self.renameScene(self.getFullpath(),scene_name)
+            scene_name += ".zip"
             self.incrementProgress(10)
             if not os.path.exists(scene_path):
                 os.makedirs(scene_path)
             self.incrementProgress(10)
             upload_scene = os.path.join(scene_path, scene_name).replace("\\", "/")
             self.incrementProgress(25)
-            shutil.copyfile(self.getFullpath(), upload_scene)
+            shutil.copyfile(t_file, upload_scene)
             self.incrementProgress(25)
+            self.uploader.birdoapp.get_temp_folder(clean=True)
         elif self.filename.endswith((".mov", ".mp4")):
             animatic_path = self.uploader.project_data.paths.get_animatics_folder("server", episode_code).normpath()
             self.incrementProgress(10)
