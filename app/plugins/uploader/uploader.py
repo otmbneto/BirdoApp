@@ -114,6 +114,7 @@ class Uploader(QtGui.QMainWindow):
 
         progression = 100 / len(self.listOfWidgets) if len(self.listOfWidgets) > 0 else 100
         self.ui.progressBar.setVisible(True)
+        extra_list = []
         for movie in self.listOfWidgets:
 
             if os.path.exists(temp):
@@ -122,9 +123,25 @@ class Uploader(QtGui.QMainWindow):
 
             QtGui.qApp.processEvents()
             movie.upload(temp)
+            print("GET SCENE ANIMATIC:" + str(movie.getSceneAnimatic()))
+            if movie.getSceneAnimatic() is not None:
+                #self.listOfWidgets.append(movie.getSceneAnimatic())
+                dropped,movWidget = self.dropWidget(movie.getSceneAnimatic(),addToList = False)
+                if dropped:
+                    extra_list.append(movWidget)
             self.incrementProgress(progression)
+        
+        for movie in extra_list:
+
+            if os.path.exists(temp):
+                shutil.rmtree(temp)
+            os.makedirs(temp)
+
+            QtGui.qApp.processEvents()
+            movie.upload(temp)
 
         self.setProgress(100)
+        self.birdoapp.get_temp_folder(clean=True)
         self.birdoapp.mb.information("Copias feitas com sucesso!")
 
     def getProgress(self):
@@ -159,16 +176,33 @@ class Uploader(QtGui.QMainWindow):
             for url in urls:
                 QtGui.qApp.processEvents()
                 u = str(url.toLocalFile())
+                '''
                 movWidget = self.get_template_item(u, self.episodes)
                 print(movWidget)
                 if movWidget.isValid():
                     self.listOfWidgets.append(movWidget)
                     self.verticalLayout.addWidget(movWidget)
                     droppedSomething = True
+                '''
+                droppedSomething,movWidget = self.dropWidget(u)
             if droppedSomething:
                 self.ui.cleanBtn.setEnabled(True)
         else:
             e.ignore()
+
+
+    def dropWidget(self,item,addToList = True):
+
+        dropped = False
+        movWidget = self.get_template_item(item, self.episodes)
+        print(movWidget)
+        if movWidget.isValid():
+            if addToList:
+                self.listOfWidgets.append(movWidget)
+            self.verticalLayout.addWidget(movWidget)
+            dropped = True
+        return dropped,movWidget
+
 
     def findIndexOf(self, text):
         index = self.ui.globalEpisodes.findText(text, QtCore.Qt.MatchFixedString)

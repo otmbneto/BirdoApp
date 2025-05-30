@@ -19,10 +19,14 @@ class uiItem(QtGui.QGroupBox):
 
         self.filename = "ITEM_NAME"
         self.filetypes = (".mov", ".mp4", ".zip")
+        print(fullpath)
         if fullpath is not None:
             self.filename = fullpath.split("/")[-1]
             self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
+        print(self.filename)
+        print(self.filepath)
         self.sceneFound = True
+        self.sceneAnimatic = None
 
         #self.initLogic()
 
@@ -113,6 +117,10 @@ class uiItem(QtGui.QGroupBox):
         if self.episode is not None:
             self.setEpisode(self.findIndexOf(self.episode))
         self.delete_button.clicked.connect(self.close)
+
+    def getSceneAnimatic(self):
+
+        return self.sceneAnimatic.replace("\\","/")
 
     def checkScene(self, toggle=True):
         shot = self.uploader.project_data.paths.find_sc(self.filename)
@@ -235,7 +243,7 @@ class uiItem(QtGui.QGroupBox):
         ) if shot_num is not None else None
 
 
-    def renameScene(self,zip_file,scene_name):
+    def renameScene(self,zip_file,scene_name,version):
 
         temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder = "Temp_" + scene_name, clean=True).normpath()
         extract_zipfile(zip_file,temp_folder)
@@ -247,25 +255,34 @@ class uiItem(QtGui.QGroupBox):
                 continue
             xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
             if xstage:
-                #script = Path(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))) / "batch" / "BAT_CompactScene.js"
-                #print(script)
-                #print(xstage)
-                #self.uploader.birdoapp.harmony.compile_script(script, xstage)
+                script = Path(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))) / "batch" / "BAT_CompactScene.js"
+                print(script)
+                print(xstage)
+                self.uploader.birdoapp.harmony.compile_script(script, xstage)
+                animatic = os.path.join(folder,"frames","animatic.mov")
+                if os.path.exists(animatic):
+                    animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder = "Temp_Animatic_" + scene_name, clean=True).normpath()
+                    animatic_dst = os.path.join(animatic_folder,scene_name + ".mov")
+                    shutil.copyfile(animatic, animatic_dst)
+                    self.sceneAnimatic = animatic_dst
 
                 new_name = None
-                print([xstage,xstage.replace(".xstage",".aux"),xstage + ".thumbnails",folder])
-                for f in [xstage,xstage.replace(".xstage",".aux"),xstage + ".thumbnails",folder]:
+                for f in [xstage,xstage.replace(".xstage",".aux"),xstage.replace(".xstage",".aux~"),xstage.replace(".xstage",".xstage~"),xstage + ".thumbnails"]:
 
                     if os.path.exists(f):
                         prefix = ".".join([""] + f.split(".")[1:])
-                        new_name = Path(os.path.dirname(f)) / scene_name
+                        new_name = Path(os.path.dirname(f)) / (scene_name + "_" + version)
                         print(new_name)
                         print(f)
                         os.rename(f,new_name.normpath() + prefix)
 
+                #prefix = ".".join([""] + folder.split(".")[1:])
+                new_name = Path(os.path.dirname(folder)) / scene_name
+                print(new_name)
+                print(folder)
+                os.rename(folder,new_name.normpath())
                 output = new_name.normpath() + ".zip"
                 compact_folder(new_name.normpath(),output)
-
                 break
 
 
@@ -296,9 +313,11 @@ class uiItem(QtGui.QGroupBox):
             scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,self.stepBox.currentText()) / "PUBLISH"
             scene_path = scene_path.normpath()
             self.incrementProgress(10)
-            scene_name += "_" + self.getVersion(scene_name, scene_path)
-            t_file = self.renameScene(self.getFullpath(),scene_name)
-            scene_name += ".zip"
+            version = self.getVersion(scene_name, scene_path)
+            #scene_name += "_" + self.getVersion(scene_name, scene_path)
+            t_file = self.renameScene(self.getFullpath(),scene_name,version)
+            scene_name += "_" + version + ".zip"
+            #scene_name += ".zip"
             self.incrementProgress(10)
             if not os.path.exists(scene_path):
                 os.makedirs(scene_path)
@@ -307,7 +326,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             shutil.copyfile(t_file, upload_scene)
             self.incrementProgress(25)
-            self.uploader.birdoapp.get_temp_folder(clean=True)
+            #self.uploader.birdoapp.get_temp_folder(clean=True)
         elif self.filename.endswith((".mov", ".mp4")):
             animatic_path = self.uploader.project_data.paths.get_animatics_folder("server", episode_code).normpath()
             self.incrementProgress(10)
@@ -318,6 +337,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(10)
             dst = os.path.join(animatic_path, scene_name)
             compressed = os.path.join(temp, self.filename).replace("\\", "/")
+            print(self.getFullpath())
             if not self.uploader.birdoapp.ffmpeg.compress_video(self.getFullpath(), compressed):
                 self.uploader.birdoapp.mb("Erro comprimindo o arquivo: {0}".format(self.filename))
                 return False
