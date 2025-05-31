@@ -10,13 +10,13 @@ function crate_animatic_movie(){
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
 		Print("[BIRDOAPP - crate animatic movie][ERROR] Fail to get BirdoProject paths and data... canceling!");
-		return;
+		return false;
 	}
 	
 	var animatic = findAnimaticNode();
 	if(!animatic){
 		Print("[BIRDOAPP - crate animatic movie]cant find animatic node...");
-		return;
+		return false;
 	}
 	
 	var node_folder = element.completeFolder(node.getElementId(animatic));
@@ -31,7 +31,7 @@ function crate_animatic_movie(){
 		
 		if(!BD1_CopyFile(full_path, temp_folder + name)){
 			Print("[BIRDOAPP - crate animatic movie]Error copying img " + full_path);
-			return 
+			return false;
 		}
 	});
 	
@@ -45,11 +45,11 @@ function crate_animatic_movie(){
 	Print("[BIRDOAPP - crate animatic movie]Pattern: " + imagePatern);
 	if(!BD1_MakeMovieFromImageSeq(projectDATA.birdoApp, imagePatern, scene.getFrameRate(), audio, movie)){
 		Print("[BIRDOAPP - crate animatic movie]Fail to create movie from animatic...");
-		return;
+		return false;
 	}
 	
 	Print("[BIRDOAPP - crate animatic movie]Movie animatic created: " + movie);
-	
+	return true;
 }
 exports.crate_animatic_movie = crate_animatic_movie;
 
@@ -59,9 +59,11 @@ function findAnimaticNode(){
 		Print("[BIRDOAPP - crate animatic movie]More than 1 animatic node in setup..");
 		return false;
 	}
+	Print("[BIRDOAPP - crate animatic movie] Animatic group node found: " + animatic_g[0]);
 	var anim_nodes = node.subNodes(animatic_g[0]).filter(function(item){ return node.type(item) == "READ"});
 	if(anim_nodes.length != 1){
-		Print("[BIRDOAPP - crate animatic movie]Invalid animatic nodes number!");
+		Print("[BIRDOAPP - crate animatic movie]Invalid animatic nodes number: " + anim_nodes.length);
+		Print(anim_nodes);
 		return false;
 	}
 	return anim_nodes[0];
