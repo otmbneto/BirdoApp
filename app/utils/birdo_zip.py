@@ -1,8 +1,9 @@
 from zipfile import ZipFile
 from zipfile import ZIP_DEFLATED
 import textwrap
-from tqdm import tqdm
 import os
+import time
+from tqdm import tqdm
 
 
 def format_file_path(file_path, limit=50):
@@ -89,7 +90,14 @@ def extract_zipfile(zipfile, extract_to):
                 pb.update()
                 try:
                     zip_f.extract(zip_info.filename, extract_to)
-                    data["content_list"].append(os.path.join(extract_to, zip_info.filename))
+                    fpath = os.path.join(extract_to, zip_info.filename)
+                    # Get the original mod time
+                    mod_time = time.mktime(zip_info.date_time + (0, 0, -1))
+
+                    # Reapply the original mod time
+                    os.utime(fpath, (mod_time, mod_time))
+
+                    data["content_list"].append(fpath)
                 except Exception as err:
                     data["error_list"].append(zip_info.filename)
                     print err
