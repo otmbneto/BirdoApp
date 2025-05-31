@@ -7,7 +7,6 @@ import os
 import sys
 from PySide import QtCore, QtGui, QtUiTools
 import shutil
-import tempfile
 import uploaderItem as upi
 import argparse
 curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -106,33 +105,29 @@ class Uploader(QtGui.QMainWindow):
 
     def execute(self):
         # SEND TO SERVER
-        temp = os.path.join(tempfile.gettempdir(), "BirdoApp/Compressed").replace("\\", "/")
-        if not os.path.exists(temp):
-            os.makedirs(temp)
+        temp = self.birdoapp.get_temp_folder(sub_folder="Compressed", clean=True).path
 
         self.ui.cleanBtn.setEnabled(True)
 
         progression = 100 / len(self.listOfWidgets) if len(self.listOfWidgets) > 0 else 100
         self.ui.progressBar.setVisible(True)
         extra_list = []
-        for movie in self.listOfWidgets:
 
+        for movie in self.listOfWidgets:
             if os.path.exists(temp):
                 shutil.rmtree(temp)
             os.makedirs(temp)
 
             QtGui.qApp.processEvents()
             movie.upload(temp)
-            print("GET SCENE ANIMATIC:" + str(movie.getSceneAnimatic()))
-            if movie.getSceneAnimatic() is not None:
-                #self.listOfWidgets.append(movie.getSceneAnimatic())
-                dropped,movWidget = self.dropWidget(movie.getSceneAnimatic(),addToList = False)
+            print("GET SCENE ANIMATIC:" + str(movie.scene_animatic))
+            if movie.scene_animatic is not None:
+                dropped, movWidget = self.dropWidget(movie.scene_animatic, addToList=False)
                 if dropped:
                     extra_list.append(movWidget)
             self.incrementProgress(progression)
-        
-        for movie in extra_list:
 
+        for movie in extra_list:
             if os.path.exists(temp):
                 shutil.rmtree(temp)
             os.makedirs(temp)
@@ -184,14 +179,13 @@ class Uploader(QtGui.QMainWindow):
                     self.verticalLayout.addWidget(movWidget)
                     droppedSomething = True
                 '''
-                droppedSomething,movWidget = self.dropWidget(u)
+                droppedSomething, movWidget = self.dropWidget(u)
             if droppedSomething:
                 self.ui.cleanBtn.setEnabled(True)
         else:
             e.ignore()
 
-
-    def dropWidget(self,item,addToList = True):
+    def dropWidget(self, item, addToList=True):
 
         dropped = False
         movWidget = self.get_template_item(item, self.episodes)
@@ -201,8 +195,7 @@ class Uploader(QtGui.QMainWindow):
                 self.listOfWidgets.append(movWidget)
             self.verticalLayout.addWidget(movWidget)
             dropped = True
-        return dropped,movWidget
-
+        return dropped, movWidget
 
     def findIndexOf(self, text):
         index = self.ui.globalEpisodes.findText(text, QtCore.Qt.MatchFixedString)

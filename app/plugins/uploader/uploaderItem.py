@@ -5,12 +5,13 @@ import shutil
 import re
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
-from utils.birdo_zip import compact_folder,extract_zipfile
+from utils.birdo_zip import compact_folder, extract_zipfile
 from utils.birdo_pathlib import Path
 
 
 class uiItem(QtGui.QGroupBox):
     """class para criar item na interface principal do Uploader"""
+
     def __init__(self, fullpath, episode_list, uploader):
         super(uiItem, self).__init__()
 
@@ -26,9 +27,7 @@ class uiItem(QtGui.QGroupBox):
         print(self.filename)
         print(self.filepath)
         self.sceneFound = True
-        self.sceneAnimatic = None
-
-        #self.initLogic()
+        self.scene_animatic = None
 
         # init layout
         self.setMinimumHeight(50)
@@ -118,10 +117,6 @@ class uiItem(QtGui.QGroupBox):
             self.setEpisode(self.findIndexOf(self.episode))
         self.delete_button.clicked.connect(self.close)
 
-    def getSceneAnimatic(self):
-
-        return self.sceneAnimatic.replace("\\","/")
-
     def checkScene(self, toggle=True):
         shot = self.uploader.project_data.paths.find_sc(self.filename)
         if shot is None:
@@ -141,9 +136,6 @@ class uiItem(QtGui.QGroupBox):
             self.sceneFound = True
         else:
             self.checkScene(toggle=False)
-
-    def wasSceneFound(self):
-        return self.sceneFound
 
     def setBackgroundColor(self, color):
         self.setStyleSheet("background-color: {0}".format(color))
@@ -180,11 +172,6 @@ class uiItem(QtGui.QGroupBox):
     def getFullpath(self):
         return self.filepath + self.filename
 
-    def setFullpath(self, fullpath):
-        self.filepath = os.path.dirname(fullpath)
-        self.filename = os.path.basename(fullpath)
-        self.setSceneName(self.filename)
-
     def setStatus(self, text, color):
         self.status_label.setText(text)
         self.status_label.setStyleSheet("QLabel { color : " + color + "; }")
@@ -201,22 +188,12 @@ class uiItem(QtGui.QGroupBox):
     def setStep(self, index):
         self.stepBox.setCurrentIndex(index)
 
-    def addEpisodes(self, episodes):
-        self.episodes.addItems(episodes)
-
-    def setDone(self):
-        self.status_label.setText("Feito")
-        self.status_label.setStyleSheet("QLabel { color : green; }")
-
-    def setError(self):
-        self.status_label.setText("ERRO")
-        self.status_label.setStyleSheet("QLabel { color : red; }")
-
     def setEnable(self, value):
         self.delete_button.setEnabled(value)
 
     def getVersion(self, scene_name, path):
-        return "v" + str(len([f for f in os.listdir(path) if f.endswith(self.filetypes) and scene_name in f]) + 1).zfill(
+        return "v" + str(
+            len([f for f in os.listdir(path) if f.endswith(self.filetypes) and scene_name in f]) + 1).zfill(
             2) if os.path.exists(path) else "v01"
 
     def getRegexPattern(self, regex, filename):
@@ -226,9 +203,6 @@ class uiItem(QtGui.QGroupBox):
             for i in range(len(index_range)):
                 if m.group(i + 1) is not None:
                     return m.group(i + 1)
-
-    def getShot(self, filename):
-        return self.getRegexPattern(r'.*SC_(\d{4}).*|.*SC(\d{4}).*', filename)
 
     def renamefiles(self, name, files):
         for file in files:
@@ -242,12 +216,10 @@ class uiItem(QtGui.QGroupBox):
             shot_num
         ) if shot_num is not None else None
 
-
-    def renameScene(self,zip_file,scene_name,version):
-
-        temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder = "Temp_" + scene_name, clean=True).normpath()
-        extract_zipfile(zip_file,temp_folder)
-        folders = [os.path.join(temp_folder,f) for f in os.listdir(temp_folder)]
+    def renameScene(self, zip_file, scene_name, version):
+        temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_{0}".format(scene_name), clean=True).normpath()
+        extract_zipfile(zip_file, temp_folder)
+        folders = [os.path.join(temp_folder, f) for f in os.listdir(temp_folder)]
 
         output = None
         for folder in folders:
@@ -255,36 +227,34 @@ class uiItem(QtGui.QGroupBox):
                 continue
             xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
             if xstage:
-                script = Path(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))) / "batch" / "BAT_CompactScene.js"
-                print(script)
-                print(xstage)
+                script = os.path.join(self.uploader.birdoapp.root, "batch", "BAT_CompactScene.js")
+                print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running script compile: {1}".format(xstage, script)
                 self.uploader.birdoapp.harmony.compile_script(script, xstage)
-                animatic = os.path.join(folder,"frames","animatic.mov")
+                animatic = os.path.join(folder, "frames", "animatic.mov")
                 if os.path.exists(animatic):
-                    animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder = "Temp_Animatic_" + scene_name, clean=True).normpath()
-                    animatic_dst = os.path.join(animatic_folder,scene_name + ".mov")
-                    shutil.copyfile(animatic, animatic_dst)
-                    self.sceneAnimatic = animatic_dst
+                    animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_Animatic_{0}".format(scene_name), clean=True)
+                    animatic_dst = animatic_folder / "{0}.mov".format(scene_name)
+                    shutil.move(animatic, animatic_dst.path)
+                    self.scene_animatic = animatic_dst.path
 
                 new_name = None
-                for f in [xstage,xstage.replace(".xstage",".aux"),xstage.replace(".xstage",".aux~"),xstage.replace(".xstage",".xstage~"),xstage + ".thumbnails"]:
+                for f in [xstage, xstage.replace(".xstage", ".aux"), xstage.replace(".xstage", ".aux~"),
+                          xstage.replace(".xstage", ".xstage~"), xstage + ".thumbnails"]:
 
                     if os.path.exists(f):
                         prefix = ".".join([""] + f.split(".")[1:])
                         new_name = Path(os.path.dirname(f)) / (scene_name + "_" + version)
                         print(new_name)
                         print(f)
-                        os.rename(f,new_name.normpath() + prefix)
+                        os.rename(f, new_name.normpath() + prefix)
 
-                #prefix = ".".join([""] + folder.split(".")[1:])
                 new_name = Path(os.path.dirname(folder)) / scene_name
                 print(new_name)
                 print(folder)
-                os.rename(folder,new_name.normpath())
+                os.rename(folder, new_name.normpath())
                 output = new_name.normpath() + ".zip"
-                compact_folder(new_name.normpath(),output)
+                compact_folder(new_name.normpath(), output)
                 break
-
 
         return output
 
@@ -304,20 +274,19 @@ class uiItem(QtGui.QGroupBox):
         shot_num = self.uploader.project_data.paths.find_sc(self.filename)
         if not self.scene_text.isEnabled() and shot_num is None:
             return
-        scene_name = self.getScene(int(re.sub(r"\D", "", episode_code)),
-                                   int(self.scene_text.text())) if self.scene_text.isEnabled() else self.getScene(
-            int(re.sub(r"\D", "", episode_code)), int(re.sub(r"\D", "", shot_num)))
+        ep_num = int(re.sub(r"\D", "", episode_code))
+        sc_num = int(self.scene_text.text()) if self.scene_text.isEnabled() else int(re.sub(r"\D", "", shot_num))
+        scene_name = self.getScene(ep_num, sc_num)
+        print("...scene name: {0}".format(scene_name))
         self.incrementProgress(10)
         if self.filename.endswith(".zip"):
 
-            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,self.stepBox.currentText()) / "PUBLISH"
+            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()) / "PUBLISH"
             scene_path = scene_path.normpath()
             self.incrementProgress(10)
             version = self.getVersion(scene_name, scene_path)
-            #scene_name += "_" + self.getVersion(scene_name, scene_path)
-            t_file = self.renameScene(self.getFullpath(),scene_name,version)
-            scene_name += "_" + version + ".zip"
-            #scene_name += ".zip"
+            t_file = self.renameScene(self.getFullpath(), scene_name, version)
+            scene_name += "_{0}.zip".format(version)
             self.incrementProgress(10)
             if not os.path.exists(scene_path):
                 os.makedirs(scene_path)
@@ -326,7 +295,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             shutil.copyfile(t_file, upload_scene)
             self.incrementProgress(25)
-            #self.uploader.birdoapp.get_temp_folder(clean=True)
+
         elif self.filename.endswith((".mov", ".mp4")):
             animatic_path = self.uploader.project_data.paths.get_animatics_folder("server", episode_code).normpath()
             self.incrementProgress(10)
@@ -346,7 +315,8 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             os.remove(compressed)
         else:
-            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()).normpath()
+            scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,
+                                                                         self.stepBox.currentText()).normpath()
             self.incrementProgress(10)
             temp_dir = os.path.join(temp, scene_name)
             scene_name += "_" + self.getVersion(scene_name, scene_path)
@@ -372,7 +342,6 @@ class uiItem(QtGui.QGroupBox):
             zip_file = compact_folder(temp_dir, temp_dir + ".zip")
             shutil.copyfile(zip_file, upload_scene)
             self.incrementProgress(10)
-            # shutil.rmtree(temp_dir)
             self.incrementProgress(10)
 
         self.setStatus("Done", "green")
