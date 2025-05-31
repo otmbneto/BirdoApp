@@ -23,7 +23,7 @@ function create_compact_file_list(use_progressbar){
 	//LISTAR TRATAMENTO DE ARQUIVOS AQUI////
 	var main_folders = ["audio", "elements", "frames", "palette-library", "scripts"];
 	var files_ext_list = ["xstage", "aux", "elementTable", "versionTable"];
-	var file_list = ["PALETTE_LIST"];
+	var file_list = ["PALETTE_LIST", "scene.elementTable", "scene.versionTable"];
 	var elements_ext_exeption_list = ["tga"];//extencoes de arquivos dos elements para NAO adicionar
 	///////////////////////////////////////
 
@@ -50,7 +50,6 @@ function create_compact_file_list(use_progressbar){
 	Print("Main folder added to list: " + cenaPath);
 	counter_file++;
 
-
 	for(var i=0; i<all_files.length; i++){
 		if(use_progressbar){
 			progressDlg.setLabelText("Listing Scene Files: [" + i + "/" + all_files.length + "]");
@@ -59,21 +58,19 @@ function create_compact_file_list(use_progressbar){
 		
 		//fullpath of file
 		var file_path = cenaPath + "/" + all_files[i];
+		
+		//add elements filtering usage in scene version
 		if(all_files[i] == "elements" && !BD1_is_file(file_path)) {
 			var elementRootItem = {"full_path": file_path, "relative_path": file_path.replace(cenaDir, "")};
 			finalOutput["file_list"].push(elementRootItem);
-			Print("file added to list: " + file_path);
 			counter_file++;
 			list_used_elements();
 			continue;
 		}
 
         if(all_files[i] == "frames" && !BD1_is_file(file_path)) {
-            BD1_RemoveDirs(file_path);
-			BD1_makeDir(file_path);
 			var framesItem = {"full_path": file_path, "relative_path": file_path.replace(cenaDir, "")};
             finalOutput["file_list"].push(framesItem);
-			Print("file added to list: " + file_path);
 			counter_file++;
             continue;
         }
@@ -84,7 +81,6 @@ function create_compact_file_list(use_progressbar){
         }else{
 			var folderItem = {"full_path": file_path, "relative_path": file_path.replace(cenaDir, "")};
             finalOutput["file_list"].push(folderItem);
-			Print("file added to list: " + file_path);
             addFolderContentToFinalList(file_path, false);
 			counter_file++;
 		}
@@ -94,7 +90,7 @@ function create_compact_file_list(use_progressbar){
 		progressDlg.close();
 	}
 	
-    Print("COMPACT VERSION LIST DONE! " + counter_file + " arquivos adicionados a lista para compactar no python!");
+    Print(counter_file + " arquivos adicionados a lista de arquivos usados na cena!");
 	return finalOutput;
 
  /////////////// funcoes complementares - limpa cena////////////////////
@@ -130,7 +126,6 @@ function create_compact_file_list(use_progressbar){
 			}
 			var elementItem = {"full_path": folder, "relative_path": folder.replace(cenaDir, "")};
             finalOutput["file_list"].push(elementItem);
-			Print("file added to list: " + folder);
             addFolderContentToFinalList(folder, true);
 			elementList.push(folder);
 			counter_file++;
@@ -156,7 +151,6 @@ function create_compact_file_list(use_progressbar){
 		for(var i=0; i<content_list.length; i++){
 			var item = {"full_path": content_list[i], "relative_path": content_list[i].replace(cenaDir, "")};
 			finalOutput["file_list"].push(item);
-			Print("file added to list: " + content_list[i]);
 			counter_file++;
 		}
 	}
