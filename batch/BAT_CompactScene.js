@@ -33,10 +33,11 @@ function BAT_CompactScene(){
 		//run compact scene
 		var compact_func = require(projectDATA.paths.birdoPackage + "utils/compact_version.js");
 		var nodes_data = compact_func.create_compact_file_list(false);
-		var nodes_data = compact_func.create_compact_file_list(false);
-		var allfiles = BD1_ListFolderRecursivelly(scene.currentProjectPath())
+		var allfiles = BD1_ListFolderRecursivelly(scene.currentProjectPath());
 		var used_nodes_list = nodes_data["file_list"].map(function(item){ return item["full_path"]});
 		var delete_list = allfiles.filter(function(item){ return used_nodes_list.indexOf(item) == -1});
+		//sort folders to last
+		delete_list.sort(function(a, b){ return b.split("/").length - a.split("/").length});
 
 		Print("[BIRDOAPP - compact scene] deletando " + delete_list.length + " arquivos...");
 		var counter = 0;
@@ -51,9 +52,12 @@ function BAT_CompactScene(){
 		});
 		
 		//create animatic movie from node...
-		var create_animatic = require(projectDATA.paths.birdoPackage + "utils/create_animatic_movie.js").crate_animatic_movie();
+		if(require(projectDATA.paths.birdoPackage + "utils/create_animatic_movie.js").crate_animatic_movie()){
+			Print("Animatic criado com sucesso!");
+		} else {
+			Print("[ERROR] Erro ao criar animatic.mov!");
+		}
 
-		
 	}catch(e){
 		Print(e);
 	}
