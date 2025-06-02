@@ -188,6 +188,10 @@ class uiItem(QtGui.QGroupBox):
     def setStep(self, index):
         self.stepBox.setCurrentIndex(index)
 
+    def setItemScene(self, sc_num):
+        num = int(sc_num) * 10 if self.uploader.ui.checkDecimal.isChecked() else int(sc_num)
+        self.scene_text.setText(str(num))
+
     def setEnable(self, value):
         self.delete_button.setEnabled(value)
 

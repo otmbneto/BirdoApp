@@ -211,7 +211,7 @@ QPushButton:pressed {
 }
 
 QPushButton::disabled {
-	border-color: #f95959;
+	border-color: gray;
 	background: #455d7a;
 	color: #53a8b6;
 }
@@ -305,7 +305,7 @@ QProgressBar::chunk {
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,2">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -326,8 +326,21 @@ QProgressBar::chunk {
      <item>
       <widget class="QComboBox" name="globalSteps"/>
      </item>
+     <item>
+      <widget class="QPushButton" name="searchScenes">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>  Pegar Numeros de Cenas  </string>
+       </property>
+      </widget>
+     </item>
      <item alignment="Qt::AlignHCenter">
       <widget class="QCheckBox" name="checkDecimal">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Forcar decimal</string>
        </property>
@@ -355,7 +368,7 @@ QProgressBar::chunk {
         <x>0</x>
         <y>0</y>
         <width>667</width>
-        <height>319</height>
+        <height>320</height>
        </rect>
       </property>
       <property name="sizePolicy">

@@ -4,6 +4,7 @@
     (Usado pela Direção Técnica ou produção)
 """
 import os
+import re
 import sys
 from PySide import QtCore, QtGui, QtUiTools
 import shutil
@@ -68,9 +69,20 @@ class Uploader(QtGui.QMainWindow):
         self.ui.executeBtn.clicked.connect(self.execute)
         self.ui.cleanBtn.clicked.connect(self.clean_scroll_list)
         self.ui.cancelBtn.clicked.connect(self.close)
-        self.ui.checkDecimal.stateChanged.connect(self.checkDecimal)
+        self.ui.checkDecimal.stateChanged.connect(self.onCheckDecimal)
+        self.ui.searchScenes.clicked.connect(self.onSearchScenes)
 
-    def checkDecimal(self):
+    def onSearchScenes(self):
+        for item in self.listOfWidgets:
+            sc_num = filter(lambda x: len(filter(lambda y: x in y.filename, self.listOfWidgets)) == 1, re.findall(r'\d+', item.filename))[0]
+            item.setItemScene(sc_num)
+
+    def updateSerchButton(self):
+        has_no_sc_item = not any([not x.scene_text.isEnabled() for x in self.listOfWidgets])
+        self.ui.searchScenes.setEnabled(has_no_sc_item)
+        self.ui.checkDecimal.setEnabled(has_no_sc_item)
+
+    def onCheckDecimal(self):
         print "decimal changed to : {0}".format(self.ui.checkDecimal.isChecked())
 
     def episode_changed(self):
@@ -195,6 +207,10 @@ class Uploader(QtGui.QMainWindow):
                 self.listOfWidgets.append(movWidget)
             self.verticalLayout.addWidget(movWidget)
             dropped = True
+
+        # update search sc button
+        self.updateSerchButton()
+
         return dropped, movWidget
 
     def findIndexOf(self, text):
