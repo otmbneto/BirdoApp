@@ -26,7 +26,6 @@ function BD_AddFullNodes(){
 		return false;
 	}
 	
-	
 	var current_group = getCurrentNodeViewGroup();
 	if(!current_group){
 		MessageBox.warning("ERRO! Node View nao esta ativa!\nDia a NodeView no Grupo que deseja criar os nodes de 'FULL'!",0,0);
@@ -75,8 +74,9 @@ function BD_AddFullNodes(){
 	//extra functions
 	function findRigName(nodeP, proj_data){//retorna nome do rig
 		var name = proj_data.pattern.asset.exec(nodeP)[0];
-		return name.replace(name.split("_")[0] + "_", "").replace(/_v\d+/, "");
+		return name.replace(name.split("_")[0] + "_", "").replace(proj_data.pattern.version, "").replace(/(-G)?_\d+$/, "");
 	}
+	
 	
 	function getCurrentNodeViewGroup(){//retorna o current group na nodeview
 		var views = view.viewList();	
@@ -88,15 +88,13 @@ function BD_AddFullNodes(){
 		});
 		return nv ? view.group(nv) : false;
 	}	
+	
 		
 	function get_names(group_node, rigName){//interface simples para definir nomes
 
 		d = new Dialog;
 		d.title = "ADD Full Nodes!";
 		d.addSpace(5);
-
-		var group_clean_name = node.getName(group_node).split(".")[1].split("-v")[0];
-		group_clean_name = group_clean_name.replace(rigName, "");
 
 		var group = new GroupBox;		
 		group.title = "Add FULL:";
@@ -109,7 +107,7 @@ function BD_AddFullNodes(){
 
 		var labelFull = new LineEdit();
 		labelFull.label = "FULL Name:";
-		labelFull.text = group_clean_name == rigName || !group_clean_name ? "MASTER" : group_clean_name;
+		labelFull.text = node.getName(group_node);
 		group.add(labelFull);
 
 		d.addSpace(5);
@@ -133,7 +131,7 @@ function BD_AddFullNodes(){
 			simple_name: ["FULL", full_name].join("_")
 		};
 	}	
-		
+
 		
 	function add_backdrop(group, name, node_coord){//add backdrop to created nodes
 		var pos = {
