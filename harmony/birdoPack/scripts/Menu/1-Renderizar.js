@@ -50,7 +50,7 @@ function Renderizar(){
 			if(render_step == "PRE_COMP"){
 				var output_mov = require(pre_comp_script).pre_comp_render(projectDATA);
 				if(!output_mov){
-					MessageBox.warning("Erro renderizando a cena!",0,0);
+					Print("Renderizar cancelado...");
 				} else{
 					MessageBox.information("Cena renderizada no arquivo: \n..." + output_mov.slice(-30));
 				}
