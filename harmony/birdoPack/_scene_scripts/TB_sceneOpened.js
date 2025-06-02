@@ -192,5 +192,5 @@ function createToolBar(toolBar, toolBarFolder, scriptsJs, iconsPath){//Create To
 function check_permission(item, filter_data, mode, file_type, user_type){
 	return filter_data[item]["mode"].indexOf(mode) != -1 && 
 	filter_data[item]["file_type"].indexOf(file_type) != -1 && 
-	filter_data[item]["user_type"] == user_type;
+	(filter_data[item]["user_type"] == "ALL" || filter_data[item]["user_type"] == user_type);
 }
