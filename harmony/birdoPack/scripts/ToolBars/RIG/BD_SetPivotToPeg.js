@@ -27,6 +27,10 @@ function BD_SetPivotToPeg(){
 		return;
 	}
 	
+	if(node.isGroup(pegNode)){
+		pegNode = node.srcNode(pegNode, 0);
+	}
+	
 	if(!pegNode || node.type(pegNode) != "PEG"){
 		MessageBox.warning("No peg connected to this node!",0,0);
 		return;
