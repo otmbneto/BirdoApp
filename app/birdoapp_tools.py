@@ -2,10 +2,15 @@
 import re
 import os
 import sys
+import subprocess
+import codecs
 from config import ConfigInit
 from utils.birdo_pathlib import Path
 from utils.birdo_zip import compact_folder
 
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+
+import rpdb
 
 def convert_type(a, b):
     """Converte o objeto 'a' pelo tipo do objeto 'b'"""
@@ -28,6 +33,8 @@ class DevTools:
         }
         # selected project
         self.project = None
+        # gum executable
+        self.gum = Path(self.app.root) / "extra/gum.exe"
 
     def back_page(self):
         """Volta para pagina anterior."""
@@ -88,7 +95,7 @@ class DevTools:
         self.last["page"] = source_dict
         opt = source_dict.keys()
         opt.append("[VOLTAR]")
-        item = self.cli_input(title, options=opt)
+        item = self.choose_from_list(title, opt)
         if item == "[VOLTAR]":
             self.last["title"] = "MAIN"
             self.back_page()
@@ -98,11 +105,12 @@ class DevTools:
             self.last["title"] = title + "n\{0}".format(item)
             self.config_dict(title + "n\{0}".format(item), source_dict[item])
             return
-        edited_item = self.cli_input(title + "\n\t-Valor atual: {1}\n\t-Tipo: {2}\nNovo valor de: {0}".format(
+        edited_item = self.get_input(title + "\n\t-Valor atual: {1}\n\t-Tipo: {2}\nNovo valor de: {0}".format(
             item,
             source_dict[item],
             type(source_dict[item]).__name__
-        ))
+        ),
+                                     "Novo valor...")
 
         edited_item = convert_type(edited_item, source_dict[item])
         if edited_item:
@@ -111,10 +119,24 @@ class DevTools:
             self.update_json()
             self.back_page()
 
+    def optionize(self, s):
+        """sequencilize list of strings as string"""
+        return " ".join(['"{0}"'.format(x) for x in s])
+
+    def choose_from_list(self, header, options):
+        os.system("cls")
+        cmd = self.gum.path + " choose "
+        cmd += '--header "{0}" '.format(header)
+        cmd += self.optionize(options)
+        return subprocess.check_output(cmd, shell = True).strip()
+
     def show_main_menu(self):
         """Mostra o main menu CLI"""
+        os.system("cls")
         self.last["title"] = "MAIN"
-        r = self.cli_input(self.main_menu["header"], options=self.main_menu["options"])
+        r = self.choose_from_list("BirdoApp modo desenvolvedor. "
+                                  "Escolha uma opção:",
+                                  self.main_menu["options"])
         # "options": ["Config BirdoApp", "Projetos", "Criar Novo Projeto", "Credits", "[SAIR]"]
         if r == "Config BirdoApp":
             self.last["json"] = "app"
@@ -122,7 +144,7 @@ class DevTools:
         elif r == "Projetos":
             opt = ['{0} ({1})'.format(x["prefix"], x["name"]) for x in self.app.projects]
             opt.append("[VOLTAR]")
-            p = self.cli_input("Escolha o Projeto:", options=opt)
+            p = self.choose_from_list("Escolha o Projeto:", opt)
             if p == "[VOLTAR]":
                 self.back_page()
                 return
@@ -138,41 +160,118 @@ class DevTools:
         elif r == "[SAIR]":
             print "BirdoApp Tools Fechado!"
 
+    def get_input(self, header, placeholder):
+        """Get input via gum"""
+        os.system("cls")
+        cmd = self.gum.path + " input "
+        cmd += '--header "{0}" '.format(header)
+        cmd += '--placeholder="{0}"'.format(placeholder)
+        return subprocess.check_output(cmd, shell = True).strip()
+
+    def is_valid_name(self, name):
+        if " " in name :
+            return False
+        for i in name :
+            n = ord(i) 
+            if not (n >= 32 and n < 127):
+                return False
+        return True
+
     def show_config_app_page(self):
         """inicia a pagina de config inicial do BirdoApp"""
         # cria new config na ordem
-        self.app.config_data["studio_name"] = self.cli_input("Escolha o Nome do Estudio para configurar:")
-        self.app.config_data["server_projects"] = self.cli_input(
-            "Defina um caminho na rede (onde os usuarios do estudio tenham acesso) para "
-            "salvar as configuracoes de projetos.")
-        if not os.path.exists(self.app.config_data["server_projects"]):
-            sys.exit("CAMINHO FORNECIDO INVALIDO. Precisa ser um caminho existente.")
-        self.app.config_data["user_name"] = self.cli_input("Escolha o nome de usuario para esta maquina.")
-        h = self.cli_input("Escolha o caminho de Harmony instalado na sua maquina:",
-                           options=[x.get_name() for x in self.app.harmony_versions])
-        self.app.config_data["harmony_path"] = next((x for x in self.app.harmony_versions if x.get_name() == h),
-                                                    None).installation_path
+        confirm_studio = "Nao"
+        while confirm_studio != "Sim" :
+            os.system("cls")
+            r = self.get_input("Escolha o nome do estudio:", "Escreva aqui...")
+            s = "Confirma estudio: {0}?".format(r)
+            confirm_studio = self.choose_from_list(s, ["Sim", "Nao"])
+        self.app.config_data["studio_name"] = r
+
+        server_path = ""
+        while not os.path.exists(server_path):
+            server_path = self.get_input("Defina o caminho na rede para salvar "
+                                         "salvar as configuracoes de projetos:",
+                                         "Cole o caminho aqui...")
+        self.app.config_data["server_projects"] = server_path
+
+        user_name = ""
+        while True:
+            user_name = self.get_input(
+                "Escolha um nome unico de usuario para esta maquina.",
+                "Escreva o nome aqui...")
+            if not user_name :
+                print "O nome nao pode estar vazio."
+            elif not self.is_valid_name(user_name):
+                print "O nome nao pode conter espacos ou caracteres especiais."
+            else :
+                break
+        self.app.config_data["user_name"] = user_name
+
+        h = self.choose_from_list(
+            "Escolha uma das versoes de Harmony"
+            " instaladas em seu computador:",
+            [x.get_name() for x in self.app.harmony_versions])
+
+        self.app.config_data["harmony_path"] = next(
+            (x for x in self.app.harmony_versions if x.get_name() == h),
+            None).installation_path
 
         # atualiza o config object
         self.app.update_config_json()
         self.show_main_menu()
 
+    def get_file(self, header, path):
+        """Get file path via gum"""
+        if not os.path.exists(path):
+            path = os.getenv("HOMEPATH")
+        cmd = self.gum.path + " file {0} ".format(path)
+        cmd += '--no-permissions --no-size '
+        cmd += '--header="{0}"'.format(header)
+        try:
+            return subprocess.check_output(cmd, shell = True).strip()
+        except subprocess.CalledProcessError as e:
+            return ""
+
     def show_create_project_page(self):
+        os.system("cls")
         self.last["title"] = "MAIN"
+        prefix = ""
+        while True:
+            prefix = self.get_input("Escolha um prefixo para o projeto"
+                                    " (formato 'ABC'):",
+                                    "Escreva aqui...").upper()
+            if not prefix:
+                print("O prefixo nao pode ser vazio.")
+                continue
+            if len(prefix) != 3 :
+                print("O prefixo deve ter 3 letras exatamente.")
+                continue
+            break
+
         create_data = {
-            "01_prefix": self.cli_input("Escolha o Prefixo do Projeto:\n(Obrigatoriamente 3 letras):"),
-            "02_name": self.cli_input("Escolha o Nome do Projeto:"),
-            "03_sub_name": self.cli_input("Escolha o Sub Titulo do projeto:"),
-            "04_server_root": self.cli_input("Escolha o caminho do server do projeto:"),
-            "05_icon": self.cli_input("Escolha um Arquivo de imagem (png ou ico) com logo do projeto.")
+            "01_prefix": prefix,
+            "02_name": self.get_input("Escolha o nome do projeto:",
+                                      "Escreva aqui..."),
+            "03_sub_name": self.get_input("Escolha o subtitulo do projeto:",
+                                          "Escreva aqui..."),
+            "04_server_root": self.get_input("Escolha o caminho da "
+                                             "raiz do projeto:",
+                                             "Cole aqui..."),
+            "05_icon": False
         }
-        # checa se o icone fornecido e valido (PNG ou ICO)
-        if Path(create_data["05_icon"]).suffix not in [".png", ".ico"]:
-            if not self.cli_input(">>icone fornecido e invalido. Precisa ser de formato PNG ou ICO.\n"
-                                  "Deseja fornecer outro?", is_question=True):
-                create_data["05_icon"] = False
-            else:
-                create_data["05_icon"] = self.cli_input("Escolha um Arquivo de imagem (png ou ico) com logo do projeto.")
+
+        while True :
+            icon = self.get_file("Escolha um arquivo de imagem "
+                                 "com logo do projeto (.png ou .ico).",
+                                 os.getenv("HOMEPATH"))
+            if Path(icon).suffix not in [".png", ".ico"]:
+                s = "Formato invalido. Deseja escolher um novo icone?"
+                if self.choose_from_list(s, ["Sim", "Nao"]) == "Sim" :
+                    continue
+            else :
+                create_data["05_icon"] = icon
+            break
 
         if self.app.create_project(create_data):
             print "Projeto {0} criado!".format(create_data["01_prefix"])
@@ -183,29 +282,36 @@ class DevTools:
 
     def show_project_page(self):
         """Mostra o menu CLI do projeto"""
+        os.system("cls")
         opt = ["Config", "Episodios / Sequencias", "Criar EP / SQ", "[VOLTAR]"]
         eps = [x.name for x in self.project.paths.list_episodes("server")]
-        r = self.cli_input("Projeto - {0}".format(self.project.name), options=opt)
+        r = self.choose_from_list("Projeto {0}".format(self.project.name), opt)
         if r == "[VOLTAR]":
             self.back_page()
             return
         elif r == "Config":
             self.last["json"] = "project"
             self.last["app"] = "project_page"
-            self.config_dict("Config Projeto: {0}".format(self.project.name), self.project.raw_data)
+            self.config_dict("Config Projeto: {0}".format(self.project.name),
+                             self.project.raw_data)
 
         elif r == "Episodios / Sequencias":
             eps.append("[VOLTAR]")
-            ep = self.cli_input("Escolha o Episodio do projeto: {0}".format(self.project.name), options=eps)
+            ep = self.choose_from_list("Escolha o Episodio do projeto:"
+                                       " {0}".format(self.project.name), eps)
             if ep == "[VOLTAR]":
                 self.back_page()
                 return
             self.last["page"] = "project_page"
             self.show_ep_page(ep)
         elif r == "Criar EP / SQ":
-            ep_r = self.cli_input("Escolha o nome do ep(sq) para criar (EX:. EP001 ou SQ001)\n"
-                                "Ou forneca uma lista de ep(sq) separados por virgula ou espaco\n"
-                                "(se quiser criar uma sequencia de eps, por exemplo de 1 ate o 14, digite 1-14)")
+            ep_r = self.get_input("Escolha o nome do ep. para criar "
+                                  "(EX:. 'EP001'), ou forneca uma lista "
+                                  "separada por virgulas ou espacos "
+                                  "(se quiser criar uma sequencia de "
+                                  "eps, por exemplo, do 1 ao 14, "
+                                  "digite 1-14)",
+                                  "Escreva aqui")
             input_eps = re.findall(self.project.paths.regs["ep"]["regex"], ep_r)
             if len(input_eps) == 0:
                 div = re.findall(r"\d+-\d+", ep_r)
@@ -226,28 +332,36 @@ class DevTools:
     def show_ep_page(self, ep):
         """mostra o menu CLI do ep"""
         opts = ["Importar animatics", "Criar setup basico", "[VOLTAR]"]
-        r = self.cli_input("Escolha o que deseja fazer com o ep: {0}".format(ep), options=opts)
+        r = self.choose_from_list("Ep {0}".format(ep), opts)
         if r == "[VOLTAR]":
             self.back_page()
             return
         if r == "Importar animatics":
-            af = self.cli_input("Escolha o folder de origem dos animatics\n"
-                                "(Tem q ser uma pasta onde contenha somente os arquivos de animatic do episodio que deseja importar)")
+            af = self.get_input("Escolha a pasta de origem dos animatics "
+                                "(pasta com apenas os arquivos de vídeo "
+                                "com os trechos de animatic):",
+                                "Colo o caminho da pasta aqui...")
             if not af:
                 raise Exception("Invalid animatic folder.")
             animatics_folder = Path(af)
-            animatics = filter(lambda x: x.is_file(), animatics_folder.glob("*"))
+            animatics = filter(lambda x: x.is_file(),
+                               animatics_folder.glob("*"))
             self.project.paths.import_animatics_to_ep(animatics, ep)
             self.pause()
 
         if r == "Criar setup basico":
-            sr = self.cli_input("Criar Setup Basico: {0}".format(ep), options=["Lista de Cenas", "Todo Episodio"])
+            sr = self.choose_from_list("Criar Setup Basico: {0}".format(ep),
+                                       ["Lista de Cenas", "Todo Episodio"])
             counter = {"errors": 0, "done": 0}
             if sr == "[VOLTAR]":
                 self.back_page()
                 return
             if sr == "Lista de Cenas":
-                input_scenes = self.cli_input("Insira lista de cenas para criar o setup (cenas no padrao de cenas 'SCXXXX', separados por virgula ou espaco)")
+                input_scenes = self.get_input("Insira lista de cenas para "
+                                              "criar o setup (cenas no padrao "
+                                              "de cenas 'SCXXXX', separados "
+                                              "por virgula ou espaco)",
+                                              "Liste as cenas aqui...")
                 if not input_scenes:
                     raise Exception("Lista de cenas invalida.")
                 in_sc = [x.rstrip() for x in re.split(r"\s|,", input_scenes) if bool(re.findall(self.project.paths.regs["sc"]["regex"], x))]
@@ -255,7 +369,8 @@ class DevTools:
             else:
                 scenes = self.project.paths.list_scenes_from_animatics(ep)
             for item in scenes:
-                temp_folder = self.app.get_temp_folder("create_setup", clean=True)
+                temp_folder = self.app.get_temp_folder("create_setup",
+                                                       clean = True)
                 publish_zip = self.project.paths.get_publish_file(item, "SETUP")
                 if "v01" not in publish_zip.name:
                     print " -- CENA {0} ja tem setup basico!".format(item)
@@ -263,7 +378,8 @@ class DevTools:
                     continue
                 temp_scene = temp_folder / item
                 if not self.project.paths.copy_scene_template(temp_scene):
-                    print "ERRO criando copia da cena {0} no temp...".format(item)
+                    print("ERRO criando copia da cena "
+                          "{0} no temp...".format(item))
                     counter["errors"] += 1
                     continue
                 import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
