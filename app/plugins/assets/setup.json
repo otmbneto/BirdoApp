@@ -1,0 +1,17 @@
+{
+	"name": "BirdoApp Assets",
+	"version": "2.1",
+	"description": "Este plugin permite criar ou abrir arquivos de assets do projeto.",
+	"author": "leobazao@birdo",
+	"icon": "assets.png",
+	"main_script": "assets.py",
+	"ui_file": "ui/dialog.ui",
+	"extra_files": null,
+	"arguments": [],
+	"permissions": [
+		"RIG",
+        "DESIGN",
+        "DT"
+	]
+}
+
