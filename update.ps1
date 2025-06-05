@@ -53,6 +53,29 @@ function Update-Files($repo,$temp,$dst){
     Copy-item -Force -Recurse -Verbose "$birdoTemp\$unzip\*" -Destination "$birdoApp\"
     Write-Output "updated with build $unzip" >> "$birdoApp\lastUpdated.txt"
 
+}
+
+function Clean-Birdoapp(){
+
+    # Define the path to the folder
+    $targetFolder = "$env:APPDATA\BirdoApp"
+
+    # Define items to exclude (names only, not full paths)
+    $excludeList = @("config.json", "venv", "lastUpdated.txt", "extra")
+
+    # Get all files and folders in the target folder
+    $items = Get-ChildItem -Path $targetFolder
+
+    # Loop through each item
+    foreach ($item in $items) {
+        if ($excludeList -notcontains $item.Name) {
+            # Remove file or folder
+            Remove-Item -Path $item.FullName -Recurse -Force
+            Write-Host "Deleted: $($item.FullName)"
+        } else {
+            Write-Host "Kept: $($item.FullName)"
+        }
+    }
 
 }
 
@@ -63,7 +86,14 @@ if(Test-Path $birdoTemp){
 }
 
 New-Item -Path "$env:TEMP" -Name "BirdoApp_update" -ItemType "directory"
-if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
+
+#check if birdoapp is already installed and if it is still using git. 
+if(Test-Path "$birdoApp\.git"){
+
+    #return
+    Write-Host "This is a repo! update can be done with git instead."
+
+}elseif([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
     $lastModified = Get-Item "$birdoApp\lastUpdated.txt"
     $releaseDate = Get-RepoReleaseDate "otmbneto/BirdoApp"
     Write-Host (Get-Date $lastModified.LastWriteTime -Format "yyyy-MM-dd hh:mm:ss")
@@ -73,6 +103,7 @@ if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
         $answer = Ask-User("Existe uma nova versao do app disponivel! Voce quer atualiza-lo?")
         if($answer -eq 6){
 
+            Clean-Birdoapp
             Write-Host "Baixando atualização..."
             $zipFile = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
             Expand-Archive -Path $zipFile -DestinationPath "$birdoTemp" -Force
@@ -89,6 +120,7 @@ if ([System.IO.File]::Exists("$birdoApp\lastUpdated.txt")){
         $answer = Ask-User("A ultima atualizacao nao foi registrada corretamente! Voce que tentar atualizar novamente?")
         if($answer -eq 6){
 
+            Clean-Birdoapp
             Write-Host "Baixando atualização..."
             $zipFile = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
             Expand-Archive -Path $zipFile -DestinationPath "$birdoTemp" -Force
