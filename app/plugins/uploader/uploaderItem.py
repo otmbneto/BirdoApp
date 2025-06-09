@@ -285,6 +285,7 @@ class uiItem(QtGui.QGroupBox):
         self.incrementProgress(10)
         if self.filename.endswith(".zip"):
 
+            temp_name = scene_name
             scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()) / "PUBLISH"
             scene_path = scene_path.normpath()
             self.incrementProgress(10)
@@ -299,6 +300,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             shutil.copyfile(t_file, upload_scene)
             self.incrementProgress(25)
+            self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_{0}".format(temp_name), clean=True)
 
         elif self.filename.endswith((".mov", ".mp4")):
             animatic_path = self.uploader.project_data.paths.get_animatics_folder("server", episode_code).normpath()
