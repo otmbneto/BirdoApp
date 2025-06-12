@@ -148,7 +148,7 @@ class Uploader(QtGui.QMainWindow):
             movie.upload(temp)
 
         self.setProgress(100)
-        self.birdoapp.get_temp_folder(clean=True)
+        #self.birdoapp.get_temp_folder(clean=True)
         self.birdoapp.mb.information("Copias feitas com sucesso!")
 
     def getProgress(self):
