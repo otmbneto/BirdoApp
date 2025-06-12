@@ -221,7 +221,9 @@ class uiItem(QtGui.QGroupBox):
         ) if shot_num is not None else None
 
     def renameScene(self, zip_file, scene_name, version):
-        temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_{0}".format(scene_name), clean=True).normpath()
+        temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="uploader", clean=True) / scene_name
+        temp_folder.make_dirs()        
+        temp_folder = temp_folder.normpath()
         extract_zipfile(zip_file, temp_folder)
         folders = [os.path.join(temp_folder, f) for f in os.listdir(temp_folder)]
 
