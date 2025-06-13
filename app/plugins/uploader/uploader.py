@@ -73,8 +73,23 @@ class Uploader(QtGui.QMainWindow):
         self.ui.searchScenes.clicked.connect(self.onSearchScenes)
 
     def onSearchScenes(self):
-        for item in self.listOfWidgets:
-            sc_num = filter(lambda x: len(filter(lambda y: x in y.filename, self.listOfWidgets)) == 1, re.findall(r'\d+', item.filename))[0]
+        cenas = [item.filename for item in self.listOfWidgets]
+        if not any(len(re.findall(r'\d+', cenas[0])) != re.findall(r'\d+', x) for x in cenas):
+            self.birdoapp.mb.warning("Sequencia de numero de cenas invalidas para char o numero automaticamente.\nVerifique os arquivos e forneça individualmente")
+            return
+        print cenas
+        numbs = [[] for _ in re.findall(r'\d+', cenas[0])]
+        for sc in cenas:
+            [numbs[i].append(int(x)) for i, x in enumerate(re.findall(r'\d+', sc))]
+        sequential = filter(lambda x: not any(x.count(y) != 1 for y in x), numbs)
+        print sequential
+        if len(sequential) != 1:
+            self.birdoapp.mb.warning("Sequencia de numeros nao e valida. Impossivel achar os numeros de cena!")
+            return
+
+        for i, item in enumerate(self.listOfWidgets):
+            sc_num = sequential[0][i]
+            print "scene {0} found for item {1}".format(sc_num, item.filename)
             item.setItemScene(sc_num)
 
     def updateSerchButton(self):

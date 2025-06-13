@@ -45,6 +45,7 @@ class uiItem(QtGui.QGroupBox):
         item_label.setMaximumWidth(150)
 
         self.episodes = QtGui.QComboBox()
+        self.episodes.wheelEvent = lambda event: event.ignore
         self.episodes.addItems(episode_list)
         self.episodes.setMinimumWidth(25)
         self.episodes.setMaximumWidth(25)
@@ -66,6 +67,7 @@ class uiItem(QtGui.QGroupBox):
         self.typing_timer.timeout.connect(self.onTypingFinished)
 
         self.stepBox = QtGui.QComboBox()
+        self.stepBox.wheelEvent = lambda event: event.ignore
         self.stepBox.addItems([""] + self.uploader.project_data.paths.steps.keys())
         self.stepBox.setMinimumWidth(50)
         self.stepBox.setMaximumWidth(50)
