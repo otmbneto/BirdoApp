@@ -31,7 +31,7 @@ function Renderizar(){
 	//define o tipo de arquivo para prosseguir...
 	if(projectDATA.entity.type == "ASSET" || !projectDATA.entity.type){
 		try{
-			require(projectDATA.paths.birdoPackage + "utils/render_file.js").render_script.render_file(projectDATA);
+			require(projectDATA.paths.birdoPackage + "utils/render_file.js").render_file(projectDATA);
 		} catch(e){
 			Print(e);
 			return;
