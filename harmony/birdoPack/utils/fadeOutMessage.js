@@ -12,6 +12,7 @@ function fadeOutMessage(projData, message){
 		if(!dialog){
 			return;
 		}
+		
 		dialog.ui.show();
 		dialog.updateMessage(message);
 		dialog.startFade();
@@ -23,29 +24,17 @@ function fadeOutMessage(projData, message){
 exports.fadeOutMessage = fadeOutMessage;
 
 
-function find_interface(ui_path){//acha (ou cria) a interface
-	var wlist = QApplication.allWidgets();
-	for(var i=0; i<wlist.length; i++){
-		if(wlist[i].windowTitle == "BD_FadeOutMessage"){
-			Print("Fade Message Interface found...");
-			if(wlist[i].visible){
-				wlist[i].close();
-				Print("ui is still active..");
-				return false;
-			}
-			return new FadeOutMessage(wlist[i]);
-		}
-	};
-	Print("Fade Message Interface created!");
-	var d = new FadeOutMessage(ui_path);
-	return d;
-}
-
 function FadeOutMessage(uifile){
 
-	this.ui = typeof uifile == "string" ? UiLoader.load(uifile) : uifile;
-	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
-	this.ui.activateWindow();
+	if(typeof uifile == "string"){
+		this.ui = UiLoader.load(uifile)
+		this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
+		this.ui.activateWindow();
+		Print("Fadeout interface created..");
+	} else {
+		this.ui = uifile;
+		Print(this.ui);
+	}
 
 	//timer
 	this.button_timer = new QTimer();
