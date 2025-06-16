@@ -28,15 +28,16 @@ function BD_CompareGroups(){
 	}
 		
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_CompareGroups.ui";
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
 	var nv_utils = require(projectDATA["paths"]["birdoPackage"] + "utils/nodeview_utils.js");
 
-	var d = new createInrterface(ui_path, nv_utils);
+	var d = new createInrterface(ui_path, nv_utils, ui_util);
 	d.ui.show();
 	
 }
 
 
-function createInrterface(uifile, nv_utils){
+function createInrterface(uifile, nv_utils, ui_util){
 
 	this.ui = UiLoader.load(uifile); 
 	
@@ -263,9 +264,12 @@ function createInrterface(uifile, nv_utils){
 	this.ui.buttonFindB.clicked.connect(this, this.onFindNodeB);
 	this.ui.pushCopyCoordA.clicked.connect(this, this.onCopyCoordA);
 	this.ui.pushCopyCoordB.clicked.connect(this, this.onCopyCoordB);
-	this.ui.groupBox.comboType["currentIndexChanged(QString)"].connect(this, this.updateFilters);
-	this.ui.groupBox.comboFilter["currentIndexChanged(QString)"].connect(this, this.updateFilters);
-
+	
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupBox.comboType", "combo", "this.updateFilters"));
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupBox.comboFilter", "combo", "this.updateFilters"));
+	
 //////////////################################# EXTRA FUNCTIONS
 	function Print(msg){		
 		if(typeof msg == "object"){

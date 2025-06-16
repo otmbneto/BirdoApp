@@ -832,7 +832,9 @@ function createMCObjectCallbacks(self, mc_data, type, index){
 			mc_data["group_node"] = selectedGroup;
 			Print("Selected Group: " + selectedGroup);
 		}
-		mc_data.widgets.group_combo["currentIndexChanged(QString)"].connect(self, selectGroupCallback);
+			
+		//connect combo signal
+		eval(ui_util.get_connect_string("mc_data.widgets.group_combo", "combo", "selectGroupCallback"));
 		
 	}
 	
@@ -1311,7 +1313,7 @@ function updateSceneMCs(showMCs){
 exports.updateSceneMCs = updateSceneMCs;
 
 
-function updateAdvancedTab(self, advancedPage, rig_data){
+function updateAdvancedTab(self, advancedPage, rig_data, ui_util){
 	//expose mcs advanced tool
 	advancedPage.comboMcs.clear();
 	advancedPage.pushExpose.enabled = false;
@@ -1374,8 +1376,9 @@ function updateAdvancedTab(self, advancedPage, rig_data){
 	}
 	
 	//connections
-	advancedPage.comboMcs["currentIndexChanged(QString)"].connect(self, comboMCCallBack);
 	advancedPage.pushExpose.clicked.connect(self, pushExposeCallBack);
+	//connect combo signal
+	eval(ui_util.get_connect_string("advancedPage.comboMcs", "combo", "comboMCCallBack"));
 	
 }
 exports.updateAdvancedTab = updateAdvancedTab;

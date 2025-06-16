@@ -77,12 +77,11 @@ function render_file(self, projData, export_config, config_json){
 	function exportGIF(export_data){//exports gif image
 		var gif_path = file_name_path + ".gif";
 		Print("exporting gif: " + gif_path);
-		
 		try{
 			var res = exporter.exportGIF({ fileName : gif_path,
 										 displayName : export_data.display.last,
-										 startFame : export_data.start_frame,
-										 stopFrame : export_data.end_frame,
+										 startFame : parseInt(export_data.start_frame),
+										 stopFrame : parseInt(export_data.end_frame),
 										 resX : scene.currentResolutionX(),
 										 resY : scene.currentResolutionY(),
 										 dith : exporter.None,

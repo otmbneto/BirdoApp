@@ -86,7 +86,7 @@ function BD_BirdoLib_Save(){
 	function get_selection_data(sel_node, root_path, proj_data){//check if selections is valid and return rig data
 		
 		var regex_rig = proj_data.get_rig_regex();
-		var regex_version = projDATA.pattern.version;
+		var regex_version = proj_data.pattern.version;
 		var lib_type = selection.isSelectionRange() ? "ANIM" : "POSE";
 		
 		//check node type

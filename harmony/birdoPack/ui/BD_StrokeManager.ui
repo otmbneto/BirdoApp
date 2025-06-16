@@ -315,59 +315,6 @@ QSpinBox::down-button {
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="pushClose">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-	color: rgb(200, 70, 50);
-	background: transparent;
-	border: null;
-	border-radius: 15px;
-}
-
-QPushButton:hover {
-	font: 75 9pt &quot;MS Shell Dlg 2&quot;;
-	background: rgb(30, 50, 80);
-}
-
-QPushButton:pressed {
-	color: #e3e3e3;
-	border-color: #e3e3e3;
-    background-color: #f95959;
-}</string>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item row="1" column="0" colspan="2">

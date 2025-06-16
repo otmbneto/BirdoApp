@@ -14,13 +14,6 @@ Copyright:   @leobazao
  
 -------------------------------------------------------------------------------
 */
-// TODO:
-//   tentar incluir edicao das tags dos items na funcao do edit items (mto dificil... se rolar, blz!!)
-//        
-//   descobrir a forma de pegar o usuario do database e melhorar a funcao do getPaths para quando for database e offline (completar o path da lib com o env no final)
-//   Melhorar acao do menu de trocar status (tem q fazer uma funcao util pra mudar json da lib com a info nova) - DONE
-//   criar esquema do configure... fazer package para primeira entrega - NAO ROLOU direto no usadb.. tentar instalar no usuario e olhar pros arquivos no servidor - DONE
-
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
@@ -45,7 +38,8 @@ function BD_BirdoLibrary(){
 		return;
 	}
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/BirdoLibraryUtils.js");
-	
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
+
 	var library_root = projectDATA.getLibPath();
 	
 	//gets user data 
@@ -71,7 +65,7 @@ function BD_BirdoLibrary(){
 
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_BirdoLib.ui";
 
-	var d = new createInrterface(ui_path, rig_data, user_data, utils);
+	var d = new createInrterface(ui_path, rig_data, user_data, utils, ui_util);
 	d.ui.show();
 	
 	//Main function helper funtions
@@ -247,7 +241,7 @@ function BD_BirdoLibrary(){
 }
 
 //interface function
-function createInrterface(uifile, library_rig_data, user_data, utils){
+function createInrterface(uifile, library_rig_data, user_data, utils, ui_util){
 
 	this.ui = UiLoader.load(uifile); 
 	var items_counter = 0;//counter of the total items found in all tabs
@@ -693,8 +687,10 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 
 		//update label tag
 		this.ui.groupFilter.labelTags.text = main_tag_list.length + " Tag(s)";
-		
-		tag_combo["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
+			
+		//connect combo signal
+		eval(ui_util.get_connect_string("tag_combo", "combo", "this.updateItemsWithFilter"));
+
 		Print("Tag added! New list length: " + main_tag_list.length);
 	}
 	
@@ -901,11 +897,22 @@ function createInrterface(uifile, library_rig_data, user_data, utils){
 	this.ui.groupFilter.removeTagButton.clicked.connect(this, this.removeTagItem);
 	this.ui.cancelButton.clicked.connect(this, this.close);
 	this.ui.applyButton.clicked.connect(this, this.applyButton);
-	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
-	this.ui.groupFilter.comboType["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
-	this.ui.groupFilter.comboStatus["currentIndexChanged(QString)"].connect(this, this.updateItemsWithFilter);
-	this.ui.groupAdvanced.spinStart["valueChanged(int)"].connect(this, this.updateSpinStart);
-	this.ui.groupAdvanced.spinEnd["valueChanged(int)"].connect(this, this.updateSpinEnd);
+	
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupFilter.comboType", "combo", "this.updateItemsWithFilter"));
+
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupFilter.comboStatus", "combo", "this.updateItemsWithFilter"));
+
+	//connect tab signal
+	eval(ui_util.get_connect_string("this.ui.tabWidget", "tab", "this.updateTab"));
+
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupAdvanced.spinStart", "spin", "this.updateSpinStart"));
+
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupAdvanced.spinEnd", "spin", "this.updateSpinEnd"));
+
 //////////////#################################
 	function Print(msg){		
 		if(typeof msg == "object"){
