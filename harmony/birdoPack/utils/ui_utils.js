@@ -9,7 +9,8 @@ include("BD_2-ScriptLIB_Geral.js");
 var signals = {
 	"combo": about.getMajorVersion() < 24 ? "[\"currentIndexChanged(int)\"]" : "currentIndexChanged",
 	"spin": about.getMajorVersion() < 24 ? "[\"valueChanged(int)\"]" : "valueChanged",
-	"tab": about.getMajorVersion() < 24 ? "[\"currentChanged(int)\"]" : "currentChanged"
+	"tab": about.getMajorVersion() < 24 ? "[\"currentChanged(int)\"]" : "currentChanged",
+	"line_edit": about.getMajorVersion() < 24 ? "[\"textEdited(QString)\"]" : "textEdited"
 };
 
 function get_connect_string(ui_name, widget_type, func){
