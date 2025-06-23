@@ -53,7 +53,7 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 	var asset_server_folder = main_assetfolder + assetInfo["version"] + "/" + assetInfo.assetName;
 	
 	if(BD1_DirExist(asset_server_folder)){
-		var ask = MessageBox.warning("Este asset ja existe na library, deseja substituir?", 3, 4) == 3;
+		var ask = BD2_AskQuestion("Este asset ja existe na library, deseja substituir?");
 		if(!ask){
 			Print("Canceled..");
 			return false;
@@ -193,6 +193,9 @@ function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 		var new_att_data = ui_att_raw.replace(reg, rigVersionName);
 		node.setTextAttr(mcNode, "UI_DATA", 1, new_att_data);
 		
+		//update camera view
+		Action.performForEach("onActionInvalidateCanvas","cameraView");
+
 		return files_list != new_files_att || ui_att_raw != new_att_data;
 	}
 	
