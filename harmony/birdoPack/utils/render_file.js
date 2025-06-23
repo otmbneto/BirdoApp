@@ -85,7 +85,10 @@ function render_file(projectDATA){
 			Print("Fail to read memory json file!");
 		}
 	}
-	var d = new createInterface(projectDATA, export_config, config_json);
+		
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
+
+	var d = new createInterface(projectDATA, export_config, config_json, ui_util);
 	d.ui.show();
 	
 	//Extra functions:
@@ -117,7 +120,7 @@ function render_file(projectDATA){
 }
 
 
-function createInterface(projData, config_data, config_json){
+function createInterface(projData, config_data, config_json, ui_util){
 	var uiPath = projData.paths.birdoPackage + "ui/BD_RenderFile.ui";
 	this.ui = UiLoader.load(uiPath);
 	this.ui.activateWindow();
@@ -248,10 +251,7 @@ function createInterface(projData, config_data, config_json){
 	this.ui.groupOutput.radioImages.toggled.connect(this, this.updateRadio);
 	this.ui.groupOutput.radioGif.toggled.connect(this, this.updateRadio);
 	this.ui.groupOutput.radioMov.toggled.connect(this, this.updateRadio);
-
-	this.ui.groupOutput.spinStart['valueChanged(QString)'].connect(this, this.updateSpin);
 	this.ui.groupOutput.buttonFolder.clicked.connect(this, this.chooseFolder);
-
 	this.ui.buttonExport.clicked.connect(this, this.onExport);
 	this.ui.buttonCancel.clicked.connect(this, this.onClose);
 	
@@ -260,6 +260,8 @@ function createInterface(projData, config_data, config_json){
 	this.ui.groupOutput.comboFormat.addItems(config_data.formats.list);
 	this.ui.groupOutput.spinFPS.value = config_data.fps;
 	
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupOutput.spinStart", "spin", "this.updateSpin"));
 	
 	//EXTRA FUNCTIONS
 	function Print(msg){

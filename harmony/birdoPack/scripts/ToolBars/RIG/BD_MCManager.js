@@ -30,6 +30,7 @@ function BD_MCManager(){
 	}
 	
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/master_controllers_utils.js");
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
 	
 	var rig_data = utils.get_rig_selection(projectDATA);
 	if(!rig_data){
@@ -44,13 +45,13 @@ function BD_MCManager(){
 
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_BirdoMCManager.ui";
 
-	var d = new createInrterface(ui_path, rig_data, utils, projectDATA);
+	var d = new createInrterface(ui_path, rig_data, utils, projectDATA, ui_util);
 	d.ui.show();	
 		
 }
 
 
-function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da interface
+function createInrterface(uifile, rig_data, utils, projectDATA, ui_util){//cria objeto da interface
 
 	this.ui = UiLoader.load(uifile);
 
@@ -391,7 +392,7 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 			}	
 		} else {
 			try {
-				utils.updateAdvancedTab(this, advancedPage, rig_data);
+				utils.updateAdvancedTab(this, advancedPage, rig_data, ui_util);
 			} catch(e) {
 				Print(e);
 				Print("ERROR setting advanced page!");
@@ -479,13 +480,13 @@ function createInrterface(uifile, rig_data, utils, projectDATA){//cria objeto da
 	masterPage.groupFrames.pushUpdateTurn.clicked.connect(this, this.updateTurn);
 	masterPage.pushMCcheckbox.clicked.connect(this, this.onUpdateCheckBox);
 	masterPage.groupMaster2.labelMaster2Name.editingFinished.connect(this, this.updateLineName);
-
-
 	extrasPage.groupExtrasList.pushAddExtra.clicked.connect(this, this.addExtra);
-	extrasPage.comboType["currentIndexChanged(QString)"].connect(this, this.updateComboTurnType);
-
-	//quando muda a tab
-	this.ui.tabWidget["currentChanged(int)"].connect(this, this.updateTab);
+	
+	//connect combo signal
+	eval(ui_util.get_connect_string("extrasPage.comboType", "combo", "this.updateComboTurnType"));
+	//connect tab signal
+	eval(ui_util.get_connect_string("this.ui.tabWidget", "tab", "this.updateTab"));
+	
 
 //////////////#################################
 

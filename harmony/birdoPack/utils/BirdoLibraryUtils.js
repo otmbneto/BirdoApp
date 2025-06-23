@@ -120,9 +120,7 @@ function validateTimelineSelection(rig_group_node){
 	}
 	
 	if(layersData.counter_deform.length > 0){
-		MessageBox.warning("Erro detectado! Foram encontrado(s) " + layersData.counter_deform.length + " node(s) com drawings que nao estao no deformation chain: \n\n - " + 
-		layersData.counter_deform + "\n\nNao vai funcionar se for assim para lib! Use o drawing com o deform q já existe no rig!",0,0);
-		return false;
+		MessageBox.warning("Foram encontrado(s) " + layersData.counter_deform.length + " node(s) com drawings que usam o deformation chain.\nPossivelmente a pose não irá funcionar ao ser aplicada.", MessageBox.Ok);
 	}
 	
 	var msg = "Foram encontrados inconsistencias na seleção na timeline:\n - Exposições vazias: " + 

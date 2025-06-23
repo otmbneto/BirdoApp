@@ -73,8 +73,13 @@ function BD_AddFullNodes(){
 
 	//extra functions
 	function findRigName(nodeP, proj_data){//retorna nome do rig
-		var name = proj_data.pattern.asset.exec(nodeP)[0];
-		return name.replace(name.split("_")[0] + "_", "").replace(proj_data.pattern.version, "").replace(/(-G)?_\d+$/, "");
+		var name = proj_data.pattern.asset.exec(nodeP);
+		Print(name);
+		if(!name){
+			Print("nao é uma estrutura de rig padrão!");
+			return nodeP.split("/")[1];
+		}
+		return name[0].replace(name[0].split("_")[0] + "_", "").replace(proj_data.pattern.version, "").replace(/(-G)?_\d+$/, "");
 	}
 	
 	

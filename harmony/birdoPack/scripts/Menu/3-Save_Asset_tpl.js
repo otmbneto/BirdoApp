@@ -42,7 +42,8 @@ function SaveAssettpl(){
 	
 	var saveTPL_script = projectDATA["paths"]["birdoPackage"] + "utils/saveTPL.js";
 	var utils = require(saveTPL_script);
-	
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
+
 	var selNodes = utils.getSelection(asset_type, projectDATA);// pega nodes selecionados
 	if(!selNodes){
 		return;
@@ -73,18 +74,13 @@ function SaveAssettpl(){
 	Print("ASSETDATA: ");
 	Print(assetData);
 
-	var dialog = new initiateUI(selNodes, projectDATA, assetData, utils);
+	var dialog = new initiateUI(selNodes, projectDATA, assetData, utils, ui_util);
 	dialog.ui.show();
 
-///////////////////FUNCOES EXTRAS MAIN///////////////
-	function warningAsk(msg){
-		var ask = MessageBox.warning(msg, 3, 4);
-		return ask == 3;
-	}
 }
 
 
-function initiateUI(selectionData, projData, projectAssetData, utils){
+function initiateUI(selectionData, projData, projectAssetData, utils, ui_util){
 
 	var uiPath = projData.paths.birdoPackage + "ui/BD_SaveASSET.ui";
 	this.ui = UiLoader.load(uiPath);
@@ -225,12 +221,16 @@ function initiateUI(selectionData, projData, projectAssetData, utils){
 	}
 
 	////////////// CONNECTIONS //////////////////////
-	this.ui.assetIndex["valueChanged(int)"].connect(this, this.updateAssetIndex);
 	this.ui.checkShortName.toggled.connect(this,this.updateCheckBox);
-	this.ui.comboAssetName["currentIndexChanged(QString)"].connect(this, this.updateName);
-	this.ui.labelAssetName["textEdited(QString)"].connect(this, this.updateName);
 	this.ui.saveButton.clicked.connect(this, this.onSaveTpl);
 	this.ui.cancelButton.clicked.connect(this, this.ui.close);
+		
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.assetIndex", "spin", "this.updateAssetIndex"));
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.comboAssetName", "combo", "this.updateName"));
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.labelAssetName", "line_edit", "this.updateName"));
 
 	//MUDAR ITENS DEPOIS DOS CONNECTS
 	updateInitialValues(this, selectionData);

@@ -7,10 +7,8 @@ import codecs
 from config import ConfigInit
 from utils.birdo_pathlib import Path
 from utils.birdo_zip import compact_folder
-
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
-import rpdb
 
 def convert_type(a, b):
     """Converte o objeto 'a' pelo tipo do objeto 'b'"""

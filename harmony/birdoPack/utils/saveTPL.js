@@ -4,7 +4,7 @@ include("BD_2-ScriptLIB_Geral.js");
 function saveTPL(self, projectDATA, assetInfoFromOtherScript){
 
 	var assetInfo = assetInfoFromOtherScript;
-	Print("TESTE asset info saveTPL.js:");
+	Print("asset info saveTPL.js:");
 	Print(assetInfo);
 	Print("------------------------------------------------");
 	var libs = find_lib_groups(assetInfo.fullNode, projectDATA);
@@ -643,8 +643,9 @@ function checkASSET(asset_sel, asset_name, node_list){//funcao para verificar se
 		var colunaD = node.linkedColumn(asset_sel.asset,"DRAWING.ELEMENT");
 		var drawingsIn = column.getDrawingTimings(colunaD);
 		if(drawingsIn.indexOf("Zzero") == -1){
-			MessageBox.information("Falta criar o 'Zzero' para este ASSET!\nUse o Script BD_Zzero!");
-			return false;
+			if(!BD2_AskQuestion("Falta criar o 'Zzero' para este ASSET!\nDeseja continuar?")){
+				return false;
+			}
 		}
 		if(numFrames  < drawingsIn.length -1){
 			MessageBox.information("Deixe este arquivo da seguinte forma antes de continuar:\n -Todos Drawings Expostos na Timeline (exeto o 'Zzero');\n - Somente os Drawings q serao usados na Library (Use o BD_CleanLibrary para apagar os nao usados);\n -A duracao dos frames acabando junto com os drawings expostos na Timeline;\nOBS: Se vc esta fazendo uma atualizacao de vistas novas para um prop existente, mantenha todos os drawings expostos na timeline, incluindo as poses novas e antigas!");
@@ -657,7 +658,7 @@ function checkASSET(asset_sel, asset_name, node_list){//funcao para verificar se
 	}
 
 	if(node.getTextAttr(asset_sel.peg, 1,"PIVOT.X") == 0 && node.getTextAttr(asset_sel.peg, 1,"PIVOT.Y") == 0){// check pivot da PEG
-		if(!warningAsk("O Pivot da peg STAGE parece errado!\nDeseja continuar?!")){
+		if(!BD2_AskQuestion("O Pivot da peg STAGE parece errado!\nDeseja continuar?!")){
 			return false;
 		}
 	}
@@ -722,29 +723,27 @@ function reviewRIG(node_list){//verifica os drawings com nome no padrao, se cont
 	}
 	
 	if(!isFullOK){
-		if(!warningAsk("Este RIG nao contem os nodes FULL que deveria!!\nDeseja continhar mesmo assim??")){
+		if(!BD2_AskQuestion("Este RIG nao contem os nodes FULL que deveria!!\nDeseja continhar mesmo assim??")){
 			return false;
 		}
 	}
 
 	if(counter_number > 0){
-		if(!warningAsk("Este RIG contem "  + counter_number + " nodes com desenhos fora do padrao de nome!\nDeseja continhar??")){
+		if(!BD2_AskQuestion("Este RIG contem "  + counter_number + " nodes com desenhos fora do padrao de nome!\nDeseja continhar??")){
 			return false;
 		}
 	}
 	
 	if(counter_empty > 0){
 		MessageBox.warning("Este RIG contem "  + counter_empty + " nodes com exposicao vazia! Use o script 'EmptyToZzero' na timeline para resolver isso! Ou acerte o tamanho da timeline, deixe somente as poses necessarias expostas na timeline!", 0, 0);
-		return false;
 	}
-			
+
 	if(counter_Zzero > 0){
-		MessageBox.warning("Este RIG contem "  + counter_Zzero + " nodes sem o Zzero criado! Acerte isso antes de gerar o TPL!", 0,0);
-		return false;
+		Print("Este RIG contem "  + counter_Zzero + " nodes sem o Zzero criado! Acerte isso antes de gerar o TPL!");
 	}
 	
 	if(!isNamesOk){
-		if(!warningAsk("Este RIG contem grupos com nome sujo ('-G') no final!\nDeseja continhar mesmo assim??")){
+		if(!BD2_AskQuestion("Este RIG contem grupos com nome sujo ('-G') no final!\nDeseja continhar mesmo assim??")){
 			return false;
 		}
 	}
@@ -793,7 +792,7 @@ function checkPallets(pltList){/*roda o resultado do script checkNodesPallet;
 			mensagem += (" -" + usedPal[item] + "\n");
 		}
 		mensagem += "Deseja criar o TPL mesmo assim?\n";
-		if(!warningAsk(mensagem)){
+		if(!BD2_AskQuestion(mensagem)){
 			return false;
 		}
 	}

@@ -46,7 +46,6 @@ function BD_ShowHideFXNodes(){
 		MessageBox.information("No FX nodes found in the current Node View Group!");
 		return;
 	}
-	
 	var ui_generator = new UiGeometry(nv_geometry);
 	
 	rigs_list.forEach(function(item, index){
@@ -104,7 +103,7 @@ function BD_ShowHideFXNodes(){
 		}
 		var w = w_list[w_list.indexOf(top_corner.x()) - 1] - w_list[w_list.indexOf(top_corner.x())]; 
 		var h = h_list[h_list.indexOf(top_corner.y()) - 1] - h_list[h_list.indexOf(top_corner.y())];
-		return new QRect(top_corner.x() + 5, top_corner.y() -20, w, h);
+		return new QRect(top_corner.x() + 5, top_corner.y() + 40, w, h);
 	}
 	
 	function get_rig_nodes_list_data(){//retorna lista de objetos contendo info dos grupos de rigs encontrados
@@ -170,12 +169,13 @@ function BD_ShowHideFXNodes(){
 	}
 }
 
+
 function Interface(nodes_list, node_name, pathUI, curr_state, ui_rect){
+	
 	this.ui = UiLoader.load(pathUI);
-	this.ui.activateWindow();
-	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
 	this.ui.setGeometry(ui_rect.x(), ui_rect.y(), ui_rect.width(), ui_rect.height());
-	this.ui.setWindowTitle("ShowHideFXScript");
+	this.ui.setWindowTitle(node_name);
+	this.ui.activateWindow();
 
 	//update label name
 	this.ui.label.text = formatName(node_name);
@@ -183,8 +183,8 @@ function Interface(nodes_list, node_name, pathUI, curr_state, ui_rect){
 	//style sheet options
 	this.sliderOffStyle = "QSlider::groove:horizontal {\n    border: 2px solid rgb(255, 93, 93);\n	border-radius: 18px;\n    height: 34; \n    background: rgb(255, 181, 156);\n}\n\nQSlider::handle:horizontal {\n    background: rgb(255, 138, 138);\n    border: 2px solid rgb(255, 98, 93);\n    border-radius: 12px;\n    width: 24px;\n	height: 24px;\n    margin: 4px 8px;\n}";
 	this.sliderOnStyle = "QSlider::groove:horizontal {\n    border: 2px solid rgb(70, 190, 80);\n	border-radius: 18px;\n    height: 34; \n    background: rgb(181, 230, 150);\n}\n\nQSlider::handle:horizontal {\n    background: rgb(138, 250, 138);\n    border: 2px solid rgb(98, 200, 93);\n    border-radius: 12px;\n    width: 24px;\n	height: 24px;\n    margin: 4px 8px;\n}";
-	this.labelOnStyle = "QLabel {\n	color: rgb(80, 150, 40);\n	background: rgba(213, 255, 196, 155);\n	border-radius: 10px;\n}";
-	this.labelOffStyle = "QLabel {\n	color: rgb(150, 80, 40);\n	background: rgba(255, 213, 196, 155);\n	border-radius: 10px;\n}";
+	this.labelOnStyle = "QLabel {\n	color: rgb(80, 150, 40);\n	background: rgba(213, 255, 196, 155);\n	border-radius: 5px;\n}";
+	this.labelOffStyle = "QLabel {\n	color: rgb(150, 80, 40);\n	background: rgba(255, 213, 196, 155);\n	border-radius: 5px;\n}";
 
 	//update current value
 	this.ui.horizontalSlider.value = curr_state ? 1 : 0;
@@ -199,13 +199,7 @@ function Interface(nodes_list, node_name, pathUI, curr_state, ui_rect){
 		updateNodesState(nodes_list, state, node_name);
 	}
 	
-	this.onClose = function(){
-		MessageLog.trace(node_name + " comp FX On Off CLOSED!");
-		this.ui.close();
-	}
-	
 	//connections
-	this.ui.pushButton.clicked.connect(this, this.onClose);
 	this.ui.horizontalSlider.valueChanged.connect(this, this.onUpdateSlider);
 	
 	//extra funcs

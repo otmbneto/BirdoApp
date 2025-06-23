@@ -312,57 +312,6 @@ https://www.linkedin.com/in/leonardobazilio/</string>
        </layout>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="pushButtonClose">
-       <property name="minimumSize">
-        <size>
-         <width>30</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QPushButton {
-	color: red;
-    border: 2px solid white;
-    border-radius: 6px;
-	background-color: #233142;
-}
-
-QPushButton:pressed {
-	color: red;
-    background-color: black;
-}
-
-QPushButton:flat {
-    border: none; /* no border for a flat push button */
-}
-
-QPushButton:default {
-    border-color: navy; /* make the default button prominent */
-}
-
-QPushButton:hover{
-    border: 2px solid #05B8CC;
-    color: darkred;
-}</string>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>

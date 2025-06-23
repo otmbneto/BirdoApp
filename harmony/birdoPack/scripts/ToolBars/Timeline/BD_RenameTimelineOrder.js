@@ -33,8 +33,9 @@ function BD_RenameTimelineOrder(){
 	}
 	
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_RenameOrder.ui";
-	
-	var d = new loadInterface(pathUI);
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
+
+	var d = new loadInterface(pathUI, ui_util);
 	d.ui.show();
 
 ////////////////funcoes extras main///////////////////////////////////////
@@ -72,7 +73,7 @@ function BD_RenameTimelineOrder(){
 }
 
 
-function loadInterface(uiPath){
+function loadInterface(uiPath, ui_util){
 	
 	this.ui = UiLoader.load(uiPath);
 	this.ui.activateWindow();
@@ -140,13 +141,14 @@ function loadInterface(uiPath){
 	this.ui.groupDrawName.checkPrefix.toggled.connect(this,this.changeCheckPrefix);
 	this.ui.radioFrNumber.toggled.connect(this,this.changeRadio);
 	this.ui.radioChoose.toggled.connect(this,this.changeRadio);
-
 	this.ui.groupDrawName.linePrefix.textChanged.connect(this,this.changeLabel);
-	this.ui.groupDrawName.spinBox["valueChanged(int)"].connect(this,this.changeLabel);
-
 	this.ui.cancelButton.clicked.connect(this,this.cancelOperation);
 	this.ui.okButton.clicked.connect(this,this.okOperation);
 	
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupDrawName.spinBox", "spin", "this.changeLabel"));
+
+
 	///////////////////////funcao extra//////////////////////////
 	function renameOrder(prefix, sufix){
 		scene.beginUndoRedoAccum("Renomeia na Ordem");

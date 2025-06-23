@@ -237,7 +237,6 @@ class OpenScene(QtGui.QWidget):
                 print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
                 index += 1
                 continue
-
             for item in zips:
                 versions_data[step]['versions'][item.name] = item
 
@@ -374,6 +373,7 @@ class OpenScene(QtGui.QWidget):
             return
 
         version_list = scene_data['versions'].keys()
+        version_list.sort()
         # update list version with scene data
         for i, version in enumerate(version_list):
             print "Scene version found: {0}".format(version)

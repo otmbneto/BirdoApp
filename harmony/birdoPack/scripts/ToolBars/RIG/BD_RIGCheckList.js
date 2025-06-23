@@ -100,7 +100,7 @@ function BD_RIGCheckList(){
 			continue;	
 		}
 
-		if(modify_layers_frames(col, col_type, colName)){
+		if(modify_layers_frames(col, col_type, colName, node_path)){
 			counter++;	
 		}
 
@@ -134,13 +134,37 @@ function BD_RIGCheckList(){
 		node.setTextAttr(fullPeg, "PIVOT.Y", 1, 0);
 	}
 	
-	function modify_drawing(coluna, fr, prefixo){//modifica camada de desenho (se tiver vazia muda pra zzero e se for numero renomeia)
+	function rename_drawing_deform(node_path, old_name, new_name){
+		var nextnode = node.srcNode(node_path, 0);
+		if(node.isGroup(nextnode)){
+			var switchnodes = node.subNodes(nextnode).filter(function(item){ return node.type(item) == "TransformationSwitch"});
+			switchnodes.forEach(function(item){
+				var d_list = [];
+				var att = node.getTextAttr(item, 1, "transformationnames.transformation1");
+				var drawings = att.split(";");
+				drawings.forEach(function(d){ 
+					if(d == old_name){
+						d_list.push(new_name);
+						Print("node Transformation Switch deformer drawing was renamed: " + node_path);
+					} else {
+						d_list.push(d);
+					}
+				});
+				var new_att_val = d_list.join(";");
+				node.setTextAttr(item, "transformationnames.transformation1", 1, new_att_val);
+			});
+		}
+	}
+	
+	function modify_drawing(coluna, fr, prefixo, node_path){//modifica camada de desenho (se tiver vazia muda pra zzero e se for numero renomeia)
 		var current_drawing = column.getEntry(coluna, 1, fr);
 		var modifyed = false;
 		if(!isNaN(current_drawing[0]) && options.rename_poses){
-			if(!BD2_RenameDrawingWithNumber(coluna, current_drawing, prefixo)){
+			var renamed = BD2_RenameDrawingWithNumber(coluna, current_drawing, prefixo);
+			if(!renamed){
 				return false;
 			}
+			rename_drawing_deform(node_path, current_drawing, renamed);
 			modifyed = true;
 			counter_rename++;
 		}
@@ -160,14 +184,14 @@ function BD_RIGCheckList(){
 	}
 	
 	
-	function modify_layers_frames(coluna, col_type, col_name){
+	function modify_layers_frames(coluna, col_type, col_name, node_path){
 		var pose_index = 0;
 		var updated_node = false;
 		for(var i = firstFrame; i <= endFrame; i++){
 			var prefix = prefix_list[pose_index];
 			if(col_type == "DRAWING"){
 				var draw = column.getEntry(coluna, 1, i);
-				if(modify_drawing(coluna, i, prefix)){
+				if(modify_drawing(coluna, i, prefix, node_path)){
 					updated_node = true;
 				}
 			} else {

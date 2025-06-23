@@ -30,75 +30,49 @@ function BD_StrokeThicknessControl(){
 	}
 	//ui file path
 	var pathUI = projectDATA.paths.birdoPackage + "ui/BD_StrokeManager.ui";
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
 	
-	show_interface(pathUI);
-}
-
-function show_interface(ui_path){//se a ui ja existe, mostra ela, se não cria
-	var wlist = QApplication.allWidgets();
-	var d = null;
-	wlist.forEach(function(item){
-		if(item.windowTitle == "BD_StrokeManager"){
-			d = item;
-			return;
-		}
-	});
-	if(d){
-		if(d.visible){
-			Print("Widget is already opened!");
-		} else {
-			Print("Showing existing interface...");
-			d.show();
-		}
-	} else {
-		var camera_view = view.currentView();
-		Print("TESTE VIEW : " + view.type(camera_view));
-
-		var d = new CreateInterface(ui_path, camera_view);
-		d.ui.show();
-		Print("Interface foi criada!");
+	try{
+		show_interface(pathUI, ui_util);
+	} catch(e){
+		Print(e);
 	}
 }
 
-function CreateInterface(pathUI, camera_view){
-	this.ui = UiLoader.load(pathUI);
+function show_interface(ui_path, ui_util){//se a ui ja existe, mostra ela, se não cria
+	var wlist = QApplication.allWidgets();
+	var ui = ui_path;
+	for(var i=0; i<wlist.length; i++){
+		if(wlist[i].windowTitle == "BD_StrokeManager"){
+			ui = wlist[i];
+			if(ui.visible){
+				Print("Widget is already opened!");
+				ui.close();
+			} else {
+				Print("Showing existing interface...");
+			}
+			break;
+		}
+	}
+
+	var d = new CreateInterface(ui, ui_util);
+	d.ui.show();
+}
+
+function CreateInterface(pathUI, ui_util){
+	
+	//create ui
+	this.ui = typeof pathUI == "string" ? UiLoader.load(pathUI) : pathUI;
+	
 	//set window
 	this.ui.activateWindow();
-	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
-	var ui_geom = getUIGeometry(camera_view);
-	//check if is multi screen
-	var screen = QApplication.desktop();//screen geometry
-	if(screen.screenCount > 1){
+	var ui_geom = getUIGeometry();
+	if(!ui_geom){
 		Print("widget vai ficar no meio")
 	} else {
 		this.ui.setGeometry(ui_geom.x(), ui_geom.y(), ui_geom.width(), ui_geom.height());
 	}
 
-	//set drag ui
-	var dragPosition;
-	var mainwindow = this.ui;
-	var drag_w = new QWidget();
-	drag_w.setParent(this.ui.labelTitle);
-	drag_w.setWindowFlags(Qt.FramelessWindowHint);
-	drag_w.setAttribute(Qt.WA_TranslucentBackground);
-	
-	drag_w.mousePressEvent = function(event) {
-		if (event.button() == Qt.LeftButton) {
-			var p = event.globalPos();
-			var corner = mainwindow.frameGeometry.topLeft();
-			dragPosition = new QPoint(p.x() - corner.x(), p.y() - corner.y());
-			event.accept();
-		}
-	}
-	drag_w.mouseMoveEvent = function(event) {
-		if (event.buttons() & Qt.LeftButton) {
-			var p = event.globalPos();
-			mainwindow.move(p.x() - dragPosition.x(), p.y() - dragPosition.y());
-			event.accept();
-		}
-	}
-	
-	
 	//drawing variables
 	this.selection_data = null;
 	this.drawing_data = null;
@@ -301,11 +275,6 @@ function CreateInterface(pathUI, camera_view){
 		this.updateStrokes();
 	}
 	
-	this.onClose = function(){//close ui
-		Print("Closed!");
-		this.ui.close();
-	}
-
 	//update values:
 	this.updateSelection();
 	
@@ -324,13 +293,14 @@ function CreateInterface(pathUI, camera_view){
 	this.ui.groupPoints.sliderPoints.sliderReleased.connect(this, this.updateStrokes);
 	this.ui.groupLineT.sliderMax.sliderReleased.connect(this, this.updateStrokes);
 	this.ui.groupLineT.sliderMin.sliderReleased.connect(this, this.updateStrokes);
-	
-	this.ui.groupPoints.spinPoints["valueChanged(int)"].connect(this, this.updateLabelValues);
-	this.ui.groupLineT.spinMax["valueChanged(int)"].connect(this, this.updateLabelValues);
-	this.ui.groupLineT.spinMin["valueChanged(int)"].connect(this, this.updateLabelValues);
-	
-	this.ui.pushClose.clicked.connect(this, this.onClose);
 
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupPoints.spinPoints", "spin", "this.updateLabelValues"));
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupLineT.spinMax", "spin", "this.updateLabelValues"));
+	//connect spin signal
+	eval(ui_util.get_connect_string("this.ui.groupLineT.spinMin", "spin", "this.updateLabelValues"));
+	
 	//update labels
 	this.updateLabelValues();
 	
@@ -342,9 +312,10 @@ function CreateInterface(pathUI, camera_view){
 		MessageLog.trace(msg);
 	}
 	
-	function getUIGeometry(camera_view){//retorna a geometry pra criar a ui
-		var pos = view.viewPosition(camera_view);
-		return new QRect(pos.x() + 5, pos.y() - 25, 284, 337);
+	function getUIGeometry(){//retorna a geometry pra criar a ui
+		var camera_views = view.viewList().filter(function(item){ return view.type(item) == "Camera"});
+		var pos = camera_views.length == 0 ? null : view.viewPosition(camera_views[0]);
+		return Boolean(pos) ? new QRect(pos.x() + 5, pos.y() - 25, 284, 337) : null;
 	}
 	
 	function createTList(points){//retorna lista de porcentagens de insercoes de thickness (em valores float)

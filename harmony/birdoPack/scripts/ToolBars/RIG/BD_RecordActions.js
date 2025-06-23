@@ -40,6 +40,7 @@ function BD_RecordActions(){
 	var utils = require(projectDATA["paths"]["birdoPackage"] + "utils/record_actions_utils.js");
 	
 	var ui_path = projectDATA.paths.birdoPackage + "ui/BD_RecordActions.ui";
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
 
 	//get temporary folder
 	var tempfolder = projectDATA.systemTempFolder + "/BirdoApp/actions/";
@@ -54,7 +55,7 @@ function BD_RecordActions(){
 	}
 	
 	try{
-		var d = new Interface(ui_path, utils, actions_data);
+		var d = new Interface(ui_path, utils, actions_data, ui_util);
 		d.ui.show();
 		Print("End");
 	} catch(e){
@@ -62,9 +63,8 @@ function BD_RecordActions(){
 	}
 }
 
-function Interface(uifile, utils, actions_data){
+function Interface(uifile, utils, actions_data, ui_util){
 	this.ui = UiLoader.load(uifile);
-	this.ui.setWindowFlags(Qt.FramelessWindowHint | Qt.TransparentMode);
 	this.ui.activateWindow();
 	
 	//test if is recording
@@ -89,52 +89,15 @@ function Interface(uifile, utils, actions_data){
 	//set play area
 	this.ui.groupPlay.comboBox.enabled = this.scripts.length > 0;
 	this.ui.groupPlay.comboBox.addItems(this.scripts);
-	
-	
-	//set drag ui
-	var dragPosition;
-	var mainwindow = this.ui;
-	var drag_w = new QWidget();
-	drag_w.setParent(this.ui.title);
-	drag_w.setWindowFlags(Qt.FramelessWindowHint);
-	drag_w.setAttribute(Qt.WA_TranslucentBackground);
-	
-	drag_w.mousePressEvent = function(event) {
-		if (event.button() == Qt.LeftButton) {
-			var p = event.globalPos();
-			var corner = mainwindow.frameGeometry.topLeft();
-			dragPosition = new QPoint(p.x() - corner.x(), p.y() - corner.y());
-			event.accept();
-		}
-	}
-	drag_w.mouseMoveEvent = function(event) {
-		if (event.buttons() & Qt.LeftButton) {
-			var p = event.globalPos();
-			mainwindow.move(p.x() - dragPosition.x(), p.y() - dragPosition.y());
-			event.accept();
-		}
-	}
 		
-	
-	//callbacks
-	this.onClose = function(){
-		
-		MessageLog.trace("CLOSED! Timer stoped!");
-		this.timer.stop()
-		this.ui.close();
-		
-	}
-	
+	//callbacks	
 	this.resetVariables = function(){
-		
 		this.modification_list = [];
 		this.snap_shop_list = [];
 		this.current_nv_group = null;
-		
 	}
 	
 	this.updateModifications = function(){
-		
 		var curr_snap = utils.getNodeViewGroupSnapShop(this.current_nv_group);
 		var mod = utils.getModifications(this, this.snap_shop_list[this.snap_shop_list.length -1], curr_snap);
 		if(mod){
@@ -142,11 +105,9 @@ function Interface(uifile, utils, actions_data){
 			this.modification_list.push(mod);
 			Print("modification list updated!");
 		}
-		
 	}
 	
 	this.recordingLoop = function(){
-		
 		if(scene.isDirty()){
 			MessageLog.trace(" -- Scene Changed!");
 			scene.saveAll();
@@ -157,19 +118,15 @@ function Interface(uifile, utils, actions_data){
 				Print(e);
 			}
 		}
-		
 	}
 	
 	this.updateWidgets = function(){
-		
 		this.ui.groupRec.pushREC.text = this.recording ? "STOP" : "REC";
 		this.ui.groupPlay.enabled = !this.recording;
 		this.ui.groupRec.styleSheet = this.recording ? "QGroupBox {\n	border: 1px solid red;\n}" : "";
-	
 	}
 	
 	this.registerAction = function(){
-		
 		if(this.modification_list.length == 0){
 			MessageBox.information("Insuficient Modifications! Canceled");
 			Print("insuficient modifications!");
@@ -188,11 +145,9 @@ function Interface(uifile, utils, actions_data){
 			this.ui.groupPlay.comboBox.addItem(actionName + ".js");
 			this.ui.groupPlay.comboBox.enabled = true;
 		}
-		
 	}
 	
 	this.onRec = function(){
-		
 		if(!this.recording){
 			MessageLog.trace("Recording stated...");
 			this.current_nv_group = utils.getCurrentGroupNV();
@@ -208,22 +163,18 @@ function Interface(uifile, utils, actions_data){
 		}
 		this.recording = !this.recording;
 		this.updateWidgets();
-		
 	}
 	
 	this.addLogInfo = function(text){
-		
 		var scroll_wid = this.ui.groupRec.groupLog.scrollArea.widget();
 		var log_layout = scroll_wid.layout();
 
 		var label = new QLabel(text);
 		label.setParent(scroll_wid);
 		log_layout.addWidget(label, 0, Qt.AlignTop);	
-		
 	}
 	
 	this.onPlay = function(){
-		
 		Print("Create function");
 		var scriptName = this.ui.groupPlay.comboBox.currentText;
 		var chosen_script = this.temp_folder + scriptName;
@@ -239,24 +190,21 @@ function Interface(uifile, utils, actions_data){
 		}catch(e){
 			Print(e);
 		}
-		
 	}
 	
 	this.onChangeCombo = function(){
-		
 		this.ui.groupPlay.pushButtonPlay.enabled = this.ui.groupPlay.comboBox.currentIndex != 0;
-		
 	}
 	
 	//connections
-	this.ui.pushButtonClose.clicked.connect(this, this.onClose);
 	this.ui.groupRec.pushREC.clicked.connect(this, this.onRec);
 	this.ui.groupPlay.pushButtonPlay.clicked.connect(this, this.onPlay);
-	this.ui.groupPlay.comboBox["currentIndexChanged(QString)"].connect(this, this.onChangeCombo);
-
 	this.timer.timeout.connect(this, this.recordingLoop);
 	
-	//
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.groupPlay.comboBox", "combo", "this.onChangeCombo"));
+	
+	//extra
 	function Print(msg){
 		if(typeof msg == "object"){
 			var msg = JSON.stringify(msg, null, 2);

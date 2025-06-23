@@ -43,8 +43,8 @@ function BD_BirdoLineControl(){
 	
 	//require util script
 	var util_apply = require(projectDATA.paths.birdoPackage + "utils/applyLineControl.js");
-	
-	var d = new defineInterface(pathUI, initialData, util_apply);
+	var ui_util = require(projectDATA.paths.birdoPackage + "utils/ui_utils.js");
+	var d = new defineInterface(pathUI, initialData, util_apply, ui_util);
 	d.ui.show();
 	
 	//EXTRA FUNTION MAIN FUNCTION
@@ -97,7 +97,7 @@ function BD_BirdoLineControl(){
 	
 }
 
-function defineInterface(pathUI, initialData, util_apply){
+function defineInterface(pathUI, initialData, util_apply, ui_util){
 
 	this.ui = UiLoader.load(pathUI);
 	
@@ -160,7 +160,6 @@ function defineInterface(pathUI, initialData, util_apply){
 	this.updateLineType = function(){
 		var curr_line_index = this.ui.gb_options.comboScale.currentIndex; 
 		this.ui.gb_options.checkBAnimLine.enabled = curr_line_index != 0;
-		
 	}
 	
 	this.onUpdateSlider = function(){
@@ -209,9 +208,10 @@ function defineInterface(pathUI, initialData, util_apply){
 	this.ui.gb_options.radioChoose.toggled.connect(this,this.onRadioLineValue);
 	this.ui.cancelButton.clicked.connect(this,this.onCancel);
 	this.ui.applyButton.clicked.connect(this,this.onApply);
-		
-	this.ui.gb_options.comboScale["currentIndexChanged(QString)"].connect(this, this.updateLineType);
-
+	
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.gb_options.comboScale", "combo", "this.updateLineType"));
+	
 	///FUNCOES EXTRAS DA INTERFACE
 	function Print(msg){
 		if(typeof msg == "object"){

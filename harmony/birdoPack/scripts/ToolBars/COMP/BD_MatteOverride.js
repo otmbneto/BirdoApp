@@ -44,7 +44,9 @@ function BD_MatteOverride(){
 	
 	//creates interface
 	var uiPath = projData.paths.birdoPackage + "ui/BD_MatteOverride.ui";	
-	var d = new CreateInterface(uiPath, mattePaletteData, presetsData);
+	var ui_util = require(projData.paths.birdoPackage + "utils/ui_utils.js");
+
+	var d = new CreateInterface(uiPath, mattePaletteData, presetsData, ui_util);
 	d.ui.show();
 	
 	///EXTRA FUNCS
@@ -194,7 +196,7 @@ function BD_MatteOverride(){
 	}
 }
 
-function CreateInterface(uiPath, matteData, presetsData){
+function CreateInterface(uiPath, matteData, presetsData, ui_util){
 	
 	this.ui = UiLoader.load(uiPath);
 	this.ui.activateWindow();
@@ -528,7 +530,9 @@ function CreateInterface(uiPath, matteData, presetsData){
 		scene.endUndoRedoAccum();
 	}
 	
-	this.ui.comboMatteList["currentIndexChanged(QString)"].connect(this, this.selectMattePalette);
+	//connect combo signal
+	eval(ui_util.get_connect_string("this.ui.comboMatteList", "combo", "this.selectMattePalette"));
+	
 	this.ui.pushCreateMatte.clicked.connect(this, this.onAddNewMatte);
 	this.ui.pushRenamePalette.clicked.connect(this, this.onRenamePalette);
 	this.ui.groupEditColors.pushRemoveColors.clicked.connect(this, this.onResetMattePallet);

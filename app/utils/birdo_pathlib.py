@@ -156,10 +156,9 @@ class Path:
             print "folder does not exist... nothing to list."
             return []
         reg = re.compile(pattern.replace("*", r".+"))
-        return [
-            self / x for x in
-            filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
-        ]
+        files = filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
+        files.sort()
+        return [self / x for x in files]
 
     def rglob(self, pattern):
         """lista o conteudo recursivamente do folder"""
