@@ -22,7 +22,7 @@ function TB_sceneOpened(){
 		return;
 	}
 	
-	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 15000, "Loading_scripts...");
+	var loadingScreen = BD2_loadingBirdo(projectDATA.birdoApp, 10000, "Loading scripts...");
 
 	Print("[BIRDOAPP] BirdoAPP Project DATA:\n");
 	Print(projectDATA);
@@ -98,7 +98,7 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 	//cria os menus
 	var ajuda_msg = "";
 	for(var i=0; i<menuScripts.length; i++){
-		Print("TESTE::: " + menuScripts[i]);
+		Print("Menu script criado: " + menuScripts[i]);
 		
 		if(!check_permission(menuScripts[i], entity_filter, mode, projDATA.entity.type, user_permission)){
 			continue;
