@@ -1208,18 +1208,20 @@ Inicia a ui do loading pelo python, retorna o processo... (OBG tem q chamar proc
 @birdoAppPath => caminho do app birdo no sistema;
 @timeout => tempo de duracao do loading;
 @text => String com a descricao do loading;
+@wait => Boolean para definir se e pra esperar o processo do loading esperar ou nao
 */
 function BD2_loadingBirdo(birdoAppPath, timeout, loadingtext){
+	
+	var text_formated = loadingtext.replace(/\s/g, "^");
 	var pythonPath = BD2_FormatPathOS(birdoAppPath + "venv/Scripts/python");
 	var pyFile = BD2_FormatPathOS(birdoAppPath + "app/utils/loadingDialog.py");
 	var start = Process2(pythonPath, pyFile, timeout, loadingtext);
-	var ret = start.launchAndDetach();
-
+    var ret = start.launchAndDetach();
 	if(ret != 0){
 		Print("Fail to start progressBirdo progress!");
-		return false; 
+		return false;
 	}
-	
+		
 	return start;
 }
 
