@@ -6,7 +6,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout, QIcon, QMovie
 from PySide import QtCore
 from system import get_short_path_name
-from birdo_json import read_json_file
+from birdo_json import read_json_file, write_json_file
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from config import ConfigInit
 
@@ -73,7 +73,7 @@ class DialogPublish(QDialog):
 
     """Class With ProgressDialog to request copy file"""
 
-    def __init__(self, scene_name, birdo_config, files_list, rel_list, dst_file):
+    def __init__(self, scene_name, birdo_config, files_list, rel_list, dst_file, sc_file_info):
         super(DialogPublish, self).__init__()
         print("[BIRDOAPP_py] Progress File Dialog Created.")
 
@@ -82,10 +82,11 @@ class DialogPublish(QDialog):
         self.scene_name = scene_name
 
         # define arquivos para processar
-        self.temp_zip = self.birdoapp.get_temp_folder("publish_scene", clean=True) / "_temp.zip"
+        self.temp_zip = self.birdoapp.get_temp_folder("publish_scene", clean=False) / "_temp.zip"
         self.files_fullpath = files_list
         self.files_relative = rel_list
         self.publish_file = dst_file
+        self.sc_file_info = sc_file_info
 
         # bool com valor de sucesso da operacao
         self.copy = None
@@ -195,6 +196,11 @@ class DialogPublish(QDialog):
             self.birdoapp.mb.warning("Algo deu errado com a Cópia do arquivo!")
             self.close()
         else:
+            # update do input json file
+            raw_data = read_json_file(self.sc_file_info)
+            raw_data["published_file"] = str(self.publish_file)
+            write_json_file(self.sc_file_info, raw_data)
+
             self.birdoapp.mb.information("Cena {0} publicada com sucesso!".format(self.publish_file.stem))
             print("[BIRDOAPP_py] - Cena {0} publicada com sucesso!".format(self.publish_file.stem))
 
@@ -217,8 +223,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # arguments
-    proj, step, scene_name = int(args.proj_id), args.step, args.scene_name
-    scene_data = read_json_file(args.scene_data_file)
+    proj, step, scene_name, sc_data_file = int(args.proj_id), args.step, args.scene_name, args.scene_data_file
+    scene_data = read_json_file(sc_data_file)
 
     # inicia o birdoapp no python
     birdoapp = ConfigInit()
@@ -237,6 +243,6 @@ if __name__ == "__main__":
     rel_files = [x["relative_path"].replace("{PLACE_HOLDER}", publish_file.stem) for x in scene_data["file_list"]]
 
     app = QApplication.instance()
-    dialog = DialogPublish(scene_name, birdoapp, file_list, rel_files, publish_file)
+    dialog = DialogPublish(scene_name, birdoapp, file_list, rel_files, publish_file, sc_data_file)
     dialog.start_publish()
     sys.exit(app.exec_())

@@ -46,10 +46,8 @@ function createInrterface(uifile, nv_utils, ui_util){
 	this.typeList = [""];
 	
 	//BRUSHES FOR ITENS COLORS
-	var redBrush = new QBrush();
-	redBrush.setColor(new QColor(255,150,10,255));
-	var greenBrush = new QBrush();
-	greenBrush.setColor(new QColor(100,245,120,255));
+	var redBrush = new QBrush(new QColor(255,150,10,255));
+	var greenBrush = new QBrush(new QColor(100,245,120,255));
 
 	//update comobo filter
 	this.ui.groupBox.comboFilter.addItems(["All", "Matches", "Difference"]);

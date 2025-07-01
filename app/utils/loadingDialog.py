@@ -1,5 +1,6 @@
 from PySide import QtCore, QtGui
 from ui.BirdoLoading import Ui_Form
+import argparse
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -36,13 +37,27 @@ class loadingDialog(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    args = sys.argv
-    duration = int(args[1])
-    text = str(args[2]).replace("_", " ")
+    parser = argparse.ArgumentParser(description='Birdo Loading Interface')
+    parser.add_argument('timeout', type=int, help='Loading timeout')
+    parser.add_argument('text', type=str, help='Label to display in loading interface')
+    args = parser.parse_args()
+
+    # get args
+    duration = args.timeout
+    text = args.text.replace("^", " ")
 
     birdoapp = ConfigInit(verbose=False)
     app = QtGui.QApplication.instance()
     loading = loadingDialog(birdoapp)
+
+    # center with desktop current window
+    desktop = app.desktop()
+    desktop_geo = desktop.screenGeometry(desktop.screenNumber(QtGui.QCursor.pos()))
+    geo = loading.geometry()
+    geo.moveCenter(desktop_geo.center())
+    loading.setGeometry(geo)
+
+    # start loading...
     loading.start_animation()
     loading.set_text(text)
     loading.set_duration(duration)

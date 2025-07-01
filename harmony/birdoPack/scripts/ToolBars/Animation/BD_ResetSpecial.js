@@ -38,6 +38,10 @@ function BD_ResetSpecial(){
 			if(node.isGroup(nextNode) && is_def_group(nextNode)){
 				nodes_to_reset.push(nextNode);
 				nodes_to_reset.push(node.srcNode(nextNode,0));
+				var mcnode = findMCDef(nextNode);
+				if(mcnode){
+					nodes_to_reset.push(mcnode);
+				}
 			}
 			if(is_anim_node(nodes_sel[0])){
 				nodes_to_reset.push(nodes_sel[0]);
@@ -102,4 +106,13 @@ function BD_ResetSpecial(){
 		return ask != 4;
 	}
 
+	function findMCDef(next_node){
+		for(var i=0; i<node.numberOfOutputLinks(next_node, 0); i++){
+			var downNode = node.dstNodeInfo(next_node, 0, i);
+			if(/^mcDef/.test(node.getName(downNode.node)) && node.isGroup(downNode.node)){
+				return downNode.node;
+			}
+		}
+		return false;
+	}	
 }

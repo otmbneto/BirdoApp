@@ -53,29 +53,40 @@ function Publish(){
 			return;
 		}
 		var sc_json = publish_temp + "_sc_data.json";
-		BD1_WriteJsonFile(compact_version_data, sc_json);
+		if(!BD1_WriteJsonFile(compact_version_data, sc_json)){
+			MessageBox.warning("ERROR! Não foi possível criar o json temp com dados da cena para compactar!",0,0);
+			return false;
+		}
 	} catch(e){
 		Print(e);
+		MessageBox.warning("ERROR! Não foi possível criar o json temp com dados da cena para compactar!",0,0);
 		return;
 	}
 	
-	//run publish python script
-	if(run_publish_python(projectDATA, publish_data["publish_step"], projectDATA.entity.name, sc_json)){
-		Print("[BIRDOAPP] - Publish python scritp foi um sucesso!");		
-	} else{
-		MessageBox.warning("PUBLISH SCENE ERROR! Nao foi possivel publicar a cena. Verifique o terminal para mais detalhes.", 0, 0);
-		return;
+	try{
+		//run publish python script
+		if(run_publish_python(projectDATA, publish_data["publish_step"], projectDATA.entity.name, sc_json)){
+			Print("[BIRDOAPP] - Publish python scritp foi um sucesso!");
+			//update publish_data value with publishied file path
+			if(BD1_FileExists(sc_json)){
+				var data = BD1_ReadJSONFile(sc_json);
+				publish_data["published_file"] = data.published_file;
+			}
+		} else{
+			MessageBox.warning("PUBLISH SCENE ERROR! Nao foi possivel publicar a cena. Verifique o terminal para mais detalhes.", 0, 0);
+			return;
+		}
+		//roda o script post-publish com todas funcoes q modificam a cena antes de enviar
+		var pos_publish_js = projectDATA.proj_confg_root + "pos_publish.js";
+		if(BD1_FileExists(pos_publish_js)){
+			require(pos_publish_js).pos_publish(projectDATA, publish_data);
+			Print("[BIRDOAPP] Acoes de pos publish finalizadas!");
+		} else {
+			Print("[BIRDOAPP] Nenhum script pre_publish.js encontrado para o projeto.");
+		}
+	} catch(e){
+		Print(e);
 	}
-
-	//roda o script post-publish com todas funcoes q modificam a cena antes de enviar
-	var pos_publish_js = projectDATA.proj_confg_root + "pos_publish.js";
-	if(BD1_FileExists(pos_publish_js)){
-		require(pos_publish_js).pos_publish(projectDATA, publish_data);
-		Print("[BIRDOAPP] Acoes de pos publish finalizadas!");
-	} else {
-		Print("[BIRDOAPP] Nenhum script pre_publish.js encontrado para o projeto.");
-	}
-
 }
 exports.Publish = Publish;
 
