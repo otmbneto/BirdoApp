@@ -34,7 +34,6 @@ class Spoiler(QtGui.QWidget):
 
         self.headerLine.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Maximum)
 
-        self.contentArea.setStyleSheet("QScrollArea { background-color: rgb(91, 91, 91); border: none;}")
         self.contentArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         # start out collapsed
         self.contentArea.setMaximumHeight(0)
@@ -119,11 +118,10 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
-        self.recent_list.setStyleSheet("color: black;")
 
         # -------------------------------------------------------------
         self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
-        CreateSceneDropDown = Spoiler(title="CRIAR CENA")
+        CreateSceneDropDown = Spoiler(title="CRIAR ARQUIVO")
         CreateSceneDropDown.set_content_layout(self.getCreateSceneLayout())
         self.ui.v_lay.addWidget(CreateSceneDropDown)
         OpenSceneDropDown = Spoiler(checked=True, visible=False)
@@ -148,7 +146,7 @@ class BirdoApp(QtGui.QMainWindow):
             item.setText(f.name)
             item.setData(3, f.path)
             item.setToolTip(f.path)
-            #item.setStyleSheet("color: black;")
+            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
             self.recent_list.addItem(item)
 
     def load_ui(self, ui_file):
@@ -221,7 +219,7 @@ class BirdoApp(QtGui.QMainWindow):
         standaloneNameLabel.setMinimumSize(60, 20)
         self.standaloneNameLine = QtGui.QLineEdit()
         self.standaloneNameLine.setMinimumSize(200, 20)
-        self.standaloneCreateBtn = QtGui.QPushButton("Criar cena")
+        self.standaloneCreateBtn = QtGui.QPushButton("Criar")
         self.standaloneCreateBtn.setStyleSheet("color: white;")
         self.standaloneCreateBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneNameLabel)
@@ -234,8 +232,9 @@ class BirdoApp(QtGui.QMainWindow):
         standaloneLocationLabel.setMinimumSize(60, 20)
         self.standaloneLocationLine = QtGui.QLineEdit()
         self.standaloneLocationLine.setMinimumSize(200, 20)
-        self.standaloneFolderBtn = QtGui.QPushButton("Navegar")
-        self.standaloneFolderBtn.setStyleSheet("color: white;")
+        self.standaloneFolderBtn = QtGui.QPushButton()
+        folder_icon = QtGui.QIcon(self.birdoapp.icons["folder"])
+        self.standaloneFolderBtn.setIcon(folder_icon)
         self.standaloneFolderBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneLocationLabel)
         hLayout.addWidget(self.standaloneLocationLine)
