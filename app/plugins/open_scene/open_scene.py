@@ -89,6 +89,7 @@ class OpenScene(QtGui.QWidget):
         if self.recently_open_log.exists():
             with open(self.recently_open_log.normpath(),"r") as rec_open_log:
                 self.recently_open = rec_open_log.readlines()
+                print("READING: " + str(self.recently_open))
         print(self.recently_open)
 
     def load_page(self, ui_file):
@@ -186,11 +187,13 @@ class OpenScene(QtGui.QWidget):
 
     def get_episodes_data(self):
         """Generates all episodes and shots data object"""
+        print("get episodes data")
         episode_list = self.project_data.paths.list_episodes("server")
         if episode_list and len(episode_list) > 0:
             episode_list.sort(key=lambda x: x.name)
             self.signals.progress_range_set.emit([0, len(episode_list)])
             for episode in episode_list:
+                print(episode)
                 result = self.get_episode_data(episode)
                 if result is not None:
                     self.signals.episode_received.emit([{episode.name: result}])
@@ -588,11 +591,12 @@ class OpenScene(QtGui.QWidget):
         if len(self.recently_open) >= 10:
             self.recently_open = self.recently_open[1:]
         
-        self.recently_open.append(local_scene["xstage"].normpath())
+        self.recently_open.append("\n"+local_scene["xstage"].normpath())
 
         self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
         with open(self.recently_open_log.normpath(),"w") as rec_open_log:
-            rec_open_log.write("\n".join(self.recently_open))
+            print("WRITTING: " + str(self.recently_open))
+            rec_open_log.write("".join(self.recently_open))
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
