@@ -137,12 +137,12 @@ class BirdoApp(QtGui.QMainWindow):
         self.red_color = "color: rgb(255, 100, 74);"
         self.green_color = "color: rgb(100, 255, 100);"
         self.recently_open = []
-        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        if self.recently_open_log.exists():
-            self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
-            self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
-
-        print("The file is being fetched" + str(self.recently_open_log))
+        self.recently_open = self.birdoapp.load_recently_open_files()
+        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        #if self.recently_open_log.exists():
+        #    self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
+        #    self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
+        #print("The file is being fetched" + str(self.recently_open_log))
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
             item.setText(f.name)
@@ -328,9 +328,10 @@ class BirdoApp(QtGui.QMainWindow):
         if len(self.recently_open) >= 10:
             self.recently_open = list(set(self.recently_open[1:]))
         self.recently_open.append(f)
-        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        print("The file is being updated" + str(self.recently_open_log))
-        self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
+        self.birdoapp.save_recently_open_files(self.recently_open)
+        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        #print("The file is being updated" + str(self.recently_open_log))
+        #self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
 
         self.recent_list.clear()
         for file in self.recently_open:

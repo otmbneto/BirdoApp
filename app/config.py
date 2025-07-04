@@ -162,6 +162,24 @@ class ConfigInit(object):
             temp_folder.make_dirs()
         return temp_folder
 
+    #TODO: move recently open log e recently open para essa classe.
+    def save_recently_open_files(self,recently_open):
+
+        recently_open_log = self.get_temp_folder() / "recently_open.log"
+        print("The file is being updated" + str(recently_open_log))
+        recently_open_log.write_text("\n".join([str(x.path) for x in recently_open]))
+
+    def load_recently_open_files(self):
+
+        recently_open = []
+        recently_open_log = self.get_temp_folder() / "recently_open.log"
+        print("The file is being fetched" + str(recently_open_log))
+        if recently_open_log.exists():
+            recently_open = [Path(x.strip()) for x in recently_open_log.read_text().split("\n")]
+            recently_open = list(filter(lambda x: x.exists(), recently_open))
+
+        return recently_open
+
     def create_project(self, create_data):
         """cria novo projeto no server do estudio.(usado no modo dev)"""
         if not bool(self.prefix_reg.match(create_data["01_prefix"])):

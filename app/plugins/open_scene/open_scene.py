@@ -85,12 +85,13 @@ class OpenScene(QtGui.QWidget):
         # LIMPA A PASTA TEMP ANTES DE COMECAR
         self.temp_open_scene = self.birdoapp.get_temp_folder(sub_folder='OpenScene', clean=True)
         self.recently_open = []
-        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        if self.recently_open_log.exists():
-            with open(self.recently_open_log.normpath(),"r") as rec_open_log:
-                self.recently_open = rec_open_log.readlines()
-                print("READING: " + str(self.recently_open))
-        print(self.recently_open)
+        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        #if self.recently_open_log.exists():
+        #    with open(self.recently_open_log.normpath(),"r") as rec_open_log:
+        #        self.recently_open = rec_open_log.readlines()
+        #        print("READING: " + str(self.recently_open))
+        #print(self.recently_open)
+        self.recently_open = self.birdoapp.load_recently_open_files()
 
     def load_page(self, ui_file):
         ui_file = QtCore.QFile(ui_file)
@@ -588,15 +589,15 @@ class OpenScene(QtGui.QWidget):
         self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
         print "opening scene: {0}".format(local_scene["xstage"])
         self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
+
         if len(self.recently_open) >= 10:
             self.recently_open = self.recently_open[1:]
-        
-        self.recently_open.append("\n"+local_scene["xstage"].normpath())
-
-        self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        with open(self.recently_open_log.normpath(),"w") as rec_open_log:
-            print("WRITTING: " + str(self.recently_open))
-            rec_open_log.write("".join(self.recently_open))
+        self.recently_open.append(local_scene["xstage"])
+        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
+        #with open(self.recently_open_log.normpath(),"w") as rec_open_log:
+        #    print("WRITTING: " + str(self.recently_open))
+        #    rec_open_log.write("".join(self.recently_open))
+        self.birdoapp.save_recently_open_files(self.recently_open)
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
