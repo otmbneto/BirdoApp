@@ -162,6 +162,18 @@ class ConfigInit(object):
             temp_folder.make_dirs()
         return temp_folder
 
+    def update_recently_open_files(self,recently_open,new_file):
+
+        while new_file.path in [x.path for x in recently_open]:
+            recently_open.pop([x.path for x in recently_open].index(new_file.path))
+        
+        if len(recently_open) >= 10:
+            recently_open = recently_open[1:]
+        recently_open.append(new_file)
+        self.save_recently_open_files(recently_open)
+
+        return
+
     #TODO: move recently open log e recently open para essa classe.
     def save_recently_open_files(self,recently_open):
 

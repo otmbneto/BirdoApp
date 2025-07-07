@@ -294,7 +294,8 @@ class BirdoApp(QtGui.QMainWindow):
 
         xstage = Path(self.birdoapp.harmony.get_xstage_last_version(template.normpath())).rename(scene_name + ".xstage")
         self.birdoapp.open_harmony_file(xstage.path)
-        self.update_recently_open(xstage)
+        #self.update_recently_open(xstage)
+        self.birdoapp.update_recently_open_files(self.recently_open,xstage)
 
     def on_open_standalone(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
@@ -310,7 +311,8 @@ class BirdoApp(QtGui.QMainWindow):
         f = Path(str(xstage[0]))
         if f.exists():
             self.birdoapp.open_harmony_file(f.path)
-            self.update_recently_open(f)
+            #self.update_recently_open(f)
+            self.birdoapp.update_recently_open_files(self.recently_open,f)
         else:
             print("[BIRDOAPP] arquivo escolhido invalido!")
 
@@ -319,11 +321,13 @@ class BirdoApp(QtGui.QMainWindow):
         if len(selected) > 0:
             f = Path(selected[0].data(3))
             self.birdoapp.open_harmony_file(f)
-            self.update_recently_open(f)
+            #self.update_recently_open(f)
+            self.birdoapp.update_recently_open_files(self.recently_open,f)
 
     def update_recently_open(self, f):
-        if f.path in [x.path for x in self.recently_open]:
+        while f.path in [x.path for x in self.recently_open]:
             self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
+        
         if len(self.recently_open) >= 10:
             self.recently_open = list(set(self.recently_open[1:]))
         self.recently_open.append(f)

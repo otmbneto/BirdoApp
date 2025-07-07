@@ -592,12 +592,13 @@ class OpenScene(QtGui.QWidget):
 
         if len(self.recently_open) >= 10:
             self.recently_open = self.recently_open[1:]
-        self.recently_open.append(local_scene["xstage"])
+        #self.recently_open.append(local_scene["xstage"])
         #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
         #with open(self.recently_open_log.normpath(),"w") as rec_open_log:
         #    print("WRITTING: " + str(self.recently_open))
         #    rec_open_log.write("".join(self.recently_open))
-        self.birdoapp.save_recently_open_files(self.recently_open)
+        #self.birdoapp.save_recently_open_files(self.recently_open)
+        self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
