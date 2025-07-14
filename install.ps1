@@ -1,4 +1,4 @@
-Add-Type -Assembly System.IO.Compression.FileSystem
+﻿Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
@@ -105,8 +105,9 @@ function Download-Ffmpeg($app_folder){
     [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";$ffmpegPath", [System.EnvironmentVariableTarget]::User)
 }
 
-function Download-Python {
-    downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
+function Download-Python($python_path){
+    #downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
+    downloadFile "$python_path" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
     if(Test-Path "$PWD\python27.msi"){
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
@@ -179,10 +180,11 @@ function Init-Venv($venv,$base,$python){
             Write-Host "`nPor favor, cheque os arquivos em:"
             Write-Host ("`n`t" + $logdir)
             Write-Host "`nO BirdoApp NÃO foi instalado. Encerrando..."
-            Exit
+            return $False
         }
 
     }
+    return $True
 
 }
 
@@ -324,7 +326,7 @@ if($DEBUG) {
 # 4) Download e instalação do Python 2.7
 $pythonInstall = "C:\Python27\python.exe"
 if(-Not (Test-Path "$pythonInstall")){
-    Download-Python
+    Download-Python "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi"
 } else {
     Write-Host "Python 2.7 já instalado. Pulando essa etapa."
 }
@@ -362,7 +364,6 @@ $varsTable += "PATH,...; Python`n"
 $varsTable += "PATH,...; Ffmpeg"
 echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 
-
 # 5) Criação de um ambiente virtual Python
 downloadFile "https://bootstrap.pypa.io/pip/2.7/get-pip.py" "$logdir\get-pip.py" "Baixando script de instalação do Pip..." "Baixou script de instalação do Pip!"
 echo "⠻ Instalando gerenciador de dependências Pip..."
@@ -372,7 +373,12 @@ rm $logdir\get-pip.py
 
 # 6) Instalação das dependências
 $currentFolder = ($PWD).path
-Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
+if(-Not (Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall)){
+    Remove-Item -Path "$env:APPDATA\BirdoApp\venv" -Recurse -Force
+    Remove-Item -Path "C:\python27" -Recurse -Force
+    Download-Python "https://www.python.org/ftp/python/2.7.18/python-2.7.18.msi"
+    Init-Venv "venv" "$env:APPDATA\BirdoApp" $pythonInstall
+}
 
 # 8) Atalho do BirdoApp na Área de Trabalho
 Write-Host "⠷ Criando atalho na área de trabalho..."
