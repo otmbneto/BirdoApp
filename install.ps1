@@ -1,4 +1,4 @@
-﻿Add-Type -Assembly System.IO.Compression.FileSystem
+Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
