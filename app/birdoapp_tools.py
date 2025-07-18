@@ -45,8 +45,10 @@ class DevTools:
 
     def show_version(self):
         """Printa no terminal info do release do birdoApp"""
-        msg = [u"{0}: {1}".format(x, self.app.data[x]) for x in self.app.data]
-        print "\n - ".join(msg)
+        print self.app.data
+        for item in self.app.data:
+            line = u"{0} : {1}".format(item, self.app.data[item])
+            print line.encode("utf-8")
 
     def pause(self):
         """da um pause na cli"""
@@ -135,7 +137,6 @@ class DevTools:
         r = self.choose_from_list("BirdoApp modo desenvolvedor. "
                                   "Escolha uma opção:",
                                   self.main_menu["options"])
-        # "options": ["Config BirdoApp", "Projetos", "Criar Novo Projeto", "Credits", "[SAIR]"]
         if r == "Config BirdoApp":
             self.last["json"] = "app"
             self.config_dict("Config BirdoApp", self.app.config_data)
