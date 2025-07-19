@@ -55,24 +55,29 @@ function TB_sceneOpened(){
 				createToolBar(tool_b, itemScriptsPath, jsFiles, scriptIcons);
 			}
 		}
+		
+		//create birdo python object
+		try{
+			var pyFilePath = projectDATA.birdoApp + "harmony/birdoPack/harmonyPythonInterface.py";
+			var myPythonObject = PythonManager.createPyObject(pyFilePath, "birdoAppScripts");
+			if(!myPythonObject){
+				MessageBox.warning("Erro Criando o PythonObject do BirdoApp! Algumas ferramentas não irão funcionar corretamente!",0,0);
+				Print("[BIRDOAPP] ERROR Creating Python Object!");
+			} else {
+				myPythonObject.addObject("birdoapp_root", projectDATA.birdoApp);
+				myPythonObject.addObject("messageLog", MessageLog);
+
+				Print("[BIRDOAPP] Python Object Created!");
+			}
+		} catch(e){
+			Print(e);
+			Print("não foi possível criar o python object!");
+		}
+		Print("[BIRDOAPP] BirdoApp Configure Done...");
+		
 	} catch(e){
 		Print(e);		
 	}
-	
-	//create birdo python object
-	var pyFilePath = projectDATA.birdoApp + "harmony/birdoPack/harmonyPythonInterface.py";
-	var myPythonObject = PythonManager.createPyObject(pyFilePath, "birdoAppScripts");
-	if(!myPythonObject){
-		MessageBox.warning("Erro Criando o PythonObject do BirdoApp! Algumas ferramentas não irão funcionar corretamente!",0,0);
-		Print("[BIRDOAPP] ERROR Creating Python Object!");
-	} else {
-		myPythonObject.addObject("birdoapp_root", projectDATA.birdoApp);
-		myPythonObject.addObject("messageLog", MessageLog);
-
-		Print("[BIRDOAPP] Python Object Created!");
-	}
-	Print("[BIRDOAPP] BirdoApp Configure Done...");
-
 }
 
 function createMenu(projDATA, mode){//Cria o Menu na UI do programa
