@@ -1470,16 +1470,6 @@ QProgressBar::chunk{
      <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>|||</string>
-    </property>
-    <addaction name="actionConfigurar_Estudio"/>
-    <addaction name="actionCredits"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <addaction name="menu"/>
   </widget>
   <action name="actionChange_User">
    <property name="text">
