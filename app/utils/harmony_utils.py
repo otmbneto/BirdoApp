@@ -28,6 +28,7 @@ class ToonBoomHarmony(object):
             re.findall(self.regex, self.name)[0][1]) > 0 else "0"
         self.edition = re.findall(self.regex, self.name)[0][2]
         self.executable = os.path.join(self.installation_path, "win64", "bin", "Harmony" + self.edition + ".exe")
+        self.utransform = os.path.join(os.path.dirname(self.executable), "utransform.exe")
 
     def get_version(self):
         return self.version
