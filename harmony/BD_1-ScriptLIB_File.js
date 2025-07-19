@@ -605,6 +605,32 @@ function BD1_convertTVGtoPNGThumbnail(imputTvgImage, outputPng){
 }
 
 /*
+convert tvg image BACK to png image
+@imputTvgImage - imput tvg to convert
+@outputPng - output png file
+*/
+function BD1_convertTVGtoPNGANIMATIC(imputTvgImage, outputPng){
+	var utransform = specialFolders.bin + "/utransform.exe";
+	var format = "PNG";
+	if(outputPng == undefined){
+		var process = new Process2(utransform, "-outformat", format, "-align", "AUTO_ALIGN", "-margin", 0, imputTvgImage);
+		var out = imputTvgImage.replace(".tvg", ".png");
+	} else {
+		var process = new Process2(utransform, "-outformat", format, "-outfile", outputPng, "-align", "AUTO_ALIGN", "-margin", 0, imputTvgImage);
+		var out = outputPng;
+	}
+	var ret = process.launch();
+
+	if(ret != 0){
+		Print("Error converting tvg into png: " + imputTvgImage);
+		return false;
+	} else {
+		Print("PNG converted: " + out);
+		return true;
+	}
+}
+
+/*
 	sleep command for sec 
 */
 function BD1_sleep(sec){
