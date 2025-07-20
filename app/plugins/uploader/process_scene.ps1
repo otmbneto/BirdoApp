@@ -187,7 +187,7 @@ function Create-Animatic {
     $audio = ls -Path $audio_folder -Filter *.wav
     $img_pat = $temp_f.FullName + "\_temp%04d.png"
     if($audio.Length -eq 0){
-        & $ffmepg -y -framerate $fps -i $img_pat -c:v copy $mov -shortest >> $log 2> $log_err    
+        & $ffmepg -y -framerate $fps -i $img_pat -c:v copy $mov >> $log 2> $log_err
     } else {
         & $ffmepg -y -framerate $fps -i $img_pat -i $audio[0].FullName -c:v copy -shortest $mov >> $log 2> $log_err
     }
