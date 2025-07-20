@@ -237,13 +237,16 @@ class uiItem(QtGui.QGroupBox):
             xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
             if xstage:
                 print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running ps1 script to prepare scene: {1}".format(xstage, self.uploader.ps_script)
-                cmd = "powershell '{0}' '{1}' '{2}' '{3}'".format(
-                    self.uploader.ps_script,
-                    xstage,
-                    self.uploader.birdoapp.harmony.utransform,
-                    self.uploader.birdoapp.ffmpeg.ffmpeg
-                )
-                subprocess.Popen(shlex.split(cmd))
+                cmd = [
+                    "powershell.exe",
+                    self.uploader.ps_script.normpath(),
+                    os.path.normpath(xstage),
+                    "\"{0}\"".format(self.uploader.birdoapp.harmony.utransform),
+                    os.path.normpath(self.uploader.birdoapp.ffmpeg.ffmpeg)
+                ]
+                print "DEBUG COMMAND:\n{0}".format(cmd)
+                ret = subprocess.call(cmd, shell=False)
+                " -ps1 script return code: {0}".format(ret)
                 animatic = os.path.join(folder, "frames", "animatic.mov")
                 if os.path.exists(animatic):
                     animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_Animatic_{0}".format(scene_name), clean=True)
