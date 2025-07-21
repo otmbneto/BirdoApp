@@ -138,11 +138,6 @@ class BirdoApp(QtGui.QMainWindow):
         self.green_color = "color: rgb(100, 255, 100);"
         self.recently_open = []
         self.recently_open = self.birdoapp.load_recently_open_files()
-        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        #if self.recently_open_log.exists():
-        #    self.recently_open = [Path(x.strip()) for x in self.recently_open_log.read_text().split("\n")]
-        #    self.recently_open = list(filter(lambda x: x.exists(), self.recently_open))
-        #print("The file is being fetched" + str(self.recently_open_log))
         for i, f in enumerate(self.recently_open):
             item = QtGui.QListWidgetItem()
             item.setText(f.name)
@@ -150,6 +145,12 @@ class BirdoApp(QtGui.QMainWindow):
             item.setToolTip(f.path)
             #item.setStyleSheet("color: black;")
             self.recent_list.addItem(item)
+
+        scene_opened = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.js")
+        print("SCENE OPEN:" + scene_opened)
+        if os.path.exists(scene_opened):
+            bkp = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.bkp")
+            os.rename(scene_opened,bkp)
 
     def load_ui(self, ui_file):
         """carreag o arquivo ui na classe"""
@@ -605,6 +606,10 @@ class BirdoApp(QtGui.QMainWindow):
         }
         # get harmony selected
         harmony = self.ui.harmony_versions.itemData(self.ui.harmony_versions.currentIndex())
+        scene_opened = os.path.join(harmony.get_default_scripts_path(),"TB_sceneOpened.js")
+        if os.path.exists(scene_opened):
+            bkp = os.path.join(harmony.get_default_scripts_path(),"TB_sceneOpened.bkp")
+            os.rename(scene_opened,bkp)
         if not harmony:
             harmony_path = self.ui.harmony_folder_line.text()
             # testa se o caminho fornecido manualmente na interface e valido

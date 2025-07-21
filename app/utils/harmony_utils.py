@@ -47,6 +47,12 @@ class ToonBoomHarmony(object):
     def get_fullpath(self):
         return self.installation_path
 
+    def get_default_scripts_path(self):
+        
+        appdata = os.getenv('APPDATA')
+        version_code = self.version + self.subversion + "0"
+        return os.path.join(appdata,"Toon Boom Animation","Toon Boom Harmony " + self.edition,version_code + "-scripts")
+
     def get_scripts_path(self):
         """
             Return the path of the Birdo Package folder in 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' variable.
