@@ -50,7 +50,7 @@ class ConfigInit(object):
         self.verbose = verbose
         self.root = os.path.dirname(os.path.dirname(__file__))
         self.app_json = os.path.join(self.root, "app.json")
-        self.data = read_json_file(self.app_json, encoding="UTF-8")
+        self.data = read_json_file(self.app_json, encoding="utf-8")
 
         # define widget message box class
         self.mb = CreateMessageBox()
@@ -162,34 +162,30 @@ class ConfigInit(object):
             temp_folder.make_dirs()
         return temp_folder
 
-    def update_recently_open_files(self,recently_open,new_file):
-
+    def update_recently_open_files(self, recently_open, new_file):
+        """adiciona um novo arquivo na lista de abertos recentemente"""
         while new_file.path in [x.path for x in recently_open]:
             recently_open.pop([x.path for x in recently_open].index(new_file.path))
-        
         if len(recently_open) >= 10:
             recently_open = recently_open[1:]
         recently_open.append(new_file)
         self.save_recently_open_files(recently_open)
-
         return
 
-    #TODO: move recently open log e recently open para essa classe.
-    def save_recently_open_files(self,recently_open):
-
+    def save_recently_open_files(self, recently_open):
+        """salva a lista de arquivos recentes no arquivo de log recently_open.log"""
         recently_open_log = self.get_temp_folder() / "recently_open.log"
         print("The file is being updated" + str(recently_open_log))
         recently_open_log.write_text("\n".join([str(x.path) for x in recently_open]))
 
     def load_recently_open_files(self):
-
+        """carrega os arquivos recentes abertos pelo birdoapp"""
         recently_open = []
         recently_open_log = self.get_temp_folder() / "recently_open.log"
         print("The file is being fetched" + str(recently_open_log))
         if recently_open_log.exists():
             recently_open = [Path(x.strip()) for x in recently_open_log.read_text().split("\n")]
             recently_open = list(filter(lambda x: x.exists(), recently_open))
-
         return recently_open
 
     def create_project(self, create_data):

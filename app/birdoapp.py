@@ -34,7 +34,6 @@ class Spoiler(QtGui.QWidget):
 
         self.headerLine.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Maximum)
 
-        self.contentArea.setStyleSheet("QScrollArea { background-color: rgb(91, 91, 91); border: none;}")
         self.contentArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         # start out collapsed
         self.contentArea.setMaximumHeight(0)
@@ -119,11 +118,10 @@ class BirdoApp(QtGui.QMainWindow):
 
         # Create the QListWidget and add items to it
         self.recent_list = QtGui.QListWidget()
-        self.recent_list.setStyleSheet("color: black;")
 
         # -------------------------------------------------------------
         self.ui.v_lay.setAlignment(QtCore.Qt.AlignTop)
-        CreateSceneDropDown = Spoiler(title="CRIAR CENA")
+        CreateSceneDropDown = Spoiler(title="CRIAR ARQUIVO")
         CreateSceneDropDown.set_content_layout(self.getCreateSceneLayout())
         self.ui.v_lay.addWidget(CreateSceneDropDown)
         OpenSceneDropDown = Spoiler(checked=True, visible=False)
@@ -143,7 +141,7 @@ class BirdoApp(QtGui.QMainWindow):
             item.setText(f.name)
             item.setData(3, f.path)
             item.setToolTip(f.path)
-            #item.setStyleSheet("color: black;")
+            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
             self.recent_list.addItem(item)
 
         scene_opened = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.js")
@@ -162,11 +160,21 @@ class BirdoApp(QtGui.QMainWindow):
 
     def setup_connections(self):
         """faz os connects das widgets"""
-        # MENU ACTIONS
-
-        self.ui.actionCredits.triggered.connect(self.credits)
-        self.ui.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
-        self.ui.actionExit.triggered.connect(self.close)
+        # CREATE MENU
+        self.menu = QtGui.QMenu("Menu")
+        self.actionCredits = self.menu.addAction(u"Créditos")
+        self.actionCredits.triggered.connect(self.credits)
+        self.actionConfigurar_birdoapp = self.menu.addAction("Configurar BirdoApp")
+        self.actionConfigurar_birdoapp.triggered.connect(self.load_config_app_page)
+        self.actionConfigurar_Estudio = self.menu.addAction(u"Configurar Estúdio")
+        self.actionConfigurar_Estudio.triggered.connect(self.load_config_studio_page)
+        self.actionConfigurar_projeto = self.menu.addAction("Configurar Projeto")
+        self.actionConfigurar_projeto.triggered.connect(self.load_config_project_page)
+        self.actionConfigurar_projeto.setVisible(False)
+        self.menu.addSeparator()
+        self.actionExit = self.menu.addAction("Exit")
+        self.actionExit.triggered.connect(self.close)
+        self.ui.menubar.addMenu(self.menu)
 
         # MAIN UPDATE BUTTON
         self.ui.update_button.clicked.connect(self.on_update_button)
@@ -195,7 +203,7 @@ class BirdoApp(QtGui.QMainWindow):
     def go_home(self):
         """vai para pagina inicial de cada modo
         """
-        self.ui.actionConfigurar_Estudio.setVisible(True)
+        self.actionConfigurar_Estudio.setVisible(True)
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
             return
@@ -222,7 +230,7 @@ class BirdoApp(QtGui.QMainWindow):
         standaloneNameLabel.setMinimumSize(60, 20)
         self.standaloneNameLine = QtGui.QLineEdit()
         self.standaloneNameLine.setMinimumSize(200, 20)
-        self.standaloneCreateBtn = QtGui.QPushButton("Criar cena")
+        self.standaloneCreateBtn = QtGui.QPushButton("Criar")
         self.standaloneCreateBtn.setStyleSheet("color: white;")
         self.standaloneCreateBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneNameLabel)
@@ -235,8 +243,9 @@ class BirdoApp(QtGui.QMainWindow):
         standaloneLocationLabel.setMinimumSize(60, 20)
         self.standaloneLocationLine = QtGui.QLineEdit()
         self.standaloneLocationLine.setMinimumSize(200, 20)
-        self.standaloneFolderBtn = QtGui.QPushButton("Navegar")
-        self.standaloneFolderBtn.setStyleSheet("color: white;")
+        self.standaloneFolderBtn = QtGui.QPushButton()
+        folder_icon = QtGui.QIcon(self.birdoapp.icons["folder"])
+        self.standaloneFolderBtn.setIcon(folder_icon)
         self.standaloneFolderBtn.setMinimumSize(65, 20)
         hLayout.addWidget(standaloneLocationLabel)
         hLayout.addWidget(self.standaloneLocationLine)
@@ -434,7 +443,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         self.ui.stackedWidget.setCurrentIndex(6)
         self.ui.progressBar.setValue(0)
-        self.ui.actionConfigurar_Estudio.setVisible(False)
+        self.actionConfigurar_Estudio.setVisible(False)
 
         # SETS THE CURRENT HEADER
         self.ui.header.setText(u"ESTUDIO CONFIG...")
@@ -451,6 +460,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.update_foot_label(u"Configure as informações que o estúdio te forneceu!", self.green_color)
 
     def load_config_project_page(self):
+        self.actionConfigurar_projeto.setVisible(False)
         self.ui.stackedWidget.setCurrentIndex(3)
         self.ui.progressBar.setValue(75)
 
@@ -468,7 +478,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         # ATUALIZA OS CAMPOS COM OS DADOS EXISTENTES
         if self.project_data.paths.root["local"]:
-            self.ui.localFolder_line.setText(self.project_data.paths.root["local"])
+            self.ui.localFolder_line.setText(unicode(self.project_data.paths.root["local"]))
         if self.project_data.user_role:
             self.ui.combo_funcao.setCurrentIndex(self.project_data.roles.index(self.project_data.user_role))
 
@@ -484,6 +494,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def load_plugin_page(self):
         """Abre pagina de plugin do projeto"""
+        self.actionConfigurar_projeto.setVisible(True)
         # hide update button
         self.ui.update_button.hide()
 
@@ -568,7 +579,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def credits(self):
         msg = '\n'.join(
-            ["{0}:\t{1}".format(item, self.birdoapp.data[item]) for item in sorted(self.birdoapp.data.keys())])
+            [u"{0}:\t{1}".format(item, unicode(self.birdoapp.data[item])) for item in sorted(self.birdoapp.data.keys())])
         self.birdoapp.mb.information(msg)
 
     def update_foot_label(self, txt, color):

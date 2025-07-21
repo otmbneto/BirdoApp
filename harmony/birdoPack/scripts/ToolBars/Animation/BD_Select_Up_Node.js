@@ -22,27 +22,19 @@ function BD_Select_Up_Node(){
 	
 	//INITIAL VARS
 	var nodeSelected = selection.selectedNode(0);
-	var nextNode = node.srcNode(nodeSelected,0);
-
-	//hide deformers and mcdeformers
-	Action.perform("onActionHideDeformer(QString)","miniPegModuleResponder", nodeSelected);
-	Action.perform("onActionHideAllControls()");
-
 	if(nodeSelected == ""){
 		Print("[BD_SELECTUPNODE] No NODE selections found!");
 		return;
 	}
+	
+	//hide deformers and mcdeformers
+	Action.perform("onActionHideDeformer(QString)","miniPegModuleResponder", nodeSelected);
+	Action.perform("onActionHideAllControls()");	
 
-	if(nextNode == ""){
+	var nextNode = getNextNode(nodeSelected);
+	if(!nextNode){
 		Print("[BD_SELECTUPNODE] End of navigation!!");
 		return;
-	}
-	
-	if(node.type(nextNode) == "MULTIPORT_IN"){//pula grupos
-		var nextNode = node.parentNode(nextNode);
-	}
-	if(node.isGroup(nextNode)){
-		nextNode = node.srcNode(nextNode, 0);
 	}
 	
 	//show deformers
@@ -66,5 +58,17 @@ function BD_Select_Up_Node(){
 		if(node.type(init_node) == "READ"){
 			Action.perform("onActionShowSelectedDeformers()","miniPegModuleResponder");
 		}
+	}
+	
+	function getNextNode(initNode){
+		var nextnode = node.srcNode(initNode, 0);
+		if(node.type(nextnode) == "MULTIPORT_IN"){//pula grupos de dentro
+			nextnode = node.parentNode(nextnode);
+		}
+		
+		if(node.isGroup(nextnode) || node.type(nextnode) == "StaticConstraint"){//pula grupos de fora e statics
+			nextnode = getNextNode(nextnode);
+		}
+		return nextnode;
 	}
 }

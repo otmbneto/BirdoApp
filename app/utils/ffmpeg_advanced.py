@@ -9,6 +9,7 @@ import re
 import os
 from datetime import datetime
 from tqdm import tqdm
+import copy
 
 
 class ConverterFFMPEG:
@@ -108,9 +109,16 @@ class ConverterFFMPEG:
     def compress_video(self, input_file, output_file):
         """Compressao basica (retirada do shotgun) do render para upload"""
         acodec = self.acodec if self.check_audio_stream(input_file) else ""
-        self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 \"{4}\"".format(
-            self.ffmpeg, input_file, self.vcodec, acodec, output_file
-        )
+
+        # test for even resolution
+        res = self.get_resolution(input_file)
+        vcodec = copy.deepcopy(self.vcodec)
+        if res:
+            if any([x % 2 != 0 for x in res]):
+                vcodec += " -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\""
+            self.cmd = "{0} -report -i \"{1}\" {2} {3}-f mp4 \"{4}\"".format(
+                self.ffmpeg, input_file, vcodec, acodec, output_file
+            )
         total_frames = self.get_video_duration(input_file)
         if total_frames:
             self.pb = tqdm(total=total_frames, leave=True, desc="[BIRDOAPP - ffmpeg] Compress file ")
@@ -134,7 +142,7 @@ class ConverterFFMPEG:
                 self.ffmpeg, fps, img_pattern, audio, self.vcodec, self.acodec, output_mov
             )
         else:
-            self.cmd = "{0} -y -report -framerate {1} -i \"{2}\" {3} \"{4}\"".format(
+            self.cmd = "{0} -y -report -framerate {1} -i \"{2}\" {3} -shortest \"{4}\"".format(
                 self.ffmpeg, fps, img_pattern, self.vcodec, output_mov
             )
         total_frames = len(filter(lambda x: x.endswith(os.path.splitext(img_pattern)), os.listdir(os.path.dirname(img_pattern))))

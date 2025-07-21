@@ -34,6 +34,9 @@ class Uploader(QtGui.QMainWindow):
         w = self.ui.frameGeometry().width()
         h = self.ui.frameGeometry().height()
 
+        # powershell plugin script
+        self.ps_script = plugin_data["root"] / "process_scene.ps1"
+
         # cria widget para scrool area
         widget = QtGui.QWidget()
         self.verticalLayout = QtGui.QVBoxLayout()

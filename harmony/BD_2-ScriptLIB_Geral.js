@@ -1215,7 +1215,7 @@ function BD2_loadingBirdo(birdoAppPath, timeout, loadingtext){
 	var text_formated = loadingtext.replace(/\s/g, "^");
 	var pythonPath = BD2_FormatPathOS(birdoAppPath + "venv/Scripts/python");
 	var pyFile = BD2_FormatPathOS(birdoAppPath + "app/utils/loadingDialog.py");
-	var start = Process2(pythonPath, pyFile, timeout, loadingtext);
+	var start = Process2(pythonPath, pyFile, timeout, text_formated);
     var ret = start.launchAndDetach();
 	if(ret != 0){
 		Print("Fail to start progressBirdo progress!");

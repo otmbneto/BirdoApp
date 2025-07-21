@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import subprocess, shlex
 from PySide import QtCore, QtGui
 import os
 import shutil
@@ -235,9 +236,17 @@ class uiItem(QtGui.QGroupBox):
                 continue
             xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
             if xstage:
-                script = os.path.join(self.uploader.birdoapp.root, "batch", "BAT_CompactScene.js")
-                print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running script compile: {1}".format(xstage, script)
-                self.uploader.birdoapp.harmony.compile_script(script, xstage)
+                print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running ps1 script to prepare scene: {1}".format(xstage, self.uploader.ps_script)
+                cmd = [
+                    "powershell.exe",
+                    self.uploader.ps_script.normpath(),
+                    os.path.normpath(xstage),
+                    "\"{0}\"".format(self.uploader.birdoapp.harmony.utransform),
+                    os.path.normpath(self.uploader.birdoapp.ffmpeg.ffmpeg)
+                ]
+                print "DEBUG COMMAND:\n{0}".format(cmd)
+                ret = subprocess.call(cmd, shell=False)
+                " -ps1 script return code: {0}".format(ret)
                 animatic = os.path.join(folder, "frames", "animatic.mov")
                 if os.path.exists(animatic):
                     animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_Animatic_{0}".format(scene_name), clean=True)
@@ -325,6 +334,7 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(25)
             os.remove(compressed)
         else:
+            # acho q e melhor nao aceitar folder de cena como input e tirar esssa parte.!!!!!!!!!!!!!!!!!
             scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name,
                                                                          self.stepBox.currentText()).normpath()
             self.incrementProgress(10)
