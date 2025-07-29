@@ -80,12 +80,10 @@ class Uploader(QtGui.QMainWindow):
         if not any(len(re.findall(r'\d+', cenas[0])) != re.findall(r'\d+', x) for x in cenas):
             self.birdoapp.mb.warning(u"Sequência de número de cenas inválidas.\nVerifique os arquivos e forneça o número das cenas individualmente em cada item da interface.")
             return
-        print cenas
         numbs = [[] for _ in re.findall(r'\d+', cenas[0])]
         for sc in cenas:
             [numbs[i].append(int(x)) for i, x in enumerate(re.findall(r'\d+', sc))]
         sequential = filter(lambda x: not any(x.count(y) != 1 for y in x), numbs)
-        print sequential
         if len(sequential) != 1:
             self.birdoapp.mb.warning(u"Sequência de números não e válida. Impóssivel achar os números de cena!")
             return
@@ -150,7 +148,6 @@ class Uploader(QtGui.QMainWindow):
 
             QtGui.qApp.processEvents()
             movie.upload(temp)
-            print("GET SCENE ANIMATIC:" + str(movie.scene_animatic))
             if movie.scene_animatic is not None:
                 dropped, movWidget = self.dropWidget(movie.scene_animatic, addToList=False)
                 if dropped:
@@ -201,14 +198,6 @@ class Uploader(QtGui.QMainWindow):
             for url in urls:
                 QtGui.qApp.processEvents()
                 u = str(url.toLocalFile())
-                '''
-                movWidget = self.get_template_item(u, self.episodes)
-                print(movWidget)
-                if movWidget.isValid():
-                    self.listOfWidgets.append(movWidget)
-                    self.verticalLayout.addWidget(movWidget)
-                    droppedSomething = True
-                '''
                 droppedSomething, movWidget = self.dropWidget(u)
             if droppedSomething:
                 self.ui.cleanBtn.setEnabled(True)
@@ -219,7 +208,6 @@ class Uploader(QtGui.QMainWindow):
 
         dropped = False
         movWidget = self.get_template_item(item, self.episodes)
-        print(movWidget)
         if movWidget.isValid():
             if addToList:
                 self.listOfWidgets.append(movWidget)

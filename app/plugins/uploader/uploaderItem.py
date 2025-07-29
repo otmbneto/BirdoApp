@@ -21,12 +21,9 @@ class uiItem(QtGui.QGroupBox):
 
         self.filename = "ITEM_NAME"
         self.filetypes = (".mov", ".mp4", ".zip")
-        print(fullpath)
         if fullpath is not None:
             self.filename = fullpath.split("/")[-1]
             self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
-        print(self.filename)
-        print(self.filepath)
         self.sceneFound = True
         self.scene_animatic = None
 
@@ -261,13 +258,9 @@ class uiItem(QtGui.QGroupBox):
                     if os.path.exists(f):
                         prefix = ".".join([""] + f.split(".")[1:])
                         new_name = Path(os.path.dirname(f)) / (scene_name + "_" + version)
-                        print(new_name)
-                        print(f)
                         os.rename(f, new_name.normpath() + prefix)
 
                 new_name = Path(os.path.dirname(folder)) / scene_name
-                print(new_name)
-                print(folder)
                 os.rename(folder, new_name.normpath())
                 output = new_name.normpath() + ".zip"
                 compact_folder(new_name.normpath(), output)
@@ -294,7 +287,6 @@ class uiItem(QtGui.QGroupBox):
         ep_num = int(re.sub(r"\D", "", episode_code))
         sc_num = int(self.scene_text.text()) if self.scene_text.isEnabled() else int(re.sub(r"\D", "", shot_num))
         scene_name = self.getScene(ep_num, sc_num)
-        print("...scene name: {0}".format(scene_name))
         self.incrementProgress(10)
         if self.filename.endswith(".zip"):
 
@@ -325,7 +317,6 @@ class uiItem(QtGui.QGroupBox):
             self.incrementProgress(10)
             dst = os.path.join(animatic_path, scene_name)
             compressed = os.path.join(temp, self.filename).replace("\\", "/")
-            print(self.getFullpath())
             if not self.uploader.birdoapp.ffmpeg.compress_video(self.getFullpath(), compressed):
                 self.uploader.birdoapp.mb(u"Erro comprimindo o arquivo: {0}".format(self.filename))
                 return False
