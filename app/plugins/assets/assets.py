@@ -75,6 +75,8 @@ class App(QtGui.QWidget):
         asset_regex = self.project_data.paths.regs["asset"]["regex"]
         for f in search_folder:
             if bool(re.match(asset_regex, f.name)) and bool(self.birdoapp.harmony.get_xstage_last_version(f)):
+                if f.name.endswith(".tpl"):
+                    continue
                 self.asset_files.append(f)
                 print 'asset file found: {0}'.format(f)
                 continue
@@ -167,17 +169,17 @@ class App(QtGui.QWidget):
         location = Path(self.ui.lineFolder.text())
         scene_name = str(self.ui.nameLabel.text())
         if not bool(scene_name):
-            self.birdoapp.mb.warning("Nome Inválido. Escolha um nome válido!")
+            self.birdoapp.mb.warning(u"Nome Inválido. Escolha um nome válido!")
             return
 
         if not location.exists():
-            self.birdoapp.mb.warning("Folder de destino inválido. Escolha um diretório válido!")
+            self.birdoapp.mb.warning(u"Folder de destino inválido. Escolha um diretório válido!")
             print("ERROR: Location not found")
             return
 
         template_proj = Path(self.project_data.config_folder) / "ASSET_template"
         if (location / scene_name).exists():
-            self.birdoapp.mb.warning("Arquivo já existe no destino! Escolha outro nome!")
+            self.birdoapp.mb.warning(u"Arquivo já existe no destino! Escolha outro nome!")
             return
         destiny_file = template_proj.copy_folder(location).rename(scene_name)
 
