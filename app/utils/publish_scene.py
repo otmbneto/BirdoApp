@@ -176,7 +176,7 @@ class DialogPublish(QDialog):
         self.pb.reset()
 
         if not zip_result:
-            self.birdoapp.mb.warning("BIRDOAPP PUBLISH: ERRO ao compactar o arquivo para o temp!")
+            self.birdoapp.mb.warning(u"BIRDOAPP PUBLISH: ERRO ao compactar o arquivo para o temp!")
             return
 
         # update dialog label
@@ -193,7 +193,7 @@ class DialogPublish(QDialog):
             self.worker_thread.terminate()
 
         if not result:
-            self.birdoapp.mb.warning("Algo deu errado com a Cópia do arquivo!")
+            self.birdoapp.mb.warning(u"Algo deu errado com a cópia do arquivo!")
             self.close()
         else:
             # update do input json file
@@ -201,14 +201,14 @@ class DialogPublish(QDialog):
             raw_data["published_file"] = str(self.publish_file)
             write_json_file(self.sc_file_info, raw_data)
 
-            self.birdoapp.mb.information("Cena {0} publicada com sucesso!".format(self.publish_file.stem))
+            self.birdoapp.mb.information(u"Cena {0} publicada com sucesso!".format(self.publish_file.stem))
             print("[BIRDOAPP_py] - Cena {0} publicada com sucesso!".format(self.publish_file.stem))
 
         self.close()
 
     def on_cancel(self):
         self.worker_thread.terminate()
-        self.birdoapp.mb.warning("CANCELADO! Verifique se o arquivo de destino não está corrompido!")
+        self.birdoapp.mb.warning(u"CANCELADO! Verifique se o arquivo de destino não está corrompido!")
         print("[BIRDOAPP_py] - File transder canceled by the user...")
         self.close()
 

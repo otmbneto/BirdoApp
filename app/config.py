@@ -239,7 +239,7 @@ class ConfigInit(object):
         """Atualiza lista todos projetos no server do studio"""
         if not os.path.exists(self.config_data["server_projects"]):
             if self.verbose:
-                self.mb.warning("O caminho {0} de config do server nao existe ou esta indisponivel. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
+                self.mb.warning(u"O caminho {0} de config do server não existe ou está indisponível. Tente de novo ou corrija o carminho, se for o caso.".format(self.config_data["server_projects"]))
             return False
         print(self.config_data["server_projects"])
         for proj in os.listdir(self.config_data["server_projects"]):
@@ -267,20 +267,20 @@ class ConfigInit(object):
         """
         # checa se o config.json e valido
         if not self.is_ready():
-            self.mb.critical("O BirdoApp nao parece configurado corretamente. Confira o arquivo 'config.json' e tente novamente!")
+            self.mb.critical(u"O BirdoApp não parece configurado corretamente. Confira o arquivo 'config.json' e tente novamente!")
             return False
 
         # CHECA SE O SYSTEMA OS E SUPORTADO
         if not self.system.check_os():
-            self.mb.critical("ATENCAO! Seu Sistema Operacional ainda nao e suportado no BirdoAPP! Avise a Direcao Tecnica!")
+            self.mb.critical(u"ATENÇÃO! Seu Sistema Operacional ainda não e suportado no BirdoAPP! Avise a Direção Técnica")
             return False
 
         if not self.system.check_paths():
-            self.mb.critical("ERRO ao pegar os caminhos do sistema! Procure a Direcao Tecnica!")
+            self.mb.critical(u"ERRO ao pegar os caminhos do sistema! Procure a Direção Técnica!")
             return False
 
         if int(project_index) not in range(len(self.projects)):
-            self.mb.warning("Algo deu errado! Argumento index de projeto invalido no 'config_project'! " + str(project_index))
+            self.mb.warning(u"Algo deu errado! Argumento index de projeto inválido no 'config_project'! " + str(project_index))
             return False
 
         project_data = copy.deepcopy(self.projects[int(project_index)])

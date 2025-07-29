@@ -23,7 +23,7 @@ class CreateMessageBox:
 
     def information(self, text):
         print text
-        self.msg.setText(unicode(text))
+        self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Information)
         self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
@@ -32,7 +32,7 @@ class CreateMessageBox:
 
     def warning(self, text):
         print text
-        self.msg.setText(unicode(text))
+        self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Warning)
         self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
@@ -41,7 +41,7 @@ class CreateMessageBox:
 
     def question(self, text):
         print text
-        self.msg.setText(unicode(text))
+        self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Question)
         self.msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.msg.show()
@@ -49,7 +49,7 @@ class CreateMessageBox:
 
     def critical(self, text):
         print text
-        self.msg.setText(unicode(text))
+        self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Critical)
         self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()

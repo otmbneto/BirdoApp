@@ -142,7 +142,7 @@ class FileDialog(QDialog):
             self.worker_thread.terminate()
 
         if not result:
-            self.birdoapp.mb.warning("Algo deu errado com a Cópia do arquivo!")
+            self.birdoapp.mb.warning(u"Algo deu errado com a cópia do arquivo!")
             self.close()
         else:
             print("[BIRDOAPP] - File Process - Arquivo processado com sucesso!")
@@ -152,7 +152,7 @@ class FileDialog(QDialog):
 
     def on_cancel(self):
         self.worker_thread.terminate()
-        self.birdoapp.mb.warning("CANCELADO! Verifique se o arquivo de destino não está corrompido!")
+        self.birdoapp.mb.warning(u"CANCELADO! Verifique se o arquivo de destino não está corrompido!")
         print("[BIRDOAPP] - File transder canceled by the user...")
         self.close()
 

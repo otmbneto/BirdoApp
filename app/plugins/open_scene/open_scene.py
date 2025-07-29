@@ -59,7 +59,7 @@ class OpenScene(QtGui.QWidget):
         # TEST SERVER CONNECTION
         status = self.update_server_status()
         if status == "Offline":
-            self.birdoapp.mb.warning("Falha em conectar o server!")
+            self.birdoapp.mb.warning(u"Falha ao conectar o server!")
 
         self.current_path = ""
 
@@ -429,7 +429,7 @@ class OpenScene(QtGui.QWidget):
         if os.path.exists(path):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
         else:
-            self.birdoapp.mb.warning("Folder does not exist yet!")
+            self.birdoapp.mb.warning(u"O folder local ainda não existe!")
 
     def on_check_open_local(self):
         show_check_all = not self.ui.checkBox_open_local.isChecked()
@@ -478,7 +478,8 @@ class OpenScene(QtGui.QWidget):
         local_scene = self.shot_versions[current_step]["local_path"]
         if self.ui.checkBox_open_local.isChecked():
             if self.shot_versions["most_recent"] == 'server':
-                self.signals.sendQuestionMessage.emit(["[question]Voce ira abrir a cena {0} que esta salva no seu computador, mas ha uma versao que foi aparentemente salva mais recente na server.\nPretente abrir mesmo assim?".format(selected_scene)])
+                self.signals.sendQuestionMessage.emit([u"[question]Você irá abrir a cena {0} que está salva no seu computador, "
+                                                       u"mas há uma versão aparentemente mais recente no server.\nPretente abrir mesmo assim?".format(selected_scene)])
                 self.wait = True
                 while self.wait:
                     continue
@@ -487,13 +488,15 @@ class OpenScene(QtGui.QWidget):
                 if not ask:
                     return
             else:
-                self.signals.sendInformationMessage.emit(["[info]Voce ira abrir a cena {0} que esta salva no seu computador que aparentemente foi modificada apos o ultimo envio de versao desta cena no server. Confira se esta e realmente a versao mais atualizada!".format(
-                        selected_scene)])
+                self.signals.sendInformationMessage.emit([u"[info]Você irá abrir a cena {0} que está salva no seu computador e aparentemente foi modificada após o último envio de versão desta cena no server.\n"
+                                                          u"Confira se esta é realmente a versão mais atualizada!".format(
+                        selected_scene)]
+                )
 
             if not local_scene["xstage"] or not local_scene["xstage"].exists():
                 self.signals.progress_format.emit(["ERROR! File not found!"])
                 self.signals.progress_made.emit([])
-                self.signals.sendWarningMessage.emit(["Error! Cant find the local scene to open!"])
+                self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar uma cena para abrir."])
                 return
         else:
 
@@ -504,8 +507,8 @@ class OpenScene(QtGui.QWidget):
                 return
 
             if self.shot_versions["most_recent"] == 'local':
-                self.signals.sendQuestionMessage.emit(["Voce ira abrir uma cena do server, que contem uma versao local aparentemente mais atual.\n"
-                                                       "Deseja continuar?\n(OBS: Se desejar abrir a versao local para conferir, clique em 'No', e marque a opcao 'Open Local File' antes de abrir!)"])
+                self.signals.sendQuestionMessage.emit([u"Você irá abrir uma cena do server, que contem uma versão local aparentemente mais atual.\n"
+                                                       u"Deseja continuar?\n(OBS: Se desejar abrir a versão local para conferir, clique em 'No', e marque a opção 'Open Local File' antes de abrir!)"])
                 self.wait = True
                 while self.wait:
                     continue
@@ -524,7 +527,7 @@ class OpenScene(QtGui.QWidget):
             scene_obj.copy_file(temp_file)
             if not temp_file.exists():
                 print "fail to download scene: {0}".format(scene_obj.name)
-                self.signals.sendWarningMessage.emit(["Falha ao fazer o download da versão da cena do server para o folder temporário!"])
+                self.signals.sendWarningMessage.emit([u"Falha ao fazer o download da versão da cena do server para o folder temporário!"])
                 return
 
             # CHECK IF NEED BACKUP
@@ -544,12 +547,12 @@ class OpenScene(QtGui.QWidget):
                         print 'fail to create backup scene bakcup from original local file'
                 except Exception as e:
                     print e
-                    self.signals.sendWarningMessage.emit(["Falha ao criar bakcup da cena! Verifique se a cena local está aberta!"])
+                    self.signals.sendWarningMessage.emit([u"Falha ao criar bakcup da cena! Verifique se a cena local está aberta!"])
                     return
             else:
                 if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
                     print "error creating scene folder scheme!"
-                    self.signals.sendWarningMessage.emit(["Erro criando diretórios locais da cena!"])
+                    self.signals.sendWarningMessage.emit([u"Erro criando diretórios locais da cena!"])
                     return
 
             # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
@@ -558,20 +561,20 @@ class OpenScene(QtGui.QWidget):
             print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
             if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
                 print "error extracting scene zip!"
-                self.signals.sendWarningMessage.emit(["Erro descompactando versão da cena baixada!"])
+                self.signals.sendWarningMessage.emit([u"Erro descompactando versão da cena baixada!"])
                 return
             local_scene["xstage"] = Path(self.birdoapp.harmony.get_xstage_last_version(local_scene["path"].path))
             # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
             if not local_scene["path"].exists():
                 print "error! Cant find unpacked version scene folder!"
-                self.signals.sendWarningMessage.emit(["Erro! Não foi possível encontrar o folder da cena descompactada!"])
+                self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar o folder da cena descompactada!"])
                 return
 
             # OPEN SCENE DOWNLOADED
             self.signals.progress_format.emit(["opening scene..."])
             self.signals.progress_made.emit([]) 
             if not local_scene["xstage"]:
-                self.signals.sendWarningMessage.emit(["Erro! Arquivo xstage da versão baixada não encontrado!"])
+                self.signals.sendWarningMessage.emit([u"Erro! Arquivo xstage da versão baixada não encontrado!"])
                 print "fail to find xstage file to scene: {0}".format(local_scene['path'].path)
                 return
 
@@ -582,7 +585,7 @@ class OpenScene(QtGui.QWidget):
         print("copying {0} to script folder".format(scene_opened_script.name))
         if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
             print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
-            self.signals.sendWarningMessage.emit(["Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcionar."])
+            self.signals.sendWarningMessage.emit([u"Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcionar."])
             return
 
         print "running update setup script..."
