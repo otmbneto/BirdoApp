@@ -269,7 +269,7 @@ QProgressBar {
 QProgressBar::chunk {
 	border: null;
 	border-radius: 10px;
-	background: green;
+	background: rgb(50, 75, 100);
 }</string>
   </property>
   <property name="sizeGripEnabled">
@@ -344,7 +344,7 @@ QProgressBar::chunk {
         </size>
        </property>
        <property name="text">
-        <string>v2.1</string>
+        <string>v2.2</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignJustify</set>
@@ -906,6 +906,13 @@ QSpinBox:hover{
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
+           <widget class="QPushButton" name="pbUpdateList">
+            <property name="text">
+             <string>Atualizar Lista de Arquivos</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_16">
             <property name="font">
              <font>
@@ -942,7 +949,10 @@ QSpinBox:hover{
              <string notr="true">QTreeWidget::item {
 	color: rgb(160, 235, 227);
 }
-</string>
+
+QTreeWidget::item::disabled {
+	color: gray;
+}</string>
             </property>
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
@@ -1044,12 +1054,12 @@ QSpinBox:hover{
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_info">
-       <property name="text">
-        <string>...</string>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="value">
+        <number>0</number>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>

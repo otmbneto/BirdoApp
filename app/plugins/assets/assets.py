@@ -6,6 +6,7 @@
 import sys
 import re
 import os
+import scandir
 import argparse
 from PySide import QtGui, QtCore, QtUiTools
 curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +15,49 @@ from app.config import ConfigInit
 from app.utils.birdo_pathlib import Path
 
 
+class Worker(QtCore.QObject):
+    item_found = QtCore.Signal(str)
+    search_finished = QtCore.Signal(bool, str)
+
+    def __init__(self, harmony, asset_regex):
+        super(Worker, self).__init__()
+        self.is_running = False
+        self.harmony = harmony
+        self.asset_regex = asset_regex
+        self.itens_count = 0
+
+    def recurse_search(self, root):
+        for entry in scandir.scandir(root):
+            if entry.is_dir():
+                if entry.name.endswith(".tpl"):
+                    continue
+                if bool(re.match(self.asset_regex, os.path.basename(entry.name))) and bool(self.harmony.is_harmony_file(entry.path)):
+                    self.item_found.emit(entry.path)
+                    print 'asset file found: {0}'.format(entry.path)
+                    self.itens_count += 1
+                else:
+                    self.recurse_search(entry.path)
+
+    @QtCore.Slot(str)
+    def start_search(self, root_path):
+        """faz a copia do arquivo por bites enviando sinal para o progressbar"""
+        self.is_running = True
+        self.itens_count = 0
+        try:
+            self.recurse_search(root_path)
+        except Exception as e:
+            print(e)
+            self.search_finished.emit(False, "ERRO: {0}".format(e.message))
+
+        self.is_running = False
+
+        # emits finished signal
+        self.search_finished.emit(True, "{0} arquivos de asset encontrados!".format(self.itens_count))
+
+
 class App(QtGui.QWidget):
+    search_request = QtCore.Signal(str)
+
     def __init__(self, config, data, plugin_data):
         super(App, self).__init__()
         self.birdoapp = config
@@ -38,13 +81,14 @@ class App(QtGui.QWidget):
         self.selected = None
         self.asset_files = []
 
-        # update files list
-        self.find_asset_files(self.project_data.paths.root["local"])
-        print "{0} asset file(s) found!".format(len(self.asset_files))
-        self.update_open_list()
-
         self.setup_ui()
         self.setup_logic()
+
+        # create worker and thread attributes
+        self.worker = None
+        self.worker_thread = QtCore.QThread()
+        # create worker
+        self.create_worker()
 
     def setup_ui(self):
         self.ui.labelLimit.hide()
@@ -68,42 +112,66 @@ class App(QtGui.QWidget):
         self.ui.tabWidget.currentChanged.connect(self.on_change_tab)
         self.treeWidget.itemClicked.connect(self.on_item_clicked)
         self.ui.pbOpen.clicked.connect(self.on_open_scene)
+        self.ui.pbUpdateList.clicked.connect(self.find_asset_files)
 
-    def find_asset_files(self, root):
-        # lista de folders locais pra procurar arquivos de assets (ignora o folder de episodios do local)
-        search_folder = [x for x in root.glob("*") if x.name != self.project_data.paths.episodes and x.is_dir()]
+    def create_worker(self):
         asset_regex = self.project_data.paths.regs["asset"]["regex"]
-        for f in search_folder:
-            if bool(re.match(asset_regex, f.name)) and bool(self.birdoapp.harmony.get_xstage_last_version(f)):
-                if f.name.endswith(".tpl"):
-                    continue
-                self.asset_files.append(f)
-                print 'asset file found: {0}'.format(f)
-                continue
-            self.find_asset_files(f)
+        self.worker = Worker(self.birdoapp.harmony, asset_regex)
+        self.search_request.connect(self.worker.start_search)
+        self.worker.item_found.connect(self.create_item)
+        self.worker.search_finished.connect(self.search_finished)
 
-    def update_open_list(self):
+        # Assign the worker to the thread and start the thread
+        self.worker.moveToThread(self.worker_thread)
+        self.worker_thread.start()
+
+    def find_asset_files(self):
+        # reset values
+        self.ui.progressBar.reset()
+        self.ui.progressBar.setRange(0, 0)
+        self.ui.progressBar.setFormat(u"Procurando Arquivos...") ## TESTAR MAS DELETAR DEPOIS PQ SEI Q NAO FUNCIONA!!!
         self.treeWidget.clear()
-        # add files to QTreeWidget
-        for f in self.asset_files:
-            item = QtGui.QTreeWidgetItem(self.treeWidget)
-            item.setText(0, f.name)
-            item.setData(1, 0, f.path)
-            item.setToolTip(0, f.path)
-            for xs in f.glob("*.xstage$"):
-                subitem = QtGui.QTreeWidgetItem(item)
-                subitem.setText(0, xs.name)
+        self.treeWidget.setEnabled(False)
+        self.asset_files = []
+
+        # start search
+        root = self.project_data.paths.root["local"].path
+        self.search_request.emit(root)
+
+    def create_item(self, folder_path):
+        f = Path(folder_path)
+        self.asset_files.append(f)
+        item = QtGui.QTreeWidgetItem(self.treeWidget)
+        item.setText(0, f.name)
+        item.setData(1, 0, f.path)
+        item.setToolTip(0, f.path)
+        for xs in f.glob("*.xstage$"):
+            subitem = QtGui.QTreeWidgetItem(item)
+            subitem.setText(0, xs.name)
+
+    def search_finished(self, done, message):
+        self.treeWidget.setEnabled(done)
+        self.ui.progressBar.setRange(0, len(self.asset_files))
+        self.ui.progressBar.setFormat(message)
+        print message
+
+    def update_tree(self):
+        """roda um loop reverso para verificar quais itens listados ainda existem"""
+        for i in reversed(range(self.treeWidget.topLevelItemCount())):
+            asset, item = self.asset_files[i], self.treeWidget.topLevelItem(i)
+            print "TESTE", i, asset, asset.exists()
+            if not asset.exists():
+                self.asset_files.pop(i)
+                self.treeWidget.takeTopLevelItem(i)
 
     def on_change_tab(self, tab):
         print "tab change>> ", tab
         self.ui.pbOpen.setEnabled(False)
-        self.asset_files = filter(lambda x: x.exists(), self.asset_files)
         if tab == 1:
-            if len(self.asset_files) != self.treeWidget.topLevelItemCount():
-                self.update_open_list()
-            self.ui.label_info.setText("escolha um arquivo de asset para abrir...")
+            self.update_tree()
+            self.ui.progressBar.setFormat(u"Escolha um arquivo de asset para abrir...")
         else:
-            self.ui.label_info.setText("crie um arquivo de asset...")
+            self.ui.progressBar.setFormat(u"Crie um arquivo de asset...")
 
     def on_item_clicked(self, item):
         p = item.parent()
@@ -117,7 +185,7 @@ class App(QtGui.QWidget):
             self.selected = file_path
             print "file selected: {0}".format(file_path.path)
             if not file_path.exists():
-                self.ui.label_info.setText("ARQUIVO SELECIONADO NÃO EXISTE MAIS!")
+                self.ui.progressBar.setFormat(u"ARQUIVO SELECIONADO NÃO EXISTE MAIS!")
                 print "selected does not exist anymore!"
         print "{0} -- > item clicked!".format(item.text(0))
 
@@ -194,14 +262,15 @@ class App(QtGui.QWidget):
         # update asset list files
         self.asset_files.append(destiny_file)
 
-        self.ui.label_info.setText("o arquivo {0} foi criado...".format(scene_name))
+        self.ui.progressBar.setFormat(u"O arquivo {0} foi criado...".format(scene_name))
         self.birdoapp.open_harmony_file(xstage)
 
     def on_open_scene(self):
         print "opening file: {0}".format(self.selected)
+        self.ui.progressBar.setFormat(u"Abrindo arquivo {0}...".format(self.selected.name))
         if not self.selected:
             print "algo deu errado. Nao ha nenhum arquivo selecionado."
-            self.ui.label_info.setText("arquivo não encontrado!")
+            self.ui.progressBar.setFormat(u"Arquivo não encontrado!")
         self.birdoapp.open_harmony_file(self.selected)
 
 
@@ -223,4 +292,5 @@ if __name__ == "__main__":
         config_app.mb.critical("[BIRDOAPP] ERRO ao pegar informacoes do projeto!")
     create_asset = App(config_app, p_data, plugin_d)
     create_asset.ui.show()
+    create_asset.find_asset_files()
     sys.exit(app.exec_())
