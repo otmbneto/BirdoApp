@@ -71,10 +71,16 @@ class Delivery(QtGui.QMainWindow):
         self.setAcceptDrops(True)
         # set window icon
         self.setWindowIcon(QtGui.QIcon((plugin_data["root"] / plugin_data["icon"]).path))
-        self.setWindowTitle("BirdaApp - Uploader")
+        self.setWindowTitle("BirdaApp - Entrega")
+        try:
+            self.ui.namePattern.setText(self.project_data.deliver_as)
+        except:
+            self.ui.namePattern.setText("")
+
 
     def set_logic(self):
 
+        self.ui.progressBar.setVisible(False)
         self.ui.explorerBtn.clicked.connect(self.choose_delivery_directory)
         self.ui.cancelBtn.clicked.connect(self.close)
         self.ui.episodesBox.currentIndexChanged.connect(self.episode_changed)
@@ -177,20 +183,32 @@ class Delivery(QtGui.QMainWindow):
 
     def deliver(self):
 
+        self.ui.progressBar.setVisible(True)
+        namePattern = self.ui.namePattern.text()
+        if len(namePattern) == 0:
+            self.birdoapp.mb.warning("Campo com o padrao de nome esta vazio! Preencha antes de enviar.")
+            return
         zip_files = [self.get_most_recent_zip((self.scenes_list.item(i).data(QtCore.Qt.UserRole) / "PUBLISH").normpath()) for i in range(self.scenes_list.count()) if self.scenes_list.item(i) is not None and self.scenes_list.item(i).checkState() == QtCore.Qt.Checked]
+        
+        count = 0 
         for zip_file in zip_files:
 
             if zip_file is not None:
                 print(zip_file)
                 scene_name = os.path.basename(zip_file).replace(".zip","")
+                print(scene_name)
+                print(self.project_data.paths.find_ep(scene_name))
                 ep = int(re.sub(r"\D", "", self.project_data.paths.find_ep(scene_name)))
                 shot = int(int(re.sub(r"\D", "", self.project_data.paths.find_sc(scene_name)))/10)#tirando o decimal
                 version = int(re.sub(r"\D", "", scene_name.split("_")[-1]))
-                new_name = "LLTD_{0:04d}_{1:03d}_An_Cl_Tk{2:02d}".format(ep,shot,int(self.ui.takeBox.currentText()))#regra do projeto LLTD
+                new_name = namePattern.format(ep,shot,int(self.ui.takeBox.currentText()))#regra do projeto LLTD
                 scene_ready = self.renameScene(zip_file,new_name)
                 deliver_to = os.path.join(self.ui.sendTo.text(),os.path.basename(scene_ready))
                 shutil.move(scene_ready,deliver_to)
                 self.birdoapp.get_temp_folder(sub_folder="Delivery", clean=True)
+            count += 1
+            value = int(100/len(zip_files)*count)
+            self.ui.progressBar.setValue(value)
 
 
 # main script
