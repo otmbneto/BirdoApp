@@ -112,7 +112,6 @@ function Download-Python($python_path){
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
     }
     Remove-Item "$PWD\python27.msi"
-    [System.Environment]::SetEnvironmentVariable("PATH", [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User) + ";C:\Python27\", [System.EnvironmentVariableTarget]::User)
 }
 
 function Is-Virtualenv {
@@ -360,7 +359,6 @@ Download-Ffmpeg "$birdoApp"
 Write-Host "As seguintes variáveis de ambiente foram adicionadas:"
 
 $varsTable = "TOONBOOM_GLOBAL_SCRIPT_LOCATION,Scripts de apoio`n"
-$varsTable += "PATH,...; Python`n"
 $varsTable += "PATH,...; Ffmpeg"
 echo $varsTable | & $gum table --print --border=double --columns="Nome,Caminho"
 
