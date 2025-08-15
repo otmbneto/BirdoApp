@@ -1,9 +1,8 @@
-﻿# etapas da desinstalação:
+# etapas da desinstalação:
 #
 # - remover versão do python 2.7
 # - remover atalho do BirdoApp da desktop
 # - remover a variavel de ambiente TOONBOOM_GLOBAL_SCRIPT_LOCATION
-# - *remover o caminho ";C:\Python27" da variável PATH
 # - remover o caminho ";$env:APPDATA\BirdoApp\extra\ffmpeg\windows\bin" da variável PATH
 # - remover pasta do Birdoapp em $env:appdata
 # - remover a pasta de arquivos temporários do BirdoApp em $env:temp
@@ -14,12 +13,11 @@ if(-not $pythonInstall){
   $pythonInstall = (Get-ItemProperty HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.displayname -match "Python 2.7" })
 }
 $desktopLink = Test-Path $HOME\Desktop\BirdoApp.lnk
-$pythonPath = $env:Path -match [regex]::Escape("C:\Python27")
 $birdoAppFfmpegPath = $env:Path -match [regex]::Escape("$env:APPDATA\BirdoApp\extra\ffmpeg\windows\bin")
 $birdoAppFolder = Test-Path $env:APPDATA\BirdoApp
 $birdoAppTemp = (Test-Path $env:TEMP\BirdoApp) -or (Test-Path $env:TEMP\BirdoApp_update)
 
-if(-not ($pythonInstall -and $desktopLink -and $pythonPath -and $birdoAppFfmpegPath -and $birdoAppFolder -and $birdoAppTemp)){
+if(-not ($pythonInstall -and $desktopLink -and $birdoAppFfmpegPath -and $birdoAppFolder -and $birdoAppTemp)){
   Read-Host "Não há sinais do BirdoApp em seu computador. Pressione ENTER para encerrar"
   exit
 }
@@ -42,12 +40,6 @@ if($desktopLink){
   $uninstallChecklist += (" - [ ] Remover atalho do BirdoApp da desktop" + "`n")
 }else{
   $uninstallChecklist += (" - [✓] Não existe atalho do BirdoApp na desktop." + "`n")
-}
-
-if($pythonPath){
-  $uninstallChecklist += (" - [ ] Remover caminho do Python 2.7 da variável PATH." + "`n")
-}else{
-  $uninstallChecklist += (" - [✓] Caminho do Python 2.7 não consta na variável PATH." + "`n")
 }
 
 if($birdoAppFfmpegPath){
@@ -120,12 +112,6 @@ if($env:TOONBOOM_GLOBAL_SCRIPT_LOCATION){
 if($desktopLink){
   rm $HOME\Desktop\BirdoApp.lnk
   echo " - [✓] Atalho removido da desktop"
-}
-
-if($pythonPath){
-  $newPathPython = [environment]::GetEnvironmentVariable("Path", "User").replace("C:\Python27", "").replace(";;", ";") -replace "^;", ""
-  [environment]::SetEnvironmentVariable("Path", $newPathPython, "User")
-  echo " - [✓] Caminho 'C:\Python27\' removido da variável PATH"
 }
 
 if($birdoAppFfmpegPath){ # [environment]::GetEnvironmentVariable("Path")
