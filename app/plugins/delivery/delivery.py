@@ -219,7 +219,7 @@ class Delivery(QtGui.QMainWindow):
             count += 1
             value = int((count/len(zip_files))*100)
             self.ui.progressBar.setValue(value)
-        self.birdoapp.mb.warning("{0}/{1} arquivo{2} enviado{2} com sucesso.".format(count,len(zip_files),"s" if len(zip_files) > 1))
+        self.birdoapp.mb.warning("{0}/{1} arquivo{2} enviado{2} com sucesso.".format(count,len(zip_files),"s" if len(zip_files) > 1 else ""))
 
 
 # main script
