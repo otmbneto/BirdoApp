@@ -181,7 +181,18 @@ class Delivery(QtGui.QMainWindow):
         most_recent = max(zip_files, key=os.path.getmtime)
         return most_recent
 
+
+    #TODO: send execution to another thread
+    #      create delivery folder if does not exist
+    #      warning message that execution was sucessfull
+    #      Counter of files found
     def deliver(self):
+
+        if len(self.ui.sendTo.text()) == 0:
+            self.birdoapp.mb.warning("Campo de pasta destino esta vazia! Preencha antes de enviar.")
+            return
+        elif not os.path.exists(self.ui.sendTo.text()):
+            os.makedirs(self.ui.sendTo.text())
 
         self.ui.progressBar.setVisible(True)
         namePattern = self.ui.namePattern.text()
@@ -193,6 +204,7 @@ class Delivery(QtGui.QMainWindow):
         count = 0 
         for zip_file in zip_files:
 
+            #LLTD_{0:04d}_{1:03d}_An_Cl_Tk{2:02d}
             if zip_file is not None:
                 print(zip_file)
                 scene_name = os.path.basename(zip_file).replace(".zip","")
