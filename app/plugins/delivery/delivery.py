@@ -183,8 +183,6 @@ class Delivery(QtGui.QMainWindow):
 
 
     #TODO: send execution to another thread
-    #      create delivery folder if does not exist
-    #      warning message that execution was sucessfull
     #      Counter of files found
     def deliver(self):
 
@@ -219,8 +217,9 @@ class Delivery(QtGui.QMainWindow):
                 shutil.move(scene_ready,deliver_to)
                 self.birdoapp.get_temp_folder(sub_folder="Delivery", clean=True)
             count += 1
-            value = int(100/len(zip_files)*count)
+            value = int((count/len(zip_files))*100)
             self.ui.progressBar.setValue(value)
+        self.birdoapp.mb.warning("{0}/{1} arquivo{2} enviado{2} com sucesso.".format(count,len(zip_files),"s" if len(zip_files) > 1))
 
 
 # main script
