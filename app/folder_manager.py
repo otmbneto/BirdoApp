@@ -287,7 +287,7 @@ class FolderManager(object):
 
     def copy_scene_template(self, destiny_folder):
         """copia o template de cena do projeto para o 'destiny_folder'
-           OBS: o nome da cena de destino e o nome do volder 'destiny_folder'
+           OBS: o nome da cena de destino e o nome do folder 'destiny_folder'
         """
         dst = Path(str(destiny_folder))
         if dst.exists():
