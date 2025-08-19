@@ -27,11 +27,11 @@ class CreateProjectClass(object):
     """
     def __init__(self, project_dict):
         self.raw_data = project_dict
-        for key in project_dict:
-            if type(project_dict[key]) is dict:
-                setattr(self, key, CreateProjectClass(project_dict[key]))
+        for key in self.raw_data:
+            if type(self.raw_data[key]) is dict:
+                setattr(self, key, CreateProjectClass(self.raw_data[key]))
             else:
-                setattr(self, key, project_dict[key])
+                setattr(self, key, self.raw_data[key])
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
