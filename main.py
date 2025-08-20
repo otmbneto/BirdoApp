@@ -31,7 +31,9 @@ if __name__ == "__main__":
         dev.start()
 
     elif args.versao:
-        DevTools().show_version()
+        dev = DevTools()
+        dev.print_header()
+        dev.show_about()
     else:
 
         last_updated_file = os.path.join(app_root, "lastUpdated.txt")
