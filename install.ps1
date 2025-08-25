@@ -241,16 +241,6 @@ $greetings = "
    de scripts e programas que auxiliam produções de animações 2D.
    Pressione ENTER para continuar."
 
-$licenceA =  "   O BirdoApp é distribuído de forma gratuita através da`n"
-$licenceA += "   licença MIT, descrita nos termos a seguir:`n"
-$licenceB = 'Copyright (c) 2025 BirdoStudios
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
-
 # FIXME cachear gum?
 if ((get-item $env:temp\gum.zip 2> $null) -ne $null) {
     rm $env:temp\gum.zip
@@ -289,12 +279,51 @@ if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
     exit
 }
 
-echo $licenceA
-& $gum style --border=double --width=78 --margin="-1 0" --align=center --padding="1 2" $licenceB
+$termsS = (irm -Uri https://raw.githubusercontent.com/otmbneto/BirdoApp/refs/heads/config_proj3/TERMS.md).replace("**", "")
+$termsA = $termsS.split("`n")
 
-$LastUserResponse = AskYesNo "Você concorda com os termos descritos acima? (S/N)"
+$H = $Host.UI.RawUI.WindowSize.Width - 2
+$V = $Host.UI.RawUI.WindowSize.Height - 9
 
-if ($LastUserResponse -eq 1) {
+$boxHeader = " TERMOS DE USO "
+if(($H % 2) -eq 0){$boxHeader += "═"}
+
+$topseg = "═" * [Int](($H - $boxHeader.length) / 2)
+$topline = "$([char]27)[38:5:1m╔" + $topseg + $boxHeader + $topseg + "╗$([char]27)[0m"
+$bottomline = "$([char]27)[38:5:1m╚" + ("═" * $H) + "╝$([char]27)[0m"
+
+$topScroll = 0
+$bf = @()
+$bf += $topline
+for($i=0; $i -lt $V ; $i++){$bf += ""}
+$bf += $bottomline
+$bf += ""
+$bf += "    Você está de acordo com os termos descritos acima?"
+$bf += ""
+$bf += "      $([char]27)[48:5:235m$([char]27)[38:5:254m  Sim  $([char]27)[0m    $([char]27)[48:5:212m$([char]27)[38:5:230m  Não  $([char]27)[0m"
+$bf += ""
+$bf += "$([char]27)[38:5:8m ↑↓ rolagem | ←→  seleção | ENTER confirma$([char]27)[0m"
+
+$agree = $false
+
+while($true){
+    cls
+    $keyInfo = ""
+    for($i=1; $i -le $V ; $i++){
+        $fauxlinebreak = $H - $termsA[$i + $topScroll].length  - 3
+        $bf[$i] = ("$([char]27)[38:5:1m║$([char]27)[0m   " + $termsA[$i + $topScroll] + (" " * $fauxlinebreak) + "$([char]27)[38:5:1m║$([char]27)[0m")
+    }
+    echo $bf
+    while(-not ($keyInfo.key -in ("UpArrow", "DownArrow", "LeftArrow", "RightArrow", "Enter"))){$keyInfo = [System.Console]::ReadKey()}
+    if(($keyInfo.key -eq "UpArrow") -and ($topScroll -gt 0)){$topScroll--}
+    if(($keyInfo.key -eq "DownArrow") -and ($topScroll -lt ($termsA.Length - $V))){$topScroll++}
+    if($keyInfo.key -eq "LeftArrow"){$bf[-3]="      $([char]27)[48:5:212m$([char]27)[38:5:230m  Sim  $([char]27)[0m    $([char]27)[48:5:235m$([char]27)[38:5:254m  Não  $([char]27)[0m"; $agree = $true}
+    if($keyInfo.key -eq "RightArrow"){$bf[-3]="      $([char]27)[48:5:235m$([char]27)[38:5:254m  Sim  $([char]27)[0m    $([char]27)[48:5:212m$([char]27)[38:5:230m  Não  $([char]27)[0m"; $agree = $false}
+    if($keyInfo.key -eq "Enter"){break}
+}
+cls
+
+if (-not $agree) {
     echo "`nO BirdoApp NÃO foi instalado. Encerrando..."
     exit
 }

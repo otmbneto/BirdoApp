@@ -34,7 +34,7 @@ pessoal e comercial, a modificação do código-fonte, a redistribuição com
 ou sem alterações e a inclusão do software em outros projetos, desde que
 mantidos os avisos de copyright originais e os termos da Licença MIT.
 
-O software é fornecido \"no estado em que se encontra\" (as is), sem
+O software é fornecido "no estado em que se encontra" (as is), sem
 garantias de qualquer natureza, expressas ou implícitas. Os
 desenvolvedores originais não assumem qualquer responsabilidade por
 danos decorrentes do uso, mau funcionamento ou inadequação do aplicativo
@@ -100,7 +100,7 @@ autorais serão recusadas e poderão ser reportadas à equipe do Birdo App.
 
 **6. Isenção de Garantias**
 
-O BirdoApp é fornecido \"no estado em que se encontra\" (\"*as is*\"),
+O BirdoApp é fornecido "no estado em que se encontra" ("*as is*"),
 sem garantias explícitas ou implícitas de qualquer tipo, incluindo, mas
 não se limitando a: (i) funcionamento contínuo ou livre de erros, (ii)
 compatibilidade com versões futuras do Toon Boom Harmony ou de

@@ -79,6 +79,10 @@ class ToonBoomHarmony(object):
             return False
         return package
 
+    def is_harmony_file(self, folder):
+        h_folder = Path(str(folder))
+        return len(h_folder.glob('*.xstage$')) > 0
+
     def get_xstage_last_version(self, harmony_file_folder):
         """
         Retorna o arquivo .xstage mais recente no folder do arquivo harmony fornecido.

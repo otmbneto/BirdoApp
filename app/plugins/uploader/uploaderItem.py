@@ -318,7 +318,7 @@ class uiItem(QtGui.QGroupBox):
             dst = os.path.join(animatic_path, scene_name)
             compressed = os.path.join(temp, self.filename).replace("\\", "/")
             if not self.uploader.birdoapp.ffmpeg.compress_video(self.getFullpath(), compressed):
-                self.uploader.birdoapp.mb("Erro comprimindo o arquivo: {0}".format(self.filename))
+                self.uploader.birdoapp.mb(u"Erro comprimindo o arquivo: {0}".format(self.filename))
                 return False
             self.incrementProgress(25)
             shutil.copyfile(compressed, dst)

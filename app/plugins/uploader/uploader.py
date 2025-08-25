@@ -78,14 +78,14 @@ class Uploader(QtGui.QMainWindow):
     def onSearchScenes(self):
         cenas = [item.filename for item in self.listOfWidgets]
         if not any(len(re.findall(r'\d+', cenas[0])) != re.findall(r'\d+', x) for x in cenas):
-            self.birdoapp.mb.warning("Sequencia de numero de cenas invalidas para char o numero automaticamente.\nVerifique os arquivos e forneça individualmente")
+            self.birdoapp.mb.warning(u"Sequência de número de cenas inválidas.\nVerifique os arquivos e forneça o número das cenas individualmente em cada item da interface.")
             return
         numbs = [[] for _ in re.findall(r'\d+', cenas[0])]
         for sc in cenas:
             [numbs[i].append(int(x)) for i, x in enumerate(re.findall(r'\d+', sc))]
         sequential = filter(lambda x: not any(x.count(y) != 1 for y in x), numbs)
         if len(sequential) != 1:
-            self.birdoapp.mb.warning("Sequencia de numeros nao e valida. Impossivel achar os numeros de cena!")
+            self.birdoapp.mb.warning(u"Sequência de números não e válida. Impóssivel achar os números de cena!")
             return
 
         for i, item in enumerate(self.listOfWidgets):
@@ -164,7 +164,7 @@ class Uploader(QtGui.QMainWindow):
 
         self.setProgress(100)
         #self.birdoapp.get_temp_folder(clean=True)
-        self.birdoapp.mb.information("Copias feitas com sucesso!")
+        self.birdoapp.mb.information(u"Cópias feitas com sucesso!")
 
     def getProgress(self):
         return self.ui.progressBar.value()

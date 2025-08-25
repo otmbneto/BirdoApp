@@ -135,7 +135,8 @@ class Path:
         counter = 0
         if dst.exists():
             dst = dst / self.name
-            dst.make_dirs()
+
+        dst.make_dirs()
         try:
             for item in tqdm(self.glob("*"), leave=False, desc='Copying {0}'.format(self.name)):
                 if item.is_dir():

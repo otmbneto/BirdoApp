@@ -11,9 +11,7 @@ import subprocess
 class Spoiler(QtGui.QWidget):
     def __init__(self, parent=None, title='', checked=False, visible=True, anim_duration=100):
         """
-        References:
-            # Adapted from c++ version
-            http://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
+            Classe para criar uma área 'minimizável' na interface
         """
         super(Spoiler, self).__init__(parent=parent)
 
@@ -367,7 +365,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.progressBar.setValue(0)
         # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config studio)
         if not self.birdoapp.is_server_available():
-            self.birdoapp.mb.warning("Falha ao conectar o caminho do servidor do Estudio. Confira se o caminho esta correto, e se tem acesso a pasta.Caso use VPN,verifique se esta conectada. No momento o modo standalone vai ser iniciado.")
+            self.birdoapp.mb.warning(u"Falha ao conectar o caminho do servidor do Estúdio. Confira se o caminho está correto, e se tem acesso a pasta. Caso use VPN,verifique se está conectada. No momento o modo standalone vai ser iniciado.")
             self.load_standalone_page()
             return
 
@@ -629,7 +627,7 @@ class BirdoApp(QtGui.QMainWindow):
             if harmony_path:
                 harmony = ToonBoomHarmony(harmony_path)
                 if not harmony.is_installed():
-                    self.birdoapp.mb.warning("O caminho fornecido de instalação do Harmony não é válido!")
+                    self.birdoapp.mb.warning(u"O caminho fornecido de instalação do Harmony não é válido!")
                     self.update_foot_label(u"Caminho inválido de instalação do Harmony...", self.red_color)
                     return False
         else:
@@ -660,17 +658,16 @@ class BirdoApp(QtGui.QMainWindow):
         # verifica se os valores dos campos estao corretos
         if not local_folder.exists():
             self.birdoapp.mb.warning(
-                "O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
+                u"O caminho escolhido para 'folder local' do projeto, não é válido pois ele não existe!")
             self.update_foot_label(u"Folder local inválido...", self.red_color)
             return False
 
         if local_folder.path == self.project_data.paths.root["server"].path:
-            self.birdoapp.mb.warning("Você escolheu o folder do projeto no servidor do estudio."
-                                     "Forneca o seu folder LOCAL do projeto, "
-                                     "onde você irá salvar as cenas no seu computador.")
+            self.birdoapp.mb.warning(u"Você escolheu o folder do projeto no servidor do estudio. Forneça o seu folder LOCAL do projeto,"
+                                     u" onde você irá salvar as cenas no seu computador.")
             return False
         if not user_proj["user_role"]:
-            self.birdoapp.mb.warning("Escolha sua função, válida para o projeto!")
+            self.birdoapp.mb.warning(u"Escolha sua função, válida para o projeto!")
             self.update_foot_label(u"Escolha sua função no projeto...", self.red_color)
             return False
 
