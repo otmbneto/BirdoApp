@@ -16,7 +16,7 @@ def get_last_release(main_app):
 
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description='BirdoApp - 2.0')
+    parser = argparse.ArgumentParser(description='BirdoApp')
     parser.add_argument('--produtor', action='store_true', help='Abre o menu do "Modo Produtor"')
     parser.add_argument('--versao', action='store_true', help='Exibir informacao de release do BirdoApp')
     args = parser.parse_args()
