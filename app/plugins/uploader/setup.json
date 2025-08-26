@@ -3,7 +3,7 @@
 	"version": "2.0",
 	"description": "Este plugin tem como finalidade subir cenas de harmony e arquivos de video\nde animatic para a estrutura de pastas do servidor do projeto.",
 	"author": "ottoni_bastos@birdo",
-	"icon": "plugin.ico",
+	"icon": "uploader.png",
 	"main_script": "uploader.py",
 	"ui_file": "ui/uploader.ui",
 	"extra_files": null,

@@ -1,0 +1,4 @@
+BD_FindDrawingExp
+Use a interface Tipo da Library 
+para escolher um drawing da camada
+selecionada e achar se ele esta exposto na timeline

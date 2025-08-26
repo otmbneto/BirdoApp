@@ -1,0 +1,3 @@
+BD_CreateRIGTemplate
+Este script cria um template de grupo de rig, atraves da selecao:
+Selecione um grupo, e de o nome de destino, e sera gerado uma replica com desenhos vazios
