@@ -1,5 +1,0 @@
-BD_CreatePatch
-Este script cria um patch simples com os nodes selecionados:
-Selecione nodes assim: 
- mais a direita na nodeview: Node principal;
- nodes a esquerda do principal, serao cortados dentro dele;

@@ -1,4 +1,4 @@
-**Termos de Uso -- BirdoApp**
+# Termos de Uso BirdoApp
 
 Última atualização: [XX]{.mark} de agosto de 2025
 
@@ -13,7 +13,7 @@ código-fonte no repositório oficial.
 Ao acessar, utilizar, contribuir ou redistribuir o BirdoApp, você
 declara ter lido, compreendido e aceitado estes Termos.
 
-**1. Descrição do BirdoApp**
+## 1. Descrição do BirdoApp
 
 O BirdoApp é uma ferramenta de automação voltada a usuários do software
 Toon Boom Harmony, com foco na organização de arquivos e tarefas
@@ -27,7 +27,7 @@ repositório.
 Este projeto é mantido pela equipe da Birdo com fins educacionais e
 colaborativos, sem fins lucrativos ou comerciais.
 
-**2. Licença**
+## 2. Licença
 
 O BirdoApp é licenciado sob os termos da Licença MIT, que autoriza o uso
 pessoal e comercial, a modificação do código-fonte, a redistribuição com
@@ -40,16 +40,14 @@ desenvolvedores originais não assumem qualquer responsabilidade por
 danos decorrentes do uso, mau funcionamento ou inadequação do aplicativo
 para fins específicos.
 
-**3. Dependências e Licenças de Terceiros**
+## 3. Dependências e Licenças de Terceiros
 
 O BirdoApp utiliza ferramentas e bibliotecas de terceiros, todas com
 licenças compatíveis com redistribuição open source:
 
--   Python 2.7 -- Licença: Python Software Foundation License
-
--   FFmpeg -- Licença: LGPL/GPL (vide FFmpeg Legal Info)
-
--   Gum (by Charmbracelet) -- Licença: MIT
+ - Python 2.7 -- Licença: Python Software Foundation License
+ - FFmpeg -- Licença: LGPL/GPL (vide FFmpeg Legal Info)
+ - Gum (by Charmbracelet) -- Licença: MIT
 
 **Importante**: O BirdoApp depende, para pleno funcionamento de algumas
 de suas funcionalidades, do software Toon Boom Harmony, o qual é de
@@ -59,19 +57,19 @@ usuário providenciar, por seus próprios meios, o acesso legal ao Toon
 Boom Harmony, respeitando os termos e condições definidos por seus
 proprietários.
 
-**4. Dados Pessoais e Privacidade**
+## 4. Dados Pessoais e Privacidade
 
 O BirdoApp foi projetado para não coletar automaticamente dados pessoais
 nem transmitir informações a servidores externos. As únicas exceções de
 tratamento de dados ocorrem nas situações abaixo:
 
-4.1. Formulários voluntários na landing page: o usuário poderá, de forma
+### 4.1. Formulários voluntários na landing page: o usuário poderá, de forma
 opcional e anônima, informar seu perfil de uso (ex.: estudante,
 profissional ou estúdio) para fins estatísticos e de melhoria do
 projeto. Nenhum dado pessoal identificável (como nome, e-mail ou
 endereço) é exigido ou coletado automaticamente.
 
-4.2. Arquivos locais gerados pelo aplicativo: o BirdoApp pode criar
+### 4.2. Arquivos locais gerados pelo aplicativo: o BirdoApp pode criar
 arquivos de configuração e logs armazenados exclusivamente no
 dispositivo do usuário. Esses arquivos não contêm dados pessoais, exceto
 se o usuário inserir voluntariamente tais informações nos campos de
@@ -85,7 +83,7 @@ Todos os dados são tratados em conformidade com a Lei nº 13.709/2018
 (LGPD) e não serão compartilhados com terceiros, e só serão
 compartilhados caso o próprio usuário os envie voluntariamente.
 
-**5. Contribuições da Comunidade**
+## 5. Contribuições da Comunidade
 
 O BirdoApp está aberto a contribuições de terceiros via plataformas. Ao
 submeter uma contribuição (pull request, issue, sugestão de código,
@@ -98,7 +96,7 @@ MIT, exceto se combinado de outra forma com os mantenedores do BirdoApp.
 Contribuições com código malicioso, plágio ou violação de direitos
 autorais serão recusadas e poderão ser reportadas à equipe do Birdo App.
 
-**6. Isenção de Garantias**
+## 6. Isenção de Garantias
 
 O BirdoApp é fornecido "no estado em que se encontra" ("*as is*"),
 sem garantias explícitas ou implícitas de qualquer tipo, incluindo, mas
@@ -110,7 +108,7 @@ disponibilidade de suporte técnico.
 O usuário é responsável por garantir que o uso do BirdoApp esteja em
 conformidade com leis locais e termos de softwares de terceiros.
 
-**7. Limitação de Responsabilidade**
+## 7. Limitação de Responsabilidade
 
 Em nenhuma circunstância desenvolvedores, colaboradores ou mantenedores
 do BirdoApp serão responsabilizados por danos diretos, indiretos,
@@ -118,7 +116,7 @@ incidentais, especiais ou consequenciais decorrentes do uso ou da
 incapacidade de uso do software, incluindo perda de dados ou interrupção
 de negócios, mesmo que tenham sido alertados sobre tal possibilidade.
 
-**8. Uso de Nome e Marca**
+## 8. Uso de Nome e Marca
 
 O nome "Birdo" e "BirdoApp" são marcas de titularidade da Birdo.
 
@@ -126,14 +124,16 @@ O uso desses nomes em versões modificadas ou redistribuídas exige
 autorização prévia e expressa da equipe da Birdo, exceto quando apenas
 para referência ao BirdoApp.
 
-**9. Modificações nos Termos**
+## 9. Modificações nos Termos
 
 Estes Termos de Uso podem ser atualizados a qualquer momento. Alterações
 relevantes serão registradas no repositório oficial do BirdoApp com
 indicação da data de modificação. O uso contínuo do software após a
 publicação de mudanças indica aceitação das novas condições.
 
-**10. Contato**
+## 10. Contato
 
-Para dúvidas, sugestões, contribuições ou suporte, entre em contato via
-e-mail: <birdoapp@birdo.com.br>
+Para dúvidas, sugestões, contribuições ou suporte, entre em contato 
+via e-mail: <birdoapp@birdo.com.br>
+
+_____
