@@ -2,7 +2,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 /*v2.0
 -------------------------------------------------------------------------------
-Name:			10-Update_Setup.js
+Name:			10-Atualizar_Setup.js
 
 Description:	Update setup nodes in the scene;
 
@@ -15,7 +15,8 @@ Created:	Julho, 2023. (update fevereiro 2025);
 Copyright:  leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
-function UpdateSetup(){
+
+function AtualizarSetup(){
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -35,4 +36,4 @@ function UpdateSetup(){
 	}	
 	Print("[BIRDOAPP] End update setup!");
 }
-exports.UpdateSetup = UpdateSetup;
+exports.AtualizarSetup = AtualizarSetup;

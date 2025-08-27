@@ -5,7 +5,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
-function SendNotes(){
+function EnviarNotes(){
 
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -91,4 +91,4 @@ function SendNotes(){
 		return _notes + "/" + combo.currentItem;
 	}
 }
-exports.SendNotes = SendNotes;
+exports.EnviarNotes = EnviarNotes;

@@ -6,7 +6,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
-function Publish(){
+function Publicar(){
 				
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -88,7 +88,7 @@ function Publish(){
 		Print(e);
 	}
 }
-exports.Publish = Publish;
+exports.Publicar = Publicar;
 
 
 function run_publish_python(proj_data, step, scene_name, sc_data_file){

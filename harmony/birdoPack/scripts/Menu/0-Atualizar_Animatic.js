@@ -5,7 +5,7 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
-function UpdateAnimatic(){
+function AtualizarAnimatic(){
 
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -80,7 +80,7 @@ function UpdateAnimatic(){
 	}
 
 }
-exports.UpdateAnimatic = UpdateAnimatic;
+exports.AtualizarAnimatic = AtualizarAnimatic;
 
 
 

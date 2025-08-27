@@ -1,7 +1,7 @@
 include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
-/* V4.0 - BirdoAPP - agora com function sort pra ordenar os intens em ordem alfabetica na interface
-Name:		ImportAssets.js
+/* 
+Name:		4-Importar_Assets.js
 
 Description:	Este Script acessa a library de assets e importa os tpls direto pra cena
 
@@ -17,7 +17,7 @@ Copyright:   leobazao_@Birdo, ottoni
 */
 
 
-function ImportAssets(){
+function ImportarAssets(){
 
 	//////////////////////////////////  INICIACAO  ///////////////////////////////////////////
 	var projectDATA = BD2_ProjectInfo();
@@ -267,4 +267,4 @@ function createInterface(projectDATA, base_folder, utils){
 		return file.baseName;
 	}
 }
-exports.ImportAssets = ImportAssets;
+exports.ImportarAssets = ImportarAssets;

@@ -3,7 +3,7 @@ include("BD_2-ScriptLIB_Geral.js");
 
 /*v2.0
 -------------------------------------------------------------------------------
-Name:		BD_2-ScriptLIB_Geral.js
+Name:		2-Salvar_tpl.js
 
 Description:	Script do Birdoapp para salvar itens na library de assets
 
@@ -17,15 +17,8 @@ Copyright:  leobazao_@Birdo
 -------------------------------------------------------------------------------
 */
 
-/*
-	TODO:
-	[] - acertar widget do combo name para funcionar como lineinput
-	[] - acertar signal de edit text do combo name
-	[] - testar save
-*/
-
 	
-function SaveAssettpl(){
+function Salvartpl(){
 	
 	var projectDATA = BD2_ProjectInfo();
 	if(!projectDATA){
@@ -326,4 +319,4 @@ function initiateUI(selectionData, projData, projectAssetData, utils, ui_util){
 		System.println(msg);
 	}
 }
-exports.SaveAssettpl = SaveAssettpl;
+exports.Salvartpl = Salvartpl;

@@ -93,13 +93,17 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 		return false;
 	}
 	var menuBar = tbWindow.menuBar();
-	var menu = menuBar.addMenu("BirdoApp");
 	
 	//user permissions	
 	var entity_filter_json = menuPath + "entity_filter.json";
 	var entity_filter = BD1_ReadJSONFile(entity_filter_json);
 	var user_permission = (projDATA.user_type == "DT" || projDATA.user_type == "ANIM_LEAD") ? "LEAD" : "ALL";
-
+	
+	//cria os menus
+	var menus = {
+		"main": menuBar.addMenu("BirdoApp")
+	}	
+	
 	//cria os menus
 	var ajuda_msg = "";
 	for(var i=0; i<menuScripts.length; i++){
@@ -124,9 +128,19 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
                                categoryId   : "BirdoApp Menu",
                                categoryText : "Scripts"});
 			//cria o menu
+			if("menu" in entity_filter[menuScripts[i]]){
+				var menu_name = entity_filter[menuScripts[i]]["menu"];
+				if(menu_name in menus){
+					var menu = menus[menu_name];
+				} else {
+					var menu = menus["main"].addMenu(menu_name);
+					menus[entity_filter[menuScripts[i]]["menu"]] = menu;
+				}
+			} else {
+				var menu = menus["main"];
+			}
 			var action = menu.addAction(itemName.split("-")[1]);
 			action.triggered.connect(this, eval("require(jsPath)." + funcName));
-			
 		} catch (err){
 			Print("[BIRDOAPP] error creating birdo Menu:");
 			Print(err);
@@ -134,7 +148,8 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 		}
 	}
 	//cria ajuda
-	var ajuda = menu.addAction("Ajuda");
+	menus["main"].addSeparator();
+	var ajuda = menus["main"].addAction("Ajuda");
 	ajuda.triggered.connect(this, function() {
 		MessageBox.information(ajuda_msg);
 	});

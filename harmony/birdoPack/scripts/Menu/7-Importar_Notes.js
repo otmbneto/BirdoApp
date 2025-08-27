@@ -5,7 +5,7 @@ include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
 
 
-function GetNotes(){
+function ImportarNotes(){
 	
 	var _notesGroup = "Top/_NOTES";
 	if(node.getName(_notesGroup)==""){
@@ -99,5 +99,4 @@ function GetNotes(){
 		return server_notes_path + "/" + combo.currentItem;
 	}
 }
-
-exports.GetNotes = GetNotes;
+exports.ImportarNotes = ImportarNotes;

@@ -1,8 +1,24 @@
+include("BD_1-ScriptLIB_File.js");
 include("BD_2-ScriptLIB_Geral.js");
+/* 
+Name:		5-Criar_Note.js
 
-function AddNotes(){
+Description:	Este Script cria um novo node para criar notes e organiza no grupo de _NOTES;
+
+Usage:		Acesse pelo menu do birdoapp, e aperte no menu para criar o node.
+
+Author:		Leonardo Bazilio Bentolila
+
+Created:	Novembro, 2020; (update agosto 2025)
+            
+Copyright:   @leobazao, @camelo
+ 
+-------------------------------------------------------------------------------
+*/
+
+function CriarNote(){
+	
 	var projectDATA = BD2_ProjectInfo();
-
 	if(projectDATA.user_type != "ANIM_LEAD" && projectDATA.user_type != "DT"){
 		MessageBox.information("Apenas para supervisores.");
 		return;
@@ -19,9 +35,9 @@ function AddNotes(){
 	var composite = _notes + "/Composite";
 	var tempNotesList = node.subNodes(_notes);
 	var listNumbers = tempNotesList.filter(function(i){return node.type(i) == "READ";});
+	var nodeName = getNextNoteNAME(listNumbers);
+	var note_node = BD2_addNode("READ", _notes, nodeName, {x:0, y:0, z:0}); 
 
-	var nodeName =  getNextNoteNAME(listNumbers);
-	var a = novoDrawing(_notes, nodeName);
 	var saida = _notes + "/Multi-Port-In";
 	var addPort;
 	if(node.numberOfOutputPorts(saida) == 0){
@@ -29,19 +45,21 @@ function AddNotes(){
 	} else {
 		addPort = false;
 	}
-
-	node.link(saida, 0, a, 0, addPort, true);
-	node.link(a, 0, composite,0); 
+	
+	node.link(saida, 0, note_node, 0, addPort, true);
+	node.link(note_node, 0, composite,0); 
 
 	organizaNotes(composite);
 
 	selection.clearSelection();
-	selection.addNodeToSelection(a);
+	selection.addNodeToSelection(note_node);
 	Action.perform("onActionChooseBrushTool()");
 	node.setAsGlobalDisplay("Top/SETUP/_PREVIEW");
 	preferences.setBool("DRAWING_LIGHTTABLE_ENABLE_SHADE_FRAME_VIEW", false);
 
 	scene.endUndoRedoAccum();
+	
+	MessageBox.information("O node " + nodeName + " foi criado!\nBrush tool foi selecionada para começar a criar o Note!");
 
 /////////////////////////////////////////////FUNCOES EXTRAS////////////////////////////////////////////////////
 	function getNextNoteNAME(numeros){//pega o nome para o proximo NOTE
@@ -70,15 +88,6 @@ function AddNotes(){
 		return stamp 
 	}	
 
-	function novoDrawing(group, name){
-		var id = element.add(name, "BW", scene.numberOfUnitsZ(), "SCAN", "TVG");
-		column.add(name, "DRAWING");
-		column.setElementIdOfDrawing(name, id);
-		var tempNode = node.add(group,name, "READ", 0, 0, 0);
-		node.linkAttr(tempNode, "DRAWING.ELEMENT", name);
-		return tempNode;
-	}
-
 	function organizaNotes(comp){
 		var space = 30; // Define o espaço entre os nodes//
 		var nodesCon = node.numberOfInputPorts(comp);
@@ -93,22 +102,21 @@ function AddNotes(){
 				node.setCoord(n1, startCoordX, (startCoordY - 150));
 			}
 		}
-
-	function defineCoordXPrimeiroNode(Comp){
+		
 		//define posicao do primeiro node a direita baseado no numero de nodes conectado na comp, com espaço entre eles como parametro//
-		var xPosComp = node.coordX(Comp);
-		var coord = 0;
-		var ports = node.numberOfInputPorts(Comp);
-		for(var i=0; i<ports; i++){
-			var nC = node.srcNode(Comp,i);
-			var nodeSize = node.width(nC);
-			coord = coord + nodeSize;
+		function defineCoordXPrimeiroNode(Comp){
+			var xPosComp = node.coordX(Comp);
+			var coord = 0;
+			var ports = node.numberOfInputPorts(Comp);
+			for(var i=0; i<ports; i++){
+				var nC = node.srcNode(Comp,i);
+				var nodeSize = node.width(nC);
+				coord = coord + nodeSize;
+			}
+			var mid = Math.floor(coord / 2);		
+			var posFINAL = xPosComp + mid + node.width(node.srcNode(Comp,0));
+			return posFINAL;
 		}
-		var mid = Math.floor(coord / 2);		
-		var posFINAL = xPosComp + mid + node.width(node.srcNode(Comp,0));
-		return posFINAL;
-	}
 	}
 }
-
-exports.AddNotes = AddNotes;
+exports.CriarNote = CriarNote;
