@@ -127,7 +127,7 @@ class ConfigInit(object):
         write_json_file(self.json_session.path, session)
 
     def get_current_mode(self):
-        """retorna se o usertype e 'STANDALONE' ou 'STUDIO'"""
+        """retorna se o usertype e 'SOLO' ou 'STUDIO'"""
         if not self.json_session.exists():
             return None
         session_data = read_json_file(self.json_session.path)
