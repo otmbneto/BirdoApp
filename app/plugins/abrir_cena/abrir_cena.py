@@ -48,7 +48,7 @@ class OpenScene(QtGui.QWidget):
         self.ui = self.load_page((plugin_data["root"] / plugin_data["ui_file"]).path)
         self.ui.resize(800, 600)
         self.ui.setWindowIcon(QtGui.QIcon((plugin_data["root"] / plugin_data["icon"]).path))
-        self.ui.setWindowTitle("BirdoApp - Open Scene")
+        self.ui.setWindowTitle("{0} - {1} ({2})".format(self.birdoapp.data["name"], plugin_data["name"], plugin_data["version"]))
         # set project logo
         self.ui.logoProj.setPixmap(QtGui.QPixmap(os.path.join(self.project_data.config_folder, self.project_data.icon)))
 

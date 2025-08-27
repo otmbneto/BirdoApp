@@ -133,42 +133,6 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.v_lay.addWidget(OpenSceneDropDown)
         # -------------------------------------------------------------
 
-        # setup connections
-        self.setup_connections()
-        # useful colors
-        self.red_color = "color: rgb(255, 100, 74);"
-        self.blue_color = "color: rgb(8, 177, 203);"
-        self.recently_open = []
-        self.recently_open = self.birdoapp.load_recently_open_files()
-        for i, f in enumerate(self.recently_open):
-            item = QtGui.QListWidgetItem()
-            item.setText(f.name)
-            item.setData(3, f.path)
-            item.setToolTip(f.path)
-            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
-            self.recent_list.addItem(item)
-
-        #check if config was already created before fixing the sceneOpened.js problem
-        if self.birdoapp.harmony is not None:
-            scene_opened = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.js")
-            print("SCENE OPEN:" + scene_opened)
-            if os.path.exists(scene_opened):
-                bkp = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.bkp")
-                os.rename(scene_opened,bkp)
-
-        # add about QDialog to the birdoapp main class
-        self.about = About(self.birdoapp, parent=self)
-
-    def load_ui(self, ui_file):
-        """carreag o arquivo ui na classe"""
-        ui = QtCore.QFile(ui_file)
-        ui.open(QtCore.QFile.ReadOnly)
-        loader = QtUiTools.QUiLoader()
-        loader.registerCustomWidget(Spoiler)
-        return loader.load(ui)
-
-    def setup_connections(self):
-        """faz os connects das widgets"""
         # CREATE MENU
         self.menu = QtGui.QMenu("Menu")
         self.actionConfigurar_birdoapp = self.menu.addAction("Configurar BirdoApp")
@@ -201,11 +165,43 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.local_folder_button.clicked.connect(lambda: self.get_folder(self.ui.localFolder_line))
         self.recent_list.itemDoubleClicked.connect(self.double_click_recent)
 
-        # CONFIG STANDALONE WIDGETS
-        self.standaloneCreateBtn.clicked.connect(self.on_create_scene)
-        self.standaloneFolderBtn.clicked.connect(self.choose_standalone_directory)
-        self.ui.loadStandaloneBtn.clicked.connect(self.onLoadStandAloneBtn)
+        # CONFIG SOLO WIDGETS
+        self.soloCreateBtn.clicked.connect(self.on_create_scene)
+        self.soloFolderBtn.clicked.connect(self.choose_solo_directory)
+        self.ui.loadSoloBtn.clicked.connect(self.onLoadSoloBtn)
         self.ui.loadStudioBtn.clicked.connect(self.onLoadStudioBtn)
+
+        # useful colors
+        self.red_color = "color: rgb(255, 100, 74);"
+        self.blue_color = "color: rgb(8, 177, 203);"
+        self.recently_open = []
+        self.recently_open = self.birdoapp.load_recently_open_files()
+        for i, f in enumerate(self.recently_open):
+            item = QtGui.QListWidgetItem()
+            item.setText(f.name)
+            item.setData(3, f.path)
+            item.setToolTip(f.path)
+            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
+            self.recent_list.addItem(item)
+
+        #check if config was already created before fixing the sceneOpened.js problem
+        if self.birdoapp.harmony is not None:
+            scene_opened = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.js")
+            print("SCENE OPEN:" + scene_opened)
+            if os.path.exists(scene_opened):
+                bkp = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.bkp")
+                os.rename(scene_opened,bkp)
+
+        # add about QDialog to the birdoapp main class
+        self.about = About(self.birdoapp, parent=self)
+
+    def load_ui(self, ui_file):
+        """carreag o arquivo ui na classe"""
+        ui = QtCore.QFile(ui_file)
+        ui.open(QtCore.QFile.ReadOnly)
+        loader = QtUiTools.QUiLoader()
+        loader.registerCustomWidget(Spoiler)
+        return loader.load(ui)
 
     def closeEvent(self, event):
         print "session terminated!"
@@ -218,8 +214,8 @@ class BirdoApp(QtGui.QMainWindow):
         if not self.birdoapp.is_ready():
             self.load_config_app_page()
             return
-        if self.birdoapp.get_current_mode() == "STANDALONE":
-            self.load_standalone_page()
+        if self.birdoapp.get_current_mode() == "SOLO":
+            self.load_solo_page()
         elif self.birdoapp.get_current_mode() == "STUDIO":
             if not self.birdoapp.is_studio_ready():
                 self.load_config_studio_page()
@@ -230,71 +226,71 @@ class BirdoApp(QtGui.QMainWindow):
         self.birdoapp.update_session("STUDIO")
         self.go_home()
 
-    def onLoadStandAloneBtn(self):
-        self.birdoapp.update_session("STANDALONE")
+    def onLoadSoloBtn(self):
+        self.birdoapp.update_session("SOLO")
         self.go_home()
 
     def getCreateSceneLayout(self):
         vLayout = QtGui.QVBoxLayout()
         hLayout = QtGui.QHBoxLayout()
-        standaloneNameLabel = QtGui.QLabel("Nome: ")
-        standaloneNameLabel.setMinimumSize(60, 20)
-        self.standaloneNameLine = QtGui.QLineEdit()
-        self.standaloneNameLine.setMinimumSize(200, 20)
-        self.standaloneCreateBtn = QtGui.QPushButton("Criar")
-        self.standaloneCreateBtn.setStyleSheet("color: white;")
-        self.standaloneCreateBtn.setMinimumSize(65, 20)
-        hLayout.addWidget(standaloneNameLabel)
-        hLayout.addWidget(self.standaloneNameLine)
-        hLayout.addWidget(self.standaloneCreateBtn)
+        soloNameLabel = QtGui.QLabel("Nome: ")
+        soloNameLabel.setMinimumSize(60, 20)
+        self.soloNameLine = QtGui.QLineEdit()
+        self.soloNameLine.setMinimumSize(200, 20)
+        self.soloCreateBtn = QtGui.QPushButton("Criar")
+        self.soloCreateBtn.setStyleSheet("color: white;")
+        self.soloCreateBtn.setMinimumSize(65, 20)
+        hLayout.addWidget(soloNameLabel)
+        hLayout.addWidget(self.soloNameLine)
+        hLayout.addWidget(self.soloCreateBtn)
         vLayout.addLayout(hLayout)
         # -----------------------------
         hLayout = QtGui.QHBoxLayout()
-        standaloneLocationLabel = QtGui.QLabel("Local: ")
-        standaloneLocationLabel.setMinimumSize(60, 20)
-        self.standaloneLocationLine = QtGui.QLineEdit()
-        self.standaloneLocationLine.setMinimumSize(200, 20)
-        self.standaloneFolderBtn = QtGui.QPushButton()
+        soloLocationLabel = QtGui.QLabel("Local: ")
+        soloLocationLabel.setMinimumSize(60, 20)
+        self.soloLocationLine = QtGui.QLineEdit()
+        self.soloLocationLine.setMinimumSize(200, 20)
+        self.soloFolderBtn = QtGui.QPushButton()
         folder_icon = QtGui.QIcon(self.birdoapp.icons["folder"])
-        self.standaloneFolderBtn.setIcon(folder_icon)
-        self.standaloneFolderBtn.setMinimumSize(65, 20)
-        hLayout.addWidget(standaloneLocationLabel)
-        hLayout.addWidget(self.standaloneLocationLine)
-        hLayout.addWidget(self.standaloneFolderBtn)
+        self.soloFolderBtn.setIcon(folder_icon)
+        self.soloFolderBtn.setMinimumSize(65, 20)
+        hLayout.addWidget(soloLocationLabel)
+        hLayout.addWidget(self.soloLocationLine)
+        hLayout.addWidget(self.soloFolderBtn)
         vLayout.addLayout(hLayout)
         # -----------------------------
         hLayout = QtGui.QHBoxLayout()
-        standaloneTemplateLabel = QtGui.QLabel("Template: ")
-        standaloneTemplateLabel.setMinimumSize(60, 20)
-        standaloneTemplateLabel.setMaximumSize(60, 20)
-        self.standaloneTemplateBox = QtGui.QComboBox()
-        self.standaloneTemplateBox.setMinimumSize(200, 20)
+        soloTemplateLabel = QtGui.QLabel("Template: ")
+        soloTemplateLabel.setMinimumSize(60, 20)
+        soloTemplateLabel.setMaximumSize(60, 20)
+        self.soloTemplateBox = QtGui.QComboBox()
+        self.soloTemplateBox.setMinimumSize(200, 20)
         for name in ["ASSET_template", "SCENE_template"]:
-            self.standaloneTemplateBox.addItem(name)
-        hLayout.addWidget(standaloneTemplateLabel)
-        hLayout.addWidget(self.standaloneTemplateBox)
+            self.soloTemplateBox.addItem(name)
+        hLayout.addWidget(soloTemplateLabel)
+        hLayout.addWidget(self.soloTemplateBox)
         vLayout.addLayout(hLayout)
         return vLayout
 
     def getOpenSceneLayout(self):
         vLayout = QtGui.QVBoxLayout()
         openSceneLbl = QtGui.QLabel("Abrir arquivo de Harmony existente no computador:")
-        self.standaloneOpenBtn = QtGui.QPushButton("Abrir arquivo")
-        self.standaloneOpenBtn.setStyleSheet("color: white;")
-        self.standaloneOpenBtn.clicked.connect(self.on_open_standalone)
+        self.soloOpenBtn = QtGui.QPushButton("Abrir arquivo")
+        self.soloOpenBtn.setStyleSheet("color: white;")
+        self.soloOpenBtn.clicked.connect(self.on_open_solo)
         self.recentGrp = QtGui.QGroupBox("Abertos recentemente")
         self.recentGrp.setStyleSheet("color: gray;")
         recent_layout = QtGui.QVBoxLayout()
         self.recentGrp.setLayout(recent_layout)
         recent_layout.addWidget(self.recent_list)
         vLayout.addWidget(openSceneLbl)
-        vLayout.addWidget(self.standaloneOpenBtn)
+        vLayout.addWidget(self.soloOpenBtn)
         vLayout.addWidget(self.recentGrp)
         return vLayout
 
     def on_create_scene(self):
-        location = str(self.standaloneLocationLine.text())
-        scene_name = str(self.standaloneNameLine.text())
+        location = str(self.soloLocationLine.text())
+        scene_name = str(self.soloNameLine.text())
         if len(location) == 0:
             print("ERROR: No location was selected")
             return
@@ -307,7 +303,7 @@ class BirdoApp(QtGui.QMainWindow):
             print("ERROR: you must choose a name for the new scene")
             return
 
-        template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.standaloneTemplateBox.currentText()))
+        template = Path(os.path.join(self.birdoapp.root, 'template', 'project_template', self.soloTemplateBox.currentText()))
         template = template.copy_folder(location).rename(scene_name)
         for script in ["TB_sceneOpenPreUI.js", "createASSET.ui"]:
             script_path = template / "scripts" / script
@@ -319,7 +315,7 @@ class BirdoApp(QtGui.QMainWindow):
         #self.update_recently_open(xstage)
         self.birdoapp.update_recently_open_files(self.recently_open,xstage)
 
-    def on_open_standalone(self):
+    def on_open_solo(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
         xstage = QtGui.QFileDialog().getOpenFileName(
             self, "Escolha Arquivo xstage",
@@ -376,8 +372,10 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.progressBar.setValue(0)
         # Checa se o caminho de config do server e valido (se for invalido joga pra pagina de config studio)
         if not self.birdoapp.is_server_available():
-            self.birdoapp.mb.warning(u"Falha ao conectar o caminho do servidor do Estúdio. Confira se o caminho está correto, e se tem acesso a pasta. Caso use VPN,verifique se está conectada. No momento o modo standalone vai ser iniciado.")
-            self.load_standalone_page()
+            self.birdoapp.mb.warning(u"Falha ao conectar o caminho do servidor do Estúdio. Confira se o caminho está "
+                                     u"correto, e se tem acesso a pasta. "
+                                     u"Caso use VPN, verifique se está conectada. No momento o modo solo vai ser iniciado.")
+            self.load_solo_page()
             return
 
         # hide update button
@@ -415,18 +413,18 @@ class BirdoApp(QtGui.QMainWindow):
         # SETS THE CURRENT HEADER
         self.update_foot_label(u"Bem Vind@ ao BirdoApp...", self.blue_color)
 
-    def choose_standalone_directory(self):
+    def choose_solo_directory(self):
         input_dir = QtGui.QFileDialog.getExistingDirectory(self, 'Select a folder:')
-        self.standaloneLocationLine.setText(input_dir)
+        self.soloLocationLine.setText(input_dir)
 
-    def load_standalone_page(self):
+    def load_solo_page(self):
         self.ui.stackedWidget.setCurrentIndex(5)
 
         # HIDE update button
         self.ui.update_button.hide()
         # SETS THE CURRENT HEADER
         self.ui.header.setText("BIRDOAPP")
-        self.ui.sub_header.setText(u"Modo 'Standalone' selecionado!")
+        self.ui.sub_header.setText(u"Modo 'Solo' selecionado!")
         self.update_foot_label(u"Bem vind@ {0}...".format(self.birdoapp.config_data["user_name"]), self.blue_color)
 
     def load_config_app_page(self):

@@ -231,7 +231,7 @@ QPushButton::menu-indicator {
           </widget>
          </widget>
          <widget class="QWidget" name="loading_page">
-          <widget class="QPushButton" name="loadStandaloneBtn">
+          <widget class="QPushButton" name="loadSoloBtn">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -244,7 +244,7 @@ QPushButton::menu-indicator {
             <string notr="true">color:white;</string>
            </property>
            <property name="text">
-            <string>Standalone</string>
+            <string>Solo</string>
            </property>
           </widget>
           <widget class="QPushButton" name="loadStudioBtn">
