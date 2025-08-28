@@ -105,19 +105,18 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 	}	
 	
 	//cria os menus
-	var ajuda_msg = "";
+	var ajuda_msg = "\n<h1>Ajuda Birdoapp</h1>";
 	for(var i=0; i<menuScripts.length; i++){
 		Print("Menu script criado: " + menuScripts[i]);
 		
-		if(!check_permission(menuScripts[i], entity_filter, mode, projDATA.entity.type, user_permission)){
-			continue;
-		}
+		var enable = check_permission(menuScripts[i], entity_filter, mode, projDATA.entity.type, user_permission);
+		
 		
 		var funcName = BD2_RenameAll((menuScripts[i].split("-")[1]).replace(".js", ""), "_", "");
 		var itemName = BD2_RenameAll(menuScripts[i].replace(".js", ""), "_", " ");
 		var jsPath = menuPath + menuScripts[i];
 		var descripition = BD1_ReadFile(jsPath.replace(".js", ".tooltip"));
-		ajuda_msg += (itemName + "\n" + descripition + "\n------\n")
+		ajuda_msg += ("<h2>" + itemName.split("-")[1] + "</h2><b>" + descripition + "</b>")
 		try {
 			//cria o shortcut
 			ScriptManager.addShortcut({id   : "BirdoApp_" + funcName + "_Shortcut",
@@ -141,6 +140,7 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 			}
 			var action = menu.addAction(itemName.split("-")[1]);
 			action.triggered.connect(this, eval("require(jsPath)." + funcName));
+			action.setEnabled(enable);
 		} catch (err){
 			Print("[BIRDOAPP] error creating birdo Menu:");
 			Print(err);
@@ -152,6 +152,22 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 	var ajuda = menus["main"].addAction("Ajuda");
 	ajuda.triggered.connect(this, function() {
 		MessageBox.information(ajuda_msg);
+	});
+	var terms = menus["main"].addAction("Termos Legais");
+	terms.triggered.connect(this, function() {	
+		var pythonPath = projDATA.birdoApp + "venv/Scripts/python";
+		var pyFile = projDATA.birdoApp + "app/utils/birdoapp_about.py";
+		var start = Process2(pythonPath, pyFile, "terms");
+		var ret = start.launch();
+		MessageLog.trace("Terms display python call: " + ret);
+	});
+	var creditos = menus["main"].addAction("Créditos");
+	creditos.triggered.connect(this, function() {	
+		var pythonPath = projDATA.birdoApp + "venv/Scripts/python";
+		var pyFile = projDATA.birdoApp + "app/utils/birdoapp_about.py";
+		var start = Process2(pythonPath, pyFile, "credits");
+		var ret = start.launch();
+		MessageLog.trace("Credits display python call: " + ret);
 	});
 	
 	

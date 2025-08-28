@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 import io
-from PySide.QtGui import QDialog, QTextEdit, QVBoxLayout
+from PySide.QtGui import QDialog, QTextEdit, QVBoxLayout, QApplication, QIcon
 from birdo_pathlib import Path
+import os
+import sys
+import argparse
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from config import ConfigInit
 
 
 def convert_markdown(markdown_text):
@@ -68,3 +73,29 @@ class About(QDialog):
     def show_credits(self):
         self.text_edit.setHtml(self.credits_rt)
         self.show()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Birdoapp About')
+    parser.add_argument("action", type=str, choices=["terms", "credits"],
+                        help="Choose action. Options are: terms (to display terms information) "
+                             "credits (to display credits information)")
+
+    args = parser.parse_args()
+
+    # arguments
+    action = args.action
+
+    # perform action
+    app = QApplication([])
+
+    # config class
+    birdoapp = ConfigInit()
+    d = About(birdoapp)
+    d.setWindowIcon(QIcon(birdoapp.icons["logo"]))
+    if action == "terms":
+        d.show_terms()
+    elif action == "credits":
+        d.show_credits()
+
+    sys.exit(app.exec_())
