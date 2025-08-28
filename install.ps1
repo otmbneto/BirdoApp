@@ -43,8 +43,9 @@ function downloadFile($url, $targetFile, $title, $end) {
 function Get-GitRelease($repo,$dst,$type,$file){
 
     if($type -eq "Source"){
-        $response = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/releases/latest"
-        $tag = $response.tag_name
+        $response = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/releases"
+        $response = $response | Sort-Object { [datetime]$_.published_at } -Descending #ensure that the first release of the list is the most recent one.
+        $tag = $response[0].tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
         $msg = "Baixando arquivos do repositório do BirdoApp..." #FIXME weird :|
