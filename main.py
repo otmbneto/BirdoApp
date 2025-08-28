@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from app.birdoapp import BirdoApp
 from app.birdoapp_tools import DevTools
+from app.utils import birdo_json
 from PySide import QtGui
 import argparse
 import sys
@@ -8,11 +9,16 @@ import os
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
+def getRepository():
+
+    app_data = os.path.join(app_root,"app.json")
+    json_data = birdo_json.read_json_file(app_data)
+    return json_data["repository"] if "repository" in json_data.keys() else None
 
 def get_last_release(main_app):
-    cmd = "powershell.exe {0}".format(os.path.join(main_app, "update.ps1"))
-    print(cmd)
-    return os.system(cmd) if main_app is not None else 0
+    repo = getRepository()
+    cmd = "powershell.exe {0} \"{1}\"".format(os.path.join(main_app, "update.ps1"),repo)
+    return os.system(cmd) if (main_app is not None and repo is not None) else 0
 
 
 def get_arguments():
