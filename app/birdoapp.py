@@ -537,7 +537,7 @@ class BirdoApp(QtGui.QMainWindow):
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
         button.clicked.connect(lambda: self.project_selected(project))
-        button.setToolTip(project["name"])
+        button.setToolTip("<h3>{0}</h3><b>{1}</b>".format(project["name"], project["sub_name"]))
         return button
 
     def project_selected(self, project):
@@ -562,7 +562,7 @@ class BirdoApp(QtGui.QMainWindow):
         button.setToolTip(plugin["name"])
         button.setIcon(QtGui.QIcon((plugin["root"] / plugin["icon"]).path))
         button.setIconSize(QtCore.QSize(100, 100))
-        button.setToolTip("{0} {1}\n{2}".format(plugin["name"], plugin["version"], plugin["description"]))
+        button.setToolTip("<h4>{0} - {1}</h4><b>{2}</b>".format(plugin["name"], plugin["version"], plugin["description"]))
         BUTTON_SIZE = QtCore.QSize(115, 115)
         button.setMinimumSize(BUTTON_SIZE)
         button.setMaximumSize(BUTTON_SIZE)
