@@ -3,5 +3,6 @@
   "name": "BirdoApp",
   "release": "BETA 1.8",
   "release_date": "19 de Julho de 2025",
-  "release_notes": "Versao BETA para testes internos."
+  "release_notes": "Versao BETA para testes internos.",
+  "repository": "otmbneto/BirdoApp"
 }
