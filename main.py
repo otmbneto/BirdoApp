@@ -9,15 +9,16 @@ import os
 
 app_root = os.path.dirname(os.path.realpath(__file__))
 
-def getRepository():
 
-    app_data = os.path.join(app_root,"app.json")
+def get_repository():
+    app_data = os.path.join(app_root, "app.json")
     json_data = birdo_json.read_json_file(app_data)
     return json_data["repository"] if "repository" in json_data.keys() else None
 
+
 def get_last_release(main_app):
-    repo = getRepository()
-    cmd = "powershell.exe {0} \"{1}\"".format(os.path.join(main_app, "update.ps1"),repo)
+    repo = get_repository()
+    cmd = "powershell.exe {0} \"{1}\"".format(os.path.join(main_app, "update.ps1"), repo)
     return os.system(cmd) if (main_app is not None and repo is not None) else 0
 
 
