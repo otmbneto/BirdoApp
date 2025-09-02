@@ -1,4 +1,4 @@
-Add-Type -Assembly System.IO.Compression.FileSystem
+﻿Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
@@ -266,17 +266,18 @@ $host.UI.ReadLine()
 
 $birdoApp = "$env:APPDATA\BirdoApp"
 #check if birdoapp is already installed and if it is still using git. 
-if((Test-Path $birdoApp) -and (Test-Path "$birdoApp\.git")){
+if(Test-Path $birdoApp){
 
-    Remove-Item -Force -Recurse -Path "$birdoApp"
+    if(Test-Path "$birdoApp\.git"){
+        Remove-Item -Force -Recurse -Path "$birdoApp"
+    }else{
+        echo "Parece que o BirdoApp já está instalado em seu computador."
+        echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
+        echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
+        Start-Sleep -Seconds 2
+        exit
+    }
 
-}
-
-if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
-    echo "Parece que o BirdoApp já está instalado em seu computador."
-    echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
-    echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
-    exit
 }
 
 $termsS = (irm -Uri https://raw.githubusercontent.com/otmbneto/BirdoApp/refs/heads/config_proj3/TERMS.md).replace("**", "")
