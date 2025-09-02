@@ -104,6 +104,22 @@ function createMenu(projDATA, mode){//Cria o Menu na UI do programa
 		"main": menuBar.addMenu("BirdoApp")
 	}	
 	
+	//cria primeiro item do menu: abrir cena
+	var abrir_folder = menus["main"].addAction("Abrir Diretório");
+	abrir_folder.triggered.connect(this, function() {
+		var scene_folder = scene.currentProjectPath();
+		var command = System.getenv("windir") + "/explorer.exe";
+		process = new Process2(fileMapper.toNativePath(command), fileMapper.toNativePath(scene_folder));
+		var ret = process.launch();
+		MessageLog.trace(ret);
+		if(ret != 1){
+			MessageBox.information("Erro ao tentar abrir folder: " + scene_folder);
+		} else {
+			MessageLog.trace("Folder opened: " + scene_folder);
+		}
+	});
+	menus["main"].addSeparator();
+
 	//cria os menus
 	var ajuda_msg = "\n<h1>Ajuda Birdoapp</h1>";
 	for(var i=0; i<menuScripts.length; i++){

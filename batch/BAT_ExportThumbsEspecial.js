@@ -22,7 +22,7 @@ create_tpl_metadata();
 
 function save_metadata_to_JSON(assetInfo){//salva json com metadata do tpl salvo
 	var jsonFile = scene.currentProjectPath() + "/saveTPL.JSON";
-	var metadata = {"user": "OttoniBastos#0366",
+	var metadata = {"user": about.getUserName(),
 					"info" : assetInfo,
 					"original_file" : scene.currentProjectPath() + "/" + scene.currentVersionName() + ".xstage",
 					"date" : new Date(),
