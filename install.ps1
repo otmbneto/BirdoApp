@@ -1,4 +1,4 @@
-﻿Add-Type -Assembly System.IO.Compression.FileSystem
+Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
@@ -7,32 +7,38 @@ function downloadFile($url, $targetFile, $title, $end) {
     $dots = "⠻⠽⠾⠷⠯⠟"
     $inc = 0
     $uri = New-Object "System.Uri" "$url"
-    $request = [System.Net.HttpWebRequest]::Create($uri)
-    $request.set_Timeout(10000)
-    $response = $request.GetResponse()
-    # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
-    $responseStream = $response.GetResponseStream()
-    $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
-    $buffer = new-object byte[] 10KB
-    $count = $responseStream.Read($buffer,0,$buffer.length)
-    # $downloadedBytes = $count
-    while ($count -gt 0) {
-        # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
-        if ($title -ne $null) {
-            Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
-        }
-        $targetStream.Write($buffer, 0, $count)
-        $count = $responseStream.Read($buffer,0,$buffer.length)
-        # $downloadedBytes = $downloadedBytes + $count
-        $inc = ($inc + 1) % 6000
+    try{
+            $request = [System.Net.HttpWebRequest]::Create($uri)
+            $request.set_Timeout(10000)
+            $response = $request.GetResponse()
+            # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
+            $responseStream = $response.GetResponseStream()
+            $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
+            $buffer = new-object byte[] 10KB
+            $count = $responseStream.Read($buffer,0,$buffer.length)
+            # $downloadedBytes = $count
+            while ($count -gt 0) {
+                # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
+                if ($title -ne $null) {
+                    Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
+                }
+                $targetStream.Write($buffer, 0, $count)
+                $count = $responseStream.Read($buffer,0,$buffer.length)
+                # $downloadedBytes = $downloadedBytes + $count
+                $inc = ($inc + 1) % 6000
+            }
+            if ($title -ne $null) {
+                Write-Host ($dots[[Math]::Floor($inc / 1000)] + " " + $title)
+            }
+            $targetStream.Flush()
+            $targetStream.Close()
+            $targetStream.Dispose()
+            $responseStream.Dispose()
+
     }
-    if ($title -ne $null) {
-        Write-Host ($dots[[Math]::Floor($inc / 1000)] + " " + $title)
+    catch{
+        $_ > $logdir\downloadErr.log
     }
-    $targetStream.Flush()
-    $targetStream.Close()
-    $targetStream.Dispose()
-    $responseStream.Dispose()
     if ($end -ne $null) {
         & $gum style --border=double --align=center --padding="1 4" $end
     }
