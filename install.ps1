@@ -37,7 +37,10 @@ function downloadFile($url, $targetFile, $title, $end) {
 
     }
     catch{
-        $_ > $logdir\downloadErr.log
+        $_ >> $logdir\downloadErr.log
+        Write-Host "Erro durante download de: " $url
+        Start-Sleep -Seconds 2
+        exit 1
     }
     if ($end -ne $null) {
         & $gum style --border=double --align=center --padding="1 4" $end
