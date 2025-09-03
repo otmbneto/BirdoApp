@@ -7,32 +7,41 @@ function downloadFile($url, $targetFile, $title, $end) {
     $dots = "⠻⠽⠾⠷⠯⠟"
     $inc = 0
     $uri = New-Object "System.Uri" "$url"
-    $request = [System.Net.HttpWebRequest]::Create($uri)
-    $request.set_Timeout(10000)
-    $response = $request.GetResponse()
-    # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
-    $responseStream = $response.GetResponseStream()
-    $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
-    $buffer = new-object byte[] 10KB
-    $count = $responseStream.Read($buffer,0,$buffer.length)
-    # $downloadedBytes = $count
-    while ($count -gt 0) {
-        # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
-        if ($title -ne $null) {
-            Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
-        }
-        $targetStream.Write($buffer, 0, $count)
-        $count = $responseStream.Read($buffer,0,$buffer.length)
-        # $downloadedBytes = $downloadedBytes + $count
-        $inc = ($inc + 1) % 6000
+    try{
+            $request = [System.Net.HttpWebRequest]::Create($uri)
+            $request.set_Timeout(10000)
+            $response = $request.GetResponse()
+            # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
+            $responseStream = $response.GetResponseStream()
+            $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
+            $buffer = new-object byte[] 10KB
+            $count = $responseStream.Read($buffer,0,$buffer.length)
+            # $downloadedBytes = $count
+            while ($count -gt 0) {
+                # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
+                if ($title -ne $null) {
+                    Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
+                }
+                $targetStream.Write($buffer, 0, $count)
+                $count = $responseStream.Read($buffer,0,$buffer.length)
+                # $downloadedBytes = $downloadedBytes + $count
+                $inc = ($inc + 1) % 6000
+            }
+            if ($title -ne $null) {
+                Write-Host ($dots[[Math]::Floor($inc / 1000)] + " " + $title)
+            }
+            $targetStream.Flush()
+            $targetStream.Close()
+            $targetStream.Dispose()
+            $responseStream.Dispose()
+
     }
-    if ($title -ne $null) {
-        Write-Host ($dots[[Math]::Floor($inc / 1000)] + " " + $title)
+    catch{
+        $_ >> $logdir\downloadErr.log
+        Write-Host "Erro durante download de: " $url
+        Start-Sleep -Seconds 2
+        exit 1
     }
-    $targetStream.Flush()
-    $targetStream.Close()
-    $targetStream.Dispose()
-    $responseStream.Dispose()
     if ($end -ne $null) {
         & $gum style --border=double --align=center --padding="1 4" $end
     }
@@ -266,17 +275,18 @@ $host.UI.ReadLine()
 
 $birdoApp = "$env:APPDATA\BirdoApp"
 #check if birdoapp is already installed and if it is still using git. 
-if((Test-Path $birdoApp) -and (Test-Path "$birdoApp\.git")){
+if(Test-Path $birdoApp){
 
-    Remove-Item -Force -Recurse -Path "$birdoApp"
+    if(Test-Path "$birdoApp\.git"){
+        Remove-Item -Force -Recurse -Path "$birdoApp"
+    }else{
+        echo "Parece que o BirdoApp já está instalado em seu computador."
+        echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
+        echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
+        Start-Sleep -Seconds 2
+        exit
+    }
 
-}
-
-if ((ls -Name  $env:APPDATA | Select-String BirdoApp).length -gt 0) {
-    echo "Parece que o BirdoApp já está instalado em seu computador."
-    echo "Inicie o BirdoApp para usar ou buscar atualizações.`n"
-    echo "Caso precise de ajuda acesse https://birdo.com.br/birdoapp"
-    exit
 }
 
 $termsS = (irm -Uri https://raw.githubusercontent.com/otmbneto/BirdoApp/refs/heads/config_proj3/TERMS.md).replace("**", "")
