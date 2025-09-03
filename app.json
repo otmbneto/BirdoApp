@@ -1,8 +1,8 @@
 {
-  "credits": "@birdo 2025",
+  "credits": "@ 2025 Birdo Filmes em Animacao LTDA",
   "name": "BirdoApp",
-  "release": "BETA 1.8",
-  "release_date": "19 de Julho de 2025",
-  "release_notes": "Versao BETA para testes internos.",
+  "release": "BirdoApp.1.0 (teste local)",
+  "release_date": "03 de Setembro de 2025",
+  "release_notes": "Versao de lancamento do BirdoApp para realizar ultimo teste.",
   "repository": "otmbneto/BirdoApp"
 }
