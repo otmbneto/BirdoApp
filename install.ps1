@@ -1,6 +1,18 @@
 Add-Type -Assembly System.IO.Compression.FileSystem
 $ProgressPreference = 'SilentlyContinue'
 
+### troca rápida ###
+
+$GUM_REPO          = "charmbracelet/gum"
+$GUM_FILE_MATCH    = "^gum_\d+\.\d+\.\d+_Windows_x86_64.zip$"
+
+$FFMPEG_REPO       = "BtbN/FFmpeg-Builds"
+$FFMPEG_FILE_MATCH = "^ffmpeg-master-latest-win64-gpl.zip$"
+
+$BIRDOAPP_REPO     = "otmbneto/BirdoApp"
+
+####################
+
 $logdir = mkdir ($env:temp + "\" + (Get-Date -Format "yyyyMMdd_HHmmss") + "_BirdoAppInstallationLogs")
 
 function downloadFile($url, $targetFile, $title, $end) {
@@ -45,7 +57,7 @@ function downloadFile($url, $targetFile, $title, $end) {
 
 
 #download the last release of a giving repo
-function Get-GitRelease($repo,$dst,$type,$file){
+function Get-GitRelease($repo, $dst, $type, $filematch, $titlemsg, $endmsg){
 
     if($type -eq "Source"){
         $response = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/releases"
@@ -53,24 +65,27 @@ function Get-GitRelease($repo,$dst,$type,$file){
         $tag = $response[0].tag_name
         $download = "https://github.com/$repo/archive/refs/tags/$tag.zip"
         $zip = "source-lastest-master.zip"
-        $msg = "Baixando arquivos do repositório do BirdoApp..." #FIXME weird :|
-        $end = "Arquivos do BirdoApp baixados!"  #FIXME weird :|
     }
     elseif($type -eq "Binary"){
-        $releases = "https://api.github.com/repos/$repo/releases"
-        $tag = (Invoke-WebRequest -UseBasicParsing $releases | ConvertFrom-Json)[0].tag_name
-        $download = "https://github.com/$repo/releases/download/$tag/$file"
-        $name = $file.Split(".")[0]
-        $zip = "$name-$tag.zip"
-        $msg = "Baixando Ffmpeg..." #FIXME weird :|
-        $end = "Baixou Ffmpeg!"  #FIXME weird :|
-    }
-    else{
-
+        $releasesUrl = "https://api.github.com/repos/$repo/releases"
+        $lastRelease = (Invoke-WebRequest -UseBasicParsing $releasesUrl | ConvertFrom-Json)[0]
+        if($null -eq $lastRelease.assets){
+            echo "Requisição dos releases do $repo não retornou lista de assets."
+            return $null
+        }
+        $asset=((($lastRelease.psobject.Properties | Where-Object {$_.name -eq "assets"}).value) | Where-Object {$_.name -match $filematch})
+        if($asset -is [System.Array]){
+            echo "Mais de um release combina com o termo $filematch."
+            return $null
+        }
+        $filename=$asset.name
+        $download = $asset.browser_download_url
+        $zip = $filename
+    }else{
         return $null
     }
 
-    downloadFile $download $dst\$zip $msg $end
+    downloadFile $download $dst\$zip $titlemsg $endmsg
 
     return "$dst\$zip"
 
@@ -87,7 +102,7 @@ function Download-Ffmpeg($app_folder){
         New-Item -ItemType Directory -Force -Path $ffmpegInstall > $null
     }
 
-    $returnedObject = Get-GitRelease "BtbN/FFmpeg-Builds" $ffmpegInstall "Binary" "ffmpeg-master-latest-win64-gpl.zip"
+    $returnedObject = Get-GitRelease $FFMPEG_REPO $ffmpegInstall "Binary" $FFMPEG_FILE_MATCH "Baixando FFMpeg." "FFMpeg baixado!"
     $zipFile = $returnedObject[$returnedObject.length - 1]
 
     # Expand the archive using PowerShell's System.IO.Compression.FileSystem
@@ -254,9 +269,9 @@ if ((get-item ($env:temp + "\gum_0.15.0_Windows_x86_64") 2> $null) -ne $null) {
     rm -Recurse ($env:temp + "\gum_0.15.0_Windows_x86_64")
 }
 
-downloadFile "https://github.com/charmbracelet/gum/releases/download/v0.15.0/gum_0.15.0_Windows_x86_64.zip" "$env:TEMP\gum.zip"
-[IO.Compression.ZipFile]::ExtractToDirectory("$env:TEMP\gum.zip", $env:TEMP)
-$gum = ($env:TEMP + "\gum_0.15.0_Windows_x86_64\gum.exe")
+$gumZippedFile = Get-GitRelease $GUM_REPO "$env:TEMP" "Binary" $GUM_FILE_MATCH
+[IO.Compression.ZipFile]::ExtractToDirectory($gumZippedFile, $env:TEMP)
+$gum = ($gumZippedFile.Replace(".zip", "") + "\gum.exe")
 
 function AskYesNo ($question){
     & $gum confirm --no-show-help --affirmative="Sim" --negative="Não" $question
@@ -373,7 +388,7 @@ if(Test-Path $birdoTemp){
 }
 
 New-Item -Path "$env:TEMP" -Name "BirdoApp" -ItemType "directory" > $null
-$returnedObject = Get-GitRelease "otmbneto/BirdoApp" $birdoTemp "Source"
+$returnedObject = Get-GitRelease $BIRDOAPP_REPO $birdoTemp "Source" "FILE_MATCH_NOT_USED" "Baixando arquivos do repositório do BirdoApp..." "Arquivos do BirdoApp baixados!"
 $gitpath = $returnedObject[$returnedObject.length - 1]
 [IO.Compression.ZipFile]::ExtractToDirectory($gitpath, $birdoTemp)
 Remove-Item -Path "$gitpath" -Force
