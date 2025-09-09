@@ -265,8 +265,8 @@ if ((get-item $env:temp\gum.zip 2> $null) -ne $null) {
     rm $env:temp\gum.zip
 }
 
-if ((get-item ($env:temp + "\gum_0.15.0_Windows_x86_64") 2> $null) -ne $null) {
-    rm -Recurse ($env:temp + "\gum_0.15.0_Windows_x86_64")
+if ((get-item ($env:temp + "\gum_*_Windows_x86_64") 2> $null) -ne $null) {
+    rm -Recurse ($env:temp + "\gum_*_Windows_x86_64")
 }
 
 $gumZippedFile = Get-GitRelease $GUM_REPO "$env:TEMP" "Binary" $GUM_FILE_MATCH
