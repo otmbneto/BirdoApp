@@ -11,20 +11,16 @@ function downloadFile($url, $targetFile, $title, $end) {
             $request = [System.Net.HttpWebRequest]::Create($uri)
             $request.set_Timeout(10000)
             $response = $request.GetResponse()
-            # $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
             $responseStream = $response.GetResponseStream()
             $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
             $buffer = new-object byte[] 10KB
             $count = $responseStream.Read($buffer,0,$buffer.length)
-            # $downloadedBytes = $count
             while ($count -gt 0) {
-                # $loopString = ("Baixados " + [String]([System.Math]::Floor($downloadedBytes/1024)) + "kb de " + [String]($totalLength) + "kb`r")
                 if ($title -ne $null) {
                     Write-Host -NoNewline ($dots[[Math]::Floor($inc / 1000)] + " " + $title + "`r")
                 }
                 $targetStream.Write($buffer, 0, $count)
                 $count = $responseStream.Read($buffer,0,$buffer.length)
-                # $downloadedBytes = $downloadedBytes + $count
                 $inc = ($inc + 1) % 6000
             }
             if ($title -ne $null) {
@@ -116,7 +112,6 @@ function Download-Ffmpeg($app_folder){
 }
 
 function Download-Python($python_path){
-    #downloadFile "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
     downloadFile "$python_path" "$PWD\python27.msi" "Baixando instalador do Python 2.7..." "Baixou Python 2.7!"
     if(Test-Path "$PWD\python27.msi"){
         Start-Process msiexec.exe -ArgumentList "/passive", "/i", "$PWD\python27.msi" -Wait
