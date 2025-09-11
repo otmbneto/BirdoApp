@@ -76,13 +76,17 @@ function BD_FindDrawingWithColour(){
 	//EXTRA FUNCTIONS
 	function getNodeInfo(nodePath, colorId){//funcao que descobre se o node contem a cor e retorna objeto com informacoes de drawings
 		var id = node.getElementId(nodePath);
+		if(id <= 0){
+			Print("invalid node : " + nodePath);
+			return false;
+		}
+		
 		var nodeObj = {"node": nodePath, "drawings": []};
 		var thumbnailsFolder = element.completeFolder(id) + "/.thumbnails/";
 		
 		if(duplicate_check_list.indexOf(id) != -1){
 			return false;
 		}
-		
 		for(var i=0; i<Drawing.numberOf(id); i++){
 			var drawName = Drawing.name(id, i);		
 			var drawfile = Drawing.filename(id, drawName);
