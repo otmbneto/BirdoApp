@@ -31,7 +31,7 @@ function BD_Select_Up_Node(){
 	Action.perform("onActionHideDeformer(QString)","miniPegModuleResponder", nodeSelected);
 	Action.perform("onActionHideAllControls()");	
 
-	var nextNode = getNextNode(nodeSelected);
+	var nextNode = getNextNode();
 	if(!nextNode){
 		Print("[BD_SELECTUPNODE] End of navigation!!");
 		return;
@@ -60,12 +60,13 @@ function BD_Select_Up_Node(){
 		}
 	}
 	
-	function getNextNode(initNode){
-		var nextnode = node.srcNode(initNode, 0);
+	function getNextNode(){
+
+		Action.perform("onActionNaviSelectParent()", "Node View");
+		var nextnode = selection.selectedNode(0);
 		if(node.type(nextnode) == "MULTIPORT_IN"){//pula grupos de dentro
 			nextnode = node.parentNode(nextnode);
 		}
-		
 		if(node.isGroup(nextnode) || node.type(nextnode) == "StaticConstraint"){//pula grupos de fora e statics
 			nextnode = getNextNode(nextnode);
 		}
