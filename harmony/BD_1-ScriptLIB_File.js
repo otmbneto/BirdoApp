@@ -582,6 +582,28 @@ function BD1_extract_audio_from_movieFile(birdoAppRoot, movie, output_file){
 	return false;
 }
 
+/*
+comprime uma seq de imagens em um mov
+@birdoAppRoot - root do birdoApp
+@imagePatern - padrao de imagem para achar (usar modo: fullpath/Name_%04d.png como padrao)
+@fps - frame rate do mov
+@res_x - resolution x output
+@res_y - resolution y output
+@output_file - saida do arquivo
+*/
+function BD1_CreateGIF(birdoAppRoot, imagePatern, fps, res_x, res_y, output_file){
+	var pythonPath = BD2_FormatPathOS(birdoAppRoot + "venv/Scripts/python");
+	var pyFile = BD2_FormatPathOS(birdoAppRoot + "app/utils/harmony_ffmpeg.py");
+	var start = Process2(pythonPath, pyFile, "gif", "-i", imagePatern, "-fps", fps, "-x", res_x, "-y", res_y, "-o", output_file);
+	var ret = start.launch();
+
+	if(ret != 0){
+		Print("[BIRDOAPP] falha ao rodar o script de ffmpeg no python!");
+		return false; 
+	}
+	Print("[BIRDOAPP] GIF criado " + output_file);
+	return true;
+}
 
 //UTRANSFORM
 /*
