@@ -80,9 +80,10 @@ function BD_SetPivotToPeg(){
 	Print("Fild drawing center: ");
 	Print({x: finalBox.center().x(), y: finalBox.center().y()});
 	
+	
 	var scenePos = {
-		x: finalBox.center().x()/208.25,
-		y: finalBox.center().y()/156.57
+		x: (finalBox.center().x()/208.0706762142851),
+		y: finalBox.center().y()/154.8352615694165
 	};
 	
 	Print("Scene OLG drawing center: ");
