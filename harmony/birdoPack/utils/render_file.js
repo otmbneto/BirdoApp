@@ -24,13 +24,15 @@ function render_file(projectDATA){
 	
 	//config information
 	var images_format = ["png", "jpeg", "tiff"];//lista de formatos de imagem
-	var displays_nodes = node.getNodes(["DISPLAY"]);
+	var displays_nodes = [""].concat(node.getNodes(["DISPLAY"]));
+	
 	//sort display by node name to get ASSET_VIEW first
 	displays_nodes.sort(function(a, b) {
 		var textA = node.getName(a);
 		var textB = node.getName(b);
 		return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
 	});
+	
 	var display_names = [];
 	displays_nodes.forEach(function(x){ Print(x); display_names.push(node.getName(x))});
 	var config_json = scene.currentProjectPath() + "/_renderizar.json";
@@ -42,6 +44,10 @@ function render_file(projectDATA){
 			"selected": images_format[0]
 		},
 		"fps": scene.getFrameRate(),
+		"size": {
+			"x": scene.currentResolutionX(),
+			"y": scene.currentResolutionY()
+		},
 		"start_frame": 1,
 		"end_frame": frame.numberOf(),
 		"folder": scene.currentProjectPath() + "/frames",
@@ -59,27 +65,13 @@ function render_file(projectDATA){
 		var memory_config = BD1_ReadJSONFile(config_json);
 		Print("Reading existing config file");
 		if(memory_config){
-			//layers 
-			for(item in export_config["layers"]["filters"]){
-				if(export_config["layers"]["filters"][item]){
-					export_config["layers"]["filters"][item]["checked"] = memory_config["layers"]["filters"][item]["checked"];
+			for(item in memory_config){
+				//test if output folder exists
+				if(item == "folder" && !BD1_DirExist(memory_config[item])){
+					continue;
 				}
+				export_config[item] = memory_config[item];
 			}
-			//output
-			export_config["output"] = memory_config["output"];
-			//image_format
-			if(images_format.indexOf(memory_config["formats"]["selected"]) != -1){
-				export_config["formats"]["selected"] = memory_config["formats"]["selected"];
-			}
-			//frames
-			export_config["start_frame"] = memory_config["start_frame"];
-			export_config["end_frame"] = memory_config["end_frame"];
-			//output folder
-			if(BD1_DirExist(memory_config["folder"])){
-				export_config["folder"] = memory_config["folder"];
-			}
-			export_config["file_name"] = memory_config["file_name"];
-			export_config["open_folder"] = memory_config["open_folder"];
 			
 		} else {
 			Print("Fail to read memory json file!");
@@ -135,6 +127,9 @@ function createInterface(projData, config_data, config_json, ui_util){
 		"movie": this.ui.groupOutput.radioMov
 	}
 	
+	//scene aspect ratio
+	this.aspect_ratio = scene.currentResolutionX() / scene.currentResolutionY();
+
 	//update widgets - layers
 	this.ui.groupLayers.enabled = config_data.layers.groupBoxEnabled;
 	if(config_data.layers.filters.lineup){
@@ -160,6 +155,10 @@ function createInterface(projData, config_data, config_json, ui_util){
 	this.ui.groupOutput.spinStart.value = config_data.start_frame;
 	this.ui.groupOutput.spinEnd.value = config_data.end_frame;
 	
+	//update resolution widgets
+	this.ui.groupOutput.sbWidth.value = config_data.size.x;
+	this.ui.groupOutput.sbHeight.value = config_data.size.y;
+	
 	//update widgets - output folder and button
 	var folderIcon = projData.getAppIcon("folder");
 	var icon = new QIcon(folderIcon);
@@ -171,8 +170,13 @@ function createInterface(projData, config_data, config_json, ui_util){
 	this.ui.comboDisplay.addItems(config_data.display.names);
 	this.ui.comboDisplay.setCurrentIndex(config_data.display.names.indexOf(config_data.display.last));
 	
+	//enables main group if has valid display
+	this.ui.groupOutput.enabled = this.ui.comboDisplay.currentIndex != 0;
+	this.ui.buttonExport.enabled = this.ui.comboDisplay.currentIndex != 0;
+
 	//update widgets - open folder at the end of render
 	this.ui.checkOpenFolder.checked = config_data.open_folder;
+	
 	
 	//CALL BACKS
 	this.updateRadio = function(){
@@ -200,8 +204,22 @@ function createInterface(projData, config_data, config_json, ui_util){
 		}
 	}
 	
-	this.onExport = function(){
-		//update export data with options:
+	this.update_width = function(){
+		if(this.ui.groupOutput.cbLock.checked){
+			this.ui.groupOutput.sbHeight.value = parseInt(this.ui.groupOutput.sbWidth.value / this.aspect_ratio);
+			Print("Locked Height value: " + this.ui.groupOutput.sbHeight.value);
+		}
+	}
+	
+	this.update_combo_display = function(){
+		this.ui.groupOutput.enabled = this.ui.comboDisplay.currentIndex != 0;
+		this.ui.buttonExport.enabled = this.ui.comboDisplay.currentIndex != 0;
+		var d = config_data.display.nodes[this.ui.comboDisplay.currentIndex];
+		Print("display escolhido: " + d);
+	}
+	
+	this.update_config = function(){//update export data with options:
+		
 		//layers
 		if(config_data["layers"]["filters"]["ref"]){
 			config_data["layers"]["filters"]["ref"]["checked"] = this.ui.groupLayers.checkRef.checked;
@@ -213,18 +231,26 @@ function createInterface(projData, config_data, config_json, ui_util){
 			config_data["layers"]["filters"]["colourcard"]["checked"] = this.ui.groupLayers.checkColorCard.checked;
 		}
 		
-		//output 
+		//output type
 		for(item in this.obj_radios){
 			if(this.obj_radios[item].checked){
 				config_data["output"] = item;
-				break;	
+				break;
 			}	
 		}
+		
+		//image format
 		if(config_data.output == "images"){
 			config_data["formats"]["selected"] = this.ui.groupOutput.comboFormat.currentText;
 		} else {
 			config_data["fps"] = this.ui.groupOutput.spinFPS.value;
 		}
+		
+		//size
+		config_data["size"]["x"] = this.ui.groupOutput.sbWidth.value;
+		config_data["size"]["y"] = this.ui.groupOutput.sbHeight.value;
+		
+		//duration
 		config_data["start_frame"] = this.ui.groupOutput.spinStart.value;
 		config_data["end_frame"] = this.ui.groupOutput.spinEnd.value;
 
@@ -235,11 +261,23 @@ function createInterface(projData, config_data, config_json, ui_util){
 
 		//display
 		config_data["display"]["last"] = this.ui.comboDisplay.currentText;
+	}
+	
+	this.onExport = function(){
+		
+		try{
+			this.update_config();
+			Print(config_data);
 
-		var util_export = require(projData.paths.birdoPackage + "utils/render_file_utils.js");
-		Print(config_data);
-		util_export.render_file(this, projData, config_data, config_json);
+			var util_export = require(projData.paths.birdoPackage + "utils/render_file_utils.js");
+			util_export.render_file(this, projData, config_data, config_json);
+		
+		} catch(e){
+			Print(e);
+		}
+		
 		this.ui.close();
+		
 	}
 	
 	this.onClose = function(){
@@ -262,7 +300,9 @@ function createInterface(projData, config_data, config_json, ui_util){
 	
 	//connect combo signal
 	eval(ui_util.get_connect_string("this.ui.groupOutput.spinStart", "spin", "this.updateSpin"));
-	
+	eval(ui_util.get_connect_string("this.ui.groupOutput.sbWidth", "spin", "this.update_width"));
+	eval(ui_util.get_connect_string("this.ui.comboDisplay", "combo", "this.update_combo_display"));
+
 	//EXTRA FUNCTIONS
 	function Print(msg){
 		if(typeof msg == "object"){
