@@ -72,38 +72,39 @@ function BD_Mirror(){
 	scene.endUndoRedoAccum();
 
 	///////////////////funcoes secundarias////////////////////////////////
+	
 	function get_limbs(nodePath){
 		
 		var parentGroup = node.parentNode(nodePath);
 		var limbs = {"limbA": parentGroup, "limbB": null};
 
-		while(parentGroup != node.root()){
-			var nextNodeInfo = node.srcNodeInfo(parentGroup, 0);
-			if(!nextNodeInfo){
-				Print("End of navigation..");
-				return false;
-			}
-			
-			if(node.type(nextNodeInfo.node) == "StaticConstraint"){
-				nextNodeInfo = node.srcNodeInfo(nextNodeInfo.node, 0);
-			}
-			
-			if(node.numberOfOutputLinks(nextNodeInfo.node, nextNodeInfo.port) == 2){
-				var link = nextNodeInfo.link == 0 ? 1 : 0;
-				var simblingNode = node.dstNode	(nextNodeInfo.node, nextNodeInfo.port, link);
-				if(node.type(simblingNode) == "StaticConstraint"){
-					simblingNode = node.dstNode(simblingNode, 0, 0);
+		for(var i=0; i<node.numberOfInputPorts(parentGroup); i++){
+			while(parentGroup != node.root()){
+				var nextNodeInfo = node.srcNodeInfo(parentGroup, i);
+				if(!nextNodeInfo || (node.type(nextNodeInfo.node) != "StaticConstraint" && node.type(nextNodeInfo.node) != "PEG")){
+					Print("End of navigation..");
+					break;
 				}
-				if(node.isGroup(simblingNode)){
-					limbs["limbA"] = parentGroup;
-					limbs["limbB"] = simblingNode;
-					return limbs;
+				
+				if(node.type(nextNodeInfo.node) == "StaticConstraint"){
+					nextNodeInfo = node.srcNodeInfo(nextNodeInfo.node, 0);
 				}
+				
+				if(node.numberOfOutputLinks(nextNodeInfo.node, nextNodeInfo.port) == 2){
+					var link = nextNodeInfo.link == 0 ? 1 : 0;
+					var simblingNode = node.dstNode(nextNodeInfo.node, nextNodeInfo.port, link);
+					if(node.type(simblingNode) == "StaticConstraint"){
+						simblingNode = node.dstNode(simblingNode, 0, 0);
+					}
+					if(node.isGroup(simblingNode)){
+						limbs["limbA"] = parentGroup;
+						limbs["limbB"] = simblingNode;
+						return limbs;
+					}
+				}
+				parentGroup = node.parentNode(parentGroup);
 			}
-		
-			parentGroup = node.parentNode(parentGroup);
 		}
-		return false;
 	}
-	
+	return false;
 }
