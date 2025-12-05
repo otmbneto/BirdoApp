@@ -62,7 +62,8 @@ class ConverterFFMPEG:
             process.stdout.flush()
 
         # closes progress bar
-        self.pb.close()
+        if self.pb:
+            self.pb.close()
         self.pb = None
         os.chdir(self.initial_dir)
         print "[BIRDOAPP] comando ffmpeg finalizado!"
@@ -148,6 +149,30 @@ class ConverterFFMPEG:
         total_frames = len(filter(lambda x: x.endswith(os.path.splitext(img_pattern)), os.listdir(os.path.dirname(img_pattern))))
         if total_frames:
             self.pb = tqdm(total=total_frames, leave=True, desc="[BIRDOAPP - ffmpeg] Creating Movie... ")
+        return self.run_command()
+
+    def create_pallet(self, img_pattern, fps, res_x, res_y):
+        """Cria uma pallet para usar com o comando de gif"""
+        pallet = self.temp_folder / "palette.png"
+        if pallet.exists():
+            pallet.remove()
+        self.cmd = "{0} -report -framerate {1} -i \"{2}\" -vf \"fps={1},scale={3}:{4}:flags=lanczos,palettegen\" palette.png".format(
+            self.ffmpeg, fps, img_pattern, res_x, res_y
+        )
+        self.run_command()
+        if not pallet.exists():
+            print "error generating gif pallet!"
+            return None
+        return pallet
+
+    def create_gif(self, img_pattern, fps, res_x, res_y, output_file):
+        """cria um gif atravez de sequencia de imagens"""
+        pallete = self.create_pallet(img_pattern, fps, res_x, res_y)
+        if not pallete:
+            return None
+        self.cmd = "{0} -report -framerate {1} -i \"{2}\" -i palette.png -filter_complex \"fps={1},scale={3}:{4}:flags=lanczos[x];[x][1:v]paletteuse\" {5}".format(
+            self.ffmpeg, fps, img_pattern, res_x, res_y, output_file
+        )
         return self.run_command()
 
     def extract_audio(self, input_mov_file, output_audio_file):
