@@ -70,8 +70,3 @@ def check_audio_stream(video_file):
         subprocess.check_output("{0} -i {1}".format(ffmpeg_path, video_file), stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as exc:
         return bool(re.findall(r"Stream\s.+\sAudio", exc.output))
-
-
-if __name__ == "__main__":
-    inmov = r"C:\_BirdoRemoto\PROJETOS\LupiBaduki\LEB_EP101_SC0020.mov"
-    print extract_audio(inmov, r"C:\_BirdoRemoto\PROJETOS\LupiBaduki\LEB_EP101_SC0020_TESTE.wav")
