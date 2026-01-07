@@ -435,7 +435,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.ui.update_button.show()
 
         # SETS THE CURRENT HEADER
-        self.ui.header.setText(u"BIRDOAPP CONFIG...")
+        self.ui.header.setText(u"CONFIGURAÇÃO USUÁRIO...")
         self.ui.sub_header.setText(u"Configuração básica do Birdoapp...")
 
         # ATUALIZA OS CAMPOS COM OS DADOS EXISTENTES
@@ -459,7 +459,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.actionConfigurar_Estudio.setVisible(False)
 
         # SETS THE CURRENT HEADER
-        self.ui.header.setText(u"ESTUDIO CONFIG...")
+        self.ui.header.setText(u"CONFIGURAÇÃO DE ESTÚDIO")
         self.ui.sub_header.setText(u"Configuração do Estúdio.")
 
         # SHOW update button
