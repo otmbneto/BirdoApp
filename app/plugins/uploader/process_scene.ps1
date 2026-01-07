@@ -54,12 +54,12 @@ function Clean-Scene {
     $file_list = @("PALETTE_LIST", "scene.elementTable", "scene.versionTable")
 
     #list used elements in scene
-    $nodes = $X.SelectNodes("//module[@type='READ']")
+    $cols = $X.SelectNodes("//column[@type='0']")
     $e_folders = @()
-    forEach($n in $nodes){
-        Write-Progress -Activity 'listing used nodes in scene...' -Status $n.name
-        $ef = $X.SelectNodes("//elements").element | Where-Object { $_.elementName -eq $n.name }
-        if($ef.Count -ne 0){
+    forEach($c in $cols){
+        Write-Progress -Activity 'listing used nodes in scene...' -Status $c.name
+        $ef = $X.SelectNodes("//elements").element | Where-Object { $_.id -eq $c.id }
+        if($ef.Count -ne 0 -and $e_folders -notcontains $ef.elementFolder){
             $e_folders += $ef.elementFolder
         }
     }
@@ -99,6 +99,13 @@ function Clean-Scene {
                 echo $msg >> $log
             }
         } else {
+            # remove ~ backup files
+            if($f.Name.EndsWith("~")){
+                Write-Host -ForegroundColor Red ("[DEBUG] Invalid Temporary backup File (~): " + $f.FullName)
+                rm -Path $f.FullName
+                continue
+            }
+
             if($file_list -contains $f.Name){
                 $msg = "[DEBUG] Valid file :" + $f.FullName
                 Write-Host -ForegroundColor Green $msg
