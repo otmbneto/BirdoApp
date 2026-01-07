@@ -688,8 +688,20 @@ class BirdoApp(QtGui.QMainWindow):
             self.update_foot_label(u"Escolha sua função no projeto...", self.red_color)
             return False
 
-        # update user projects list in app.config_data
-        self.birdoapp.config_data["user_projects"].append(user_proj)
+        i = 0
+        #print self.birdoapp.config_data["user_projects"]
+        while(i < len(self.birdoapp.config_data["user_projects"])):
+
+            if user_proj["id"] == self.birdoapp.config_data["user_projects"][i]["id"]:
+                break
+            i+=1
+
+        #new project
+        if i == len(self.birdoapp.config_data["user_projects"]):
+            # update user projects list in app.config_data
+            self.birdoapp.config_data["user_projects"].append(user_proj)
+        else:
+            self.birdoapp.config_data["user_projects"][i] = user_proj
 
         # updates self.project_data.paths.local_folder
         self.project_data.paths.update_local_root(user_proj["local_folder"])

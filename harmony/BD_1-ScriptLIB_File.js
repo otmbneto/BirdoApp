@@ -714,4 +714,21 @@ function BD1_GetPythonObject(){
 		Print(e);
 		return null;
 	}
+<<<<<<< HEAD:harmony/BD_1-ScriptLIB_File.js
 }
+=======
+	
+	var python = proj_data.birdoApp + "venv/Scripts/python.exe";
+	var pyFile = "app/utils/copy_file_with_pb.py";
+	var start = Process2(python, pyFile, src_file, dst_file, ask_override);
+	var ret = start.launch();
+	return ret == 0;
+}
+
+// Get Windows shortname of a dir via PythonManager wrapper
+function getPyShortName(path){
+	var appdata = System.getenv("APPDATA");
+	var fn = PythonManager.createPyObject(appdata + "/BirdoApp/package/harmony20/includes/harmonyPythonInterface.py");
+	return(fn.py.getShortName(path));
+}
+>>>>>>> fb0aed841bd49b8968180720bdce67c87cd2974b:package/harmony20/includes/BD_1-ScriptLIB_File.js
