@@ -358,7 +358,7 @@ QPushButton::menu-indicator {
             <item row="5" column="0">
              <widget class="QLabel" name="harmony_versions_lbl">
               <property name="text">
-               <string>Harmony Versions:</string>
+               <string>Versão do Harmony</string>
               </property>
              </widget>
             </item>
@@ -521,7 +521,7 @@ OBS: É obrigatório ter o Harmony instalado para usar o Birdoapp.</string>
               <item row="4" column="0" colspan="2">
                <widget class="QLabel" name="funcao_label">
                 <property name="text">
-                 <string>Funcao no Projeto:</string>
+                 <string>Função no Projeto</string>
                 </property>
                </widget>
               </item>
@@ -534,14 +534,14 @@ OBS: É obrigatório ter o Harmony instalado para usar o Birdoapp.</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Project Info:</string>
+                 <string>Configuração Local do Projeto</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="local_folder_label">
                 <property name="text">
-                 <string>Local Folder:</string>
+                 <string>Folder Local:</string>
                 </property>
                </widget>
               </item>
