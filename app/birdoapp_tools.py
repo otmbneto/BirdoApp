@@ -104,52 +104,6 @@ class DevTools:
         except:
             sys.exit("cancelado!")
 
-    def get_folder(self, header, path):
-        """Get folder path via gum"""
-        self.print_header()
-        if not os.path.exists(path):
-            path = os.getenv("HOMEPATH")
-        h = (header + "\n(use  a seta -> para entrar em uma pasta)")
-        cmd = [
-            self.gum.path,
-            "file",
-            "{0}".format(path),
-            "--directory",
-            "--no-permissions",
-            "--no-size",
-            "--header=\"{0}\"".format(h)
-        ]
-        try:
-            r = subprocess.check_output(cmd)
-            r = r.strip().replace("\"", "")
-            if not self.confirm("Confirma escolha do Folder: '{0}'?".format(r)):
-                self.get_folder(header, path)
-            return r
-        except:
-            sys.exit("cancelado!")
-
-    def get_file(self, header, path):
-        """Get file path via gum"""
-        self.print_header()
-        if not os.path.exists(path):
-            path = os.getenv("HOMEPATH")
-        cmd = [
-            self.gum.path,
-            "file",
-            "{0}".format(path),
-            "--no-permissions",
-            "--no-size",
-            "--header=\"{0}\"".format(header)
-        ]
-        try:
-            r = subprocess.check_output(cmd)
-            r = r.strip().replace("\"", "")
-            if not self.confirm("Confirma escolha do Arquivo: '{0}'?".format(r)):
-                self.get_file(header, path)
-            return r
-        except:
-            sys.exit("cancelado!")
-
     def is_valid_name(self, name):
         """valida o nome escolhido"""
         if " " in name:
@@ -182,14 +136,13 @@ class DevTools:
         confirm_studio = False
         r = ""
         while confirm_studio is False:
-            r = self.get_input("Escolha o nome do estudio:", "Escreva aqui...")
+            r = self.get_input(u"Escolha o nome do estúdio:".encode(sys.getfilesystemencoding()), "Escreva aqui...")
             confirm_studio = self.confirm("Confirma estudio: {0}?".format(r))
         self.app.config_data["studio_name"] = r
 
         server_path = ""
         while not os.path.exists(server_path):
-            server_path = self.get_input("Defina o caminho na rede para salvar "
-                                         "as configuracoes de projetos:",
+            server_path = self.get_input(u"Defina o caminho na rede para salvar as configurações de projetos:".encode(sys.getfilesystemencoding()),
                                          "Cole o caminho aqui...")
             if not os.path.exists(server_path):
                 print "Aparentemente o caminho fornecido esta inacessivel!"
@@ -198,7 +151,7 @@ class DevTools:
 
         while True:
             user_name = self.get_input(
-                "Escolha um nome unico de usuario para esta maquina.",
+                u"Escolha um nome único de usuário para esta maquina.".encode(sys.getfilesystemencoding()),
                 "Escreva o nome aqui..."
             )
             if not bool(user_name):
@@ -229,7 +182,7 @@ class DevTools:
         """mostra a pagina de configuracao local do projeto"""
         user_proj = {
             "id": self.project.id,
-            "local_folder": self.get_folder("Escolha o folder local do projeto:", ""),
+            "local_folder": self.get_input("Escolha o folder local do projeto:", "Cole o caminho aqui."),
             "user_role": self.choose_from_list("Escolha um papel no projeto:", self.project.roles)
         }
 
@@ -263,7 +216,7 @@ class DevTools:
             "01_prefix": prefix,
             "02_name": self.get_input("Escolha o nome do projeto:",
                                       "Escreva aqui..."),
-            "03_sub_name": self.get_input("Escolha o subtitulo do projeto:",
+            "03_sub_name": self.get_input(u"Escolha o subtítulo do projeto:".encode(sys.getfilesystemencoding()),
                                           "Escreva aqui..."),
             "04_server_root": self.get_input("Escolha o caminho da "
                                              "raiz do projeto:",
@@ -272,9 +225,7 @@ class DevTools:
         }
 
         while True:
-            icon = self.get_file("Escolha um arquivo de imagem "
-                                 "com logo do projeto (.png ou .ico).",
-                                 os.getenv("HOMEPATH"))
+            icon = self.get_input(u"Forneça caminho de um arquivo de imagem com logo do projeto:".encode(sys.getfilesystemencoding()), "Cole o caminho aqui! (formatos aceitos: .png ou .ico)")
             if Path(icon).suffix not in [".png", ".ico"]:
                 if self.confirm("Formato invalido. Deseja escolher um novo icone?"):
                     continue
@@ -322,13 +273,8 @@ class DevTools:
                 return
             self.show_ep_page(ep)
         elif r == "Criar EP / SQ":
-            ep_r = self.get_input("Escolha o nome do ep. para criar "
-                                  "(EX:. 'EP001'), ou forneca uma lista "
-                                  "separada por virgulas ou espacos "
-                                  "(se quiser criar uma sequencia de "
-                                  "eps, por exemplo, do 1 ao 14, "
-                                  "digite 1-14)",
-                                  "Escreva aqui\nIMPORTANTE: Lembre-se de usar o prefixo de episódio do projeto.")
+            ep_r = self.get_input(u"Escolha o nome do ep. para criar (EX:. 'EP001'), ou forneca uma lista separada por vírgulas ou espaços (se quiser criar uma sequencia de eps, por exemplo, do 1 ao 14, digite 1-14)".encode(sys.getfilesystemencoding()),
+                                  u"Escreva aqui\nIMPORTANTE: Lembre-se de usar o prefixo de episódio do projeto.".encode(sys.getfilesystemencoding()))
             input_eps = re.findall(self.project.paths.regs["ep"]["regex"], ep_r)
             if len(input_eps) == 0:
                 div = re.findall(r"\d+-\d+", ep_r)
@@ -352,9 +298,7 @@ class DevTools:
             self.show_project_page()
             return
         if r == "Importar animatics":
-            af = self.get_folder("Escolha a pasta de origem dos animatics "
-                                "(pasta com apenas os arquivos de vídeo "
-                                "com os trechos de animatic):",
+            af = self.get_input(u"Escolha a pasta de origem dos animatics (pasta com apenas os arquivos de vídeo com os trechos de animatic):".encode(sys.getfilesystemencoding()),
                                 self.project.paths.root["local"].path)
             animatics_folder = Path(af)
             animatics = filter(lambda x: x.is_file(),
@@ -370,10 +314,7 @@ class DevTools:
                 self.show_ep_page(ep)
                 return
             if sr == "Lista de Cenas":
-                input_scenes = self.get_input("Insira lista de cenas para "
-                                              "criar o setup (cenas no padrao "
-                                              "de cenas 'SCXXXX', separados "
-                                              "por virgula ou espaco)",
+                input_scenes = self.get_input(u"Insira lista de cenas para criar o setup (cenas no padrão  de cenas 'SCXXXX', separados  por vírgula ou espaco)".encode(sys.getfilesystemencoding()),
                                               "Liste as cenas aqui...")
                 in_sc = [x.rstrip() for x in re.split(r"\s|,", input_scenes) if
                          bool(re.findall(self.project.paths.regs["sc"]["regex"], x))]
