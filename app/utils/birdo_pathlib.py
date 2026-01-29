@@ -10,7 +10,7 @@ class Path:
     """Classe que junta opcoes para lidar com arquivos e pastas."""
 
     def __init__(self, path):
-        self.path = str(path).replace("\\", "/")
+        self.path = str(path).strip().replace("\\", "/")
         self.name = os.path.basename(path)
         self.suffix = os.path.splitext(path)[-1]
         self.suffixes = os.path.splitext(path)[1:]
