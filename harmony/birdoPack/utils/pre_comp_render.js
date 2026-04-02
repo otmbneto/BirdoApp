@@ -18,7 +18,7 @@ Copyright:   leobazao_@Birdo
 */
 
 
-function pre_comp_render(proj_data){
+function pre_comp_render(proj_data, step_name){
 
 	var temp_folder = proj_data.systemTempFolder + "/BirdoApp/export_mov";
 	if(!BD1_CleanFolder(temp_folder)){
@@ -121,7 +121,7 @@ function pre_comp_render(proj_data){
 	
 	if(export_data.send_copy){
 		progressDlg.setLabelText("Criando copia no server...");
-		var mov_server = proj_data.getRenderPath("server", proj_data.user_type) + "/" + scene.currentScene() + ".mov"; 
+		var mov_server = proj_data.getRenderPath("server", step_name) + "/" + scene.currentScene() + ".mov"; 
 		if(!BD1_CopyFile(mov_path, mov_server)){
 			MessageBox.warning("ERROR copiando o arquivo para a rede!",0,0);
 			progressDlg.close();

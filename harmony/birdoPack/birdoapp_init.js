@@ -283,13 +283,14 @@ function BirdoAppConfig(config_data, project_data){
 	}
 	
 	this.getRenderPath = function(root, step){
-				
+
 		var tb_root = "";
 		if(root == "server"){
 			tb_root = this.getServerRoot();
 		} else if(root == "local"){
 			tb_root = this.getLocalRoot();
 		}
+		MessageLog.trace("TESTE 1");
 		
 		return tb_root + [
 			this.paths["episodes"], 

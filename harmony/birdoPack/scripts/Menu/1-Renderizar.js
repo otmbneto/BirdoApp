@@ -43,12 +43,22 @@ function Renderizar(){
 		}
 		
 		//Render Step definido baseado no user_type
-		var render_step = projectDATA.user_type != "COMP" ? "PRE_COMP" : "COMP";
+		if(projectDATA.user_type == "DT"){
+			var render_step  = Input.getItem("Escolha o STEP Render:", ["PRE_COMP", "COMP"], "PRE_COMP", false, "RENDER STEP FOR DT", null);
+			var step_name = render_step == "COMP" ? "COMP" : "ANIM";
+			if(!render_step){
+				Print("Canceled..");
+				return;
+			}
+		} else {
+			var render_step = projectDATA.user_type != "COMP" ? "PRE_COMP" : "COMP";
+			var step_name = projectDATA.user_type;
+		}
 		var pre_comp_script = projectDATA.paths.birdoPackage + "utils/pre_comp_render.js";
 		var comp_script = projectDATA.paths.birdoPackage + "utils/comp_render.js";
 		try{
 			if(render_step == "PRE_COMP"){
-				var output_mov = require(pre_comp_script).pre_comp_render(projectDATA);
+				var output_mov = require(pre_comp_script).pre_comp_render(projectDATA, step_name);
 				if(!output_mov){
 					Print("Renderizar cancelado...");
 				} else{
