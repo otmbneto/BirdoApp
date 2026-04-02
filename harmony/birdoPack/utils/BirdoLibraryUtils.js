@@ -78,6 +78,11 @@ function validateTimelineSelection(rig_group_node){
 		var coluna = node.linkedColumn(readNodes[i], "DRAWING.ELEMENT");
 		progressDlg.setLabelText("Validating selection...\n -layer: " + node_name);
 		
+		if(!coluna){
+			//testa se o node read e um node vazio de placeholder (sem element column)
+			continue;
+		}
+		
 		if(layersData.layers.hasOwnProperty(coluna)){//testa se ja tem info dessa camada no objeto
 			continue;
 		}
