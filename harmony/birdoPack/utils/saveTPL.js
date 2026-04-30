@@ -674,11 +674,6 @@ function reviewRIG(node_list){//verifica os drawings com nome no padrao, se cont
 	var counter_number = 0;
 	var counter_empty = 0;
 	var counter_Zzero = 0;
-
-	var regex_sujeira = /(-G)$/;
-	var regex_FULL = /FULL/;
-	var isNamesOk = true;
-	var isFullOK = false;
 	var drawing_list = [];
 
 	for(var i=0; i<node_list.length; i++){
@@ -686,21 +681,11 @@ function reviewRIG(node_list){//verifica os drawings com nome no padrao, se cont
 		
 		node.setShowTimelineThumbnails(node_list[i], false);//desliga o show thumbnail do node na timeline
 
-		if(regex_sujeira.test(node_list[i]) && node.type(node_list[i]) == "GROUP"){
-			Print("[SAVEASSET]Node com sujeira no nome: " + node_list[i]);
-			isNamesOk = false;
-		}
-
-		if(regex_FULL.test(node_list[i])){
-			isFullOK = true;
-		}
-	
 		if(node.type(node_list[i]) != "READ"){
 			continue;
 		}
 
 		var coluna = node.linkedColumn(node_list[i], "DRAWING.ELEMENT");
-
 		if(!checkExposicao(coluna)){
 			Print("node: " + node_list[i]);
 			counter_empty++;
@@ -724,12 +709,6 @@ function reviewRIG(node_list){//verifica os drawings com nome no padrao, se cont
 		}
 
 	}
-	
-	if(!isFullOK){
-		if(!BD2_AskQuestion("Este RIG nao contem os nodes FULL que deveria!!\nDeseja continhar mesmo assim??")){
-			return false;
-		}
-	}
 
 	if(counter_number > 0){
 		if(!BD2_AskQuestion("Este RIG contem "  + counter_number + " nodes com desenhos fora do padrao de nome!\nDeseja continhar??")){
@@ -745,12 +724,6 @@ function reviewRIG(node_list){//verifica os drawings com nome no padrao, se cont
 		Print("Este RIG contem "  + counter_Zzero + " nodes sem o Zzero criado! Acerte isso antes de gerar o TPL!");
 	}
 	
-	if(!isNamesOk){
-		if(!BD2_AskQuestion("Este RIG contem grupos com nome sujo ('-G') no final!\nDeseja continhar mesmo assim??")){
-			return false;
-		}
-	}
-
 	return true;
 
 
