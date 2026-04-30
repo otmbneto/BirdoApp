@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from config import ConfigInit
 from utils.birdo_json import read_json_file
 from utils.birdo_pathlib import Path
@@ -103,6 +105,9 @@ class BirdoApp(QtGui.QMainWindow):
         # Empty plugin value to start
         self.plugins = None
 
+        # regex para testar non ascii chars
+        self.non_ascii_reg = r'[^\x00-\x7F]|\s'
+
         # SETS ICONS
         logo = QtGui.QIcon(self.birdoapp.icons["logo"])
         logo_name = QtGui.QPixmap(self.birdoapp.icons["nomeapp"])
@@ -176,13 +181,7 @@ class BirdoApp(QtGui.QMainWindow):
         self.blue_color = "color: rgb(8, 177, 203);"
         self.recently_open = []
         self.recently_open = self.birdoapp.load_recently_open_files()
-        for i, f in enumerate(self.recently_open):
-            item = QtGui.QListWidgetItem()
-            item.setText(f.name)
-            item.setData(3, f.path)
-            item.setToolTip(f.path)
-            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
-            self.recent_list.addItem(item)
+        self.update_recent_widgets()
 
         #check if config was already created before fixing the sceneOpened.js problem
         if self.birdoapp.harmony is not None:
@@ -221,6 +220,16 @@ class BirdoApp(QtGui.QMainWindow):
                 self.load_config_studio_page()
                 return
             self.load_projects_page()
+
+    def update_recent_widgets(self):
+        self.recent_list.clear()
+        for f in self.recently_open[::-1]:
+            item = QtGui.QListWidgetItem()
+            item.setText(f.name)
+            item.setData(3, f.path)
+            item.setToolTip(f.path)
+            item.setForeground(QtGui.QBrush(QtGui.QColor("lightgray")))
+            self.recent_list.addItem(item)
 
     def onLoadStudioBtn(self):
         self.birdoapp.update_session("STUDIO")
@@ -280,8 +289,10 @@ class BirdoApp(QtGui.QMainWindow):
         self.soloOpenBtn.clicked.connect(self.on_open_solo)
         self.recentGrp = QtGui.QGroupBox("Abertos recentemente")
         self.recentGrp.setStyleSheet("color: gray;")
+        recentTipLabel = QtGui.QLabel(u"(Dê um clique duplo para abrir!)")
         recent_layout = QtGui.QVBoxLayout()
         self.recentGrp.setLayout(recent_layout)
+        recent_layout.addWidget(recentTipLabel)
         recent_layout.addWidget(self.recent_list)
         vLayout.addWidget(openSceneLbl)
         vLayout.addWidget(self.soloOpenBtn)
@@ -312,8 +323,7 @@ class BirdoApp(QtGui.QMainWindow):
 
         xstage = Path(self.birdoapp.harmony.get_xstage_last_version(template.normpath())).rename(scene_name + ".xstage")
         self.birdoapp.open_harmony_file(xstage.path)
-        #self.update_recently_open(xstage)
-        self.birdoapp.update_recently_open_files(self.recently_open,xstage)
+        self.update_recently_open(xstage)
 
     def on_open_solo(self):
         initial_dir = self.recently_open[-1].get_parent().path if len(self.recently_open) != 0 else self.birdoapp.root
@@ -329,8 +339,7 @@ class BirdoApp(QtGui.QMainWindow):
         f = Path(str(xstage[0]))
         if f.exists():
             self.birdoapp.open_harmony_file(f.path)
-            #self.update_recently_open(f)
-            self.birdoapp.update_recently_open_files(self.recently_open,f)
+            self.update_recently_open(f)
         else:
             print("[BIRDOAPP] arquivo escolhido invalido!")
 
@@ -339,28 +348,23 @@ class BirdoApp(QtGui.QMainWindow):
         if len(selected) > 0:
             f = Path(selected[0].data(3))
             self.birdoapp.open_harmony_file(f)
-            #self.update_recently_open(f)
-            self.birdoapp.update_recently_open_files(self.recently_open,f)
+            self.update_recently_open(f)
 
     def update_recently_open(self, f):
+        """atualiza as widgets da lista de arquivos recentes"""
+        # remove file from recently list
         while f.path in [x.path for x in self.recently_open]:
             self.recently_open.pop([x.path for x in self.recently_open].index(f.path))
-        
+
+        # keep list with 10 itens
         if len(self.recently_open) >= 10:
             self.recently_open = list(set(self.recently_open[1:]))
-        self.recently_open.append(f)
-        self.birdoapp.save_recently_open_files(self.recently_open)
-        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        #print("The file is being updated" + str(self.recently_open_log))
-        #self.recently_open_log.write_text("\n".join([str(x.path) for x in self.recently_open]))
 
-        self.recent_list.clear()
-        for file in self.recently_open:
-            item = QtGui.QListWidgetItem()
-            item.setText(file.name)
-            item.setData(3, file.path)
-            item.setToolTip(file.path)
-            self.recent_list.addItem(item)
+        self.recently_open.append(f)
+        self.birdoapp.update_recently_open_files(self.recently_open, f)
+
+        # update widget list
+        self.update_recent_widgets()
 
     def clean_layout(self, layout):
         """remove widgets from layout"""
@@ -666,6 +670,10 @@ class BirdoApp(QtGui.QMainWindow):
         print "updating project config..."
         # user project data
         local_folder = Path(self.ui.localFolder_line.text())
+        if bool(re.findall(self.non_ascii_reg, local_folder.path)):
+            self.birdoapp.mb.warning(u"O BirdoApp não funciona com caminhos com espaços ou caracteres inválidos na lingua inglesa, como 'ç' ou acentos!"
+                                     u" Escolha um folder com nome válido, ou renomeie o folder escolhido para um nome válido.")
+            return
         user_proj = {
             "id": self.project_data.id,
             "local_folder": local_folder.path,
