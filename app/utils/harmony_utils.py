@@ -250,10 +250,21 @@ class AdobeAnimate(object):
 
         return True
 
+    @staticmethod
+    def _on_open(open_scene):
+
+        def wrapper(*args, **kwargs):
+            
+            print("Checking if the animate scripts are on the right location")
+            return open_scene(*args, **kwargs)
+
+        return wrapper
+
+    @_on_open
     def open_scene(self, app_file):
 
-        xstege = Path(str(app_file))
-        return subprocess.Popen([self.executable, app_file.path])
+        p_file = Path(str(app_file))
+        return subprocess.Popen([self.executable, p_file.path])
 
 def get_available_animate_installations():
     """
@@ -273,7 +284,7 @@ def get_available_animate_installations():
         for app in app_installations:
             if re.match(regex, app):
                 availableVersions.append(os.path.join(current_path, app))
-                
+
     return availableVersions
 
 

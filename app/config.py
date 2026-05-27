@@ -8,7 +8,7 @@ from utils.MessageBox import CreateMessageBox
 from utils.system import SystemFolders
 from utils.ffmpeg_advanced import ConverterFFMPEG
 from folder_manager import FolderManager
-from utils.harmony_utils import ToonBoomHarmony, get_available_harmony_installations
+from utils.harmony_utils import *
 import copy
 import os
 import re
@@ -84,9 +84,11 @@ class ConfigInit(object):
 
         # define harmony class
         self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
-
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
+
+        self.animate = Animate(self.config_data["animate_path"]) if bool(self.config_data["animate_path"]) else None
+        self.animate_versions = [Animate(h) for h in get_available_animate_installations() if Animate(h).is_installed()]
 
         # lista de projetos do estudio
         self.projects = []
@@ -334,6 +336,15 @@ class ConfigInit(object):
         data = read_json_file(plugin_json.path)
         data["root"] = plugin_root
         return data
+
+    def open_animate_file(self,animate_file):
+
+        p_file = Path(str(animate_file))
+        if not p_file.endswith(".fla"):
+            print "invalid format for Adobe Animate input: {0}\nMust be .fla file.".format(p_file)
+            return False
+
+        return self.animate.open_scene(p_file.path)
 
     def open_harmony_file(self, harmony_file):
         """copia o arquivo .js de init do birdoapp pra pasta scripts do arquivo, e abre com o harmony"""
