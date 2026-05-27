@@ -173,6 +173,110 @@ class ToonBoomHarmony(object):
         return subprocess.Popen([self.executable, xstege.path])
 
 
+class AdobeAnimate(object):
+    """
+    Creates a Class with user local's Adobe Animate information and project version setting
+    ...
+
+    Parameters
+    ----------
+    installation_path: string
+        caminho com a instalacao do animate
+    """
+    def __init__(self, installation_path):
+
+        self.regex = r'Adobe Animate (\d{4})'
+        self.installation_path = installation_path
+        self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith(
+            "/") or installation_path.endswith("\\") \
+            else os.path.basename(installation_path)
+
+        self.version = re.findall(self.regex, self.name)[0][0]
+        self.subversion = ""
+        self.edition = ""
+        self.executable = os.path.join(self.installation_path,"Animate.exe")
+        self.utransform = "" #os.path.normpath(os.path.join(os.path.dirname(self.executable), "utransform.exe"))
+
+    def get_version(self):
+        return self.version
+
+    def get_subversion(self):
+        return self.subversion
+
+    def get_edition(self):
+        return self.edition
+
+    def get_name(self):
+        return self.name
+
+    def is_installed(self):
+        return os.path.exists(self.executable)
+
+    def get_fullpath(self):
+        return self.installation_path
+
+    #for now it retrieves the commands folder
+    def get_default_scripts_path(self):
+        
+        appdata = os.getenv('LOCALAPPDATA')
+        version_code = self.version
+        return os.path.join(appdata,"Adobe",f"Animate {version_code}","pt_BR","Configuration","Commands","Birdo")
+
+    def get_scripts_path(self):
+
+        return None
+
+    def get_package_folder(self):
+
+        return None
+
+    def is_project_file(self, file):
+        return file.endswith(".fla")
+
+    def get_last_version(self):
+
+
+        return
+
+    def render_scene(self, app_scene):
+
+        return True
+
+    def compile_script(self, script, harmony_file):
+
+        return True
+
+    def create_thumbnails(self, harmony_tpl):
+
+        return True
+
+    def open_scene(self, app_file):
+
+        xstege = Path(str(app_file))
+        return subprocess.Popen([self.executable, app_file.path])
+
+def get_available_animate_installations():
+    """
+    Funcao que retorna todas possiveis instalacoes de animate nos drives: C e D
+    ...
+    """
+    regex = r'Adobe Animate (\d{4})'
+    availableVersions = []
+    app_default_path = "/Program Files/Adobe/"
+    drives = ["C:", "D:"]
+
+    for drive in drives:
+        current_path = os.path.join(drive, app_default_path)
+        if not os.path.exists(current_path):
+            continue
+        app_installations = os.listdir(current_path)
+        for app in app_installations:
+            if re.match(regex, app):
+                availableVersions.append(os.path.join(current_path, app))
+                
+    return availableVersions
+
+
 def get_available_harmony_installations():
     """
     Funcao que retorna todas possiveis instalacoes de harmony nos drives: C e D
