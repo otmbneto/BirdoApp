@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
 
-from config import ConfigInit
-from utils.birdo_json import read_json_file
-from utils.birdo_pathlib import Path
-from utils.harmony_utils import ToonBoomHarmony
-from utils.birdoapp_about import About
+from .config import ConfigInit
+from .utils.birdo_json import read_json_file
+from .utils.birdo_pathlib import Path
+from .utils.harmony_utils import ToonBoomHarmony
+from .utils.birdoapp_about import About
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import subprocess
@@ -203,7 +203,7 @@ class BirdoApp(QtGui.QMainWindow):
         return loader.load(ui)
 
     def closeEvent(self, event):
-        print "session terminated!"
+        print("session terminated!")
         self.birdoapp.kill_session()
 
     def go_home(self):
@@ -334,7 +334,7 @@ class BirdoApp(QtGui.QMainWindow):
         )
 
         if not xstage:
-            print "canceled..."
+            print("canceled...")
             return
         f = Path(str(xstage[0]))
         if f.exists():
@@ -547,10 +547,10 @@ class BirdoApp(QtGui.QMainWindow):
     def project_selected(self, project):
         self.project_data = self.birdoapp.get_project_data(project["id"])
         if not self.project_data:
-            print "get project data failed to complete!"
+            print("get project data failed to complete!")
             self.close()
             return
-        print "project data is ready!" if self.project_data.ready else "project data is NOT ready!"
+        print("project data is ready!" if self.project_data.ready else "project data is NOT ready!")
         # label do nome do projeto no header
         self.ui.header.setText(project["name"])
         self.ui.sub_header.setText(u"Ferramentas disponíveis para o projeto selecionado...")
@@ -609,7 +609,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def update_studio_config(self):
         """Pega as infos das widgets do config studio page e atualiza o app.config_data"""
-        print "updating studio config..."
+        print("updating studio config...")
         # get data to update
         update_data = {
             "studio_name": self.ui.studio_name_label.text(),
@@ -631,7 +631,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def update_app_config(self):
         """Pega as infos das widgets do config_app page e atualiza o app.config_data"""
-        print "updating app config..."
+        print("updating app config...")
         # get data to update
         update_data = {
             "user_name": self.ui.username_line.text()
@@ -667,7 +667,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def update_proj_config(self):
         """Pega as infos das widgets do config proj page e atualiza o app.config_data"""
-        print "updating project config..."
+        print("updating project config...")
         # user project data
         local_folder = Path(self.ui.localFolder_line.text())
         if bool(re.findall(self.non_ascii_reg, local_folder.path)):
@@ -721,23 +721,23 @@ class BirdoApp(QtGui.QMainWindow):
         # se estiver aberta a config app page (index 2)
         if self.ui.stackedWidget.currentIndex() == 2:
             if not self.update_app_config():
-                print "error updating config app!"
+                print("error updating config app!")
                 return
-            print "update app config done!"
+            print("update app config done!")
             self.go_home()
 
         # se estiver aberta a config studio page (index 6)
         elif self.ui.stackedWidget.currentIndex() == 6:
             if not self.update_studio_config():
-                print "error updating config app!"
+                print("error updating config app!")
                 return
-            print "update project config done!"
+            print("update project config done!")
             self.go_home()
 
         # se estiver aberta a config proj page (index 3)
         elif self.ui.stackedWidget.currentIndex() == 3:
             if not self.update_proj_config():
-                print "error updating config app!"
+                print("error updating config app!")
                 return
-            print "update project config done!"
+            print("update project config done!")
             self.go_home()

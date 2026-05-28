@@ -51,7 +51,6 @@ class FileDialog(QDialog):
     """Class With ProgressDialog to request copy file"""
     def __init__(self, birdo_config, src_file, dst_file):
         super(FileDialog, self).__init__()
-        print("Progress File Dialog Created.")
 
         # files
         self.src_file, self.dst_file = src_file, dst_file

@@ -87,8 +87,9 @@ class ConfigInit(object):
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
 
-        self.animate = Animate(self.config_data["animate_path"]) if bool(self.config_data["animate_path"]) else None
-        self.animate_versions = [Animate(h) for h in get_available_animate_installations() if Animate(h).is_installed()]
+        if "animate_path" in self.config_data.keys():
+            self.animate = AdobeAnimate(self.config_data["animate_path"]) if bool(self.config_data["animate_path"]) else None
+        self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
 
         # lista de projetos do estudio
         self.projects = []
@@ -193,10 +194,10 @@ class ConfigInit(object):
     def create_project(self, create_data):
         """cria novo projeto no server do estudio.(usado no modo dev)"""
         if not bool(self.prefix_reg.match(create_data["01_prefix"])):
-            print "Prefixo de projeto invalido! Deve conter apenas 3 letras!"
+            print("Prefixo de projeto invalido! Deve conter apenas 3 letras!")
             return False
         if create_data["01_prefix"] in [x["prefix"] for x in self.projects]:
-            print "Prefixo escolhido ja existe!"
+            print("Prefixo escolhido ja existe!")
             return False
 
         # copia os arquivos do template para o destino do projeto
@@ -217,7 +218,7 @@ class ConfigInit(object):
         content = asset_setup.read_text()
         new_content = content.replace("PROJ_PREFIX_PLACE_HOLDER", create_data["01_prefix"])
         asset_setup.write_text(new_content)
-        print "asset setup atualizado!"
+        print("asset setup atualizado!")
 
         # config project_data.json
         new_json = config_path / "project_data.json"
@@ -245,7 +246,6 @@ class ConfigInit(object):
             return False
         print(self.config_data["server_projects"])
         for proj in os.listdir(self.config_data["server_projects"]):
-            print(proj)
             p = os.path.join(self.config_data["server_projects"], proj)
             proj_json = os.path.join(p, "project_data.json")
             if os.path.exists(proj_json):
@@ -256,7 +256,7 @@ class ConfigInit(object):
                 self.projects.append(p_data)
         self.projects.sort(key=lambda x: x["id"])
         if self.verbose:
-            print "Config App done! {0} projects listed for studio >> {1}".format(len(self.projects), self.config_data["studio_name"])
+            print("Config App done! {0} projects listed for studio >> {1}".format(len(self.projects), self.config_data["studio_name"]))
 
     def get_project_data(self, project_index):
         """Creates Object with all information and methods for the project
@@ -295,7 +295,7 @@ class ConfigInit(object):
         # pega a info do projeto e do usuario
         project_user_data = next((x for x in self.config_data["user_projects"] if x["id"] == int(project_index)), None)
         if not project_user_data:
-            print "project of index {0} is not configured for local user.. will open config project page...".format(project_index)
+            print("project of index {0} is not configured for local user.. will open config project page...".format(project_index))
             project_data["ready"] = False
             project_data['user_role'] = None
             local_folder = None
@@ -331,7 +331,7 @@ class ConfigInit(object):
         """retorna um dicionario com informacoes do plugin"""
         plugin_json = plugin_root / "setup.json"
         if not plugin_json.exists():
-            print "[BIRDOAPP] Plugin invalido: {0}".format(plugin_root.name)
+            print("[BIRDOAPP] Plugin invalido: {0}".format(plugin_root.name))
             return None
         data = read_json_file(plugin_json.path)
         data["root"] = plugin_root
@@ -341,7 +341,7 @@ class ConfigInit(object):
 
         p_file = Path(str(animate_file))
         if not p_file.endswith(".fla"):
-            print "invalid format for Adobe Animate input: {0}\nMust be .fla file.".format(p_file)
+            print("invalid format for Adobe Animate input: {0}\nMust be .fla file.".format(p_file))
             return False
 
         return self.animate.open_scene(p_file.path)
@@ -350,13 +350,13 @@ class ConfigInit(object):
         """copia o arquivo .js de init do birdoapp pra pasta scripts do arquivo, e abre com o harmony"""
         h_file = Path(str(harmony_file))
         if not h_file.endswith("xstage"):
-            print "harmony open file invalid format input: {0}\nMust be .xstage file.".format(h_file)
+            print("harmony open file invalid format input: {0}\nMust be .xstage file.".format(h_file))
             return False
         scripts_f = h_file.get_parent() / "scripts"
         if not scripts_f.exists():
             scripts_f.make_dirs()
         sco_script = Path(self.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
         if not sco_script.copy_file(scripts_f / sco_script.name):
-            print "[BIRDOAPP] falha ao copiar arquivo 'TB_sceneOpened.js' para o arquivo de harmony: {0}".format(h_file)
+            print("[BIRDOAPP] falha ao copiar arquivo 'TB_sceneOpened.js' para o arquivo de harmony: {0}".format(h_file))
             return False
         return self.harmony.open_harmony_scene(h_file.path)

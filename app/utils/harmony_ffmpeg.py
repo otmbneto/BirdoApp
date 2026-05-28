@@ -7,7 +7,7 @@ import os
 import sys
 import argparse
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from config import ConfigInit
+from .config import ConfigInit
 
 
 if __name__ == "__main__":

@@ -1,9 +1,8 @@
-from birdo_pathlib import Path
+import os
 import platform
 import re
-import os
 import subprocess
-
+from .birdo_pathlib import Path
 
 def get_short_path_name(long_name):
     """
@@ -17,7 +16,6 @@ def get_short_path_name(long_name):
             split_path[i] = re.split(r'\\+|/', temp_short_path)[-1]
     return "/".join(split_path)
 
-
 class SystemFolders(object):
     """
     Class containing the operational system paths and test methods
@@ -27,7 +25,6 @@ class SystemFolders(object):
         self.system_os = platform.system()
 
         if self.system_os == 'Darwin':
-            print 'Sistema MacOS detectado...'
             self.user_home = os.getenv("HOME")
             self.appdata = os.getenv('HOME')
             self.programs = '/Applications'
@@ -35,7 +32,6 @@ class SystemFolders(object):
             self.desktop = os.path.join(os.getenv('HOME'), 'Desktop')
 
         elif self.system_os == 'Windows':
-            print 'Sistema Windows detectado...'
             self.user_home = Path(os.getenv("HOMEPATH"))
             self.appdata = Path(os.getenv('APPDATA'))
             self.programs = Path(os.getenv('ProgramFiles(x86)'))
@@ -49,11 +45,8 @@ class SystemFolders(object):
         ...
         RETURN: bool
         """
-        if self.system_os != 'Windows' and self.system_os != 'Darwin':
-            return False
-        else:
-            print 'Check OS ok!'
-            return True
+
+        return self.system_os == 'Windows' or self.system_os == 'Darwin'
 
     # CHECA SE OS CAMINHOS EXISTEM
     def check_paths(self):
@@ -64,13 +57,13 @@ class SystemFolders(object):
         """
         check = True
         if not self.appdata.exists():
-            print "ERRO finding appdata path in the system: {0}".format(self.appdata)
+            print("ERRO finding appdata path in the system: {0}".format(self.appdata))
             check = False
         if not self.appdata.exists():
-            print "ERRO finding programs path in the system: {0}".format(self.programs)
+            print("ERRO finding programs path in the system: {0}".format(self.programs))
             check = False
         if not self.appdata.exists():
-            print "ERRO finding temp path in the system: {0}".format(self.temp)
+            print("ERRO finding temp path in the system: {0}".format(self.temp))
             check = False
         return check
 

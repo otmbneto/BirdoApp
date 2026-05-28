@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
-from tqdm import tqdm
-from datetime import datetime
 import re
-
+import shutil
+from datetime import datetime
+from tqdm import tqdm
 
 class Path:
     """Classe que junta opcoes para lidar com arquivos e pastas."""
@@ -116,7 +115,7 @@ class Path:
                         pbar.update(len(buff))
                     else:
                         pbar.setValue(len(buff))
-            print "file copied from: {0} to {1}".format(self.path, dst)
+            print("file copied from: {0} to {1}".format(self.path, dst))
         except Exception as e:
             raise e
         return dst
@@ -146,7 +145,7 @@ class Path:
                 counter += 1
         except Exception as e:
             raise e
-        print "{0} items copied...".format(counter)
+        print("{0} items copied...".format(counter))
         return dst
 
     def glob(self, pattern):
@@ -154,7 +153,7 @@ class Path:
         if self.is_file():
             raise Exception("Not a folder to list!")
         if not self.exists():
-            print "folder does not exist... nothing to list."
+            print("folder does not exist... nothing to list.")
             return []
         reg = re.compile(pattern.replace("*", r".+"))
         files = filter(lambda y: bool(reg.match(y)), os.listdir(self.path))
@@ -166,7 +165,7 @@ class Path:
         if self.is_file():
             raise Exception("Not a folder to list!")
         if not self.exists():
-            print "folder does not exist... nothing to list."
+            print("folder does not exist... nothing to list.")
             return []
         final_list = []
         reg = re.compile(pattern.replace("*", r".+"))

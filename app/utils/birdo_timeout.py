@@ -24,7 +24,7 @@ def timeout(timeout):
                 t.start()
                 t.join(timeout)
             except Exception as je:
-                print ('error starting thread')
+                print('error starting thread')
                 raise je
             ret = res[0]
             if isinstance(ret, BaseException):

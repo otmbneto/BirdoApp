@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
+import argparse
 import os
 import sys
-import argparse
 from zipfile import ZipFile, ZIP_DEFLATED
 from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout, QIcon, QMovie
 from PySide import QtCore
-from system import get_short_path_name
-from birdo_json import read_json_file, write_json_file
+from .system import get_short_path_name
+from .birdo_json import read_json_file, write_json_file
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from config import ConfigInit
-
+from .config import ConfigInit
 
 class Worker(QtCore.QObject):
+    
     copied = QtCore.Signal(int)
     zipped = QtCore.Signal(int)
     zip_end = QtCore.Signal(bool)
     transfer_end = QtCore.Signal(bool)
-
     def __init__(self):
         super(Worker, self).__init__()
         self.buffer_size = 1024 * 1024
@@ -55,15 +54,15 @@ class Worker(QtCore.QObject):
         with ZipFile(dst_zip, 'w', compression=ZIP_DEFLATED) as zip_f:
             for (file, relpath) in zip(file_list, relpath_list):
                 short_name_path = get_short_path_name(file)
-                print "** ziping file: {0}".format(file)
+                print("** ziping file: {0}".format(file))
                 try:
                     zip_f.write(short_name_path, relpath)
                 except Exception as e:
                     err_counter += 1
-                    print e
+                    print(e)
                 self.zipped.emit(i)
                 i += 1
-        print "[BIRDOAPP_py] Scene Zip erros: {0}".format(err_counter)
+        print("[BIRDOAPP_py] Scene Zip erros: {0}".format(err_counter))
         self.zip_end.emit(os.path.exists(dst_zip))
 
 

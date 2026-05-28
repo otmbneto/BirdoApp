@@ -44,7 +44,7 @@ class FolderManager(object):
                     raw_string = raw_string.replace(n, proj_data["name_config"][n]["prefix"])
                     raw_string = raw_string.replace(proj_data["name_config"][n]["digits_ph"], str(proj_data["name_config"][n]["digits"]))
                 self.regs[item][subitem] = raw_string
-                print "{0} created for {1} : {2}".format(subitem, item, raw_string)
+                print("{0} created for {1} : {2}".format(subitem, item, raw_string))
 
         self.root = {
             "server": Path(proj_data["paths"]["root"]) / proj_data["paths"]["sub_root"],
@@ -99,7 +99,7 @@ class FolderManager(object):
             self.server_status = "Online" if self.is_server_available() else "Offline"
             return self.server_status == "Online"
         except Exception as e:
-            print e
+            print(e)
             self.server_status = "Offline"
             return False
 
@@ -197,8 +197,7 @@ class FolderManager(object):
         files_names = map(lambda x: x.stem, animatics)
         reg = None
         if any(not self.find_sc(x) for x in files_names):
-            print "padrao de nome de cenas na sequencia de animatic nao e o padrao do " \
-                  "birdoapp.\nTentando achar padrao na sequencia..."
+            print("padrao de nome de cenas na sequencia de animatic nao e o padrao do birdoapp.\nTentando achar padrao na sequencia...")
             reg = find_scenes_pattern(files_names)
             if not reg:
                 raise Exception("Sequencia de animatic fornecida nao tem um padrao de nome de cenas valido!")
@@ -209,17 +208,17 @@ class FolderManager(object):
         for file in tqdm(animatics, desc="Convertendo Animatics..."):
             sc = self.find_sc(file.stem, sc_reg=reg)
             if not sc:
-                print ">> ERRO achando o padrao de nome de cena no arquivo: {0}".format(file.path)
+                print(">> ERRO achando o padrao de nome de cena no arquivo: {0}".format(file.path))
                 continue
             ep_num, sc_num = int(re.findall(r"\d+", ep)[0].strip()), int(re.findall(r"\d+", sc)[0].strip())
             scene = self.regs["scene"]["model"].format(ep_num, sc_num)
             animatic_name = self.regs["animatic"]["model"].format(ep_num, sc_num, self.get_next_animatic_version(scene))
             animatic_file = animatics_root / animatic_name
             if not compress_render(file.path, animatic_file.path):
-                print "ERRO convertendo o arquivo: {0}".format(file.path)
+                print("ERRO convertendo o arquivo: {0}".format(file.path))
                 error_count += 1
                 continue
-        print "Animatics import acabou com {0} errors, e {1} arquivos importados!".format(error_count, len(animatics) - error_count)
+        print("Animatics import acabou com {0} errors, e {1} arquivos importados!".format(error_count, len(animatics) - error_count))
 
     # folder creation methods
     def create_base_folders(self, root):
@@ -230,18 +229,14 @@ class FolderManager(object):
             folders = [self.get_episodes_folder(root)]
         for item in folders:
             item.make_dirs()
-            print " -- base folder created: {0}".format(item.path)
+            print(" -- base folder created: {0}".format(item.path))
 
     def create_episode_scheme(self, root, ep):
         """Cria o esquema de pastas do episodio"""
         ep_root = self.get_episodes_folder(root) / ep
         cenas_folder = self.get_scenes_root_folder(root, ep)
         renders_root = self.get_renders_root(root, ep)
-        folders = [
-            cenas_folder,
-            ep_root / self.ep["boards"],
-            ep_root / self.ep["assets"]
-        ]
+        folders = [cenas_folder,ep_root / self.ep["boards"],ep_root / self.ep["assets"]]
         [folders.append(renders_root / x) for x in self.ep["cenas"]["render"]["sub_folders"]]
 
         # list steps renders folders:
@@ -252,7 +247,7 @@ class FolderManager(object):
         # create folders listed
         for f in folders:
             f.make_dirs()
-            print " -- project folder created: {0}".format(f.path)
+            print(" -- project folder created: {0}".format(f.path))
 
     def create_scene_scheme(self, root, scene_name, step):
         """
@@ -270,7 +265,7 @@ class FolderManager(object):
         """retorna o caminho do proximo arquivo zip para publish no server"""
         ep = self.find_ep(scene_name)
         if not ep:
-            print "[BIRDOAPP] nome de cena invalido!"
+            print("[BIRDOAPP] nome de cena invalido!")
             return None
         dir_name = filter(lambda x: "PUBLISH" in x, self.steps[step]["server"])[0]
         publish_folder = self.get_scenes_path("server", ep, step) / scene_name / dir_name
@@ -299,5 +294,5 @@ class FolderManager(object):
             raise Exception("[BIRDOAPP] Falha ao copiar scene template para o destino: {0}".format(dst))
         for item in scene_copy.glob("*"):
             if scene_template.name in item.name:
-                print " - arquivo renomeado: {0}".format(item.rename(item.name.replace(scene_template.name, scene_name)))
+                print(" - arquivo renomeado: {0}".format(item.rename(item.name.replace(scene_template.name, scene_name))))
         return scene_copy

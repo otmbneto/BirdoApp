@@ -48,7 +48,7 @@ if __name__ == "__main__":
         get_last_release(app_root)
         if os.path.exists(last_updated_file) and (last_updated != os.path.getmtime(last_updated_file)):
             os.execv(sys.argv[0], sys.argv)
-        print ">>iniciando interface do birdoapp..."
+        print(">>iniciando interface do birdoapp...")
         app = QtGui.QApplication([])
         MainWindow = BirdoApp()
         MainWindow.show()

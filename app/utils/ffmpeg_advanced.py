@@ -46,7 +46,7 @@ class ConverterFFMPEG:
                 self.pb.update(frame - self.pb.n)
                 self.pb.set_description_str('[BIRDOAPP - ffmpeg] frame: {0}'.format(frame))
             else:
-                print "[BIRDOAPP - ffmpeg] - frame {0}".format(frame)
+                print("[BIRDOAPP - ffmpeg] - frame {0}".format(frame))
 
     def run_command(self):
         """run convert images to movie command."""
@@ -66,7 +66,7 @@ class ConverterFFMPEG:
             self.pb.close()
         self.pb = None
         os.chdir(self.initial_dir)
-        print "[BIRDOAPP] comando ffmpeg finalizado!"
+        print("[BIRDOAPP] comando ffmpeg finalizado!")
         return process.returncode is None
 
     def get_resolution(self, input_file):
@@ -76,7 +76,7 @@ class ConverterFFMPEG:
         except subprocess.CalledProcessError as exc:
             res_raw = re.findall(r",\s\d+x\d+", exc.output)
             if len(res_raw) == 0:
-                print "[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(input_file)
+                print("[BIRDOAPP] - nao foi possivel encontrar a resolucao do arquivo: {0}".format(input_file))
                 return None
             resolution = [int(x) for x in re.findall(r"\d+", res_raw[0])]
             return resolution
@@ -94,7 +94,7 @@ class ConverterFFMPEG:
             fps = re.findall(r"\d+\.?\d+\sfps", exc.output)
             duration = re.findall(r"Duration:\s\d{2}:\d{2}:\d+\.?\d+", exc.output)
             if len(duration) == 0 or len(fps) == 0:
-                print "[BIRDOAPP] - nao foi possivel encontrar a duracao do arquivo: {0}".format(video_file)
+                print("[BIRDOAPP] - nao foi possivel encontrar a duracao do arquivo: {0}".format(video_file))
                 return None
             t = datetime.strptime(duration[0].replace("Duration: ", ""), "%H:%M:%S.%f")
             fps_int = float(re.findall(r"\d+\.?\d+", fps[0])[0])
@@ -161,7 +161,7 @@ class ConverterFFMPEG:
         )
         self.run_command()
         if not pallet.exists():
-            print "error generating gif pallet!"
+            print("error generating gif pallet!")
             return None
         return pallet
 

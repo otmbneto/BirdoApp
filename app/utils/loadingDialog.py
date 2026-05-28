@@ -1,11 +1,10 @@
-from PySide import QtCore, QtGui
-from ui.BirdoLoading import Ui_Form
 import argparse
 import os
 import sys
+from PySide import QtCore, QtGui
+from ui.BirdoLoading import Ui_Form
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from config import ConfigInit
-
+from .config import ConfigInit
 
 class loadingDialog(QtGui.QWidget):
     """Interface util do harmony para loading da birdo"""

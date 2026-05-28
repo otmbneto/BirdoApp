@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 import shlex
-from birdo_pathlib import Path
+from .birdo_pathlib import Path
 
 
 class ToonBoomHarmony(object):
@@ -63,7 +63,7 @@ class ToonBoomHarmony(object):
         """
         scripts = os.getenv("TOONBOOM_GLOBAL_SCRIPT_LOCATION").replace("\\", "/")
         if not scripts:
-            print "[[WARNING!]] 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' not installed in this computer!!!!"
+            print("[[WARNING!]] 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' not installed in this computer!!!!")
             return False
 
     def get_package_folder(self):
@@ -75,7 +75,7 @@ class ToonBoomHarmony(object):
         """
         package = os.getenv("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER").replace("\\", "/")
         if not package:
-            print "[[WARNING!]] 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' not installed in this computer!!!!"
+            print("[[WARNING!]] 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' not installed in this computer!!!!")
             return False
         return package
 
@@ -95,11 +95,11 @@ class ToonBoomHarmony(object):
         """
         h_folder = Path(str(harmony_file_folder))
         if not h_folder.exists():
-            print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder)
+            print("[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder))
             return False
         xstage_files = h_folder.glob('*.xstage$')
         if len(xstage_files) == 0:
-            print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder)
+            print('[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder))
             return False
         last_version = sorted(xstage_files, key=lambda x: x.get_last_modified())[-1]
         return last_version.path
@@ -118,7 +118,7 @@ class ToonBoomHarmony(object):
         """
         h_sc = Path(str(harmony_scene))
         if h_sc.suffix != ".xstage":
-            print "[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            print("[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!")
             return False
         cmd = '"{0}" -batch -scene "{1}"'.format(self.executable, h_sc.path)
         if pre_render_script:
@@ -140,7 +140,7 @@ class ToonBoomHarmony(object):
         """
         script_p, h_file = Path(str(script)), Path(str(harmony_file))
         if h_file.suffix != ".xstage":
-            print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            print("[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!")
             return False
         cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable, h_file.path, script_p.path)
         return subprocess.call(shlex.split(cmd)) == 0
@@ -220,7 +220,7 @@ class AdobeAnimate(object):
         
         appdata = os.getenv('LOCALAPPDATA')
         version_code = self.version
-        return os.path.join(appdata,"Adobe",f"Animate {version_code}","pt_BR","Configuration","Commands","Birdo")
+        return os.path.join(appdata,"Adobe","Animate {0}".format(version_code),"pt_BR","Configuration","Commands","Birdo")
 
     def get_scripts_path(self):
 
@@ -250,7 +250,6 @@ class AdobeAnimate(object):
 
         return True
 
-    @staticmethod
     def _on_open(open_scene):
 
         def wrapper(*args, **kwargs):

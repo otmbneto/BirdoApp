@@ -4,9 +4,9 @@ import os
 import sys
 import subprocess
 import codecs
-from config import ConfigInit
-from utils.birdo_pathlib import Path
-from utils.birdo_zip import compact_folder
+from .config import ConfigInit
+from .utils.birdo_pathlib import Path
+from .utils.birdo_zip import compact_folder
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
 
@@ -44,7 +44,7 @@ class DevTools:
         try:
             return os.system(cmd.encode('utf-8')) == 0
         except Exception as e:
-            print e
+            print(e)
             sys.exit("cancelado!")
 
     def show_about(self):
@@ -145,7 +145,7 @@ class DevTools:
             server_path = self.get_input(u"Defina o caminho na rede para salvar as configurações de projetos:".encode(sys.getfilesystemencoding()),
                                          "Cole o caminho aqui...")
             if not os.path.exists(server_path):
-                print "Aparentemente o caminho fornecido esta inacessivel!"
+                print("Aparentemente o caminho fornecido esta inacessivel!")
                 self.pause()
         self.app.config_data["server_projects"] = server_path
 
@@ -173,7 +173,7 @@ class DevTools:
 
         # atualiza o config object
         self.app.update_config_json()
-        print "Configuracao do BirdoApp atualizado!"
+        print("Configuracao do BirdoApp atualizado!")
         self.pause()
         self.app = ConfigInit(verbose=False)
         self.show_main_menu()
@@ -199,7 +199,7 @@ class DevTools:
         self.app = ConfigInit(verbose=False)
         self.project = self.app.get_project_data(user_proj["id"])
 
-        print "projeto {0} configurado!".format(self.project.name)
+        print("projeto {0} configurado!".format(self.project.name))
         self.pause()
         self.show_project_page()
 
@@ -234,7 +234,7 @@ class DevTools:
             break
 
         if self.app.create_project(create_data):
-            print "Projeto {0} criado!".format(create_data["01_prefix"])
+            print("Projeto {0} criado!".format(create_data["01_prefix"]))
         else:
             sys.exit("ERRO criando o Projeto {0}".format(create_data["01_prefix"]))
         self.pause()
@@ -284,7 +284,7 @@ class DevTools:
                              range(int(div[0].split("-")[0]), int(div[0].split("-")[1]))]
             for ep in input_eps:
                 if ep in eps:
-                    print "Episodio escolhido ({0}) ja existe no projeto!".format(ep)
+                    print("Episodio escolhido ({0}) ja existe no projeto!".format(ep))
                     self.show_project_page()
                 self.project.paths.create_episode_scheme("server", ep)
             self.pause()
@@ -327,28 +327,27 @@ class DevTools:
                 temp_folder = self.app.get_temp_folder("create_setup", clean=True)
                 publish_zip = self.project.paths.get_publish_file(item, "SETUP")
                 if "v01" not in publish_zip.name:
-                    print " -- CENA {0} ja tem setup basico!".format(item)
+                    print(" -- CENA {0} ja tem setup basico!".format(item))
                     counter["errors"] += 1
                     continue
                 temp_scene = temp_folder / item
                 if not self.project.paths.copy_scene_template(temp_scene):
-                    print("ERRO criando copia da cena "
-                          "{0} no temp...".format(item))
+                    print("ERRO criando copia da cena {0} no temp...".format(item))
                     counter["errors"] += 1
                     continue
                 import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
                 if not self.app.harmony.compile_script(import_animatic_js.path,
                                                        self.app.harmony.get_xstage_last_version(temp_scene.path)):
-                    print "ERRO rodando o script compile de animatic no arquivo temp..."
+                    print("ERRO rodando o script compile de animatic no arquivo temp...")
                     counter["errors"] += 1
                     continue
                 temp_zip = temp_folder / "_temp.zip"
                 if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
-                    print "ERRO ao compactar cena no temp zip"
+                    print("ERRO ao compactar cena no temp zip")
                     counter["errors"] += 1
                     continue
                 if not temp_zip.copy_file(publish_zip):
-                    print "ERRO ao copiar o temp zip para o server!"
+                    print("ERRO ao copiar o temp zip para o server!")
                     counter["errors"] += 1
                     continue
                 counter["done"] += 1
