@@ -39,6 +39,9 @@ class ToonBoomHarmony(object):
     def get_edition(self):
         return self.edition
 
+    def get_generic_name(self):
+        return "Toon Boom Harmony"
+
     def get_name(self):
         return self.name
 
@@ -157,7 +160,21 @@ class ToonBoomHarmony(object):
         """
         tpl = Path(str(harmony_tpl))
         cmd = '"{0}" -batch -template "{1}" -thumbnails -readonly'.format(self.executable, tpl.path)
+
         return subprocess.call(shlex.split(cmd)) == 0
+
+    # Convinience method to install our scripts 
+    # into the right places so the program can find it when launched.
+    # Not every software supports this kind of feature 
+    # but for the sake of consistency i'm gonna share this method with all of them.
+    def install_software_dependencies(self):
+
+        scene_opened = os.path.join(self.get_default_scripts_path(),"TB_sceneOpened.js")
+        if os.path.exists(scene_opened):
+            bkp = os.path.join(self.get_default_scripts_path(),"TB_sceneOpened.bkp")
+            os.rename(scene_opened,bkp)
+
+        return
 
     def open_harmony_scene(self, xstage_file):
         """
@@ -191,7 +208,7 @@ class AdobeAnimate(object):
             "/") or installation_path.endswith("\\") \
             else os.path.basename(installation_path)
 
-        self.version = re.findall(self.regex, self.name)[0][0]
+        self.version = re.findall(self.regex, self.name)[0]
         self.subversion = ""
         self.edition = ""
         self.executable = os.path.join(self.installation_path,"Animate.exe")
@@ -205,6 +222,10 @@ class AdobeAnimate(object):
 
     def get_edition(self):
         return self.edition
+
+    def get_generic_name(self):
+
+        return "Adobe Animate"
 
     def get_name(self):
         return self.name
@@ -258,6 +279,15 @@ class AdobeAnimate(object):
             return open_scene(*args, **kwargs)
 
         return wrapper
+
+    # Convinience method to install our scripts 
+    # into the right places so the program can find it when launched.
+    # Not every software supports this kind of feature 
+    # but for the sake of consistency i'm gonna share this method with all of them.
+    def install_software_dependencies(self):
+
+
+        return
 
     @_on_open
     def open_scene(self, app_file):
