@@ -117,12 +117,12 @@ class ConfigInit(object):
         return self.__doc__
 
     def is_ready(self):
-        """Metodo para checar se os dados basicos do config.json sao validos"""
-        return not any(not bool(x) for x in [self.config_data["user_name"], self.config_data["harmony_path"]])
+
+        return True
 
     def is_studio_ready(self):
-        """Metodo para checar se os dados de studio do config.json sao validos"""
-        return not any(not bool(x) for x in [self.config_data["studio_name"], self.config_data["server_projects"]])
+
+        return True
 
     def update_session(self, mode):
         """cria json no temp para guardar o modo de inicio da sessao"""
@@ -148,9 +148,11 @@ class ConfigInit(object):
         """Metodo para verificar se o caminho config do server e valido."""
         return os.path.exists(self.config_data["server_projects"])
 
-    def update_config_json(self):
+    def update_config_json(self,data = None):
+        
         """Atualiza o config.json"""
-        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"])
+        #self.harmony = ToonBoomHarmony(self.config_data["harmony_path"])
+        
         return write_json_file(self.config_json, self.config_data, op_code="wb", encoding="utf-8", ensure_ascii=False)
 
     def get_plugins_folder(self):
