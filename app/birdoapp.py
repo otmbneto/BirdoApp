@@ -6,7 +6,7 @@ from .utils.birdo_json import read_json_file
 from .utils.birdo_pathlib import Path
 from .utils.harmony_utils import *
 from .utils.birdoapp_about import About
-from .utils.server import ServerThread
+from .utils.server import ServerThread,HttpServerThread
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import subprocess
@@ -247,9 +247,20 @@ class BirdoApp(QtGui.QMainWindow):
         self.server.message_received.connect(self.on_message_received)
         self.server.start()
 
+        self.http_server = HttpServerThread()
+        self.http_server.message_received.connect(self.on_message_received)
+        self.http_server.start()
+
+
     @QtCore.Slot(str)
     def on_message_received(self, message):
-        self.text.append("Received: %s" % message)
+        print("Received: %s" % message)
+
+        if message["command"] == "open_scene":
+            plugin = [p for p in self.plugins if p["name"] == "Abrir Cena"]
+            if len(plugin) > 0:
+                self.plugin_selected(plugin[0],self.project_data.id)
+
 
     def load_ui(self, ui_file):
         """carreag o arquivo ui na classe"""
@@ -262,9 +273,9 @@ class BirdoApp(QtGui.QMainWindow):
     def closeEvent(self, event):
         print("session terminated!")
         self.server.stop()
+        self.http_server.stop()
         self.birdoapp.kill_session()
         event.accept()
-
 
     def go_home(self):
         """vai para pagina inicial de cada modo

@@ -2,9 +2,95 @@ import socket
 import threading
 from PySide import QtCore
 
+
+# -*- coding: utf-8 -*-
+
+# -*- coding: utf-8 -*-
+
+from PySide import QtCore
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+import threading
+import json
+
+
+class RequestHandler(BaseHTTPRequestHandler):
+
+    callback = None
+
+    def do_POST(self):
+
+        length = int(self.headers['Content-Length'])
+        body = self.rfile.read(length)
+
+        try:
+            data = json.loads(body)
+
+            if RequestHandler.callback:
+                RequestHandler.callback(data)
+
+            response = {
+                "success": True
+            }
+
+        except Exception as e:
+
+            response = {
+                "success": False,
+                "error": str(e)
+            }
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
+        self.wfile.write(json.dumps(response))
+
+    def log_message(self, format, *args):
+        pass
+
+
+class HttpServerThread(QtCore.QObject):
+
+    message_received = QtCore.Signal(object)
+    def __init__(self, host="127.0.0.1", port=5001):
+        super(HttpServerThread, self).__init__()
+
+        self.host = host
+        self.port = port
+
+        self.server = None
+        self.thread = None
+
+    def start(self):
+
+        RequestHandler.callback = self.on_request
+
+        self.server = HTTPServer((self.host, self.port),RequestHandler)
+
+        self.thread = threading.Thread(target=self.server.serve_forever)
+
+        self.thread.daemon = True
+        self.thread.start()
+
+        print("HTTP Server Started")
+
+    def stop(self):
+
+        if self.server:
+
+            self.server.shutdown()
+            self.server.server_close()
+
+            print("HTTP Server Stopped")
+
+    def on_request(self, data):
+
+        # This signal is thread-safe
+        self.message_received.emit(data)
+
 class ServerThread(QtCore.QObject):
     
-    message_received = QtCore.Signal(str)
+    message_received = QtCore.Signal(object)
     def __init__(self, host="127.0.0.1", port=5000):
         super(ServerThread, self).__init__()
 
@@ -53,7 +139,9 @@ class ServerThread(QtCore.QObject):
         try:
 
             data = client.recv(4096)
+            print(data)
             if data:
+                data = json.loads(data)
                 self.message_received.emit(data)
                 client.send("OK")
 
