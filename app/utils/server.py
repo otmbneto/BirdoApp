@@ -1,13 +1,6 @@
 import socket
 import threading
 from PySide import QtCore
-
-
-# -*- coding: utf-8 -*-
-
-# -*- coding: utf-8 -*-
-
-from PySide import QtCore
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import threading
 import json
