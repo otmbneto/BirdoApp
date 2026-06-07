@@ -86,6 +86,15 @@ class ToonBoomHarmony(object):
         h_folder = Path(str(folder))
         return len(h_folder.glob('*.xstage$')) > 0
 
+    def get_last_version(self,path):
+
+        files = []
+        if os.path.exists(path):
+            files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".xstage")]
+
+        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1]
+        return last_version.path
+
     def get_xstage_last_version(self, harmony_file_folder):
         """
         Retorna o arquivo .xstage mais recente no folder do arquivo harmony fornecido.
@@ -254,10 +263,14 @@ class AdobeAnimate(object):
     def is_project_file(self, file):
         return file.endswith(".fla")
 
-    def get_last_version(self):
+    def get_last_version(self,path):
 
+        files = []
+        if os.path.exists(path):
+            files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".fla")]
 
-        return
+        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1]
+        return last_version.path
 
     def render_scene(self, app_scene):
 

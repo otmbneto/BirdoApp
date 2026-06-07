@@ -87,8 +87,8 @@ class ConfigInit(object):
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
 
-        if "animate_path" in self.config_data.keys():
-            self.animate = AdobeAnimate(self.config_data["animate_path"]) if bool(self.config_data["animate_path"]) else None
+        if "Adobe_Animate_path" in self.config_data.keys():
+            self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
         self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
 
         # lista de projetos do estudio

@@ -34,12 +34,13 @@ class CustomSignal(QtCore.QObject):
 class OpenScene(QtGui.QWidget):
     """Main OpenScene interface"""
 
-    def __init__(self, config_birdoapp, project_data, plugin_data):
+    def __init__(self, config_birdoapp, project_data, plugin_data,target = "Toon Boom Harmony"):
         super(OpenScene, self).__init__()
 
         # set keys data
         self.birdoapp = config_birdoapp
         self.project_data = project_data
+        self.target_app = target
         self.episodes_data = {}
         self.wait = False
         self.response = False
@@ -76,22 +77,16 @@ class OpenScene(QtGui.QWidget):
         # SHOT VERSIONS
         self.shot_versions = {}
 
-        # BAT SCRIPTS
-        self.update_setup_script = os.path.join(self.birdoapp.root, 'batch', 'BAT_UpdateSETUP.js')
-
         # SCENE OBJECT WITH OPENED SCENES (EACH SCENE KEY CONTAIN THE PROCESS OBJECT AS VALUES)
         self.opened_scenes = {}
 
         # LIMPA A PASTA TEMP ANTES DE COMECAR
         self.temp_open_scene = self.birdoapp.get_temp_folder(sub_folder='OpenScene', clean=True)
         self.recently_open = []
-        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        #if self.recently_open_log.exists():
-        #    with open(self.recently_open_log.normpath(),"r") as rec_open_log:
-        #        self.recently_open = rec_open_log.readlines()
-        #        print("READING: " + str(self.recently_open))
-        #print(self.recently_open)
         self.recently_open = self.birdoapp.load_recently_open_files()
+
+        if self.target_app == "Toon Boom Harmony":
+            self.update_setup_script = os.path.join(self.birdoapp.root, 'batch', 'BAT_UpdateSETUP.js')
 
     def load_page(self, ui_file):
         ui_file = QtCore.QFile(ui_file)
@@ -147,8 +142,9 @@ class OpenScene(QtGui.QWidget):
             return "ANIM"
 
     def get_scenes_list(self, ep):
+        
         """Generates scenes list from animatic movs of the ep"""
-        mov_reg = self.project_data.paths.regs["animatic"]["regex"]  # r'\w{3}_EP\d{3}_SC\d{4}_v\d{2}\.mov'
+        mov_reg = self.project_data.paths.regs["animatic"]["regex"]
         version_reg = r'_v\d{2}.mov'
         scenes_data = {}
         list_full = self.project_data.paths.list_project_animatics(
@@ -206,11 +202,19 @@ class OpenScene(QtGui.QWidget):
         """returns object with local scene information"""
         current_step = self.ui.comboStep.currentText()
         scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK" / scene_name
-        xsxtage = self.birdoapp.harmony.get_xstage_last_version(scene_local_path.path)
-        local_scene_data = {
-            "path": scene_local_path,
-            "xstage": xsxtage if not bool(xsxtage) else Path(xsxtage)
-        }
+
+        if self.target_app == "Toom Boom Harmony":
+            file = self.birdoapp.harmony.get_last_version(scene_local_path.path)
+            local_scene_data = {
+                "path": scene_local_path,
+                "xstage": file if not bool(file) else Path(file)
+            }
+        else:
+            file = self.birdoapp.animate.get_last_version(scene_local_path.path)
+            local_scene_data = {
+                "path": scene_local_path,
+                "xstage": file if not bool(file) else Path(file)
+            }
         return local_scene_data
 
     def list_scene_versions(self, scene_name):
@@ -236,12 +240,15 @@ class OpenScene(QtGui.QWidget):
                 'versions': {}
             }
 
-            zips = scene_publish_path.glob("*.zip$")
-            if len(zips) == 0:
-                print "cant list zip files in publish in step {0} for scene {1}!".format(step, scene_name)
+
+            publish_files = scene_publish_path.glob("*.zip$") if self.target_app == "Toon Boom Harmony" else scene_publish_path.glob("*.fla$")
+            #zips = scene_publish_path.glob("*.zip$")
+            if len(publish_files) == 0:
+                print "cant list files in publish in step {0} for scene {1}!".format(step, scene_name)
                 index += 1
                 continue
-            for item in zips:
+
+            for item in publish_files:
                 versions_data[step]['versions'][item.name] = item
 
             versions_data[step]["is_used"] = True
@@ -474,134 +481,135 @@ class OpenScene(QtGui.QWidget):
         self.signals.progress_format.emit(["checking local file..."])
         self.signals.progress_made.emit([])
 
-        # GETS THE LOCAL SCENE PATH
-        local_scene = self.shot_versions[current_step]["local_path"]
-        if self.ui.checkBox_open_local.isChecked():
-            if self.shot_versions["most_recent"] == 'server':
-                self.signals.sendQuestionMessage.emit([u"[question]Você irá abrir a cena {0} que está salva no seu computador, "
-                                                       u"mas há uma versão aparentemente mais recente no server.\nPretente abrir mesmo assim?".format(selected_scene)])
-                self.wait = True
-                while self.wait:
-                    continue
-                ask = self.response
-                self.response = None
-                if not ask:
+
+        if self.target_app == "Toon Boom Harmony":
+
+            # GETS THE LOCAL SCENE PATH
+            local_scene = self.shot_versions[current_step]["local_path"]
+            if self.ui.checkBox_open_local.isChecked():
+                if self.shot_versions["most_recent"] == 'server':
+                    self.signals.sendQuestionMessage.emit([u"[question]Você irá abrir a cena {0} que está salva no seu computador, "
+                                                           u"mas há uma versão aparentemente mais recente no server.\nPretente abrir mesmo assim?".format(selected_scene)])
+                    self.wait = True
+                    while self.wait:
+                        continue
+                    ask = self.response
+                    self.response = None
+                    if not ask:
+                        return
+                else:
+                    self.signals.sendInformationMessage.emit([u"[info]Você irá abrir a cena {0} que está salva no seu computador e aparentemente foi modificada após o último envio de versão desta cena no server.\n"
+                                                              u"Confira se esta é realmente a versão mais atualizada!".format(
+                            selected_scene)]
+                    )
+
+                if not local_scene["xstage"] or not local_scene["xstage"].exists():
+                    self.signals.progress_format.emit(["ERROR! File not found!"])
+                    self.signals.progress_made.emit([])
+                    self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar uma cena para abrir."])
                     return
             else:
-                self.signals.sendInformationMessage.emit([u"[info]Você irá abrir a cena {0} que está salva no seu computador e aparentemente foi modificada após o último envio de versão desta cena no server.\n"
-                                                          u"Confira se esta é realmente a versão mais atualizada!".format(
-                        selected_scene)]
-                )
 
-            if not local_scene["xstage"] or not local_scene["xstage"].exists():
-                self.signals.progress_format.emit(["ERROR! File not found!"])
+                # IF NO SETUP FOUND
+                selected_version = self.ui.listVersions.currentItem().text() if self.ui.listVersions.currentItem() is not None else None 
+                if selected_version is None or selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA":
+                    print "Error selection! Cant find scene setup!!!"
+                    return
+
+                if self.shot_versions["most_recent"] == 'local':
+                    self.signals.sendQuestionMessage.emit([u"Você irá abrir uma cena do server, que contem uma versão local aparentemente mais atual.\n"
+                                                           u"Deseja continuar?\n(OBS: Se desejar abrir a versão local para conferir, clique em 'No', e marque a opção 'Open Local File' antes de abrir!)"])
+                    self.wait = True
+                    while self.wait:
+                        continue
+                    ask = self.response
+                    self.response = None
+                    if not ask:
+                        return
+                # FIND RIGHT STEP TO OPEN
+                step_open = self.shot_versions["step_to_open"]
+                scene_obj = self.shot_versions[step_open]["versions"][selected_version]
+                # DOWNLOAD SCENE FILE...
+                self.signals.progress_format.emit(["downloading file..."])
                 self.signals.progress_made.emit([])
-                self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar uma cena para abrir."])
+                temp_file = self.temp_open_scene / scene_obj.name
+                print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file.path)
+                scene_obj.copy_file(temp_file)
+                if not temp_file.exists():
+                    print "fail to download scene: {0}".format(scene_obj.name)
+                    self.signals.sendWarningMessage.emit([u"Falha ao fazer o download da versão da cena do server para o folder temporário!"])
+                    return
+
+                # CHECK IF NEED BACKUP
+                self.signals.progress_format.emit(["checking backup..."])
+                self.signals.progress_made.emit([])
+                if local_scene["path"].exists():
+                    print "[BIRDOAPP] Já existe uma versão local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
+                    backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string() / selected_scene
+                    backup_zip = backup_folder / "backup.zip"
+                    print "--scene backup: {0};\n--zip: {1}".format(backup_folder.path, backup_zip.path)
+                    backup_folder.make_dirs()
+
+                    try:
+                        if compact_folder(local_scene["path"].path, backup_zip.path):
+                            local_scene["path"].remove()
+                        else:
+                            print 'fail to create backup scene bakcup from original local file'
+                    except Exception as e:
+                        print e
+                        self.signals.sendWarningMessage.emit([u"Falha ao criar bakcup da cena! Verifique se a cena local está aberta!"])
+                        return
+                else:
+                    if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
+                        print "error creating scene folder scheme!"
+                        self.signals.sendWarningMessage.emit([u"Erro criando diretórios locais da cena!"])
+                        return
+
+                # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
+                self.signals.progress_format.emit(["unpacking scene..."])
+                self.signals.progress_made.emit([])
+                print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
+                if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
+                    print "error extracting scene zip!"
+                    self.signals.sendWarningMessage.emit([u"Erro descompactando versão da cena baixada!"])
+                    return
+                local_scene["xstage"] = Path(self.birdoapp.harmony.get_xstage_last_version(local_scene["path"].path))
+                # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
+                if not local_scene["path"].exists():
+                    print "error! Cant find unpacked version scene folder!"
+                    self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar o folder da cena descompactada!"])
+                    return
+
+                # OPEN SCENE DOWNLOADED
+                self.signals.progress_format.emit(["opening scene..."])
+                self.signals.progress_made.emit([]) 
+                if not local_scene["xstage"]:
+                    self.signals.sendWarningMessage.emit([u"Erro! Arquivo xstage da versão baixada não encontrado!"])
+                    print "fail to find xstage file to scene: {0}".format(local_scene['path'].path)
+                    return
+
+            scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
+            scene_script_path = local_scene["path"] / "scripts"
+            if not scene_script_path.exists():
+                scene_script_path.make_dirs()
+            print("copying {0} to script folder".format(scene_opened_script.name))
+            if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
+                print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
+                self.signals.sendWarningMessage.emit([u"Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcionar."])
                 return
+
+            print "running update setup script..."
+            self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
+            print "opening scene: {0}".format(local_scene["xstage"])
+            self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
+
+            if len(self.recently_open) >= 10:
+                self.recently_open = self.recently_open[1:]
+
+            self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
         else:
-
-            # IF NO SETUP FOUND
-            selected_version = self.ui.listVersions.currentItem().text() if self.ui.listVersions.currentItem() is not None else None 
-            if selected_version is None or selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA":
-                print "Error selection! Cant find scene setup!!!"
-                return
-
-            if self.shot_versions["most_recent"] == 'local':
-                self.signals.sendQuestionMessage.emit([u"Você irá abrir uma cena do server, que contem uma versão local aparentemente mais atual.\n"
-                                                       u"Deseja continuar?\n(OBS: Se desejar abrir a versão local para conferir, clique em 'No', e marque a opção 'Open Local File' antes de abrir!)"])
-                self.wait = True
-                while self.wait:
-                    continue
-                ask = self.response
-                self.response = None
-                if not ask:
-                    return
-            # FIND RIGHT STEP TO OPEN
-            step_open = self.shot_versions["step_to_open"]
-            scene_obj = self.shot_versions[step_open]["versions"][selected_version]
-            # DOWNLOAD SCENE FILE...
-            self.signals.progress_format.emit(["downloading file..."])
-            self.signals.progress_made.emit([])
-            temp_file = self.temp_open_scene / scene_obj.name
-            print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, temp_file.path)
-            scene_obj.copy_file(temp_file)
-            if not temp_file.exists():
-                print "fail to download scene: {0}".format(scene_obj.name)
-                self.signals.sendWarningMessage.emit([u"Falha ao fazer o download da versão da cena do server para o folder temporário!"])
-                return
-
-            # CHECK IF NEED BACKUP
-            self.signals.progress_format.emit(["checking backup..."])
-            self.signals.progress_made.emit([])
-            if local_scene["path"].exists():
-                print "[BIRDOAPP] Já existe uma versão local desta cena. Open Scene ira copiar esta versao local para uma pasta no mesmo folder chamada '_backup'!"
-                backup_folder = local_scene["path"].get_parent() / "_backup" / get_current_datetime_string() / selected_scene
-                backup_zip = backup_folder / "backup.zip"
-                print "--scene backup: {0};\n--zip: {1}".format(backup_folder.path, backup_zip.path)
-                backup_folder.make_dirs()
-
-                try:
-                    if compact_folder(local_scene["path"].path, backup_zip.path):
-                        local_scene["path"].remove()
-                    else:
-                        print 'fail to create backup scene bakcup from original local file'
-                except Exception as e:
-                    print e
-                    self.signals.sendWarningMessage.emit([u"Falha ao criar bakcup da cena! Verifique se a cena local está aberta!"])
-                    return
-            else:
-                if not self.project_data.paths.create_scene_scheme("local", selected_scene, current_step):
-                    print "error creating scene folder scheme!"
-                    self.signals.sendWarningMessage.emit([u"Erro criando diretórios locais da cena!"])
-                    return
-
-            # UNPACK DOWNLOADED ZIP SCENE TO SCENE FOLDER
-            self.signals.progress_format.emit(["unpacking scene..."])
-            self.signals.progress_made.emit([])
-            print "unpacking scene:\n -temp zip: {0};\n -scene folder: {1};".format(temp_file.path, local_scene["path"].path)
-            if not extract_zipfile(temp_file.path, local_scene["path"].get_parent().path):
-                print "error extracting scene zip!"
-                self.signals.sendWarningMessage.emit([u"Erro descompactando versão da cena baixada!"])
-                return
-            local_scene["xstage"] = Path(self.birdoapp.harmony.get_xstage_last_version(local_scene["path"].path))
-            # CHECKS IF SCENE WAS SUCCESSFULLY UNPACKED
-            if not local_scene["path"].exists():
-                print "error! Cant find unpacked version scene folder!"
-                self.signals.sendWarningMessage.emit([u"Erro! Não foi possível encontrar o folder da cena descompactada!"])
-                return
-
-            # OPEN SCENE DOWNLOADED
-            self.signals.progress_format.emit(["opening scene..."])
-            self.signals.progress_made.emit([]) 
-            if not local_scene["xstage"]:
-                self.signals.sendWarningMessage.emit([u"Erro! Arquivo xstage da versão baixada não encontrado!"])
-                print "fail to find xstage file to scene: {0}".format(local_scene['path'].path)
-                return
-
-        scene_opened_script = Path(self.birdoapp.root) / "harmony" / "birdoPack" / "_scene_scripts" / "TB_sceneOpened.js"
-        scene_script_path = local_scene["path"] / "scripts"
-        if not scene_script_path.exists():
-            scene_script_path.make_dirs()
-        print("copying {0} to script folder".format(scene_opened_script.name))
-        if not scene_opened_script.copy_file(scene_script_path / scene_opened_script.name):
-            print "fail to copy TB_sceneOpened.js script file to scene... aborting... "
-            self.signals.sendWarningMessage.emit([u"Erro ao copiar o arquivo de script 'TB_sceneOpened.js' para a cena. O BirdoApp não irá funcionar."])
-            return
-
-        print "running update setup script..."
-        self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
-        print "opening scene: {0}".format(local_scene["xstage"])
-        self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
-
-        if len(self.recently_open) >= 10:
-            self.recently_open = self.recently_open[1:]
-        #self.recently_open.append(local_scene["xstage"])
-        #self.recently_open_log = self.birdoapp.get_temp_folder() / "recently_open.log"
-        #with open(self.recently_open_log.normpath(),"w") as rec_open_log:
-        #    print("WRITTING: " + str(self.recently_open))
-        #    rec_open_log.write("".join(self.recently_open))
-        #self.birdoapp.save_recently_open_files(self.recently_open)
-        self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
+            local_scene = self.shot_versions[current_step]["local_path"]
+            self.birdoapp.animate.open_scene(local_scene["xstage"])
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
@@ -625,9 +633,10 @@ class OpenScene(QtGui.QWidget):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Open Scene')
     parser.add_argument('proj_id', help='Project id')
+    parser.add_argument('-a', "--app",type = str,help='Target application for file opening')
     args = parser.parse_args()
-
     project_index = int(args.proj_id)
+    print(args.app)
     config = ConfigInit()
     p_data = config.get_project_data(project_index)
     if not p_data:
@@ -639,7 +648,7 @@ if __name__ == "__main__":
         app = QtGui.QApplication([''])
 
     plugin_data = config.get_plugin_data(Path(curr_dir))
-    MainWindow = OpenScene(config, p_data, plugin_data)
+    MainWindow = OpenScene(config, p_data, plugin_data,target = args.app)
     MainWindow.ui.show()
     MainWindow.list_episodes()
     sys.exit(app.exec_())

@@ -258,6 +258,9 @@ class BirdoApp(QtGui.QMainWindow):
 
         if message["command"] == "open_scene":
             plugin = [p for p in self.plugins if p["name"] == "Abrir Cena"]
+            print(plugin[0]["arguments"])
+
+            plugin[0]["arguments"] += ["-a",message["context"]["app"]]
             if len(plugin) > 0:
                 self.plugin_selected(plugin[0],self.project_data.id)
 
