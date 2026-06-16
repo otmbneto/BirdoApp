@@ -263,6 +263,14 @@ class BirdoApp(QtGui.QMainWindow):
             plugin[0]["arguments"] += ["-a",message["context"]["app"]]
             if len(plugin) > 0:
                 self.plugin_selected(plugin[0],self.project_data.id)
+        elif message["command"] == "publish":
+            plugin = [p for p in self.plugins if p["name"] == "Publicar"]
+            print(plugin[0]["arguments"])
+
+            plugin[0]["arguments"] += ["-f",message["context"]["file"]] 
+            plugin[0]["arguments"] += ["-a",message["context"]["app"]]
+            if len(plugin) > 0:
+                self.plugin_selected(plugin[0],self.project_data.id)
 
 
     def load_ui(self, ui_file):

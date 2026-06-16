@@ -1,0 +1,19 @@
+{
+	"name": "Publicar",
+	"version": "0.1",
+	"description": "Este plugin publica as cenas no servidor",
+	"author": "leobazao@birdo e ottoni@birdo",
+	"icon": "plugin.png",
+	"main_script": "publish.py",
+	"ui_file": "ui/dialog.ui",
+	"extra_files": null,
+	"arguments": [],
+	"permissions": [
+		"SETUP",
+        "ANIM",
+        "ANIM_LEAD",
+        "COMP",
+        "DT"
+	]
+}
+

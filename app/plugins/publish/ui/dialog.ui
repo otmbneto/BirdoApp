@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>532</width>
+    <height>188</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLabel {
+	color: lightgray;
+}
+
+QLabel:disabled{
+	color: rgb(170, 160, 160);
+}
+
+QWidget{
+	background-color: gray;
+}
+
+QGroupBox {
+	color: lightgray;
+	border: 2px solid lightgray;
+}
+
+QScrollBar::handle {
+	border-radius: 5px;
+ 	border: 2px solid lightgray;
+	background-color: gray;
+}
+
+QScrollBar::add-page{ 
+	border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar::sub-page {
+    background-color: rgb(86, 86, 86);
+	border: none;
+}
+
+QScrollBar::add-line {
+    border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar::sub-line {
+    border: none;
+    background-color: rgb(86, 86, 86);
+}
+
+QScrollBar:arrow{
+	border: none;
+	background: none;
+	color: none;
+}
+
+QListWidget:disabled {
+    color: rgb(250, 150, 120);
+    background-color: rgb(120, 105, 105);
+}
+
+QListWidget {
+    color: lightgray;
+    background-color: rgb(86, 86, 86);
+	border-radius: 10px;
+	padding: 5px;
+}
+
+QListWidget::item:hover {
+	color: rgb(80, 64, 44);
+    background: #05B8CC;
+    border: white;
+}
+
+QListWidget::item:selected {
+	color: rgb(80, 25, 44);
+	border: none;
+	background-color: rgb(79, 255, 52);
+}
+
+QListWidget::item:selected:active{
+	color: rgb(80, 64, 44);
+    background-color: rgb(187, 240, 255);
+	border: gray;
+	padding-left: 5px;
+}
+
+QListWidget::item:selected:!active {
+    background: rgb(91, 174, 181);
+	border: none;
+}
+
+QCheckBox {
+	color: white;
+    spacing: 5px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid white;
+	border-radius: 2px;
+	background-color: lightgray;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid lightgray;
+	border-radius: 1px;
+	background-color: rgb(68, 68, 68);
+}
+
+QCheckBox:disabled{
+	color: rgb(250, 150, 120);
+}
+
+QCheckBox::indicator:checked:disabled {
+    color: rgb(250, 90, 120);
+	background-color: rgb(250, 200, 200);
+	border-color: rgb(255, 230, 220);
+}
+
+QLineEdit {
+	color: rgb(64, 64, 64);
+	background-color: darkgray;
+	border-radius: 5px;
+}
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="localLay">
+       <item>
+        <widget class="QLabel" name="localLbl">
+         <property name="text">
+          <string>Local:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="localFile"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="serverLay">
+       <item>
+        <widget class="QLabel" name="serverLbl">
+         <property name="text">
+          <string>Servidor:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="serverFile"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="actionLay">
+       <item>
+        <widget class="QPushButton" name="publishBtn">
+         <property name="text">
+          <string>Publicar</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cancelBtn">
+         <property name="text">
+          <string>Cancelar</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
