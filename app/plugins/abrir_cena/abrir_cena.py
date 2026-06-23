@@ -37,6 +37,7 @@ class OpenScene(QtGui.QWidget):
     def __init__(self, config_birdoapp, project_data, plugin_data,target = "Toon Boom Harmony"):
         super(OpenScene, self).__init__()
 
+        print(target)
         # set keys data
         self.birdoapp = config_birdoapp
         self.project_data = project_data
@@ -203,7 +204,7 @@ class OpenScene(QtGui.QWidget):
         current_step = self.ui.comboStep.currentText()
         scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK" / scene_name
 
-        if self.target_app == "Toom Boom Harmony":
+        if self.target_app == "Toon Boom Harmony":
             file = self.birdoapp.harmony.get_last_version(scene_local_path.path)
             local_scene_data = {
                 "path": scene_local_path,
@@ -481,7 +482,6 @@ class OpenScene(QtGui.QWidget):
         self.signals.progress_format.emit(["checking local file..."])
         self.signals.progress_made.emit([])
 
-
         if self.target_app == "Toon Boom Harmony":
 
             # GETS THE LOCAL SCENE PATH
@@ -608,8 +608,9 @@ class OpenScene(QtGui.QWidget):
 
             self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
         else:
+            bootstrap = self.birdoapp.animate.create_boostrap_jsfl({"project":self.project_data.id ,"step": self.ui.comboStep.currentText()})
             local_scene = self.shot_versions[current_step]["local_path"]
-            self.birdoapp.animate.open_scene(local_scene["xstage"])
+            self.birdoapp.animate.open_scene(local_scene["xstage"],script = bootstrap)
 
     def set_scene_opened(self):
         """Sets the widgets to SCENE_IS_OPEN"""
@@ -648,7 +649,10 @@ if __name__ == "__main__":
         app = QtGui.QApplication([''])
 
     plugin_data = config.get_plugin_data(Path(curr_dir))
-    MainWindow = OpenScene(config, p_data, plugin_data,target = args.app)
+    if args.app:
+        MainWindow = OpenScene(config, p_data, plugin_data,target = args.app)
+    else:
+        MainWindow = OpenScene(config, p_data, plugin_data)
     MainWindow.ui.show()
     MainWindow.list_episodes()
     sys.exit(app.exec_())

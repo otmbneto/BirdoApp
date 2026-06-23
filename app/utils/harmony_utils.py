@@ -293,6 +293,81 @@ class AdobeAnimate(object):
 
         return wrapper
 
+    def create_context_file(self,context):
+        import json
+
+        context_id = context["id"]
+        tmp = os.getenv("TEMP")
+        birdo_tmp = os.path.join(tmp,"BirdoApp","context")
+        if not os.path.exists(birdo_tmp):
+            os.makedirs(birdo_tmp)
+
+        filename = "context_" + context_id + ".json"
+        with open(os.path.join(birdo_tmp,filename),"w") as jsonFile:
+            json.dump(context, jsonFile)
+
+        return os.path.join(birdo_tmp,filename)
+
+    def create_boostrap_jsfl(self,context):
+        import uuid
+
+        context_id = str(uuid.uuid4())
+        context["id"] = context_id
+        context_file = self.create_context_file(context)
+        
+        script = """
+var doc = fl.getDocumentDOM();
+
+if (!doc) {
+    fl.trace("No document open.");
+} else {
+
+    var flaURI = doc.pathURI;
+
+    if (!flaURI) {
+        fl.trace("Document is not saved yet.");
+    } else {
+
+        var folderURI = flaURI.substring(0, flaURI.lastIndexOf("/") + 1);
+
+        var contextFile = "{0}";
+
+        fl.trace("Reading context: " + contextFile);
+
+        contextFile = FLfile.platformPathToURI(contextFile)
+
+        var contextText = FLfile.read(contextFile);
+        fl.trace("file read");
+        if (!contextText) {
+            fl.trace("No context.json found.");
+        } else {
+            fl.trace("add data to document");
+            doc.addDataToDocument(
+                "pipeline_context",
+                "string",
+                contextText
+            );
+
+            fl.trace("Context saved into FLA.");
+            fl.trace(contextText);
+        }
+    }
+}
+"""
+        tmp = os.getenv("TEMP")
+        birdo_tmp = os.path.join(tmp,"BirdoApp","context")
+        if not os.path.exists(birdo_tmp):
+            os.makedirs(birdo_tmp)
+
+        print(context_file)
+        filename = "bootstrap_" + context_id + ".jsfl"
+        with open(os.path.join(birdo_tmp,filename),"w") as f:
+            context_file = context_file.replace("\\","\\\\")
+            script = script.replace("{0}",context_file)
+            f.write(script)
+
+        return os.path.join(birdo_tmp,filename)
+
     # Convinience method to install our scripts 
     # into the right places so the program can find it when launched.
     # Not every software supports this kind of feature 
@@ -303,10 +378,15 @@ class AdobeAnimate(object):
         return
 
     @_on_open
-    def open_scene(self, app_file):
+    def open_scene(self, app_file,script = None):
 
+        print(app_file)
+        print(script)
         p_file = Path(str(app_file))
-        return subprocess.Popen([self.executable, p_file.path])
+        if script:
+            return subprocess.Popen([self.executable, p_file.path, script])
+        else:
+            return subprocess.Popen([self.executable, p_file.path])
 
 def get_available_animate_installations():
     """
