@@ -19,7 +19,7 @@ from app.utils.birdo_pathlib import Path
 
 class Publish(QtGui.QWidget):
 
-    def __init__(self, config_birdoapp, project_data, plugin_data,file = None,target = "Toon Boom Harmony"):
+    def __init__(self, config_birdoapp, project_data, plugin_data,step = "SETUP",file = None,target = "Toon Boom Harmony"):
         super(Publish, self).__init__()
 
         # set keys data
@@ -27,6 +27,7 @@ class Publish(QtGui.QWidget):
         self.project_data = project_data
         self.currentFile = file
         self.target_app = target
+        self.step = step
         self.episodes_data = {}
         self.wait = False
         self.response = False
@@ -37,7 +38,10 @@ class Publish(QtGui.QWidget):
         self.ui.setWindowTitle("{0} - {1} ({2})".format(self.birdoapp.data["name"], plugin_data["name"], plugin_data["version"]))
 
         if self.currentFile:
+            extension = ".fla" if target != "Toon Boom Harmony" else ".zip"#TODO: better logic
             self.ui.localFile.setText(self.currentFile)
+            publish_path = self.project_data.paths.get_publish_file(os.path.basename(self.currentFile).replace(extension,""),step,extension = extension)
+            self.ui.serverFile.setText(publish_path.normpath())
             
         self.setup_connections()
 
@@ -54,7 +58,12 @@ class Publish(QtGui.QWidget):
         self.ui.cancelBtn.clicked.connect(self.on_close)
 
     def publish(self):
-        pass
+        
+        publish = Path(self.ui.localFile.text())
+        publish_path = os.path.dirname(self.ui.serverFile.text())
+        if not os.path.exists(publish_path):
+            os.makedirs(publish_path)
+        publish.copy_file(self.ui.serverFile.text())
 
     def on_close(self):
         """closes ui"""
@@ -82,6 +91,6 @@ if __name__ == "__main__":
         app = QtGui.QApplication([''])
 
     plugin_data = config.get_plugin_data(Path(curr_dir))
-    MainWindow = Publish(config, p_data, plugin_data,file = args.file,target = args.app)
+    MainWindow = Publish(config, p_data, plugin_data,file = args.file,target = args.app if args.app else "Toon Boom Harmony")
     MainWindow.ui.show()
     sys.exit(app.exec_())
