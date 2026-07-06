@@ -90,6 +90,8 @@ class ConfigInit(object):
         if "Adobe_Animate_path" in self.config_data.keys():
             self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
         self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
+        sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
+        sco_script.copy_folder(self.animate.get_default_scripts_path())
 
         # lista de projetos do estudio
         self.projects = []
@@ -345,6 +347,9 @@ class ConfigInit(object):
         if not p_file.endswith(".fla"):
             print("invalid format for Adobe Animate input: {0}\nMust be .fla file.".format(p_file))
             return False
+
+        sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
+        sco_script.copy_folder(self.animate.get_default_scripts_path())
 
         return self.animate.open_scene(p_file.path)
 

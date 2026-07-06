@@ -608,6 +608,10 @@ class OpenScene(QtGui.QWidget):
 
             self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
         else:
+
+            sco_script = Path(self.birdoapp.root) / "Animate" / "Commands" /"BirdoApp"
+            print(sco_script)
+            sco_script.copy_folder(self.birdoapp.animate.get_default_scripts_path())
             bootstrap = self.birdoapp.animate.create_boostrap_jsfl({"project":self.project_data.id ,"step": self.ui.comboStep.currentText()})
             local_scene = self.shot_versions[current_step]["local_path"]
             self.birdoapp.animate.open_scene(local_scene["xstage"],script = bootstrap)
