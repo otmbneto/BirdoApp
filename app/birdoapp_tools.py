@@ -241,6 +241,7 @@ class DevTools:
         self.show_main_menu()
 
     def show_choose_project_page(self):
+        
         """Mostra a pagina de escolha do projeto"""
         opt = ['{0} ({1})'.format(x["prefix"], x["name"]) for x in self.app.projects]
         opt.append("[VOLTAR]")
@@ -252,6 +253,7 @@ class DevTools:
         self.show_project_page()
 
     def show_project_page(self):
+
         """mostra a pagina do projeto selecionado"""
         if not self.project.ready:
             self.show_config_local_proj_page()
@@ -291,6 +293,7 @@ class DevTools:
             self.show_project_page()
 
     def show_ep_page(self, ep):
+
         """mostra o menu CLI do ep"""
         opts = ["Importar animatics", "Criar setup basico", "[VOLTAR]"]
         r = self.choose_from_list("Ep {0}".format(ep), opts)

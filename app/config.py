@@ -13,6 +13,7 @@ import copy
 import os
 import re
 import sys
+import shutil
 
 
 class CreateProjectClass(object):
@@ -91,6 +92,8 @@ class ConfigInit(object):
             self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
         self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
         sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
+        if os.path.exists(self.animate.get_default_scripts_path()):
+            shutil.rmtree(self.animate.get_default_scripts_path())
         sco_script.copy_folder(self.animate.get_default_scripts_path())
 
         # lista de projetos do estudio

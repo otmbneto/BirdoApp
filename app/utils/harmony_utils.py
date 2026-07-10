@@ -250,7 +250,7 @@ class AdobeAnimate(object):
         
         appdata = os.getenv('LOCALAPPDATA')
         version_code = self.version
-        return os.path.join(appdata,"Adobe","Animate {0}".format(version_code),"pt_BR","Configuration","Commands","Birdo")
+        return os.path.join(appdata,"Adobe","Animate {0}".format(version_code),"pt_BR","Configuration","Commands","BirdoApp")
 
     def get_scripts_path(self):
 
