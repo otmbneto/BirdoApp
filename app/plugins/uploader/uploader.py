@@ -19,12 +19,13 @@ from app.utils.birdo_pathlib import Path
 class Uploader(QtGui.QMainWindow):
     """classe principal com a interface do uploader."""
 
-    def __init__(self, birdoapp_config, project_data, plugin_data):
+    def __init__(self, birdoapp_config, project_data, plugin_data,target = "Adobe Animate"):
         super(Uploader, self).__init__()
 
         # define parametros importantes de config
         self.birdoapp = birdoapp_config
         self.project_data = project_data
+        self.target = target
         self.listOfWidgets = []
         self.episodes = [""]
         self.steps = [""]
@@ -228,6 +229,7 @@ class Uploader(QtGui.QMainWindow):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Uploader')
     parser.add_argument('proj_id', help='Project id')
+    parser.add_argument('-a', "--app",type = str,help='Target application for file opening')
     args = parser.parse_args()
 
     project_index = int(args.proj_id)
@@ -243,7 +245,11 @@ if __name__ == "__main__":
         sys.exit("ERROR getting project data")
 
     plugin_data = config.get_plugin_data(Path(curr_dir))
-    appWindow = Uploader(config, p_data, plugin_data)
+
+    if args.app:
+        appWindow = Uploader(config, p_data, plugin_data,target = args.app)
+    else:
+        appWindow = Uploader(config, p_data, plugin_data)
 
     appWindow.show()
     sys.exit(app.exec_())

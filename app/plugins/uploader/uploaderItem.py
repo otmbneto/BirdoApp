@@ -20,7 +20,7 @@ class uiItem(QtGui.QGroupBox):
         self.uploader = uploader
 
         self.filename = "ITEM_NAME"
-        self.filetypes = (".mov", ".mp4", ".zip")
+        self.filetypes = (".mov", ".mp4", ".fla")
         if fullpath is not None:
             self.filename = fullpath.split("/")[-1]
             self.filepath = "/".join(fullpath.split("/")[:-1]) + "/"
@@ -220,51 +220,63 @@ class uiItem(QtGui.QGroupBox):
             shot_num
         ) if shot_num is not None else None
 
+
+    def renameFiles(self,files,prefix):
+
+        new_name = None
+        for f in files:
+            if os.path.exists(f):
+                suffix = ".".join([""] + f.split(".")[1:])
+                new_name = Path(os.path.dirname(f)) / prefix
+                os.rename(f, new_name.normpath() + suffix)
+
+        return new_name
+
     def renameScene(self, zip_file, scene_name, version):
+
         temp_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="uploader", clean=True) / scene_name
         temp_folder.make_dirs()        
         temp_folder = temp_folder.normpath()
-        extract_zipfile(zip_file, temp_folder)
-        folders = [os.path.join(temp_folder, f) for f in os.listdir(temp_folder)]
 
-        output = None
-        for folder in folders:
-            if not os.path.isdir(folder):
-                continue
-            xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
-            if xstage:
-                print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running ps1 script to prepare scene: {1}".format(xstage, self.uploader.ps_script)
-                cmd = [
-                    "powershell.exe",
-                    self.uploader.ps_script.normpath(),
-                    os.path.normpath(xstage),
-                    "\"{0}\"".format(self.uploader.birdoapp.harmony.utransform),
-                    os.path.normpath(self.uploader.birdoapp.ffmpeg.ffmpeg)
-                ]
-                print "DEBUG COMMAND:\n{0}".format(cmd)
-                ret = subprocess.call(cmd, shell=False)
-                " -ps1 script return code: {0}".format(ret)
-                animatic = os.path.join(folder, "frames", "animatic.mov")
-                if os.path.exists(animatic):
-                    animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_Animatic_{0}".format(scene_name), clean=True)
-                    animatic_dst = animatic_folder / "{0}.mov".format(scene_name)
-                    shutil.move(animatic, animatic_dst.path)
-                    self.scene_animatic = animatic_dst.path
+        if self.uploader.target == "Toon Boom Harmony":
 
-                new_name = None
-                for f in [xstage, xstage.replace(".xstage", ".aux"), xstage.replace(".xstage", ".aux~"),
-                          xstage.replace(".xstage", ".xstage~"), xstage + ".thumbnails"]:
+            extract_zipfile(zip_file, temp_folder)
+            folders = [os.path.join(temp_folder, f) for f in os.listdir(temp_folder)]
+            output = None
+            for folder in folders:
+                if not os.path.isdir(folder):
+                    continue
+                xstage = self.uploader.birdoapp.harmony.get_xstage_last_version(folder)
+                if xstage:
+                    print "[UPLOADITEM] Harmony scene found in zip file: {0}\n...running ps1 script to prepare scene: {1}".format(xstage, self.uploader.ps_script)
+                    cmd = ["powershell.exe",self.uploader.ps_script.normpath(),os.path.normpath(xstage),"\"{0}\"".format(self.uploader.birdoapp.harmony.utransform),os.path.normpath(self.uploader.birdoapp.ffmpeg.ffmpeg)]
+                    print "DEBUG COMMAND:\n{0}".format(cmd)
+                    ret = subprocess.call(cmd, shell=False)
+                    " -ps1 script return code: {0}".format(ret)
+                    animatic = os.path.join(folder, "frames", "animatic.mov")
+                    if os.path.exists(animatic):
+                        animatic_folder = self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_Animatic_{0}".format(scene_name), clean=True)
+                        animatic_dst = animatic_folder / "{0}.mov".format(scene_name)
+                        shutil.move(animatic, animatic_dst.path)
+                        self.scene_animatic = animatic_dst.path
 
-                    if os.path.exists(f):
-                        prefix = ".".join([""] + f.split(".")[1:])
-                        new_name = Path(os.path.dirname(f)) / (scene_name + "_" + version)
-                        os.rename(f, new_name.normpath() + prefix)
+                    new_name = None
+                    for f in [xstage, xstage.replace(".xstage", ".aux"), xstage.replace(".xstage", ".aux~"),
+                              xstage.replace(".xstage", ".xstage~"), xstage + ".thumbnails"]:
 
-                new_name = Path(os.path.dirname(folder)) / scene_name
-                os.rename(folder, new_name.normpath())
-                output = new_name.normpath() + ".zip"
-                compact_folder(new_name.normpath(), output)
-                break
+                        if os.path.exists(f):
+                            prefix = ".".join([""] + f.split(".")[1:])
+                            new_name = Path(os.path.dirname(f)) / (scene_name + "_" + version)
+                            os.rename(f, new_name.normpath() + prefix)
+
+                    new_name = Path(os.path.dirname(folder)) / scene_name
+                    os.rename(folder, new_name.normpath())
+                    output = new_name.normpath() + ".zip"
+                    compact_folder(new_name.normpath(), output)
+                    break
+        else:
+            output = self.renameFiles([zip_file],scene_name + "_" + version)
+            output = output.normpath() + ".fla"
 
         return output
 
@@ -288,21 +300,25 @@ class uiItem(QtGui.QGroupBox):
         sc_num = int(self.scene_text.text()) if self.scene_text.isEnabled() else int(re.sub(r"\D", "", shot_num))
         scene_name = self.getScene(ep_num, sc_num)
         self.incrementProgress(10)
-        if self.filename.endswith(".zip"):
+        if self.filename.endswith((".zip",".fla")):
 
             temp_name = scene_name
             scene_path = self.uploader.project_data.paths.get_scene_path("server", scene_name, self.stepBox.currentText()) / "PUBLISH"
             scene_path = scene_path.normpath()
+
+            print(scene_name)
             self.incrementProgress(10)
             version = self.getVersion(scene_name, scene_path)
             t_file = self.renameScene(self.getFullpath(), scene_name, version)
-            scene_name += "_{0}.zip".format(version)
+            scene_name += "_{0}.{1}".format(version,"zip" if self.uploader.target == "Toon Boom Harmony" else "fla")
             self.incrementProgress(10)
             if not os.path.exists(scene_path):
                 os.makedirs(scene_path)
             self.incrementProgress(10)
             upload_scene = os.path.join(scene_path, scene_name).replace("\\", "/")
             self.incrementProgress(25)
+            print(t_file)
+            print(upload_scene)
             shutil.copyfile(t_file, upload_scene)
             self.incrementProgress(25)
             self.uploader.birdoapp.get_temp_folder(sub_folder="Temp_{0}".format(temp_name), clean=True)
