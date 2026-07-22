@@ -676,7 +676,7 @@ QPushButton::disabled {
     </layout>
    </item>
    <item row="0" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1,0,0,1">
      <item>
       <widget class="Line" name="line">
        <property name="orientation">
@@ -708,6 +708,16 @@ QPushButton::disabled {
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Softwares:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="softwareBox"/>
      </item>
      <item>
       <widget class="QLabel" name="logoProj">

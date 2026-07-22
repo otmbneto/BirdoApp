@@ -54,6 +54,9 @@ class OpenScene(QtGui.QWidget):
         # set project logo
         self.ui.logoProj.setPixmap(QtGui.QPixmap(os.path.join(self.project_data.config_folder, self.project_data.icon)))
 
+        for software in self.birdoapp.softwares:
+            self.ui.softwareBox.addItem(software.get_generic_name(),software)
+        
         # setup widget connections (and signals)
         self.signals = None
         self.setup_connections()
@@ -106,6 +109,7 @@ class OpenScene(QtGui.QWidget):
         self.ui.checkBox_open_local.stateChanged.connect(self.on_check_open_local)
         self.ui.comboStep.currentIndexChanged.connect(self.on_change_step)
         self.ui.explorer_btn.clicked.connect(self.open_local_folder)
+        self.ui.softwareBox.currentIndexChanged.connect(self.on_software_changed)
 
         # SIGNAL CONNECTIONS
         self.signals = CustomSignal()
@@ -118,6 +122,11 @@ class OpenScene(QtGui.QWidget):
         self.signals.sendInformationMessage.connect(self.informUser)
         self.signals.sendQuestionMessage.connect(self.askUser)
         self.signals.sendResponseMessage.connect(self.checkResponse)
+
+    def on_software_changed(self):
+
+        self.target_app = self.ui.softwareBox.currentText()
+        self.list_episodes()
 
     def update_server_status(self):
         self.project_data.paths.check_connection()
@@ -306,6 +315,11 @@ class OpenScene(QtGui.QWidget):
         self.birdoapp.mb.information(args[0])
 
     def list_episodes(self):
+
+        self.ui.listEpisodes.clear()
+        self.ui.listScenes.clear()
+        self.ui.listVersions.clear()
+
         """add episodes to ep listWidget"""
         thread = Thread(target=self.get_episodes_data)
         thread.start()
