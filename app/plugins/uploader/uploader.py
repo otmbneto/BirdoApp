@@ -35,6 +35,10 @@ class Uploader(QtGui.QMainWindow):
         w = self.ui.frameGeometry().width()
         h = self.ui.frameGeometry().height()
 
+
+        #for software in self.birdoapp.softwares:
+        #    self.ui.softwareBox.addItem(software.get_generic_name())
+
         # powershell plugin script
         self.ps_script = plugin_data["root"] / "process_scene.ps1"
 
