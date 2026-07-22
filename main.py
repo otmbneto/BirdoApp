@@ -26,6 +26,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description='BirdoApp')
     parser.add_argument('--produtor', action='store_true', help='Abre o menu do "Modo Produtor"')
     parser.add_argument('--versao', action='store_true', help='Exibir informacao de release do BirdoApp')
+    parser.add_argument('-a', "--app",type = str,help='Target application for file opening')
     args = parser.parse_args()
     return args
 
@@ -34,7 +35,11 @@ def get_arguments():
 if __name__ == "__main__":
     args = get_arguments()
     if args.produtor:
-        dev = DevTools()
+
+        if args.app:
+            dev = DevTools(target=args.app)
+        else:
+            dev = DevTools()
         dev.start()
 
     elif args.versao:
