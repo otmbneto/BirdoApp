@@ -11,7 +11,7 @@ sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
 
 class DevTools:
-    def __init__(self):
+    def __init__(self,target = "Toon Boom Harmony"):
         self.app = ConfigInit(verbose=False)
         self.yes_reg = re.compile(r"(Y|YEP|YES|YEAH|OUI|SIM|SI|S)")
         self.main_menu = {
@@ -21,6 +21,7 @@ class DevTools:
 
         # selected project
         self.project = None
+        self.target = target
         # gum executable
         self.gum = Path(self.app.root) / "extra/gum.exe"
 
@@ -334,24 +335,41 @@ class DevTools:
                     counter["errors"] += 1
                     continue
                 temp_scene = temp_folder / item
-                if not self.project.paths.copy_scene_template(temp_scene):
+                if not self.project.paths.copy_scene_template(temp_scene,target = self.target):
                     print("ERRO criando copia da cena {0} no temp...".format(item))
                     counter["errors"] += 1
                     continue
-                import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
-                if not self.app.harmony.compile_script(import_animatic_js.path,
-                                                       self.app.harmony.get_xstage_last_version(temp_scene.path)):
-                    print("ERRO rodando o script compile de animatic no arquivo temp...")
-                    counter["errors"] += 1
-                    continue
-                temp_zip = temp_folder / "_temp.zip"
-                if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
-                    print("ERRO ao compactar cena no temp zip")
-                    counter["errors"] += 1
-                    continue
-                if not temp_zip.copy_file(publish_zip):
-                    print("ERRO ao copiar o temp zip para o server!")
-                    counter["errors"] += 1
+
+                if self.target == "Toon Boon Harmony":
+                    import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
+                    if not self.app.harmony.compile_script(import_animatic_js.path,
+                                                           self.app.harmony.get_xstage_last_version(temp_scene.path)):
+                        print("ERRO rodando o script compile de animatic no arquivo temp...")
+                        counter["errors"] += 1
+                        continue
+                    temp_zip = temp_folder / "_temp.zip"
+                    if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
+                        print("ERRO ao compactar cena no temp zip")
+                        counter["errors"] += 1
+                        continue
+                    if not temp_zip.copy_file(publish_zip):
+                        print("ERRO ao copiar o temp zip para o server!")
+                        counter["errors"] += 1
+                        continue
+                elif self.target in ["Adobe Animate"]:
+
+                    publish_file = self.project.paths.get_publish_file(item, "SETUP",extension=".fla")
+                    if "v01" not in publish_file.name:
+                        print(" -- CENA {0} ja tem setup basico!".format(item))
+                        counter["errors"] += 1
+                        continue
+                    temp_scene_norm = temp_scene.normpath()
+                    temp_file = next(os.path.join(temp_scene_norm,f) for f in os.listdir(temp_scene_norm) if f.endswith(".fla"))
+                    if not temp_file:
+                        print("No file found for scene template for app: " + str(self.target))
+                    temp_file = Path(temp_file)
+                    temp_file.copy_file(publish_file)
+                else:
                     continue
                 counter["done"] += 1
             sys.exit("Criar Setup basico terminou com {0} cena(s) publicada(s) e {1} error(s)".format(counter["done"], counter["errors"]))

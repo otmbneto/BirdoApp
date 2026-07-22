@@ -276,19 +276,25 @@ class FolderManager(object):
         last_v_num = len(versions)
         return publish_folder / "{0}_v{1:02d}{2}".format(scene_name, (1 + last_v_num),extension)
 
-    def get_scene_template(self):
+    def get_scene_template(self,target = "Toon Boom Harmony"):
         """retorna o caminho do template de cena do projeto"""
-        return self.config_folder / "SCENE_template"
 
-    def copy_scene_template(self, destiny_folder):
+        if target == "Toon Boom Harmony":
+            return self.config_folder / "SCENE_template"
+        elif target == "Adobe Animate":
+            return self.config_folder / "Animate/Scene"
+
+    def copy_scene_template(self, destiny_folder,target = "Toon Boom Harmony"):
         """copia o template de cena do projeto para o 'destiny_folder'
            OBS: o nome da cena de destino e o nome do folder 'destiny_folder'
         """
         dst = Path(str(destiny_folder))
         if dst.exists():
             raise Exception("Nao e possivel copiar a cena para o destino: {0} pois ele ja existe!".format(dst))
-        scene_template = self.get_scene_template()
+        scene_template = self.get_scene_template(target = target)
         scene_name = dst.name
+        print(scene_template.normpath())
+        print(dst)
         scene_copy = scene_template.copy_folder(dst)
         if not scene_copy:
             raise Exception("[BIRDOAPP] Falha ao copiar scene template para o destino: {0}".format(dst))

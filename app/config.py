@@ -52,6 +52,7 @@ class ConfigInit(object):
         self.root = os.path.dirname(os.path.dirname(__file__))
         self.app_json = os.path.join(self.root, "app.json")
         self.data = read_json_file(self.app_json, encoding="utf-8")
+        self.softwares = []
 
         # define widget message box class
         self.mb = CreateMessageBox()
@@ -85,20 +86,24 @@ class ConfigInit(object):
 
         # define harmony class
         self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
+        if self.harmony:
+            self.softwares.append(self.harmony)
+
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
 
         if "Adobe_Animate_path" in self.config_data.keys():
             self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
+            sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
+            if os.path.exists(self.animate.get_default_scripts_path()):
+                shutil.rmtree(self.animate.get_default_scripts_path())
+            sco_script.copy_folder(self.animate.get_default_scripts_path())
+            self.softwares.append(self.animate)
+
         self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
-        sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
-        if os.path.exists(self.animate.get_default_scripts_path()):
-            shutil.rmtree(self.animate.get_default_scripts_path())
-        sco_script.copy_folder(self.animate.get_default_scripts_path())
 
         # lista de projetos do estudio
         self.projects = []
-
         self.prefix_reg = re.compile(r"^[0-9A-Z]{3,4}$")
 
         # system class para lidar com dados do sistema
