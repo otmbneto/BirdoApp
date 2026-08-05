@@ -616,15 +616,21 @@ class OpenScene(QtGui.QWidget):
             self.birdoapp.harmony.compile_script(self.update_setup_script, local_scene["xstage"])
             print "opening scene: {0}".format(local_scene["xstage"])
             self.birdoapp.harmony.open_harmony_scene(local_scene["xstage"])
-
             if len(self.recently_open) >= 10:
                 self.recently_open = self.recently_open[1:]
 
             self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
         else:
 
+            episode = self.ui.listEpisodes.currentItem().text()
+            shot = self.ui.listScenes.currentItem().text()
+            list_full = self.project_data.paths.list_project_animatics(episode)
+            animatic_versions = [x for x in list_full if shot in x.normpath()]
+            print(animatic_versions)
+            lastest_animatic = animatic_versions[-1] if len(animatic_versions) > 0 else None
+            temp_animatic = self.birdoapp.get_temp_folder(sub_folder='AdobeAnimate', clean=True)
+            lastest_animatic.copy_file(temp_animatic / "animatic.mov")
             sco_script = Path(self.birdoapp.root) / "Animate" / "Commands" /"BirdoApp"
-            print(sco_script)
             sco_script.copy_folder(self.birdoapp.animate.get_default_scripts_path())
             bootstrap = self.birdoapp.animate.create_boostrap_jsfl({"project":self.project_data.id ,"step": self.ui.comboStep.currentText()})
             local_scene = self.shot_versions[current_step]["local_path"]
