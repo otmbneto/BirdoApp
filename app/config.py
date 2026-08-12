@@ -83,14 +83,20 @@ class ConfigInit(object):
                 "harmony_path": "",
                 "user_projects": []
             }
-
-        # define harmony class
-        self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
-        if self.harmony:
-            self.softwares.append(self.harmony)
-
+        
         # lista versoes do harmony instaladas
         self.harmony_versions = [ToonBoomHarmony(h) for h in get_available_harmony_installations() if ToonBoomHarmony(h).is_installed()]
+        self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
+
+        ######################################### TEMP LOGIC #####################################################
+        if "Toon_Boom_Harmony_path" in self.config_data.keys():
+            self.harmony = ToonBoomHarmony(self.config_data["Toon_Boom_Harmony_path"]) if bool(self.config_data["Toon_Boom_Harmony_path"]) else None
+        else:
+            # define harmony class
+            self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
+        
+        if self.harmony:
+            self.softwares.append(self.harmony)
 
         if "Adobe_Animate_path" in self.config_data.keys():
             self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
@@ -99,8 +105,7 @@ class ConfigInit(object):
                 shutil.rmtree(self.animate.get_default_scripts_path())
             sco_script.copy_folder(self.animate.get_default_scripts_path())
             self.softwares.append(self.animate)
-
-        self.animate_versions = [AdobeAnimate(h) for h in get_available_animate_installations() if AdobeAnimate(h).is_installed()]
+        ##########################################################################################################
 
         # lista de projetos do estudio
         self.projects = []
@@ -133,6 +138,25 @@ class ConfigInit(object):
     def is_studio_ready(self):
 
         return True
+
+    def getApps(self):
+
+        if "Toon_Boom_Harmony_path" in self.config_data.keys():
+            self.harmony = ToonBoomHarmony(self.config_data["Toon_Boom_Harmony_path"]) if bool(self.config_data["Toon_Boom_Harmony_path"]) else None
+        else:
+            # define harmony class
+            self.harmony = ToonBoomHarmony(self.config_data["harmony_path"]) if bool(self.config_data["harmony_path"]) else None
+        
+        if self.harmony:
+            self.softwares.append(self.harmony)
+
+        if "Adobe_Animate_path" in self.config_data.keys():
+            self.animate = AdobeAnimate(self.config_data["Adobe_Animate_path"]) if bool(self.config_data["Adobe_Animate_path"]) else None
+            sco_script = Path(self.root) / "Animate" / "Commands" /"BirdoApp"
+            if os.path.exists(self.animate.get_default_scripts_path()):
+                shutil.rmtree(self.animate.get_default_scripts_path())
+            sco_script.copy_folder(self.animate.get_default_scripts_path())
+            self.softwares.append(self.animate)
 
     def update_session(self, mode):
         """cria json no temp para guardar o modo de inicio da sessao"""

@@ -92,8 +92,8 @@ class ToonBoomHarmony(object):
         if os.path.exists(path):
             files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".xstage")]
 
-        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1]
-        return last_version.path
+        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1] if len(files) > 0 else None
+        return last_version.path if last_version is not None else None
 
     def get_xstage_last_version(self, harmony_file_folder):
         """
