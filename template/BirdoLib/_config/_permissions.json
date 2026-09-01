@@ -1,0 +1,11 @@
+{
+	"status_list": [
+		"Pendente",
+		"Aprovado",
+		"NAO_aprovado"
+	],
+	"can_edit": [
+		"DT",
+		"ANIM_LEAD"
+	]
+}

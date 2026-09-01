@@ -1,0 +1,38 @@
+{
+  "view": [
+    "front",
+    "Qfront",
+    "profile",
+    "Qback",
+    "back",
+    "downshot"
+  ],
+  "emotion": [
+    "feliz",
+    "triste",
+    "indiferente",
+    "medroso",
+    "raiva",
+    "assustado",
+    "corajoso",
+    "curioso"
+  ],
+  "action": [
+    "andando",
+    "caminhando",
+    "correndo",
+    "pulando",
+    "voando",
+    "tremendo",
+    "chutando",
+    "socando",
+    "parado",
+    "antecipando",
+    "olhando",
+    "perspectiva",
+    "dobrado",
+    "sentado",
+    "acenando",
+    "girando"
+  ]
+}
