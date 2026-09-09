@@ -3,14 +3,13 @@
     Recebe os parametros vindos do Harmony (js)
     obs: o temp folder passado como parametro, deve ser limpo pelo codigo no js.
 """
+import argparse
 import os
 import re
 import sys
-import argparse
-from birdo_pathlib import Path
+from .birdo_pathlib import Path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from config import ConfigInit
-
+from .config import ConfigInit
 
 def main(birdoapp, scene_name, animatic_version, img_format, audio_format, temp_folder):
     """Main function get animatic"""
@@ -27,7 +26,7 @@ def main(birdoapp, scene_name, animatic_version, img_format, audio_format, temp_
     # get animatic file
     animatic_file = proj_data.paths.get_animatics_folder("server", ep) / proj_data.paths.regs["animatic"]["model"].format(ep_num, sc_num, version_num)
     if not animatic_file.exists():
-        print ("[BIRDOAPP - Py] Nao ha arquivo de Animatic para versao {0}".format(animatic_version))
+        print("[BIRDOAPP - Py] Nao ha arquivo de Animatic para versao {0}".format(animatic_version))
         sys.exit(3)
 
     # extract images
@@ -37,17 +36,16 @@ def main(birdoapp, scene_name, animatic_version, img_format, audio_format, temp_
     else:
         scale_num = 2 if res[0] > 1000 else None
     if not birdoapp.ffmpeg.convert_movie_to_image_seq(animatic_file.path, temp_folder.path, img_format, scale_num):
-        print "[BIRDOAPP - Py] Falha ao gerar sequencia de imagens do animatic!"
+        print("[BIRDOAPP - Py] Falha ao gerar sequencia de imagens do animatic!")
         sys.exit(2)
-    print "[BIRDOAPP - Py] -Sequencia de {0} extraida com sucesso!".format(img_format)
+    print("[BIRDOAPP - Py] -Sequencia de {0} extraida com sucesso!".format(img_format))
 
     if birdoapp.ffmpeg.check_audio_stream(animatic_file.path):
         audio_file = temp_folder / "animatic.{0}".format(audio_format)
         if not birdoapp.ffmpeg.extract_audio(animatic_file.path, audio_file.path):
-            print "[BIRDOAPP - Py] Falha ao extrair o arudio do animatic!"
+            print("[BIRDOAPP - Py] Falha ao extrair o arudio do animatic!")
             sys.exit(1)
-        print "[BIRDOAPP - Py] - Audio extraido com sucesso: {0}".format(audio_file)
-
+        print("[BIRDOAPP - Py] - Audio extraido com sucesso: {0}".format(audio_file))
 
 if __name__ == "__main__":
 
@@ -69,7 +67,5 @@ if __name__ == "__main__":
         raise Exception("[BIRDOAPP - Py] Birdoapp nao esta configurado!")
 
     birdoapp.ffmpeg.new_lines = False
-
     main(birdoapp, scene_name, version, img_format, audio_format, temp_folder)
-    print "[BIRDOAPP - Py] Animatic Update terminou! Exit code is 0"
     sys.exit(0)

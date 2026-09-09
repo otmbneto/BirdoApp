@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 import shlex
-from birdo_pathlib import Path
+from .birdo_pathlib import Path
 
 
 class ToonBoomHarmony(object):
@@ -39,6 +39,9 @@ class ToonBoomHarmony(object):
     def get_edition(self):
         return self.edition
 
+    def get_generic_name(self):
+        return "Toon Boom Harmony"
+
     def get_name(self):
         return self.name
 
@@ -63,7 +66,7 @@ class ToonBoomHarmony(object):
         """
         scripts = os.getenv("TOONBOOM_GLOBAL_SCRIPT_LOCATION").replace("\\", "/")
         if not scripts:
-            print "[[WARNING!]] 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' not installed in this computer!!!!"
+            print("[[WARNING!]] 'TOONBOOM_GLOBAL_SCRIPT_LOCATION' not installed in this computer!!!!")
             return False
 
     def get_package_folder(self):
@@ -75,13 +78,22 @@ class ToonBoomHarmony(object):
         """
         package = os.getenv("TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER").replace("\\", "/")
         if not package:
-            print "[[WARNING!]] 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' not installed in this computer!!!!"
+            print("[[WARNING!]] 'TB_EXTERNAL_SCRIPT_PACKAGES_FOLDER' not installed in this computer!!!!")
             return False
         return package
 
     def is_harmony_file(self, folder):
         h_folder = Path(str(folder))
         return len(h_folder.glob('*.xstage$')) > 0
+
+    def get_last_version(self,path):
+
+        files = []
+        if os.path.exists(path):
+            files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".xstage")]
+
+        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1] if len(files) > 0 else None
+        return last_version.path if last_version is not None else None
 
     def get_xstage_last_version(self, harmony_file_folder):
         """
@@ -95,11 +107,11 @@ class ToonBoomHarmony(object):
         """
         h_folder = Path(str(harmony_file_folder))
         if not h_folder.exists():
-            print "[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder)
+            print("[get_xstage_last_version] ERROR! File folder does not exist: {0}".format(h_folder))
             return False
         xstage_files = h_folder.glob('*.xstage$')
         if len(xstage_files) == 0:
-            print '[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder)
+            print('[get_xstage_last_version] ERROR! O arquivo {0} nao e um arquivo Harmony ou esta corrompido!'.format(h_folder))
             return False
         last_version = sorted(xstage_files, key=lambda x: x.get_last_modified())[-1]
         return last_version.path
@@ -118,7 +130,7 @@ class ToonBoomHarmony(object):
         """
         h_sc = Path(str(harmony_scene))
         if h_sc.suffix != ".xstage":
-            print "[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            print("[render_scene] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!")
             return False
         cmd = '"{0}" -batch -scene "{1}"'.format(self.executable, h_sc.path)
         if pre_render_script:
@@ -140,7 +152,7 @@ class ToonBoomHarmony(object):
         """
         script_p, h_file = Path(str(script)), Path(str(harmony_file))
         if h_file.suffix != ".xstage":
-            print "[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!"
+            print("[compile_script] ERROR! Harmony Compile Script ERROR: Toon Boom file parameter must be 'xstage' file!")
             return False
         cmd = '"{0}" "{1}" -batch -compile "{2}"'.format(self.executable, h_file.path, script_p.path)
         return subprocess.call(shlex.split(cmd)) == 0
@@ -157,7 +169,21 @@ class ToonBoomHarmony(object):
         """
         tpl = Path(str(harmony_tpl))
         cmd = '"{0}" -batch -template "{1}" -thumbnails -readonly'.format(self.executable, tpl.path)
+
         return subprocess.call(shlex.split(cmd)) == 0
+
+    # Convinience method to install our scripts 
+    # into the right places so the program can find it when launched.
+    # Not every software supports this kind of feature 
+    # but for the sake of consistency i'm gonna share this method with all of them.
+    def install_software_dependencies(self):
+
+        scene_opened = os.path.join(self.get_default_scripts_path(),"TB_sceneOpened.js")
+        if os.path.exists(scene_opened):
+            bkp = os.path.join(self.get_default_scripts_path(),"TB_sceneOpened.bkp")
+            os.rename(scene_opened,bkp)
+
+        return
 
     def open_harmony_scene(self, xstage_file):
         """
@@ -171,6 +197,217 @@ class ToonBoomHarmony(object):
         """
         xstege = Path(str(xstage_file))
         return subprocess.Popen([self.executable, xstege.path])
+
+
+class AdobeAnimate(object):
+    """
+    Creates a Class with user local's Adobe Animate information and project version setting
+    ...
+
+    Parameters
+    ----------
+    installation_path: string
+        caminho com a instalacao do animate
+    """
+    def __init__(self, installation_path):
+
+        self.regex = r'Adobe Animate (\d{4})'
+        self.installation_path = installation_path
+        self.name = os.path.basename(installation_path[:-1]) if installation_path.endswith(
+            "/") or installation_path.endswith("\\") \
+            else os.path.basename(installation_path)
+
+        self.version = re.findall(self.regex, self.name)[0]
+        self.subversion = ""
+        self.edition = ""
+        self.executable = os.path.join(self.installation_path,"Animate.exe")
+        self.utransform = "" #os.path.normpath(os.path.join(os.path.dirname(self.executable), "utransform.exe"))
+
+    def get_version(self):
+        return self.version
+
+    def get_subversion(self):
+        return self.subversion
+
+    def get_edition(self):
+        return self.edition
+
+    def get_generic_name(self):
+
+        return "Adobe Animate"
+
+    def get_name(self):
+        return self.name
+
+    def is_installed(self):
+        return os.path.exists(self.executable)
+
+    def get_fullpath(self):
+        return self.installation_path
+
+    #for now it retrieves the commands folder
+    def get_default_scripts_path(self):
+        
+        appdata = os.getenv('LOCALAPPDATA')
+        version_code = self.version
+        return os.path.join(appdata,"Adobe","Animate {0}".format(version_code),"pt_BR","Configuration","Commands","BirdoApp")
+
+    def get_scripts_path(self):
+
+        return None
+
+    def get_package_folder(self):
+
+        return None
+
+    def is_project_file(self, file):
+        return file.endswith(".fla")
+
+    def get_last_version(self,path):
+
+        files = []
+        if os.path.exists(path):
+            files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".fla")]
+
+        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1]
+        return last_version.path
+
+    def render_scene(self, app_scene):
+
+        return True
+
+    def compile_script(self, script, harmony_file):
+
+        return True
+
+    def create_thumbnails(self, harmony_tpl):
+
+        return True
+
+    def _on_open(open_scene):
+
+        def wrapper(*args, **kwargs):
+            
+            print("Checking if the animate scripts are on the right location")
+            return open_scene(*args, **kwargs)
+
+        return wrapper
+
+    def create_context_file(self,context):
+        import json
+
+        context_id = context["id"]
+        tmp = os.getenv("TEMP")
+        birdo_tmp = os.path.join(tmp,"BirdoApp","context")
+        if not os.path.exists(birdo_tmp):
+            os.makedirs(birdo_tmp)
+
+        filename = "context_" + context_id + ".json"
+        with open(os.path.join(birdo_tmp,filename),"w") as jsonFile:
+            json.dump(context, jsonFile)
+
+        return os.path.join(birdo_tmp,filename)
+
+    def create_boostrap_jsfl(self,context):
+        import uuid
+
+        context_id = str(uuid.uuid4())
+        context["id"] = context_id
+        context_file = self.create_context_file(context)
+        
+        script = """
+var doc = fl.getDocumentDOM();
+
+if (!doc) {
+    fl.trace("No document open.");
+} else {
+
+    var flaURI = doc.pathURI;
+
+    if (!flaURI) {
+        fl.trace("Document is not saved yet.");
+    } else {
+
+        var folderURI = flaURI.substring(0, flaURI.lastIndexOf("/") + 1);
+
+        var contextFile = "{0}";
+
+        fl.trace("Reading context: " + contextFile);
+
+        contextFile = FLfile.platformPathToURI(contextFile)
+
+        var contextText = FLfile.read(contextFile);
+        fl.trace("file read");
+        if (!contextText) {
+            fl.trace("No context.json found.");
+        } else {
+            fl.trace("add data to document");
+            doc.addDataToDocument(
+                "pipeline_context",
+                "string",
+                contextText
+            );
+
+            fl.trace("Context saved into FLA.");
+            fl.trace(contextText);
+        }
+    }
+}
+"""
+        tmp = os.getenv("TEMP")
+        birdo_tmp = os.path.join(tmp,"BirdoApp","context")
+        if not os.path.exists(birdo_tmp):
+            os.makedirs(birdo_tmp)
+
+        print(context_file)
+        filename = "bootstrap_" + context_id + ".jsfl"
+        with open(os.path.join(birdo_tmp,filename),"w") as f:
+            context_file = context_file.replace("\\","\\\\")
+            script = script.replace("{0}",context_file)
+            f.write(script)
+
+        return os.path.join(birdo_tmp,filename)
+
+    # Convinience method to install our scripts 
+    # into the right places so the program can find it when launched.
+    # Not every software supports this kind of feature 
+    # but for the sake of consistency i'm gonna share this method with all of them.
+    def install_software_dependencies(self):
+
+
+        return
+
+    @_on_open
+    def open_scene(self, app_file,script = None):
+
+        print(app_file)
+        print(script)
+        p_file = Path(str(app_file))
+        if script:
+            return subprocess.Popen([self.executable, p_file.path, script])
+        else:
+            return subprocess.Popen([self.executable, p_file.path])
+
+def get_available_animate_installations():
+    """
+    Funcao que retorna todas possiveis instalacoes de animate nos drives: C e D
+    ...
+    """
+    regex = r'Adobe Animate (\d{4})'
+    availableVersions = []
+    app_default_path = "/Program Files/Adobe/"
+    drives = ["C:", "D:"]
+
+    for drive in drives:
+        current_path = os.path.join(drive, app_default_path)
+        if not os.path.exists(current_path):
+            continue
+        app_installations = os.listdir(current_path)
+        for app in app_installations:
+            if re.match(regex, app):
+                availableVersions.append(os.path.join(current_path, app))
+
+    return availableVersions
 
 
 def get_available_harmony_installations():

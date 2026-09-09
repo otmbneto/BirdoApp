@@ -4,7 +4,6 @@ import sys
 from PySide.QtGui import*
 from PySide import QtCore
 
-
 class CreateMessageBox:
     """Class that creates a MessageBox Object"""
     def __init__(self):
@@ -22,7 +21,6 @@ class CreateMessageBox:
         self.msg.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
     def information(self, text):
-        print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Information)
         self.msg.setStandardButtons(QMessageBox.Ok)
@@ -31,7 +29,6 @@ class CreateMessageBox:
             self.app.exec_()
 
     def warning(self, text):
-        print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Warning)
         self.msg.setStandardButtons(QMessageBox.Ok)
@@ -40,7 +37,6 @@ class CreateMessageBox:
             self.app.exec_()
 
     def question(self, text):
-        print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Question)
         self.msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
@@ -48,7 +44,6 @@ class CreateMessageBox:
         return self.msg.exec_() != 65536
 
     def critical(self, text):
-        print text
         self.msg.setText(text)
         self.msg.setIcon(QMessageBox.Critical)
         self.msg.setStandardButtons(QMessageBox.Ok)

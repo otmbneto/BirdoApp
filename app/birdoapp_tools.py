@@ -4,14 +4,14 @@ import os
 import sys
 import subprocess
 import codecs
-from config import ConfigInit
-from utils.birdo_pathlib import Path
-from utils.birdo_zip import compact_folder
+from .config import ConfigInit
+from .utils.birdo_pathlib import Path
+from .utils.birdo_zip import compact_folder
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
 
 class DevTools:
-    def __init__(self):
+    def __init__(self,target = "Toon Boom Harmony"):
         self.app = ConfigInit(verbose=False)
         self.yes_reg = re.compile(r"(Y|YEP|YES|YEAH|OUI|SIM|SI|S)")
         self.main_menu = {
@@ -21,6 +21,7 @@ class DevTools:
 
         # selected project
         self.project = None
+        self.target = target
         # gum executable
         self.gum = Path(self.app.root) / "extra/gum.exe"
 
@@ -44,7 +45,7 @@ class DevTools:
         try:
             return os.system(cmd.encode('utf-8')) == 0
         except Exception as e:
-            print e
+            print(e)
             sys.exit("cancelado!")
 
     def show_about(self):
@@ -145,7 +146,7 @@ class DevTools:
             server_path = self.get_input(u"Defina o caminho na rede para salvar as configurações de projetos:".encode(sys.getfilesystemencoding()),
                                          "Cole o caminho aqui...")
             if not os.path.exists(server_path):
-                print "Aparentemente o caminho fornecido esta inacessivel!"
+                print("Aparentemente o caminho fornecido esta inacessivel!")
                 self.pause()
         self.app.config_data["server_projects"] = server_path
 
@@ -173,7 +174,7 @@ class DevTools:
 
         # atualiza o config object
         self.app.update_config_json()
-        print "Configuracao do BirdoApp atualizado!"
+        print("Configuracao do BirdoApp atualizado!")
         self.pause()
         self.app = ConfigInit(verbose=False)
         self.show_main_menu()
@@ -199,7 +200,7 @@ class DevTools:
         self.app = ConfigInit(verbose=False)
         self.project = self.app.get_project_data(user_proj["id"])
 
-        print "projeto {0} configurado!".format(self.project.name)
+        print("projeto {0} configurado!".format(self.project.name))
         self.pause()
         self.show_project_page()
 
@@ -234,13 +235,14 @@ class DevTools:
             break
 
         if self.app.create_project(create_data):
-            print "Projeto {0} criado!".format(create_data["01_prefix"])
+            print("Projeto {0} criado!".format(create_data["01_prefix"]))
         else:
             sys.exit("ERRO criando o Projeto {0}".format(create_data["01_prefix"]))
         self.pause()
         self.show_main_menu()
 
     def show_choose_project_page(self):
+        
         """Mostra a pagina de escolha do projeto"""
         opt = ['{0} ({1})'.format(x["prefix"], x["name"]) for x in self.app.projects]
         opt.append("[VOLTAR]")
@@ -252,6 +254,7 @@ class DevTools:
         self.show_project_page()
 
     def show_project_page(self):
+
         """mostra a pagina do projeto selecionado"""
         if not self.project.ready:
             self.show_config_local_proj_page()
@@ -284,13 +287,14 @@ class DevTools:
                              range(int(div[0].split("-")[0]), int(div[0].split("-")[1]))]
             for ep in input_eps:
                 if ep in eps:
-                    print "Episodio escolhido ({0}) ja existe no projeto!".format(ep)
+                    print("Episodio escolhido ({0}) ja existe no projeto!".format(ep))
                     self.show_project_page()
                 self.project.paths.create_episode_scheme("server", ep)
             self.pause()
             self.show_project_page()
 
     def show_ep_page(self, ep):
+
         """mostra o menu CLI do ep"""
         opts = ["Importar animatics", "Criar setup basico", "[VOLTAR]"]
         r = self.choose_from_list("Ep {0}".format(ep), opts)
@@ -327,29 +331,45 @@ class DevTools:
                 temp_folder = self.app.get_temp_folder("create_setup", clean=True)
                 publish_zip = self.project.paths.get_publish_file(item, "SETUP")
                 if "v01" not in publish_zip.name:
-                    print " -- CENA {0} ja tem setup basico!".format(item)
+                    print(" -- CENA {0} ja tem setup basico!".format(item))
                     counter["errors"] += 1
                     continue
                 temp_scene = temp_folder / item
-                if not self.project.paths.copy_scene_template(temp_scene):
-                    print("ERRO criando copia da cena "
-                          "{0} no temp...".format(item))
+                if not self.project.paths.copy_scene_template(temp_scene,target = self.target):
+                    print("ERRO criando copia da cena {0} no temp...".format(item))
                     counter["errors"] += 1
                     continue
-                import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
-                if not self.app.harmony.compile_script(import_animatic_js.path,
-                                                       self.app.harmony.get_xstage_last_version(temp_scene.path)):
-                    print "ERRO rodando o script compile de animatic no arquivo temp..."
-                    counter["errors"] += 1
-                    continue
-                temp_zip = temp_folder / "_temp.zip"
-                if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
-                    print "ERRO ao compactar cena no temp zip"
-                    counter["errors"] += 1
-                    continue
-                if not temp_zip.copy_file(publish_zip):
-                    print "ERRO ao copiar o temp zip para o server!"
-                    counter["errors"] += 1
+
+                if self.target == "Toon Boon Harmony":
+                    import_animatic_js = Path(self.app.root) / "batch" / "BAT_ImportAnimatic.js"
+                    if not self.app.harmony.compile_script(import_animatic_js.path,
+                                                           self.app.harmony.get_xstage_last_version(temp_scene.path)):
+                        print("ERRO rodando o script compile de animatic no arquivo temp...")
+                        counter["errors"] += 1
+                        continue
+                    temp_zip = temp_folder / "_temp.zip"
+                    if not compact_folder(temp_scene.path, temp_zip.path, add_empty_folders=False):
+                        print("ERRO ao compactar cena no temp zip")
+                        counter["errors"] += 1
+                        continue
+                    if not temp_zip.copy_file(publish_zip):
+                        print("ERRO ao copiar o temp zip para o server!")
+                        counter["errors"] += 1
+                        continue
+                elif self.target in ["Adobe Animate"]:
+
+                    publish_file = self.project.paths.get_publish_file(item, "SETUP",extension=".fla")
+                    if "v01" not in publish_file.name:
+                        print(" -- CENA {0} ja tem setup basico!".format(item))
+                        counter["errors"] += 1
+                        continue
+                    temp_scene_norm = temp_scene.normpath()
+                    temp_file = next(os.path.join(temp_scene_norm,f) for f in os.listdir(temp_scene_norm) if f.endswith(".fla"))
+                    if not temp_file:
+                        print("No file found for scene template for app: " + str(self.target))
+                    temp_file = Path(temp_file)
+                    temp_file.copy_file(publish_file)
+                else:
                     continue
                 counter["done"] += 1
             sys.exit("Criar Setup basico terminou com {0} cena(s) publicada(s) e {1} error(s)".format(counter["done"], counter["errors"]))

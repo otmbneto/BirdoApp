@@ -5,9 +5,10 @@
 import os
 import subprocess
 import re
-from system import SystemFolders
 from datetime import datetime
 import time
+from .system import SystemFolders
+
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(curr_dir))
 syst = SystemFolders()
@@ -15,7 +16,6 @@ ffmpeg_path = os.path.join(birdo_app_root, 'extra', 'ffmpeg', syst.mac_or_window
 ffmpeg_log = syst.temp / "ffmpeg_logs"
 if not ffmpeg_log.exists():
     ffmpeg_log.make_dirs()
-
 
 def compress_render(input_file, output_file):
     """Compressao basica (retirada do shotgun) do render para upload"""
@@ -27,7 +27,6 @@ def compress_render(input_file, output_file):
     )
     return os.system(cmd) == 0
 
-
 def convert_movie_to_image_seq(input_mov, output_folder, img_format, scale_size=None):
     """converte um arquivo de video em uma sequecia de imagem no destino 'output_folder'"""
     img_out = "{0}/f-%04d.{1}".format(output_folder, img_format)
@@ -38,7 +37,6 @@ def convert_movie_to_image_seq(input_mov, output_folder, img_format, scale_size=
     )
     return os.system(cmd) == 0
 
-
 def extract_audio(input_mov_file, output_audio_file):
     """converte o arquivo de video em um arquivo de audio"""
     log_file = ffmpeg_log / "{0}_{1}.log".format(int(time.time()), os.path.basename(input_mov_file))
@@ -48,7 +46,6 @@ def extract_audio(input_mov_file, output_audio_file):
     return cmd
     # return os.system(cmd) == 0
 
-
 def get_video_frames_duration(video_file):
     """retorna a duracao do video em frames"""
     try:
@@ -57,12 +54,11 @@ def get_video_frames_duration(video_file):
         fps = re.findall(r"\d+\sfps", exc.output)
         duration = re.findall(r"Duration:\s\d{2}:\d{2}:\d+\.?\d+", exc.output)
         if len(duration) == 0 or len(fps) == 0:
-            print "[BIRDOAPP] - nao foi possivel encontrar a duracao do arquivo: {0}".format(video_file)
+            print("[BIRDOAPP] - nao foi possivel encontrar a duracao do arquivo: {0}".format(video_file))
             return None
         t = datetime.strptime(duration[0].replace("Duration: ", ""), "%H:%M:%S.%f")
         fps_int = int(re.findall(r"\d+", fps[0])[0])
         return int(round(fps_int * (t.second + (t.microsecond * 1e-6))))
-
 
 def check_audio_stream(video_file):
     """checa se o arquivo de video tem faixa de audio"""

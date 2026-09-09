@@ -2,7 +2,7 @@
 import re
 import io
 from PySide.QtGui import QDialog, QTextEdit, QVBoxLayout, QApplication, QIcon
-from birdo_pathlib import Path
+from .birdo_pathlib import Path
 import os
 import sys
 import argparse

@@ -3,8 +3,6 @@ from tqdm import tqdm
 import re
 
 YES_REGEX = r"(Y|YEP|YES|YEAH|OUI|SIM|SI|S)"
-
-
 def copy_file_pb(src_file, dst_file, buffer_size=1024*1024, force_copy=False, pb_w=None):
     """
     copy file using progress bar to show progress
@@ -20,7 +18,7 @@ def copy_file_pb(src_file, dst_file, buffer_size=1024*1024, force_copy=False, pb
         if not force_copy:
             ask = raw_input("COPY_FILE: Destiny file {0} already exists. Do you want to override it?\n[y/n]".format(dst_file))
             if not bool(re.match(YES_REGEX, ask.upper())):
-                print "canceled by user!"
+                print("canceled by user!")
                 return False
 
     file_size = os.path.getsize(src_file)
@@ -40,8 +38,8 @@ def copy_file_pb(src_file, dst_file, buffer_size=1024*1024, force_copy=False, pb
                     pbar.update(len(buff))
                 else:
                     pbar.setValue(len(buff))
-        print "file copied from: {0} to {1}".format(src_file, dst_file)
+        print("file copied from: {0} to {1}".format(src_file, dst_file))
     except Exception as e:
-        print e
+        print(e)
         return False
     return True

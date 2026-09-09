@@ -4,7 +4,7 @@
     "name": "NoNoNoNoNo",
     "sub_name": "NoNoNoNoNo",
     "icon": "icon.png",
-	"render_farm": false,
+    "render_farm": false,
     "roles": [
         "RIG",
         "DESIGN",
@@ -14,6 +14,7 @@
         "COMP",
         "DT"
     ],
+    "fps": 24,
     "resolution": {
         "PRE_COMP": [1920, 1080],
         "COMP": [3840, 2160]

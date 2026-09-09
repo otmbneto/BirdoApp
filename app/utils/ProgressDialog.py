@@ -1,14 +1,12 @@
 #####
 ## TODO: resolver uma forma de fechar a application quando terminar de rodar o progress ou quando cancelar
-
-from PySide import QtGui
-from ui.progress_dialog import Ui_Form
-import sys
 import os
+import sys
+from PySide import QtGui
+from .ui.progress_dialog import Ui_Form
 
 app_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 logo = os.path.join(app_root, 'icons', 'birdoAPPLogo.ico')
-
 
 class ProgressDialog(QtGui.QWidget):
     """Interface util para ProgressDialog"""
@@ -53,11 +51,9 @@ class ProgressDialog(QtGui.QWidget):
     def check_complete(self):
         """check if max progressBar value is reached"""
         if self.progressUI.progressBar.value() == self.total:
-            print "progress dialog finished!"
             self.close()
 
     def cancel(self):
         """closes the dialog"""
         self.running = False
-        print 'Progress Dialog closed!'
         self.close()
