@@ -2,7 +2,7 @@ import os
 import re
 import subprocess
 import shlex
-from .birdo_pathlib import Path
+from birdo_pathlib import Path
 
 
 class ToonBoomHarmony(object):

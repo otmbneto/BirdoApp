@@ -5,7 +5,7 @@
 import sys
 import os
 import subprocess
-from .MessageBox import CreateMessageBox
+from MessageBox import CreateMessageBox
 
 app_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.append(app_root)

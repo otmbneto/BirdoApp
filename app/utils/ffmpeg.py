@@ -7,7 +7,7 @@ import subprocess
 import re
 from datetime import datetime
 import time
-from .system import SystemFolders
+from system import SystemFolders
 
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 birdo_app_root = os.path.dirname(os.path.dirname(curr_dir))

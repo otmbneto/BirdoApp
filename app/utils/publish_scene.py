@@ -5,10 +5,10 @@ import sys
 from zipfile import ZipFile, ZIP_DEFLATED
 from PySide.QtGui import QApplication, QDialog, QPushButton, QProgressBar, QLabel, QVBoxLayout, QIcon, QMovie
 from PySide import QtCore
-from .system import get_short_path_name
-from .birdo_json import read_json_file, write_json_file
+from system import get_short_path_name
+from birdo_json import read_json_file, write_json_file
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from .config import ConfigInit
+from config import ConfigInit
 
 class Worker(QtCore.QObject):
     

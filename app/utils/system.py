@@ -2,7 +2,7 @@ import os
 import platform
 import re
 import subprocess
-from .birdo_pathlib import Path
+from birdo_pathlib import Path
 
 def get_short_path_name(long_name):
     """

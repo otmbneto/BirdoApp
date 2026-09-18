@@ -3,7 +3,7 @@
 import os
 import sys
 from PySide import QtGui
-from .ui.progress_dialog import Ui_Form
+from ui.progress_dialog import Ui_Form
 
 app_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 logo = os.path.join(app_root, 'icons', 'birdoAPPLogo.ico')
