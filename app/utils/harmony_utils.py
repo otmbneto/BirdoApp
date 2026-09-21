@@ -269,8 +269,8 @@ class AdobeAnimate(object):
         if os.path.exists(path):
             files = [Path(os.path.join(path,f)) for f in os.listdir(path) if f.endswith(".fla")]
 
-        last_version = sorted(files, key=lambda x: x.get_last_modified())[-1]
-        return last_version.path
+        versions = sorted(files, key=lambda x: x.get_last_modified())
+        return versions[-1].path if len(versions) > 0  else None
 
     def render_scene(self, app_scene):
 
