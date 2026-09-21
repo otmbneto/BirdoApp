@@ -10,6 +10,7 @@ from .utils.server import ServerThread,HttpServerThread
 from PySide import QtCore, QtGui, QtUiTools
 import os
 import subprocess
+import copy
 
 
 class AppItem(QtGui.QWidget):
@@ -235,7 +236,6 @@ class BirdoApp(QtGui.QMainWindow):
         #check if config was already created before fixing the sceneOpened.js problem
         if self.birdoapp.harmony is not None:
             scene_opened = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.js")
-            print("SCENE OPEN:" + scene_opened)
             if os.path.exists(scene_opened):
                 bkp = os.path.join(self.birdoapp.harmony.get_default_scripts_path(),"TB_sceneOpened.bkp")
                 os.rename(scene_opened,bkp)
@@ -251,24 +251,27 @@ class BirdoApp(QtGui.QMainWindow):
         self.http_server.message_received.connect(self.on_message_received)
         self.http_server.start()
 
-
+    #todo: Redo the logic to be more generic and friendly to new apps.
     @QtCore.Slot(str)
     def on_message_received(self, message):
         print("Received: %s" % message)
 
         if message["command"] == "open_scene":
-            plugin = [p for p in self.plugins if p["name"] == "Abrir Cena"]
+            plugin = [p for p in self.plugins if p["name"] == "Abrir Cena"]            
             print(plugin[0]["arguments"])
-
-            plugin[0]["arguments"] += ["-a",message["context"]["app"]]
             if len(plugin) > 0:
-                self.plugin_selected(plugin[0],self.project_data.id)
+                p = copy.deepcopy(plugin[0]) 
+                if "arguments" in p.keys():
+                    p["arguments"] += ["-a",message["context"]["app"]]
+                self.plugin_selected(p,self.project_data.id)
+
         elif message["command"] == "publish":
             plugin = [p for p in self.plugins if p["name"] == "Publicar"]
             print(plugin[0]["arguments"])
 
             plugin[0]["arguments"] += ["-f",message["context"]["file"]] 
             plugin[0]["arguments"] += ["-a",message["context"]["app"]]
+            print(plugin[0]["arguments"])
             if len(plugin) > 0:
                 self.plugin_selected(plugin[0],self.project_data.id)
 
@@ -529,17 +532,6 @@ class BirdoApp(QtGui.QMainWindow):
         if self.birdoapp.config_data["user_name"]:
             self.ui.username_line.setText(self.birdoapp.config_data["user_name"])
 
-
-        '''    
-
-        # ATUALIZA OS CAMPOS DE CONFIG DE SOFTWARE
-        self.ui.harmony_versions.clear()
-        for harmony in self.birdoapp.harmony_versions:
-            self.ui.harmony_versions.addItem(harmony.get_name(), harmony)
-        self.ui.harmony_folder_line.setEnabled(len(self.birdoapp.harmony_versions) == 0)
-        self.ui.harmony_folder_button.setEnabled(len(self.birdoapp.harmony_versions) == 0)
-        '''
-
         container = QtGui.QWidget()
         layout = QtGui.QVBoxLayout(container)
         layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
@@ -685,6 +677,7 @@ class BirdoApp(QtGui.QMainWindow):
 
     def plugin_selected(self, plugin, project_code):
         self.update_foot_label(u"Abrindo plugin: {0}".format(plugin["name"]), self.blue_color)
+        print([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
         subprocess.Popen(
             [self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin[
                 "arguments"])

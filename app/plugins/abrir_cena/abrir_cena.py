@@ -37,7 +37,6 @@ class OpenScene(QtGui.QWidget):
     def __init__(self, config_birdoapp, project_data, plugin_data,target = "Toon Boom Harmony"):
         super(OpenScene, self).__init__()
 
-        print(target)
         # set keys data
         self.birdoapp = config_birdoapp
         self.project_data = project_data
@@ -54,9 +53,16 @@ class OpenScene(QtGui.QWidget):
         # set project logo
         self.ui.logoProj.setPixmap(QtGui.QPixmap(os.path.join(self.project_data.config_folder, self.project_data.icon)))
 
+        index = 0
+        target_index = 0
         for software in self.birdoapp.softwares:
             self.ui.softwareBox.addItem(software.get_generic_name(),software)
-        
+            if self.target_app.lower() == software.get_generic_name().lower():
+                target_index = index
+            index += 1
+
+        self.ui.softwareBox.setCurrentIndex(target_index)
+
         # setup widget connections (and signals)
         self.signals = None
         self.setup_connections()
@@ -661,7 +667,6 @@ if __name__ == "__main__":
     parser.add_argument('-a', "--app",type = str,help='Target application for file opening')
     args = parser.parse_args()
     project_index = int(args.proj_id)
-    print(args.app)
     config = ConfigInit()
     p_data = config.get_project_data(project_index)
     if not p_data:
