@@ -384,6 +384,7 @@ if (!doc) {
         print(script)
         p_file = Path(str(app_file))
         if script:
+            print(" ".join([self.executable, p_file.path, script]))
             return subprocess.Popen([self.executable, p_file.path, script])
         else:
             return subprocess.Popen([self.executable, p_file.path])

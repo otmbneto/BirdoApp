@@ -217,9 +217,10 @@ class OpenScene(QtGui.QWidget):
     def get_local_scene(self, scene_name):
         """returns object with local scene information"""
         current_step = self.ui.comboStep.currentText()
-        scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK" / scene_name
+        scene_local_path = self.project_data.paths.get_scene_path("local", scene_name, current_step) / "WORK"
 
         if self.target_app == "Toon Boom Harmony":
+            scene_local_path = scene_local_path / scene_name
             file = self.birdoapp.harmony.get_last_version(scene_local_path.path)
             local_scene_data = {
                 "path": scene_local_path,
@@ -258,6 +259,7 @@ class OpenScene(QtGui.QWidget):
 
 
             publish_files = scene_publish_path.glob("*.zip$") if self.target_app == "Toon Boom Harmony" else scene_publish_path.glob("*.fla$")
+            print("PUBLISH FILES: " + str(publish_files))
             #zips = scene_publish_path.glob("*.zip$")
             if len(publish_files) == 0:
                 print "cant list files in publish in step {0} for scene {1}!".format(step, scene_name)
@@ -628,18 +630,55 @@ class OpenScene(QtGui.QWidget):
             self.birdoapp.update_recently_open_files(self.recently_open,local_scene["xstage"])
         else:
 
+            local_scene = self.shot_versions[current_step]["local_path"]
+            print(local_scene["path"])
+            if not self.ui.checkBox_open_local.isChecked():
+            
+                # IF NO SETUP FOUND
+                selected_version = self.ui.listVersions.currentItem().text() if self.ui.listVersions.currentItem() is not None else None 
+                if selected_version is None or selected_version == "- SEM SETUP -" or selected_version == "CENA ABERTA":
+                    print("Error selection! Cant find scene setup!!!")
+                    return
+
+                if self.shot_versions["most_recent"] == 'local':
+                    self.signals.sendQuestionMessage.emit([u"Você irá abrir uma cena do server, que contem uma versão local aparentemente mais atual.\n"
+                                                           u"Deseja continuar?\n(OBS: Se desejar abrir a versão local para conferir, clique em 'No', e marque a opção 'Open Local File' antes de abrir!)"])
+                    self.wait = True
+                    while self.wait:
+                        continue
+                    ask = self.response
+                    self.response = None
+                    if not ask:
+                        return
+
+                step_open = self.shot_versions["step_to_open"]
+                scene_obj = self.shot_versions[step_open]["versions"][selected_version]
+                # DOWNLOAD SCENE FILE...
+                self.signals.progress_format.emit(["downloading file..."])
+                self.signals.progress_made.emit([])
+                local_file = local_scene["path"] / scene_obj.name
+                print "downloading scene:\n -From: {0};\n -to : {1};".format(scene_obj.path, local_file.path)
+                scene_obj.copy_file(local_file)
+                if not local_file.exists():
+                    print "fail to download scene: {0}".format(scene_obj.name)
+                    self.signals.sendWarningMessage.emit([u"Falha ao fazer o download da versão da cena do server para o folder temporário!"])
+                    return
+
+                local_scene["xstage"] = Path(self.birdoapp.animate.get_last_version(local_scene["path"].path))
+
+
+            print("Opening Animate")
             episode = self.ui.listEpisodes.currentItem().text()
             shot = self.ui.listScenes.currentItem().text()
             list_full = self.project_data.paths.list_project_animatics(episode)
             animatic_versions = [x for x in list_full if shot in x.normpath()]
-            print(animatic_versions)
             lastest_animatic = animatic_versions[-1] if len(animatic_versions) > 0 else None
             temp_animatic = self.birdoapp.get_temp_folder(sub_folder='AdobeAnimate', clean=True)
             lastest_animatic.copy_file(temp_animatic / "animatic.mov")
             sco_script = Path(self.birdoapp.root) / "Animate" / "Commands" /"BirdoApp"
             sco_script.copy_folder(self.birdoapp.animate.get_default_scripts_path())
             bootstrap = self.birdoapp.animate.create_boostrap_jsfl({"project":self.project_data.id ,"step": self.ui.comboStep.currentText()})
-            local_scene = self.shot_versions[current_step]["local_path"]
+            print(local_scene["path"])
             self.birdoapp.animate.open_scene(local_scene["xstage"],script = bootstrap)
 
     def set_scene_opened(self):
