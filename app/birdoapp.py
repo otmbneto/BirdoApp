@@ -269,11 +269,14 @@ class BirdoApp(QtGui.QMainWindow):
             plugin = [p for p in self.plugins if p["name"] == "Publicar"]
             print(plugin[0]["arguments"])
 
-            plugin[0]["arguments"] += ["-f",message["context"]["file"]] 
+            plugin[0]["arguments"] += ["-i",message["context"]["file"]] 
             plugin[0]["arguments"] += ["-a",message["context"]["app"]]
+            plugin[0]["arguments"] += ["-s",message["context"]["step"]]
+            #plugin[0]["arguments"] += ["-p",str(message["context"]["project"])]
             print(plugin[0]["arguments"])
             if len(plugin) > 0:
                 self.plugin_selected(plugin[0],self.project_data.id)
+            plugin[0]["arguments"] = []
 
 
     def load_ui(self, ui_file):
@@ -676,11 +679,11 @@ class BirdoApp(QtGui.QMainWindow):
         return button
 
     def plugin_selected(self, plugin, project_code):
+
+        print(plugin["arguments"])
         self.update_foot_label(u"Abrindo plugin: {0}".format(plugin["name"]), self.blue_color)
         print([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
-        subprocess.Popen(
-            [self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin[
-                "arguments"])
+        subprocess.Popen([self.birdoapp.python, (plugin["root"] / plugin["main_script"]).path, str(project_code)] + plugin["arguments"])
 
     def validate_plugin(self, path):
         """funcao para validar se o plugin tem permissao para abrir pro usuario"""
